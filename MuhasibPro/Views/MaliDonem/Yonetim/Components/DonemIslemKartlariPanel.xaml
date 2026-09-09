@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="MuhasibPro.Views.MaliDonem.Yonetim.Components.DonemIslemKartlariPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:MuhasibPro.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
+        <converters:BoolToVisibilityConverter x:Key="FalseToVis" TrueValue="Collapsed" FalseValue="Visible" />
+    </UserControl.Resources>
+
+    <StackPanel Spacing="10">
+        <TextBlock Text="DÖNEM İŞLEMLERİ" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Arşivle / Arşivden Çıkar -->
+            <Border Style="{StaticResource CustomModernCard}" Padding="14,12">
+                <StackPanel Spacing="6">
+                    <Border Width="34" Height="34" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" HorizontalAlignment="Center">
+                        <FontIcon Glyph="{StaticResource IconArchive}" FontSize="15" Foreground="{ThemeResource MuhasibWarningBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="Dönemi Arşivle" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                    <TextBlock Text="Kapatır, tek tıkla geri açılır." FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                    <Button ToolTipService.ToolTip="Dönemi bayrakla kapat" Click="OnArsivleClick" Style="{StaticResource GhostSmallButtonStyle}" HorizontalAlignment="Stretch" Margin="0,4,0,0" Visibility="{Binding SelectedDonem.ArsivliMi, Converter={StaticResource FalseToVis}}">
+                        <TextBlock Text="Arşivle" FontSize="11" Foreground="{ThemeResource MuhasibWarningBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                    <Button ToolTipService.ToolTip="Arşivli dönemi yeniden aç" Click="OnArsivdenCikarClick" Style="{StaticResource GhostSmallButtonStyle}" HorizontalAlignment="Stretch" Margin="0,4,0,0" Visibility="{Binding SelectedDonem.ArsivliMi, Converter={StaticResource TrueToVis}}">
+                        <TextBlock Text="Geri Aç" FontSize="11" Foreground="{ThemeResource MuhasibSuccessBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Disk Temizliği (VACUUM) -->
+            <Border Grid.Column="1" Style="{StaticResource CustomModernCard}" Padding="14,12">
+                <StackPanel Spacing="6">
+                    <Border Width="34" Height="34" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibSuccessBgBrush}" HorizontalAlignment="Center">
+                        <FontIcon Glyph="{StaticResource IconRefresh}" FontSize="15" Foreground="{ThemeResource MuhasibSuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="Disk Temizliği" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="Boş sayfaları sıfırlar. (VACUUM)" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                    <Button ToolTipService.ToolTip="VACUUM: Boş sayfaları temizle" Tag="VACUUM" Click="OnBakimClick" Style="{StaticResource GhostSmallButtonStyle}" HorizontalAlignment="Stretch" Margin="0,4,0,0">
+                        <TextBlock Text="Çalıştır" FontSize="11" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- İndeks Yenileme (REINDEX) -->
+            <Border Grid.Column="2" Style="{StaticResource CustomModernCard}" Padding="14,12">
+                <StackPanel Spacing="6">
+                    <Border Width="34" Height="34" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" HorizontalAlignment="Center">
+                        <FontIcon Glyph="{StaticResource IconZap}" FontSize="15" Foreground="{ThemeResource MuhasibWarningBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="İndeks Yenileme" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="Sorgu hızını artırır. (REINDEX)" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                    <Button ToolTipService.ToolTip="REINDEX: Tüm indeksleri yeniden inşa et" Tag="REINDEX" Click="OnBakimClick" Style="{StaticResource GhostSmallButtonStyle}" HorizontalAlignment="Stretch" Margin="0,4,0,0">
+                        <TextBlock Text="Çalıştır" FontSize="11" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- Yazma Senkronizasyonu (WAL) -->
+            <Border Grid.Column="3" Style="{StaticResource CustomModernCard}" Padding="14,12">
+                <StackPanel Spacing="6">
+                    <Border Width="34" Height="34" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibInfoBgBrush}" HorizontalAlignment="Center">
+                        <FontIcon Glyph="{StaticResource IconRefresh}" FontSize="15" Foreground="{ThemeResource MuhasibInfoBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="Yazma Senkronizasyonu" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                    <TextBlock Text="Log dosyasını sıfırlar. (WAL)" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                    <Button ToolTipService.ToolTip="WAL Checkpoint: Bekleyen işlemleri ana kütüğe yaz" Tag="WAL" Click="OnBakimClick" Style="{StaticResource GhostSmallButtonStyle}" HorizontalAlignment="Stretch" Margin="0,4,0,0">
+                        <TextBlock Text="Çalıştır" FontSize="11" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Visibility="{Binding IsBakimCalisiyor, Converter={StaticResource TrueToVis}}">
+            <ProgressRing Width="14" Height="14" IsActive="True" Foreground="{ThemeResource MuhasibPetrolBrush}" />
+            <TextBlock Text="İşlem devam ediyor..." FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+        <TextBlock Text="{Binding SonBakimMesaji, FallbackValue=''}" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" Visibility="{Binding IsBakimCalisiyor, Converter={StaticResource FalseToVis}}" />
+    </StackPanel>
+</UserControl>

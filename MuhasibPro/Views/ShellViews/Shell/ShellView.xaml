@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+    <Page
+    x:Class="MuhasibPro.Views.ShellViews.Shell.ShellView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:MuhasibPro.Views.ShellViews.Shell"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid x:Name="RootGrid" Background="{ThemeResource AppBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Pencere sürükleme şeridi (DetailsWindow chrome — zeminle bütünleşik gradyan) -->
+        <Border
+            x:Name="AppTitleBar"
+            Grid.Row="0"            
+            IsHitTestVisible="True"
+            Canvas.ZIndex="1">
+            <Grid Padding="12,8,120,8" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button x:Name="BackButton" Width="32" Height="32" Style="{StaticResource CircleIconButtonStyle}" Click="OnBackClick" Visibility="Collapsed" VerticalAlignment="Center">
+                    <FontIcon Glyph="{StaticResource IconChevronLeft}" FontSize="12" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                </Button>
+                <Border Grid.Column="1" Width="32" Height="32" CornerRadius="{StaticResource MuhasibControlCornerRadius}"
+                        >
+                    <Image Source="ms-appx:///Assets/AppIcon.png" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" />
+                </Border>
+                <StackPanel Grid.Column="2" Spacing="0" VerticalAlignment="Center">
+                    <TextBlock x:Name="AppTitleBarText" x:FieldModifier="public" Text="MuhasibPro" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="NoWrap" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!--  Frame Grid.Row="1" içinde  -->
+        <Grid Grid.Row="1">
+            <Frame
+                x:Name="frame"
+                IsEnabled="{x:Bind ViewModel.IsEnabled, Mode=OneWay}">
+                <Frame.ContentTransitions>
+                    <TransitionCollection>
+                        <NavigationThemeTransition />
+                    </TransitionCollection>
+                </Frame.ContentTransitions>
+            </Frame>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <local:ShellStatusBar />
+        </Grid>
+
+        <!--  Lock screen kısmı aynen kalabilir  -->
+        <Grid Grid.Row="1" Grid.RowSpan="2" Visibility="{x:Bind ViewModel.IsLocked, Mode=OneWay}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <StackPanel VerticalAlignment="Center">
+                <Image Width="640" Source="ms-appx:///Assets/SplashScreen.scale-200.png" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    FontSize="18"
+                    Text="Uygulama kilitli" />
+                <HyperlinkButton
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Click="OnUnlockClick"
+                    Content="Kilidi açmak için ana görünüme geçin"
+                    FontSize="18"
+                    Foreground="{StaticResource MuhasibOnPrimaryBrush}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

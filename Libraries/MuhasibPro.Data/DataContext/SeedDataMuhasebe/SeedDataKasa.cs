@@ -1,0 +1,30 @@
+﻿using Microsoft.EntityFrameworkCore;
+using MuhasibPro.Domain.Entities;
+using MuhasibPro.Domain.Entities.MuhasebeEntity.Kasa;
+
+namespace MuhasibPro.Data.DataContext.SeedData;
+
+public static class SeedDataKasa
+{
+    public static void KasaAdlari(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Kasalar>()
+            .HasData(
+                new Kasalar
+                {
+                    Id = 22,
+                    KasaAdi = "Şirket Kasası",
+                    KaydedenId = KullaniciSabitleri.SeedYoneticiId,
+                    KayitTarihi = new DateTime(2025, 3, 2)
+                },
+                new Kasalar
+                {
+                    Id = 23,
+                    KasaAdi = "POS",
+                    KaydedenId = KullaniciSabitleri.SeedYoneticiId,
+                    KayitTarihi = new DateTime(2025, 3, 2)
+                });
+    }
+
+
+}

@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Libraries/">
+    <Project Path="Libraries/MuhasibPro.Business/MuhasibPro.Business.csproj" />
+    <Project Path="Libraries/MuhasibPro.Data/MuhasibPro.Data.csproj" />
+    <Project Path="Libraries/MuhasibPro.Domain/MuhasibPro.Domain.csproj" />
+    <Project Path="Libraries/MuhasibPro.ViewModels/MuhasibPro.ViewModels.csproj" />
+    <Project Path="Libraries/MuhasibPro.Tests/MuhasibPro.Tests.csproj" />
+  </Folder>
+  <Project Path="MuhasibPro/MuhasibPro.csproj">
+    <Platform Project="x64" />
+  </Project>
+</Solution>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+    <Page
+    x:Class="MuhasibPro.Views.ShellViews.Shell.FirmaShellView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:components="using:MuhasibPro.Views.ShellViews.Shell.Components"
+    xmlns:converters="using:MuhasibPro.Converters"
+    mc:Ignorable="d"
+    Background="{ThemeResource AppBackgroundBrush}">
+
+    <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
+        <converters:BoolToVisibilityConverter x:Key="FalseToVis" TrueValue="Collapsed" FalseValue="Visible" />
+    </Page.Resources>
+
+    <Grid x:Name="RootGrid" Background="{ThemeResource AppBackgroundBrush}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0">
+            <Grid x:Name="ContentRoot" HorizontalAlignment="Stretch" Padding="24,18,24,24" MaxWidth="1600">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup>
+                        <VisualState x:Name="WideState">
+                            <VisualState.StateTriggers>
+                                <AdaptiveTrigger MinWindowWidth="1200" />
+                            </VisualState.StateTriggers>
+                            <VisualState.Setters>
+                                <Setter Target="ContentRoot.Padding" Value="32,20,32,28" />
+                                <Setter Target="PanelsGrid.ColumnSpacing" Value="12" />
+                                <Setter Target="PanelsGrid.RowSpacing" Value="0" />
+                                <Setter Target="LeftPanel.(Grid.Column)" Value="0" />
+                                <Setter Target="LeftPanel.(Grid.Row)" Value="0" />
+                                <Setter Target="RightPanel.(Grid.Column)" Value="1" />
+                                <Setter Target="RightPanel.(Grid.Row)" Value="0" />
+                                <Setter Target="LeftPanel.MinHeight" Value="420" />
+                                <Setter Target="RightPanel.MinHeight" Value="420" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="MediumState">
+                            <VisualState.StateTriggers>
+                                <AdaptiveTrigger MinWindowWidth="800" />
+                            </VisualState.StateTriggers>
+                            <VisualState.Setters>
+                                <Setter Target="ContentRoot.Padding" Value="24,18,24,24" />
+                                <Setter Target="PanelsGrid.RowSpacing" Value="0" />
+                                <Setter Target="LeftPanel.(Grid.Column)" Value="0" />
+                                <Setter Target="LeftPanel.(Grid.Row)" Value="0" />
+                                <Setter Target="RightPanel.(Grid.Column)" Value="1" />
+                                <Setter Target="RightPanel.(Grid.Row)" Value="0" />
+                                <Setter Target="LeftPanel.MinHeight" Value="380" />
+                                <Setter Target="RightPanel.MinHeight" Value="380" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="NarrowState">
+                            <VisualState.StateTriggers>
+                                <AdaptiveTrigger MinWindowWidth="0" />
+                            </VisualState.StateTriggers>
+                            <VisualState.Setters>
+                                <Setter Target="ContentRoot.Padding" Value="16,14,16,16" />
+                                <Setter Target="PanelsGrid.ColumnSpacing" Value="0" />
+                                <Setter Target="PanelsGrid.RowSpacing" Value="10" />
+                                <Setter Target="RightPanel.(Grid.Column)" Value="0" />
+                                <Setter Target="RightPanel.(Grid.Row)" Value="1" />
+                                <Setter Target="LeftPanel.MinHeight" Value="320" />
+                                <Setter Target="RightPanel.MinHeight" Value="320" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+
+                <StackPanel Spacing="10">
+
+                    <!-- ===== SAYFA HEADER (frost disinda, zemin ustunde) — Logo sola, UserInfo saga ===== -->
+                    <Grid ColumnSpacing="16" Margin="0,0,0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Sol: Logo — compact, CustomModernCard -->
+                        <Border Grid.Column="0" Style="{StaticResource CustomModernCard}" Padding="4,4,12,4" CornerRadius="{StaticResource MuhasibPillCornerRadius}" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Border Width="26" Height="26" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{StaticResource MuhasibPetrolBrush}" VerticalAlignment="Center">
+                                    <TextBlock Text="M" FontSize="14" FontWeight="Bold" Foreground="{StaticResource MuhasibOnPetrolBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="MuhasibPro" FontSize="15" FontWeight="Bold" Foreground="{StaticResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Sag: UserInfo (ilerleme adimi stili) — saga yasli, ana karta yakin -->
+                        <Border Grid.Column="2" Style="{StaticResource CustomModernCard}" Padding="4" Margin="0,15,0,4" VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <components:UserInfoControl DataContext="{x:Bind ViewModel, Mode=OneWay}" VerticalAlignment="Center" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Yuklenme progress -->
+                    <ProgressBar IsIndeterminate="True" Height="2" VerticalAlignment="Top"
+                                 Foreground="{StaticResource MuhasibPetrolBrush}" Background="Transparent"
+                                 Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
+                    <!-- Güncelleme ilerlemesi (onaylı göç) -->
+                    <StackPanel Spacing="4" Visibility="{x:Bind ViewModel.Progress.IsUpdating, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                        <ProgressBar IsIndeterminate="True" Height="4" Foreground="{StaticResource MuhasibPetrolBrush}" Background="{StaticResource MuhasibSoftBorderBrush}" />
+                        <TextBlock Text="{x:Bind ViewModel.Progress.UpdateStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- ===== ANA ICERIK (frost panel) ===== -->
+                    <Border Style="{StaticResource CustomGlassPanel}" Padding="16">
+                        <StackPanel Spacing="14">
+
+                            <!-- Ust bilgi bari — stil kaldirildi, buyuk ve tutarli tipografi -->
+                            <Grid ColumnSpacing="12" Margin="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                                    <TextBlock Text="Firma &amp; Mali Dönem" FontSize="20" FontWeight="Bold" Foreground="{StaticResource MuhasibTextPrimaryBrush}" />
+                                    <TextBlock Text="Çalışma ortamınızı seçin ve veritabanı bağlantısını kurun" FontSize="13" Foreground="{StaticResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Click="OnYeniFirmaClick" VerticalAlignment="Center" Style="{StaticResource MuhasibPrimaryButtonStyle}" ToolTipService.ToolTip="Yeni firma tanımla">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <FontIcon Glyph="{StaticResource IconAdd}" FontSize="12" Foreground="{StaticResource MuhasibOnInkBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Text="Yeni Firma" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource MuhasibOnInkBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+
+                            <!-- 2 panel -->
+                            <Grid x:Name="PanelsGrid" ColumnSpacing="12" RowSpacing="10" Margin="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Border x:Name="LeftPanel" Grid.Column="0" Grid.Row="0" Style="{StaticResource CustomModernCard}" Padding="16" VerticalAlignment="Stretch" MinHeight="380">
+                                    <components:FirmalarListControl DataContext="{x:Bind ViewModel, Mode=OneWay}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+                                </Border>
+                                <Border x:Name="RightPanel" Grid.Column="1" Grid.Row="0" Style="{StaticResource CustomModernCard}" Padding="16" VerticalAlignment="Stretch" MinHeight="380">
+                                    <components:MaliDonemlerListControl DataContext="{x:Bind ViewModel, Mode=OneWay}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+                                </Border>
+                            </Grid>
+
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Surum footer -->
+                    <TextBlock Text="v1.0 Pro Multi-Tenant" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{StaticResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Center" Opacity="0.6" />
+
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>

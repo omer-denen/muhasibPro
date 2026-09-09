@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="MuhasibPro.Views.ShellViews.Shell.Components.Dialogs.TenantDatabaseUpdateDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    PrimaryButtonText="Güncelle"
+    PrimaryButtonStyle="{StaticResource InventDialogPrimaryStyle}"
+    SecondaryButtonText="Daha sonra"
+    SecondaryButtonStyle="{StaticResource InventDialogSecondaryStyle}"
+    CloseButtonText="Vazgeç"
+    DefaultButton="None"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+    BorderThickness="1"
+    CornerRadius="{StaticResource CardCornerRadius}">
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Width="36" Height="36" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" VerticalAlignment="Center">
+                <FontIcon Glyph="{StaticResource IconShield}" FontSize="18" Foreground="{ThemeResource MuhasibWarningBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                <TextBlock Text="Güncelleme" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
+                <TextBlock Text="Veritabanı Güncelleme Gerekli" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}"/>
+            </StackPanel>
+        </Grid>
+    </ContentDialog.Title>
+
+    <Border Style="{StaticResource CustomModernCard}" Padding="14">
+        <StackPanel Spacing="12" MinWidth="380" MaxWidth="480">
+            <!-- Firma + dönem -->
+            <TextBlock x:Name="FirmaText" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap"/>
+            <!-- Veritabanı adı + yıl rozeti -->
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" x:Name="DatabaseNameText" FontSize="11" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                <Border Grid.Column="1" Padding="8,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibInventCardBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="YearText" FontSize="11" FontWeight="Bold" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+
+            <!-- Versiyon şeridi: mevcut → hedef + göç sayacı -->
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Padding="10,4" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibInventCardBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="CurrentVersionText" FontSize="12" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Grid.Column="1" Text="→" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" VerticalAlignment="Center"/>
+                <Border Grid.Column="2" Padding="10,4" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}" VerticalAlignment="Center">
+                    <TextBlock x:Name="TargetVersionText" FontSize="12" FontWeight="Bold" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" VerticalAlignment="Center"/>
+                </Border>
+                <Border Grid.Column="4" Padding="8,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" BorderBrush="{ThemeResource MuhasibWarningBrush}" BorderThickness="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="MigrationCountText" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibWarningBrush}" VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+
+            <!-- Ana değişiklik -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Ana değişiklik" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
+                <TextBlock x:Name="HeadlineText" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" TextWrapping="Wrap" MaxLines="3" TextTrimming="CharacterEllipsis"/>
+            </StackPanel>
+
+            <!-- Sayfa notu -->
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <FontIcon Glyph="{StaticResource IconBackup}" FontSize="13" Foreground="{ThemeResource MuhasibPetrolBrush}" VerticalAlignment="Center"/>
+                <TextBlock Text="Detaylar ve işlem adımları güncelleme sayfasında." FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</ContentDialog>

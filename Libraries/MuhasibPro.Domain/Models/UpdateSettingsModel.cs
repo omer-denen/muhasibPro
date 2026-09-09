@@ -1,0 +1,14 @@
+﻿namespace MuhasibPro.Domain.Models
+{
+    public class UpdateSettingsModel
+    {
+        public const string SettingsKey = "UpdateSettings";
+
+        public bool AutoCheckOnStartup { get; set; } = true;
+        public bool ShowNotifications { get; set; } = true;
+        public bool IncludeBetaVersions { get; set; } = false;
+        public DateTime? LastCheckTime { get; set; }
+        /// <summary>Manuel güncelleme kaynağı (GitHub repo URL veya Velopack feed URL). Boşsa kontrol yapılmaz.</summary>
+        public string FeedUrl { get; set; } = string.Empty;
+    }
+}

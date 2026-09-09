@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="MuhasibPro.Views.MaliDonem.Yonetim.Components.DonemSecimListesi"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:MuhasibPro.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
+        <converters:BoolToVisibilityConverter x:Key="FalseToVis" TrueValue="Collapsed" FalseValue="Visible" />
+
+        <!-- Satır seçimi: tek seçim garantisi + hover seçimi ezmez (ölçü-sabit, yalnız renk). -->
+        <Style x:Key="DonemSecimItemStyle" TargetType="ListViewItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border
+                            x:Name="Root"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource MuhasibCardCornerRadius}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.Background" Value="{ThemeResource MuhasibInventPaleBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+                                            <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolDeepBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="PointerOverSelected">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+                                            <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolDeepBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="PressedSelected">
+                                        <VisualState.Setters>
+                                            <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+                                            <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolDeepBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter
+                                Padding="10,8"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel Spacing="12">
+        <!-- Baslik: kart disinda -->
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <Border Width="26" Height="26" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}">
+                <FontIcon Glyph="{StaticResource IconDatabase}" FontSize="12" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <TextBlock Text="MALİ DÖNEMLER" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <!-- AÇIK karti -->
+        <Border Style="{StaticResource ModernCard}" Padding="14,12">
+            <StackPanel Spacing="10">
+                <TextBlock FontSize="15" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}">
+                    <Run Text="Açık Dönemler" /><Run Text=" (" /><Run Text="{Binding AcikDonemler.Count, FallbackValue='0'}" /><Run Text=")" />
+                </TextBlock>
+                <ListView
+                    x:Name="AcikListe"
+                    SelectionMode="Single"
+                    SelectionChanged="OnAcikSelectionChanged"
+                    SelectedItem="{Binding SelectedDonem, Mode=TwoWay}"
+                    ItemsSource="{Binding PagedAcikDonemler}"
+                    ItemContainerStyle="{StaticResource DonemSecimItemStyle}"
+                    ScrollViewer.VerticalScrollMode="Disabled"
+                    ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="34" Height="34" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibInventPaleBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding MaliYil}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding DatabaseName}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}">
+                                        <Run Text="{Binding MaliYil}" /><Run Text=" • " /><Run Text="{Binding BoyutMetni}" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                    <Border Padding="7,2" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibSuccessBgBrush}" BorderBrush="{ThemeResource MuhasibSuccessBrush}" BorderThickness="1" Visibility="{Binding DbGuncelMi, Converter={StaticResource TrueToVis}}">
+                                        <TextBlock Text="Açık" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSuccessBrush}" />
+                                    </Border>
+                                    <Border Padding="7,2" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibDangerBgBrush}" BorderBrush="{ThemeResource MuhasibDangerBrush}" BorderThickness="1" Visibility="{Binding DbDosyaYokMu, Converter={StaticResource TrueToVis}}">
+                                        <TextBlock Text="Dosya Yok" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibDangerBrush}" />
+                                    </Border>
+                                    <Border Padding="7,2" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibInventPaleBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1" Visibility="{Binding KapaliMi, Converter={StaticResource TrueToVis}}">
+                                        <TextBlock Text="Kapalı" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <!-- Pagination: sabit 8/sayfa -->
+                <Grid ColumnSpacing="8" Margin="0,8,0,0" Visibility="{Binding AcikHasPagination, Converter={StaticResource TrueToVis}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Content="‹" Style="{StaticResource GhostPillButtonStyle}" Click="OnAcikPrevClick" IsEnabled="{Binding AcikCanPrev}" />
+                    <TextBlock Grid.Column="1" Text="{Binding AcikPageInfo}" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Button Grid.Column="2" Content="›" Style="{StaticResource GhostPillButtonStyle}" Click="OnAcikNextClick" IsEnabled="{Binding AcikCanNext}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- ARSIV karti -->
+        <Border Style="{StaticResource CustomModernCard}" Padding="14,12" Visibility="{Binding ArsivGrubuVarMi, Converter={StaticResource TrueToVis}, FallbackValue=Collapsed}">
+            <StackPanel Spacing="10">
+                <TextBlock FontSize="15" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}">
+                    <Run Text="Arşivlenenler" /><Run Text=" (" /><Run Text="{Binding ArsivVM.ArsivliDonemler.Count, FallbackValue='0'}" /><Run Text=")" />
+                </TextBlock>
+                <ListView
+                    x:Name="ArsivListe"
+                    SelectionMode="Single"
+                    SelectionChanged="OnArsivSelectionChanged"
+                    SelectedItem="{Binding SelectedDonem, Mode=TwoWay}"
+                    ItemsSource="{Binding ArsivVM.PagedArsivliDonemler}"
+                    ItemContainerStyle="{StaticResource DonemSecimItemStyle}"
+                    ScrollViewer.VerticalScrollMode="Disabled"
+                    ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="34" Height="34" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" BorderBrush="{ThemeResource MuhasibWarningBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding MaliYil}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibWarningBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding DatabaseName}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}">
+                                        <Run Text="{Binding MaliYil}" /><Run Text=" • " /><Run Text="{Binding BoyutMetni}" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <Border Grid.Column="2" Padding="7,2" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" BorderBrush="{ThemeResource MuhasibWarningBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Arşivli" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibWarningBrush}" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <Grid ColumnSpacing="8" Margin="0,8,0,0" Visibility="{Binding ArsivVM.ArsivHasPagination, Converter={StaticResource TrueToVis}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Content="‹" Style="{StaticResource GhostPillButtonStyle}" Click="OnArsivPrevClick" IsEnabled="{Binding ArsivVM.ArsivCanPrev}" />
+                    <TextBlock Grid.Column="1" Text="{Binding ArsivVM.ArsivPageInfo}" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Button Grid.Column="2" Content="›" Style="{StaticResource GhostPillButtonStyle}" Click="OnArsivNextClick" IsEnabled="{Binding ArsivVM.ArsivCanNext}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="MuhasibPro.Views.ShellViews.Shell.Components.Dialogs.RestoreVerifyDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    PrimaryButtonText="Geri Yükle"
+    PrimaryButtonStyle="{StaticResource InventDialogPrimaryStyle}"
+    CloseButtonText="Vazgeç"
+    DefaultButton="Close"
+    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+    BorderThickness="1"
+    CornerRadius="{StaticResource CardCornerRadius}">
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Width="36" Height="36" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}" BorderBrush="{ThemeResource MuhasibPetrolBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
+                <FontIcon Glyph="{StaticResource IconUpload}" FontSize="18" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                <TextBlock Text="Doğrulama" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
+                <TextBlock Text="Yedekten Geri Yükle" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}"/>
+            </StackPanel>
+        </Grid>
+    </ContentDialog.Title>
+
+    <StackPanel Spacing="14" MinWidth="440">
+        <!-- Yedek kimlik kartı -->
+        <Border Padding="12" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource MuhasibInventPaleBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1">
+            <StackPanel Spacing="6">
+                <TextBlock x:Name="BackupFileText" FontSize="12" FontWeight="SemiBold" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" TextWrapping="Wrap"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Border x:Name="KimlikRozetBorder" Padding="6,2" CornerRadius="{StaticResource MuhasibPillCornerRadius}" BorderThickness="1">
+                        <TextBlock x:Name="KimlikRozetText" FontSize="10" FontWeight="SemiBold"/>
+                    </Border>
+                    <TextBlock x:Name="BackupSizeText" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock x:Name="KimlikDetayText" FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Hüküm banner -->
+        <Border x:Name="VerdictBorder" Padding="12" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" BorderThickness="1">
+            <StackPanel Spacing="4">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon x:Name="VerdictIcon" FontSize="16" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="VerdictTitle" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock x:Name="VerdictDesc" FontSize="12" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Kod bloğu (RequireCode durumunda görünür) -->
+        <StackPanel x:Name="CodePanel" Spacing="8" Visibility="Collapsed">
+            <Border Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" BorderBrush="{ThemeResource MuhasibWarningBrush}" BorderThickness="1">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Tek-seferlik onay kodu" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibWarningBrush}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Kod:" FontSize="12" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center"/>
+                        <Border Padding="10,6" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1">
+                            <TextBlock x:Name="GeneratedCodeText" FontSize="16" FontWeight="Bold" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" CharacterSpacing="60"/>
+                        </Border>
+                        <TextBlock Text="— kodu yazın" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <TextBox x:Name="CodeInputBox" PlaceholderText="6 haneli kodu girin" FontSize="14" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Padding="12,10" CornerRadius="{StaticResource MuhasibPillCornerRadius}" MaxLength="6" InputScope="Number"/>
+        </StackPanel>
+
+        <!-- Hata -->
+        <Border x:Name="ErrorBorder" Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource MuhasibDangerBgBrush}" BorderBrush="{ThemeResource MuhasibDangerBrush}" BorderThickness="1" Visibility="Collapsed">
+            <TextBlock x:Name="ErrorText" FontSize="12" Foreground="{ThemeResource MuhasibDangerBrush}" TextWrapping="Wrap"/>
+        </Border>
+    </StackPanel>
+</ContentDialog>

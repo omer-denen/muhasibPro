@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="MuhasibPro.Views.ShellViews.Splash.SplashStatusControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Storyboard x:Name="FadeOutStoryboard">
+            <DoubleAnimation
+                Storyboard.TargetName="MessageText"
+                Storyboard.TargetProperty="Opacity"
+                From="1" To="0" Duration="0:0:0.12">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="MessageTransform"
+                Storyboard.TargetProperty="Y"
+                From="0" To="-8" Duration="0:0:0.12">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+        <Storyboard x:Name="FadeInStoryboard">
+            <DoubleAnimation
+                Storyboard.TargetName="MessageText"
+                Storyboard.TargetProperty="Opacity"
+                From="0" To="1" Duration="0:0:0.18">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="MessageTransform"
+                Storyboard.TargetProperty="Y"
+                From="8" To="0" Duration="0:0:0.18">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid MinHeight="28" Margin="0,4,0,0">
+        <TextBlock
+            x:Name="MessageText"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontSize="12"
+            FontWeight="Medium"
+            Foreground="{StaticResource MuhasibSageSecondaryBrush}"
+            Opacity="0"
+            Text="Başlatılıyor…"
+            TextWrapping="Wrap"
+            TextAlignment="Center">
+            <TextBlock.RenderTransform>
+                <TranslateTransform x:Name="MessageTransform" />
+            </TextBlock.RenderTransform>
+        </TextBlock>
+    </Grid>
+</UserControl>

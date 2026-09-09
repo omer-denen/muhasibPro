@@ -1,0 +1,759 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ================================================================= -->
+    <!-- MUHASIBPRO BUTON STILLERI — InventEase Dili                       -->
+    <!-- Tum butonlar sablonlu (garanti hover/pressed), olu stiller yok    -->
+    <!-- ================================================================= -->
+
+    <!--  BIRINCIL AKSIYON — siyah hap (ink) + beyaz metin, garanti hover/pressed  -->
+    <Style x:Key="InventDarkButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource MuhasibInkBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibOnInkBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibPillCornerRadius}" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibInkHoverBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibInkPressedBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.45" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  BIRINCIL ALIASLAR — tum eski isimler tek sablona yonlenir  -->
+    <Style x:Key="MuhasibPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource InventDarkButtonStyle}" />
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource InventDarkButtonStyle}" />
+
+    <!--  TEHLIKE BUTONU — kirmizi hap, sablonlu hover/pressed  -->
+    <Style x:Key="DangerButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource MuhasibDangerBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibOnPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibPillCornerRadius}" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibDangerHoverBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibDangerPressedBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.45" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  IKINCIL BUTON — saydam hap, soft kenarlik, petrol hover  -->
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibSageSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource MuhasibSoftBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibPillCornerRadius}" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolBorderBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolBorderBrush}" />
+                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.45" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  GHOST PILL — kucuk satir aksiyonlari, saydam, petrol hover tinti  -->
+    <!--  NOT (Oturum 97): PointerOver/Pressed SADECE renk degistirir, olcu (BorderThickness/ -->
+    <!--  Padding) ASLA degismez. Olcu degisimi fare sabitken enter/exit dongusu yaratip -->
+    <!--  ToolTip timer'ini surekli sifirliyordu (hover tooltip'i hic acilmiyordu).  -->
+    <Style x:Key="GhostPillButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{ThemeResource MuhasibSoftBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibPillCornerRadius}" />
+        <Setter Property="Padding" Value="9,4" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibSageSecondaryBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolBorderBrush}" />
+                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolDeepBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.5" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  TOOLBAR BUTONU — muhasebe icin metin+ikon, kart-radius, saydam/petrol hover  -->
+    <!--  Referansin yuvarlak ikon butonlari yerine, muhasebe yazilimina uygun tasarim  -->
+    <Style x:Key="InventToolbarButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibSageSecondaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibCardCornerRadius}" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolBorderBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.45" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  PLAIN BUTON — sifir kenarlik/arka plan (Themes/Controls/Buttons kullanıyor)  -->
+    <Style x:Key="PlainButtonStyle" TargetType="Button">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+    </Style>
+
+    <!--  DIALOG CHROME BUTONLARI — setters-only (sablonsuz)  -->
+    <!--  Neden: ContentDialog Primary/Close chrome butonlari sablonlu (ControlTemplate'li) -->
+    <!--  stili uygulamiyor, WinUI varsayilan accent maviye dusuyor (Oturum 95-96 kaniti). -->
+    <!--  Bu stiller varsayilan Button sablonunu kullanir: Normal'de ink/danger zemin -->
+    <!--  garanti, hover/pressed varsayilan sablon davranisinda. Icerik-ici butonlarda -->
+    <!--  (sayfa/panel) sablonlu InventDark/Danger kullanilmaya devam edilir.  -->
+    <Style x:Key="InventDialogPrimaryStyle" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource MuhasibInkBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibOnInkBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibPillCornerRadius}" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="InventDialogDangerStyle" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource MuhasibDangerBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibOnPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibPillCornerRadius}" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="InventDialogInfoStyle" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource MuhasibInfoBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibOnPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibPillCornerRadius}" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!--  DIALOG CHROME SECONDARY — setters-only (QuickDialog kalibi: "Detayli Teshis" emsali)  -->
+    <!--  Chrome Secondary/Close butonlari sablonlu stil almaz; tek kaynak burasi. Sayfada Padding/  -->
+    <!--  CornerRadius/Background yazilmaz — olcu/duygu degisimi gerekiyorsa yeni varyant buraya eklenir.  -->
+    <Style x:Key="InventDialogSecondaryStyle" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource MuhasibInventCardBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibTextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource MuhasibSoftBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibPillCornerRadius}" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- ================================================================= -->
+    <!-- MERKEZI VARYANTLAR — sayfalarda Button uzerinde Padding/CornerRadius/  -->
+    <!-- Background/Foreground/BorderThickness YAZILMAZ. Ihtiyac olan olcu buradan  -->
+    <!-- secilir (varyant yoksa base stil aynen kullanilir). Tek kontrol noktasi. -->
+    <!-- ================================================================= -->
+
+    <!--  Birincil kompakt (panel CTA'lari: 12,7)  -->
+    <Style x:Key="PrimaryCompactButtonStyle" TargetType="Button" BasedOn="{StaticResource InventDarkButtonStyle}">
+        <Setter Property="Padding" Value="12,7" />
+    </Style>
+
+    <!--  Ikincil kompakt (panel CTA'lari: 12,7)  -->
+    <Style x:Key="SecondaryCompactButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+        <Setter Property="Padding" Value="12,7" />
+    </Style>
+
+    <!--  Ghost buyuk (bant/şerit aksiyonlari: 12,7)  -->
+    <Style x:Key="GhostLargeButtonStyle" TargetType="Button" BasedOn="{StaticResource GhostPillButtonStyle}">
+        <Setter Property="Padding" Value="12,7" />
+    </Style>
+
+    <!--  Ghost kucuk (satir ici ikon/metin: 8,5)  -->
+    <Style x:Key="GhostSmallButtonStyle" TargetType="Button" BasedOn="{StaticResource GhostPillButtonStyle}">
+        <Setter Property="Padding" Value="8,5" />
+    </Style>
+
+    <!--  Ghost satir tint'leri (Tumu tablosu Yonet/Yedekle/Durum/Analiz emsali — Small olcu)  -->
+    <!--  BorderThickness=0: opak zemin border gerektirmez; 1px border hover'da layout  -->
+    <!--  invalidation tetikleyip tooltip timer'ini olduruyordu (Oturum 97 deseni).  -->
+    <Style x:Key="GhostTintPaleButtonStyle" TargetType="Button" BasedOn="{StaticResource GhostSmallButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource MuhasibInventPaleBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style x:Key="GhostTintPetrolButtonStyle" TargetType="Button" BasedOn="{StaticResource GhostSmallButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style x:Key="GhostTintWarningButtonStyle" TargetType="Button" BasedOn="{StaticResource GhostSmallButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource MuhasibWarningBgBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style x:Key="GhostTintInfoButtonStyle" TargetType="Button" BasedOn="{StaticResource GhostSmallButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource MuhasibInfoBgBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style x:Key="GhostTintOliveButtonStyle" TargetType="Button" BasedOn="{StaticResource GhostSmallButtonStyle}">
+        <Setter Property="Background" Value="{ThemeResource MuhasibOliveTintBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!--  DOLU PETROL — kucuk birincil aksiyon (beyaz metin, sablonlu hover/pressed)  -->
+    <Style x:Key="PetrolButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource MuhasibPetrolBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibOnPetrolBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibPillCornerRadius}" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolDeepBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolDeepBrush}" />
+                                        <Setter Target="Root.Opacity" Value="0.85" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.45" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  PETROL TINT — ikincil kucuk aksiyon (tint zemin + petrol cerceve + koyu metin)  -->
+    <Style x:Key="PetrolTintButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibPetrolDeepBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource MuhasibPetrolBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibPillCornerRadius}" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolBorderBrush}" />
+                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolBorderBrush}" />
+                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolDeepBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.45" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Nav aktif (sidebar secili oge — InventDark olcu, sola dayali)  -->
+    <Style x:Key="InventNavActiveButtonStyle" TargetType="Button" BasedOn="{StaticResource InventDarkButtonStyle}">
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibCardCornerRadius}" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+
+    <!--  Segment (TumuHero 3'lu segment: 10,7 — GhostLarge 12,7'in dar olcusu)  -->
+    <Style x:Key="SegmentButtonStyle" TargetType="Button" BasedOn="{StaticResource GhostPillButtonStyle}">
+        <Setter Property="Padding" Value="10,7" />
+    </Style>
+
+    <!--  Daire ikon (ShellView BackButton 32x32: soluk zemin + soft halka)  -->
+    <Style x:Key="CircleIconButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{ThemeResource MuhasibInventPaleBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibSageSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource MuhasibSoftBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibCircleCornerRadius}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolBorderBrush}" />
+                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource MuhasibPetrolDeepBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.5" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Hesap satiri (QuickLogin: saydam satir + petrol hover/pressed — Button.Resources override YASAK, bkz HATALAR.md 2026-08-31)  -->
+    <Style x:Key="AccountRowButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibInventInnerCornerRadius}" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolTintBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibPetrolBorderBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.5" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Satir silme X (QuickLogin kaldir: saydam daire + danger hover/pressed)  -->
+    <Style x:Key="DismissButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibSageTertiaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibCircleCornerRadius}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibDangerBgBrush}" />
+                                        <Setter Target="Content.Foreground" Value="{ThemeResource MuhasibDangerBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibDangerHoverBrush}" />
+                                        <Setter Target="Content.Foreground" Value="{ThemeResource MuhasibOnPrimaryBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.5" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            x:Name="Content"
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Link (metin+ikon satir ici: Login Teshis emsali)  -->
+    <Style x:Key="LinkButtonStyle" TargetType="Button" BasedOn="{StaticResource PlainButtonStyle}">
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibPetrolBrush}" />
+        <Setter Property="Padding" Value="10,6" />
+    </Style>
+
+    <!--  TAB PILL — sayfa ici sekme hapi (CustomModernCard icerisinde)  -->
+    <!--  Normal: saydam + sage metin, hover: pale zemin, pressed: soft zemin.  -->
+    <!--  Aktif durum VSM ile ink zemin + beyaz metin verilir (LoginView adim karti deseni).  -->
+    <Style x:Key="TabPillButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{ThemeResource MuhasibSageTertiaryBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource MuhasibCardCornerRadius}" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibInventPaleBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibSoftBorderBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="Root.Opacity" Value="0.45" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter
+                            Padding="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

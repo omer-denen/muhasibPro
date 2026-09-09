@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="MuhasibPro.Views.ShellViews.Shell.Components.Dialogs.DeleteGuardDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    PrimaryButtonText="Dönemi Sil"
+    PrimaryButtonStyle="{StaticResource InventDialogDangerStyle}"
+    CloseButtonText="Vazgeç"
+    DefaultButton="Close"
+    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+    BorderThickness="1"
+    CornerRadius="{StaticResource CardCornerRadius}">
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Width="36" Height="36" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource MuhasibDangerBgBrush}" VerticalAlignment="Center">
+                <FontIcon Glyph="{StaticResource IconAlertTriangle}" FontSize="18" Foreground="{ThemeResource MuhasibDangerBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                <TextBlock Text="Guard Kontrolü" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
+                <TextBlock Text="Mali Dönem Silme" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}"/>
+            </StackPanel>
+        </Grid>
+    </ContentDialog.Title>
+
+    <StackPanel Spacing="16" MinWidth="400">
+
+        <!-- Guard Info — YeniMaliDonem ile aynı açık Info banner -->
+        <Border
+            Padding="12"
+            CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
+            Background="{ThemeResource MuhasibInfoBgBrush}"
+            BorderBrush="{ThemeResource MuhasibInfoBrush}"
+            BorderThickness="1">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <FontIcon
+                    Glyph="{StaticResource IconAlertTriangle}"
+                    FontSize="24"
+                    Foreground="{ThemeResource MuhasibPetrolDeepBrush}"
+                    VerticalAlignment="Center" />
+                <StackPanel>
+                    <TextBlock
+                        x:Name="DbDosyaAdiText"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
+                    <TextBlock
+                        FontSize="12"
+                        Foreground="{ThemeResource MuhasibSageSecondaryBrush}">
+                        <Run Text="Dönem: " />
+                        <Run x:Name="DonemYiliText" Text="" />
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Error Message -->
+        <Border
+            x:Name="ErrorBorder"
+            Padding="10"
+            CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
+            Background="{ThemeResource MuhasibDangerBgBrush}"
+            BorderBrush="{ThemeResource MuhasibDangerBrush}"
+            BorderThickness="1"
+            Visibility="Collapsed">
+            <TextBlock
+                x:Name="ErrorText"
+                FontSize="12"
+                Foreground="{ThemeResource MuhasibDangerBrush}"
+                TextWrapping="Wrap" />
+        </Border>
+
+        <!-- Guard Checks -->
+        <Border
+            Padding="12"
+            CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
+            Background="{ThemeResource MuhasibInventPaleBrush}"
+            BorderBrush="{ThemeResource MuhasibSoftBorderBrush}"
+            BorderThickness="1">
+            <StackPanel Spacing="8">
+                <Grid>
+                    <TextBlock
+                        Text="1. Aktif dönem kilit kontrolü:"
+                        FontSize="12"
+                        Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                    <TextBlock
+                        HorizontalAlignment="Right"
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        Foreground="{ThemeResource MuhasibSuccessBrush}"
+                        Text="✅ Güvenli" />
+                </Grid>
+                <Grid>
+                    <TextBlock
+                        Text="2. Oturum/Heartbeat kontrolü:"
+                        FontSize="12"
+                        Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                    <TextBlock
+                        Text="✅ Başka kullanıcı bağlı değil"
+                        HorizontalAlignment="Right"
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        Foreground="{ThemeResource MuhasibSuccessBrush}" />
+                </Grid>
+                <Grid>
+                    <TextBlock
+                        Text="3. Yetki kontrolü:"
+                        FontSize="12"
+                        Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                    <TextBlock
+                        Text="✅ Veritabani_Sil İzni Var"
+                        HorizontalAlignment="Right"
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        Foreground="{ThemeResource MuhasibSuccessBrush}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Confirmation Code Input -->
+        <StackPanel Spacing="8">
+            <TextBlock
+                FontSize="12"
+                FontWeight="SemiBold"
+                Foreground="{ThemeResource MuhasibTextPrimaryBrush}">
+                <Run Text="Onay Kodu: Silme işlemini onaylamak için lütfen dönemin yılını (" />
+                <Run x:Name="ConfirmCodeHintText" Text="" FontWeight="Bold" />
+                <Run Text=") yazınız:" />
+            </TextBlock>
+            <TextBox
+                x:Name="ConfirmCodeBox"
+                PlaceholderText="Örn: 2027"
+                FontSize="14"
+                FontFamily="{ThemeResource MuhasibMonospaceFontFamily}"
+                Padding="12,10"
+                CornerRadius="{StaticResource MuhasibPillCornerRadius}"
+                Background="{ThemeResource MuhasibInventPaleBrush}"
+                Foreground="{ThemeResource MuhasibTextPrimaryBrush}"
+                BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" />
+        </StackPanel>
+    </StackPanel>
+</ContentDialog>

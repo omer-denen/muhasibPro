@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="MuhasibPro.Views.ShellViews.Shell.Components.SagaPipelineDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:components="using:MuhasibPro.Views.ShellViews.Shell.Components"
+    mc:Ignorable="d"
+    PrimaryButtonText="Saga Hattını Başlat"
+    PrimaryButtonStyle="{StaticResource InventDialogPrimaryStyle}"
+    CloseButtonText="Vazgeç"
+    DefaultButton="None"
+    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+    BorderThickness="1"
+    CornerRadius="{StaticResource CardCornerRadius}">
+
+    <ContentDialog.Title>
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Width="36" Height="36" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}" VerticalAlignment="Center">
+                <FontIcon Glyph="{StaticResource IconZap}" FontSize="18" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                <TextBlock Text="Saga Pipeline" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
+                <TextBlock Text="Yeni Mali Dönem" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}"/>
+            </StackPanel>
+        </Grid>
+    </ContentDialog.Title>
+
+    <StackPanel Spacing="16" MinWidth="500">
+
+        <!-- Steps Pipeline -->
+        <ItemsControl ItemsSource="{x:Bind Steps, Mode=OneWay}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="components:SagaStepItem">
+                    <Border
+                        Margin="0,0,0,8"
+                        Padding="12"
+                        CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
+                        Background="{x:Bind Status, Converter={StaticResource SagaStepStatusToBrush}, ConverterParameter=Background, Mode=OneWay}"
+                        BorderBrush="{x:Bind Status, Converter={StaticResource SagaStepStatusToBrush}, ConverterParameter=Border, Mode=OneWay}"
+                        BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Status Circle -->
+                            <Border
+                                Grid.Column="0"
+                                Width="24"
+                                Height="24"
+                                Margin="0,0,12,0"
+                                CornerRadius="{StaticResource MuhasibCircleCornerRadius}"
+                                VerticalAlignment="Top"
+                                Background="{x:Bind Status, Converter={StaticResource SagaStepStatusToBrush}, ConverterParameter=Icon, Mode=OneWay}">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontSize="10"
+                                    FontWeight="Bold"
+                                    Text="{x:Bind StatusGlyph, Mode=OneWay}"
+                                    Foreground="{x:Bind Status, Converter={StaticResource SagaStepStatusToBrush}, ConverterParameter=Foreground, Mode=OneWay}" />
+                            </Border>
+
+                            <!-- Step Info -->
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        FontSize="12"
+                                        FontWeight="SemiBold"
+                                        Foreground="{ThemeResource MuhasibTextPrimaryBrush}">
+                                        <Run Text="Adım " />
+                                        <Run Text="{x:Bind StepNumber, Mode=OneWay}" />
+                                        <Run Text=": " />
+                                        <Run Text="{x:Bind Name, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Text="{x:Bind Timestamp, Mode=OneWay}"
+                                        FontSize="10"
+                                        FontFamily="{ThemeResource MuhasibMonospaceFontFamily}"
+                                        Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
+                                </Grid>
+                                <TextBlock
+                                    Text="{x:Bind Description, Mode=OneWay}"
+                                    FontSize="11"
+                                    Foreground="{ThemeResource MuhasibSageSecondaryBrush}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Status Footer -->
+        <Border
+            Padding="12"
+            CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
+            Background="{ThemeResource MuhasibInventPaleBrush}"
+            BorderBrush="{ThemeResource MuhasibSoftBorderBrush}"
+            BorderThickness="1">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <FontIcon x:Name="StatusIcon" Glyph="{StaticResource IconLoader}" FontSize="16" Foreground="{ThemeResource MuhasibPetrolBrush}" />
+                <TextBlock
+                    x:Name="StatusText"
+                    Text="Saga hattı bekleniyor — başlatmak için devam edin."
+                    FontSize="12"
+                    Foreground="{ThemeResource MuhasibSageSecondaryBrush}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</ContentDialog>

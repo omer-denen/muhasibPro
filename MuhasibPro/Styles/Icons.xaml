@@ -1,0 +1,57 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ================================================================= -->
+    <!-- MUHASIBPRO ICONS & GLYPH DEFINITIONS                              -->
+    <!-- Segoe Fluent Icons Unicode Glyphs & Vector Paths for Accounting   -->
+    <!-- ================================================================= -->
+
+    <!-- Core App Glyphs (canlı: grep ile doğrulandı, ölüler silindi) -->
+    <x:String x:Key="IconDashboard">&#xEA42;</x:String>
+    <x:String x:Key="IconAccounts">&#xE77B;</x:String>
+    <x:String x:Key="IconInventory">&#xE7B8;</x:String>
+    <x:String x:Key="IconInvoice">&#xE8C4;</x:String>
+    <x:String x:Key="IconVault">&#xE8C7;</x:String>
+    <x:String x:Key="IconBank">&#xE825;</x:String>
+    <x:String x:Key="IconCheckNote">&#xE8A5;</x:String>
+    <x:String x:Key="IconEmployees">&#xE716;</x:String>
+    <x:String x:Key="IconReports">&#xE9F9;</x:String>
+    <x:String x:Key="IconSettings">&#xE713;</x:String>
+    <x:String x:Key="IconDatabase">&#xE8B7;</x:String>
+    <x:String x:Key="IconLock">&#xE72E;</x:String>
+    <x:String x:Key="IconUser">&#xE77B;</x:String>
+    <x:String x:Key="IconBuilding">&#xE821;</x:String>
+    <x:String x:Key="IconCalendar">&#xE787;</x:String>
+    <x:String x:Key="IconSearch">&#xE721;</x:String>
+    <x:String x:Key="IconAdd">&#xE710;</x:String>
+    <x:String x:Key="IconEdit">&#xE70F;</x:String>
+    <x:String x:Key="IconRefresh">&#xE72C;</x:String>
+    <x:String x:Key="IconCheckMark">&#xE73E;</x:String>
+    <x:String x:Key="IconError">&#xE783;</x:String>
+    <x:String x:Key="IconInfo">&#xE946;</x:String>
+    <x:String x:Key="IconBackup">&#xEA35;</x:String>
+    <x:String x:Key="IconChevronRight">&#xE76C;</x:String>
+    <x:String x:Key="IconChevronLeft">&#xE76B;</x:String>
+    <x:String x:Key="IconHardDrive">&#xEDA2;</x:String>
+    <x:String x:Key="IconShield">&#xE1D6;</x:String>
+    <x:String x:Key="IconZap">&#xE99A;</x:String>
+    <x:String x:Key="IconWrench">&#xE90F;</x:String>
+    <x:String x:Key="IconDownload">&#xE896;</x:String>
+    <x:String x:Key="IconUpload">&#xE898;</x:String>
+    <x:String x:Key="IconArchive">&#xE7B8;</x:String>
+    <x:String x:Key="IconTrash">&#xE74D;</x:String>
+    <x:String x:Key="IconAlertCircle">&#xE783;</x:String>
+    <x:String x:Key="IconAlertTriangle">&#xE7BA;</x:String>
+    <x:String x:Key="IconCheckCircle">&#xE73E;</x:String>
+    <x:String x:Key="IconEye">&#xE7B3;</x:String>
+    <x:String x:Key="IconLogIn">&#xE8B3;</x:String>
+    <x:String x:Key="IconLogOut">&#xE8B4;</x:String>
+    <x:String x:Key="IconLoader">&#xE823;</x:String>
+    <x:String x:Key="IconLayers">&#xF246;</x:String>
+    <x:String x:Key="IconPackage">&#xE7B8;</x:String>
+    <x:String x:Key="IconPlay">&#xE768;</x:String>
+    <x:String x:Key="IconTerminal">&#xE756;</x:String>
+    <x:String x:Key="IconHelpCircle">&#xE897;</x:String>
+
+</ResourceDictionary>

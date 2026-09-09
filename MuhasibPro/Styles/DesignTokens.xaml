@@ -1,0 +1,254 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ================================================================= -->
+    <!-- MUHASIBPRO DESIGN TOKENS — InventEase Dili                        -->
+    <!-- Light = InventEase acik yesil-gri gradyan, Dark = temiz koyu      -->
+    <!-- Semantic renkler ThemeDictionaries'te (Light+Dark); fircalar      -->
+    <!-- {ThemeResource} ile baglanir -> tema degisince reaksiyon verir.    -->
+    <!-- XAML'de RequestedTheme zorlanmaz; tema tek kanal IThemeSelector    -->
+    <!-- ================================================================= -->
+
+    <ResourceDictionary.ThemeDictionaries>
+        <!-- ============ LIGHT — InventEase acik yesil-gri ============ -->
+        <ResourceDictionary x:Key="Light">
+            <!-- InventEase zemin gradyani — background_muhasib.png ile uyumlu (warm greige) -->
+            <!-- Ornek: tl #EDEBE7 / avg #E0E0D9 / br #D9DBD2 / max #F3F2EF / min #C4D1CD -->
+            <Color x:Key="MuhasibInventBgStartColor">#F3F2EF</Color>
+            <Color x:Key="MuhasibInventBgMidColor">#EDEBE7</Color>
+            <Color x:Key="MuhasibInventBgEndColor">#E0E0D9</Color>
+
+            <!-- Yuzeyler — resmin warm alt tonu ile uyumlu -->
+            <Color x:Key="MuhasibInventCardColor">#FFFFFF</Color>
+            <Color x:Key="MuhasibInventPaleColor">#E9E5DE</Color>
+            <Color x:Key="MuhasibSoftBorderColor">#DDD8CF</Color>
+
+            <!-- Metin -->
+            <Color x:Key="MuhasibTextPrimaryColor">#0F172A</Color>
+            <Color x:Key="MuhasibTextSecondaryColor">#475569</Color>
+            <Color x:Key="MuhasibTextTertiaryColor">#64748B</Color>
+
+            <!-- Sage (InventEase yesil-gri metin) -->
+            <Color x:Key="MuhasibSageSecondaryColor">#4A524D</Color>
+            <Color x:Key="MuhasibSageTertiaryColor">#7C8781</Color>
+
+            <!-- Petrol — mavi-uc vurgu (kucuk buton/ikon/metin icin koyu uc kullanilir) -->
+            <Color x:Key="MuhasibPetrolColor">#0B5560</Color>
+            <Color x:Key="MuhasibPetrolDeepColor">#073A42</Color>
+            <Color x:Key="MuhasibPetrolTintColor">#D2E6E9</Color>
+            <Color x:Key="MuhasibPetrolBorderColor">#A3CBD0</Color>
+            <Color x:Key="MuhasibOnPetrolColor">#FFFFFF</Color>
+
+            <!-- Zeytin — ikinci vurgu (rozet/sayac/grafik; kucuk metinde koyu uc) -->
+            <Color x:Key="MuhasibOliveColor">#5B6E2E</Color>
+            <Color x:Key="MuhasibOliveDeepColor">#414D1F</Color>
+            <Color x:Key="MuhasibOliveTintColor">#E9EDD5</Color>
+            <Color x:Key="MuhasibOliveBorderColor">#C2C895</Color>
+            <Color x:Key="MuhasibOnOliveColor">#FFFFFF</Color>
+
+            <!-- Ink (siyah aksiyon) -->
+            <Color x:Key="MuhasibInkColor">#141414</Color>
+            <Color x:Key="MuhasibInkHoverColor">#2B2B2B</Color>
+            <Color x:Key="MuhasibInkPressedColor">#000000</Color>
+            <Color x:Key="MuhasibOnInkColor">#FFFFFF</Color>
+
+            <!-- Brand (pipeline converter'lari icin, Primary = petrol aliasi) -->
+            <Color x:Key="MuhasibPrimaryColor">#0B5560</Color>
+            <Color x:Key="MuhasibPrimaryLightColor">#D2E6E9</Color>
+            <Color x:Key="MuhasibPrimaryBorderColor">#A3CBD0</Color>
+            <Color x:Key="MuhasibOnPrimaryColor">#FFFFFF</Color>
+
+            <!-- Durum -->
+            <Color x:Key="MuhasibSuccessColor">#0E7A0D</Color>
+            <Color x:Key="MuhasibSuccessBgColor">#DFF6DD</Color>
+            <Color x:Key="MuhasibDangerColor">#C42B1C</Color>
+            <Color x:Key="MuhasibDangerBgColor">#FDE7E9</Color>
+            <Color x:Key="MuhasibDangerHoverColor">#A32417</Color>
+            <Color x:Key="MuhasibDangerPressedColor">#8C1D13</Color>
+            <Color x:Key="MuhasibWarningColor">#9D5D00</Color>
+            <Color x:Key="MuhasibWarningBgColor">#FFF4CE</Color>
+            <Color x:Key="MuhasibInfoColor">#005FB8</Color>
+            <Color x:Key="MuhasibInfoBgColor">#E5F1FB</Color>
+        </ResourceDictionary>
+
+        <!-- ============ DARK — warm greige dark (background_muhasib.png gece karsiligi) -->
+        <ResourceDictionary x:Key="Dark">
+            <!-- InventEase zemin gradyani (dark warm) -->
+            <Color x:Key="MuhasibInventBgStartColor">#151410</Color>
+            <Color x:Key="MuhasibInventBgMidColor">#1C1914</Color>
+            <Color x:Key="MuhasibInventBgEndColor">#241E18</Color>
+
+            <!-- Yuzeyler — warm dark -->
+            <Color x:Key="MuhasibInventCardColor">#1E1B17</Color>
+            <Color x:Key="MuhasibInventPaleColor">#1A1612</Color>
+            <Color x:Key="MuhasibSoftBorderColor">#332E26</Color>
+
+            <!-- Metin -->
+            <Color x:Key="MuhasibTextPrimaryColor">#F8FAFC</Color>
+            <Color x:Key="MuhasibTextSecondaryColor">#94A3B8</Color>
+            <Color x:Key="MuhasibTextTertiaryColor">#64748B</Color>
+
+            <!-- Sage -->
+            <Color x:Key="MuhasibSageSecondaryColor">#B9C2B6</Color>
+            <Color x:Key="MuhasibSageTertiaryColor">#7E887C</Color>
+
+            <!-- Petrol — dark: mavi-uc vurgunun gece karsiligi -->
+            <Color x:Key="MuhasibPetrolColor">#6FB3BC</Color>
+            <Color x:Key="MuhasibPetrolDeepColor">#4E8A93</Color>
+            <Color x:Key="MuhasibPetrolTintColor">#1E3235</Color>
+            <Color x:Key="MuhasibPetrolBorderColor">#3A6E75</Color>
+            <Color x:Key="MuhasibOnPetrolColor">#FFFFFF</Color>
+
+            <!-- Zeytin — dark: ikinci vurgunun gece karsiligi -->
+            <Color x:Key="MuhasibOliveColor">#9BAE5F</Color>
+            <Color x:Key="MuhasibOliveDeepColor">#7C8F46</Color>
+            <Color x:Key="MuhasibOliveTintColor">#232A12</Color>
+            <Color x:Key="MuhasibOliveBorderColor">#4A5426</Color>
+            <Color x:Key="MuhasibOnOliveColor">#FFFFFF</Color>
+
+            <!-- Ink -->
+            <Color x:Key="MuhasibInkColor">#EDEFE8</Color>
+            <Color x:Key="MuhasibInkHoverColor">#FFFFFF</Color>
+            <Color x:Key="MuhasibInkPressedColor">#C9CFC6</Color>
+            <Color x:Key="MuhasibOnInkColor">#101010</Color>
+
+            <!-- Brand -->
+            <Color x:Key="MuhasibPrimaryColor">#6FB3BC</Color>
+            <Color x:Key="MuhasibPrimaryLightColor">#1E3235</Color>
+            <Color x:Key="MuhasibPrimaryBorderColor">#3A6E75</Color>
+            <Color x:Key="MuhasibOnPrimaryColor">#FFFFFF</Color>
+
+            <!-- Durum -->
+            <Color x:Key="MuhasibSuccessColor">#34D399</Color>
+            <Color x:Key="MuhasibSuccessBgColor">#064E3B</Color>
+            <Color x:Key="MuhasibDangerColor">#F87171</Color>
+            <Color x:Key="MuhasibDangerBgColor">#7F1D1D</Color>
+            <Color x:Key="MuhasibDangerHoverColor">#EF4444</Color>
+            <Color x:Key="MuhasibDangerPressedColor">#DC2626</Color>
+            <Color x:Key="MuhasibWarningColor">#FBBF24</Color>
+            <Color x:Key="MuhasibWarningBgColor">#78350F</Color>
+            <Color x:Key="MuhasibInfoColor">#38BDF8</Color>
+            <Color x:Key="MuhasibInfoBgColor">#0C4A6E</Color>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <!-- ================= Terminal (Diagnostics) — koyu panel ================= -->
+    <Color x:Key="MuhasibTerminalBgColor">#0F172A</Color>
+    <Color x:Key="MuhasibTerminalBorderColor">#1E293B</Color>
+    <Color x:Key="MuhasibTerminalTextPrimaryColor">#CBD5E1</Color>
+    <Color x:Key="MuhasibTerminalTextSecondaryColor">#94A3B8</Color>
+    <Color x:Key="MuhasibTerminalTextTertiaryColor">#64748B</Color>
+    <SolidColorBrush x:Key="MuhasibTerminalBgBrush" Color="{StaticResource MuhasibTerminalBgColor}" />
+    <SolidColorBrush x:Key="MuhasibTerminalBorderBrush" Color="{StaticResource MuhasibTerminalBorderColor}" />
+    <SolidColorBrush x:Key="MuhasibTerminalTextPrimaryBrush" Color="{StaticResource MuhasibTerminalTextPrimaryColor}" />
+    <SolidColorBrush x:Key="MuhasibTerminalTextSecondaryBrush" Color="{StaticResource MuhasibTerminalTextSecondaryColor}" />
+    <SolidColorBrush x:Key="MuhasibTerminalTextTertiaryBrush" Color="{StaticResource MuhasibTerminalTextTertiaryColor}" />
+
+    <!-- ================= Tema-reaktif fircalar ================= -->
+    
+    <!-- Zemin gradyani -->
+    <LinearGradientBrush x:Key="InventEaseBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="{ThemeResource MuhasibInventBgStartColor}" />
+        <GradientStop Offset="0.55" Color="{ThemeResource MuhasibInventBgMidColor}" />
+        <GradientStop Offset="1" Color="{ThemeResource MuhasibInventBgEndColor}" />
+    </LinearGradientBrush>
+
+    <!-- Yuzey -->
+    <SolidColorBrush x:Key="MuhasibInventCardBrush" Color="{ThemeResource MuhasibInventCardColor}" />
+    <SolidColorBrush x:Key="MuhasibInventPaleBrush" Color="{ThemeResource MuhasibInventPaleColor}" />
+    <SolidColorBrush x:Key="MuhasibSoftBorderBrush" Color="{ThemeResource MuhasibSoftBorderColor}" />
+
+    <!-- Metin -->
+    <SolidColorBrush x:Key="MuhasibTextPrimaryBrush" Color="{ThemeResource MuhasibTextPrimaryColor}" />
+    <SolidColorBrush x:Key="MuhasibTextSecondaryBrush" Color="{ThemeResource MuhasibTextSecondaryColor}" />
+    <SolidColorBrush x:Key="MuhasibTextTertiaryBrush" Color="{ThemeResource MuhasibTextTertiaryColor}" />
+
+    <!-- Sage -->
+    <SolidColorBrush x:Key="MuhasibSageSecondaryBrush" Color="{ThemeResource MuhasibSageSecondaryColor}" />
+    <SolidColorBrush x:Key="MuhasibSageTertiaryBrush" Color="{ThemeResource MuhasibSageTertiaryColor}" />
+
+    <!-- Petrol -->
+    <SolidColorBrush x:Key="MuhasibPetrolBrush" Color="{ThemeResource MuhasibPetrolColor}" />
+    <SolidColorBrush x:Key="MuhasibPetrolDeepBrush" Color="{ThemeResource MuhasibPetrolDeepColor}" />
+    <SolidColorBrush x:Key="MuhasibPetrolTintBrush" Color="{ThemeResource MuhasibPetrolTintColor}" />
+    <SolidColorBrush x:Key="MuhasibPetrolBorderBrush" Color="{ThemeResource MuhasibPetrolBorderColor}" />
+    <SolidColorBrush x:Key="MuhasibOnPetrolBrush" Color="{ThemeResource MuhasibOnPetrolColor}" />
+
+    <!-- Zeytin -->
+    <SolidColorBrush x:Key="MuhasibOliveBrush" Color="{ThemeResource MuhasibOliveColor}" />
+    <SolidColorBrush x:Key="MuhasibOliveDeepBrush" Color="{ThemeResource MuhasibOliveDeepColor}" />
+    <SolidColorBrush x:Key="MuhasibOliveTintBrush" Color="{ThemeResource MuhasibOliveTintColor}" />
+    <SolidColorBrush x:Key="MuhasibOliveBorderBrush" Color="{ThemeResource MuhasibOliveBorderColor}" />
+    <SolidColorBrush x:Key="MuhasibOnOliveBrush" Color="{ThemeResource MuhasibOnOliveColor}" />
+
+    <!-- Ink -->
+    <SolidColorBrush x:Key="MuhasibInkBrush" Color="{ThemeResource MuhasibInkColor}" />
+    <SolidColorBrush x:Key="MuhasibInkHoverBrush" Color="{ThemeResource MuhasibInkHoverColor}" />
+    <SolidColorBrush x:Key="MuhasibInkPressedBrush" Color="{ThemeResource MuhasibInkPressedColor}" />
+    <SolidColorBrush x:Key="MuhasibOnInkBrush" Color="{ThemeResource MuhasibOnInkColor}" />
+
+    <!-- Brand (Primary = Petrol aliasi — converter'lar ve pipeline UI'lari icin) -->
+    <SolidColorBrush x:Key="MuhasibPrimaryBrush" Color="{ThemeResource MuhasibPrimaryColor}" />
+    <SolidColorBrush x:Key="MuhasibPrimaryLightBrush" Color="{ThemeResource MuhasibPrimaryLightColor}" />
+    <SolidColorBrush x:Key="MuhasibPrimaryBorderBrush" Color="{ThemeResource MuhasibPrimaryBorderColor}" />
+    <SolidColorBrush x:Key="MuhasibOnPrimaryBrush" Color="{ThemeResource MuhasibOnPrimaryColor}" />
+
+    <!-- Durum -->
+    <SolidColorBrush x:Key="MuhasibSuccessBrush" Color="{ThemeResource MuhasibSuccessColor}" />
+    <SolidColorBrush x:Key="MuhasibSuccessBgBrush" Color="{ThemeResource MuhasibSuccessBgColor}" />
+    <SolidColorBrush x:Key="MuhasibDangerBrush" Color="{ThemeResource MuhasibDangerColor}" />
+    <SolidColorBrush x:Key="MuhasibDangerBgBrush" Color="{ThemeResource MuhasibDangerBgColor}" />
+    <SolidColorBrush x:Key="MuhasibDangerHoverBrush" Color="{ThemeResource MuhasibDangerHoverColor}" />
+    <SolidColorBrush x:Key="MuhasibDangerPressedBrush" Color="{ThemeResource MuhasibDangerPressedColor}" />
+    <SolidColorBrush x:Key="MuhasibWarningBrush" Color="{ThemeResource MuhasibWarningColor}" />
+    <SolidColorBrush x:Key="MuhasibWarningBgBrush" Color="{ThemeResource MuhasibWarningBgColor}" />
+    <SolidColorBrush x:Key="MuhasibInfoBrush" Color="{ThemeResource MuhasibInfoColor}" />
+    <SolidColorBrush x:Key="MuhasibInfoBgBrush" Color="{ThemeResource MuhasibInfoBgColor}" />
+
+    <!-- Frost (buzlu acrylic kap) -->
+    <AcrylicBrush
+        x:Key="InventFrostBrush"
+        TintColor="{ThemeResource MuhasibInventPaleColor}"
+        TintOpacity="0.30"
+        TintLuminosityOpacity="0.85"
+        FallbackColor="{ThemeResource MuhasibInventPaleColor}" />
+    
+    <ImageBrush x:Key="AppBackgroundBrush"
+            ImageSource="ms-appx:///Assets/Images/background_muhasib.png"
+            Stretch="UniformToFill"/>
+    <!-- ================= Geriye uyum aliaslar (converter'lar icin) ================= -->
+    <!-- Bu brush'lar converter'larda string key olarak kullaniliyor. Invent karsiliklarina yonlendir. -->
+    <SolidColorBrush x:Key="MuhasibCardBackgroundSubtleBrush" Color="{ThemeResource MuhasibInventPaleColor}" />
+    <SolidColorBrush x:Key="MuhasibBorderBrush" Color="{ThemeResource MuhasibSoftBorderColor}" />
+
+    <!-- ================= Kose yaricaplari ================= -->
+    <CornerRadius x:Key="MuhasibControlCornerRadius">6</CornerRadius>
+    <CornerRadius x:Key="MuhasibCardCornerRadius">16</CornerRadius>
+    <CornerRadius x:Key="MuhasibPanelCornerRadius">20</CornerRadius>
+    <CornerRadius x:Key="MuhasibPillCornerRadius">20</CornerRadius>
+    <CornerRadius x:Key="MuhasibCircleCornerRadius">999</CornerRadius>
+    <CornerRadius x:Key="MuhasibHeroCornerRadius">24</CornerRadius>
+    <CornerRadius x:Key="MuhasibInventInnerCornerRadius">16</CornerRadius>
+    <CornerRadius x:Key="MuhasibAccentCornerRadius">16,0,0,16</CornerRadius>
+
+    <!-- ================= Bosluk & Dolgu ================= -->
+    <x:Double x:Key="MuhasibSpacingXSmall">4</x:Double>
+    <x:Double x:Key="MuhasibSpacingSmall">8</x:Double>
+    <x:Double x:Key="MuhasibSpacingMedium">12</x:Double>
+    <x:Double x:Key="MuhasibSpacingLarge">16</x:Double>
+    <x:Double x:Key="MuhasibSpacingXLarge">20</x:Double>
+    <x:Double x:Key="MuhasibSpacing2XLarge">24</x:Double>
+    <x:Double x:Key="MuhasibSpacing3XLarge">32</x:Double>
+    <Thickness x:Key="MuhasibCardPadding">16,14,16,14</Thickness>
+
+    <!-- ================= Tipografi ================= -->
+    <FontFamily x:Key="MuhasibMonospaceFontFamily">Cascadia Code, Consolas, Courier New, monospace</FontFamily>
+    <x:Double x:Key="MuhasibFontSizeCaption">12</x:Double>
+    <x:Double x:Key="MuhasibFontSizeBody">14</x:Double>
+    <x:Double x:Key="MuhasibFontSizeSubtitle">16</x:Double>
+    <x:Double x:Key="MuhasibFontSizeHeading">18</x:Double>
+    <x:Double x:Key="MuhasibFontSizeTitle">20</x:Double>
+    <x:Double x:Key="MuhasibFontSizeDisplay">24</x:Double>
+
+</ResourceDictionary>

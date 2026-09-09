@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="MuhasibPro.Views.MaliDonem.Yonetim.Components.BilinmeyenPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:MuhasibPro.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
+    </UserControl.Resources>
+
+    <StackPanel Spacing="6">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="BİLİNMEYEN YEDEKLER" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" VerticalAlignment="Center" />
+            <Button ToolTipService.ToolTip="Bilinmeyen yedekleri yeniden tara" Grid.Column="1" Click="OnYenileClick" Style="{StaticResource GhostPillButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <FontIcon Glyph="{StaticResource IconRefresh}" FontSize="11" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
+                    <TextBlock Text="Yenile" FontSize="11" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
+                </StackPanel>
+            </Button>
+        </Grid>
+        <TextBlock Text="Dönem kaydı bulunamayan yedek dosyaları." FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" TextWrapping="Wrap" />
+        <ItemsControl ItemsSource="{Binding PagedBilinmeyenYedekler}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource CustomModernCard}" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Padding="12,8" Margin="0,0,0,6">
+                    <Grid ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding BackupFileName}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding DatabaseName, FallbackValue='?'}" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
+                                <TextBlock Text="{Binding BackupFileSizeDisplay}" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <Button Grid.Column="1" Tag="{Binding}" Click="OnTemizleClick" Style="{StaticResource GhostPillButtonStyle}" ToolTipService.ToolTip="Kalıcı Sil" VerticalAlignment="Center">
+                            <TextBlock Text="Temizle" FontSize="10" Foreground="{ThemeResource MuhasibDangerBrush}" />
+                        </Button>
+                    </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Grid ColumnSpacing="8" Margin="0,4,0,0" Visibility="{Binding BilinmeyenHasPagination, Converter={StaticResource TrueToVis}, FallbackValue=Collapsed}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button Content="‹" Style="{StaticResource GhostPillButtonStyle}" Click="OnBilinmeyenPrevClick" IsEnabled="{Binding BilinmeyenCanPrev}" />
+            <TextBlock Grid.Column="1" Text="{Binding BilinmeyenPageInfo}" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Button Grid.Column="2" Content="›" Style="{StaticResource GhostPillButtonStyle}" Click="OnBilinmeyenNextClick" IsEnabled="{Binding BilinmeyenCanNext}" />
+        </Grid>
+    </StackPanel>
+</UserControl>

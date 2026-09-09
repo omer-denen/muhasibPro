@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="MuhasibPro.Views.Components.AnimatedInfoBorder"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    IsTabStop="False">
+
+    <UserControl.Resources>
+        <Storyboard x:Name="ShowStoryboard">
+            <DoubleAnimation Storyboard.TargetName="BorderRoot" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.16" />
+            <DoubleAnimation Storyboard.TargetName="BorderTransform" Storyboard.TargetProperty="TranslateY" From="8" To="0" Duration="0:0:0.16" />
+        </Storyboard>
+        <Storyboard x:Name="HideStoryboard">
+            <DoubleAnimation Storyboard.TargetName="BorderRoot" Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.16" />
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Border
+        x:Name="BorderRoot"
+        Visibility="Collapsed"
+        Opacity="0"
+        Padding="10,8"
+        CornerRadius="{StaticResource MuhasibControlCornerRadius}"
+        Background="{StaticResource MuhasibInfoBgBrush}"
+        BorderBrush="{StaticResource MuhasibPrimaryBorderBrush}"
+        BorderThickness="1">
+        <Border.RenderTransform>
+            <CompositeTransform x:Name="BorderTransform" />
+        </Border.RenderTransform>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <FontIcon
+                x:Name="InfoIcon"
+                Glyph="{StaticResource IconInfo}"
+                FontSize="13"
+                Foreground="{StaticResource MuhasibInfoBrush}"
+                VerticalAlignment="Center" />
+            <TextBlock
+                x:Name="InfoText"
+                FontSize="11"
+                Foreground="{StaticResource MuhasibTextPrimaryBrush}"
+                TextWrapping="Wrap"
+                VerticalAlignment="Center" />
+        </StackPanel>
+    </Border>
+</UserControl>
