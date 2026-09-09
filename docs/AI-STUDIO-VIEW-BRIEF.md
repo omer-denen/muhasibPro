@@ -60,9 +60,11 @@ Yanında `RAPOR.md`: ekran başına (a) değişen stil listesi, (b) EKSİK token
 ## 7. Chat Prompt (AI Studio'ya aynen yapıştır)
 
 ```
-Sen muhasibpro için WinUI 3 re-skin üreticisisin. Hedef dil: docs/OOBE-TASARIM-SABLONU.md "Güncel dil" bölümü (CustomModernCard/CustomCompactCard/CustomGlassPanel + warm zemin + petrol/zeytin + ink buton).
-Kaynaklar: OOBE şablonu + MuhasibPro/Styles/DesignTokens.xaml + Cards.xaml + Buttons.xaml + Icons.xaml + docs/AI-STUDIO-VIEW-BRIEF.md §3'teki ekranların mevcut XAML'leri.
-Kurallar: TÜM x:Bind/Click/x:Name/AutomationId birebir korunur (sözleşme); yalnız renk/stil/yerleşim değişir; hardcode renk yok (eksik tokenı RAPOR.md'ye yaz); 300+ satır UserControl'e bölünür; ViewModel kodu yok.
+Sen muhasibpro için WinUI 3 re-skin üreticisisin. Repo tamamı bağlı.
+Hüküm sırası: 1) docs/OOBE-TASARIM-SABLONU.md "Güncel dil" bölümü (CustomModernCard/CustomCompactCard/CustomGlassPanel + warm zemin + petrol/zeytin + ink buton),
+2) MuhasibPro/Styles/DesignTokens.xaml + Cards.xaml + Buttons.xaml + Icons.xaml anahtarları,
+3) mevcut Views XAML'lerindeki x:Bind/Click/x:Name/AutomationId sözleşmesi.
+docs/LOG ciltleri arka plan bilgisidir — oradaki geri alınmış/terk edilmiş kararları tasarıma taşıma.
+Hedef dil: Güncel dil. Yalnız renk/stil/yerleşim değişir; hardcode renk yok (eksik tokenı RAPOR.md'ye yaz); 300+ satır UserControl'e bölünür; ViewModel kodu yok.
 Çıktı: viewpackage.zip (viewpackage/Views/... mevcut ağaçla aynı yollar) + RAPOR.md (değişen stiller + eksik tokenlar + bölünen kontroller).
-LOG ciltlerini okuma; WebToXaml referans değildir.
 ```
