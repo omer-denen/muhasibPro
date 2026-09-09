@@ -28,7 +28,7 @@
 
 ---
 
-## Oturum İndeksi (134 oturum, 7 cilt)
+## Oturum İndeksi (135 oturum, 7 cilt)
 
 | # | Tarih | Baslik | Durum | Cilt | Ozet |
 |---|-------|--------|-------|------|------|
@@ -167,6 +167,7 @@
 | 132 | 2026-09-09 | Faz 5 kapanışı: Kullanici/Lisans + E2 | ✅🧪 | C7 | KullaniciService+LisansService+DI; Backup/RestoreCompleted yayın+abonelik; test 235/235 |
 | 133 | 2026-09-09 | Faz 6 Mühür: 0 uyarı + docs | ✅🧪 | C7 | 70 uyarı süpürmesi (0/0); AKIS/WINUI/ROADMAP güncelleme + abonelik matrisi; test 235/235 |
 | 134 | 2026-09-09 | Tasarım brief bakımı | ✅ docs | C7 | Güncel dil kararı (Custom*); şablon + AI Studio brief yenileme |
+| 135 | 2026-09-09 | Git + AI Studio hazırlığı | ✅ | C7 | .gitignore + ilk push (muhasibPro) + prompt teslimi |
 ---
 
 ## Son Oturum Özeti (hızlı context)

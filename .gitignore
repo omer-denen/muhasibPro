@@ -273,6 +273,8 @@ ServiceFabricBackup/
 *.backup
 Databases/
 conversation-*.txt
+# MuhasibPro — docs/LOG ciltleri oturum tarihçesidir, repoda durur (kök logs/ runtime çöpü hariç)
+!docs/LOG/
 
 # Business Intelligence projects
 *.rdl.data
