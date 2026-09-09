@@ -28,7 +28,7 @@
 
 ---
 
-## Oturum İndeksi (135 oturum, 7 cilt)
+## Oturum İndeksi (136 oturum, 7 cilt)
 
 | # | Tarih | Baslik | Durum | Cilt | Ozet |
 |---|-------|--------|-------|------|------|
@@ -168,6 +168,7 @@
 | 133 | 2026-09-09 | Faz 6 Mühür: 0 uyarı + docs | ✅🧪 | C7 | 70 uyarı süpürmesi (0/0); AKIS/WINUI/ROADMAP güncelleme + abonelik matrisi; test 235/235 |
 | 134 | 2026-09-09 | Tasarım brief bakımı | ✅ docs | C7 | Güncel dil kararı (Custom*); şablon + AI Studio brief yenileme |
 | 135 | 2026-09-09 | Git + AI Studio hazırlığı | ✅ | C7 | .gitignore + ilk push (muhasibPro) + prompt teslimi |
+| 136 | 2026-09-09 | AI Studio tek-tip geçiş başladı | 🔨 devam | C7 | Prompt verildi, hazırlık yapıyor; viewpackage.zip + RAPOR.md bekleniyor |
 ---
 
 ## Son Oturum Özeti (hızlı context)
