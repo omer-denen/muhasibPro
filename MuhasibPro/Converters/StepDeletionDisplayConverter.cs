@@ -14,22 +14,22 @@ namespace MuhasibPro.Converters
                 var st2 = dStep.Status;
                 string key = (st2, brushKind) switch
                 {
-                    (DeletionStepStatus.Bekliyor, "Background") => "MuhasibCardBackgroundSubtleBrush",
-                    (DeletionStepStatus.Bekliyor, "Border") => "MuhasibBorderBrush",
-                    (DeletionStepStatus.Bekliyor, "IconBg") => "MuhasibTextTertiaryBrush",
-                    (DeletionStepStatus.Calisiyor, "Background") => "MuhasibInfoBgBrush",
+                    (DeletionStepStatus.Bekliyor, "Background") => "CardBackgroundFillColorSecondaryBrush",
+                    (DeletionStepStatus.Bekliyor, "Border") => "CardStrokeColorDefaultBrush",
+                    (DeletionStepStatus.Bekliyor, "IconBg") => "TextFillColorTertiaryBrush",
+                    (DeletionStepStatus.Calisiyor, "Background") => "SystemFillColorAttentionBackgroundBrush",
                     (DeletionStepStatus.Calisiyor, "Border") => "MuhasibPrimaryBorderBrush",
                     (DeletionStepStatus.Calisiyor, "IconBg") => "MuhasibPrimaryBrush",
-                    (DeletionStepStatus.Tamamlandi, "Background") => "MuhasibSuccessBgBrush",
-                    (DeletionStepStatus.Tamamlandi, "Border") => "MuhasibSuccessBrush",
-                    (DeletionStepStatus.Tamamlandi, "IconBg") => "MuhasibSuccessBrush",
-                    (DeletionStepStatus.Hata, "Background") => "MuhasibDangerBgBrush",
-                    (DeletionStepStatus.Hata, "Border") => "MuhasibDangerBrush",
-                    (DeletionStepStatus.Hata, "IconBg") => "MuhasibDangerBrush",
-                    (DeletionStepStatus.Uyari, "Background") => "MuhasibWarningBgBrush",
-                    (DeletionStepStatus.Uyari, "Border") => "MuhasibWarningBrush",
-                    (DeletionStepStatus.Uyari, "IconBg") => "MuhasibWarningBrush",
-                    _ => "MuhasibCardBackgroundSubtleBrush"
+                    (DeletionStepStatus.Tamamlandi, "Background") => "SystemFillColorSuccessBackgroundBrush",
+                    (DeletionStepStatus.Tamamlandi, "Border") => "SystemFillColorSuccessBrush",
+                    (DeletionStepStatus.Tamamlandi, "IconBg") => "SystemFillColorSuccessBrush",
+                    (DeletionStepStatus.Hata, "Background") => "SystemFillColorCriticalBackgroundBrush",
+                    (DeletionStepStatus.Hata, "Border") => "SystemFillColorCriticalBrush",
+                    (DeletionStepStatus.Hata, "IconBg") => "SystemFillColorCriticalBrush",
+                    (DeletionStepStatus.Uyari, "Background") => "SystemFillColorCautionBackgroundBrush",
+                    (DeletionStepStatus.Uyari, "Border") => "SystemFillColorCautionBrush",
+                    (DeletionStepStatus.Uyari, "IconBg") => "SystemFillColorCautionBrush",
+                    _ => "CardBackgroundFillColorSecondaryBrush"
                 };
                 var res = Microsoft.UI.Xaml.Application.Current?.Resources;
                 if (res != null && res.TryGetValue(key, out var b) && b is Brush brush) return brush;

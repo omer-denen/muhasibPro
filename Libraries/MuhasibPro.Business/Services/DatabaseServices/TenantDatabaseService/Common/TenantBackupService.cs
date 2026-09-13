@@ -69,7 +69,14 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService.Co
                 result.BackupDeleteCompleted = deletedCount > 0; // ⭐ En az bir tane silindi mi?
                 result.DeletedBackupCount = deletedCount;
                 if (deletedCount == 0)
-                    return ApiDataExtensions.ErrorResponse(result, "Hiçbir yedek dosyası silinemedi");
+                {
+                    var kilitliler = backupFiles.Data
+                        .Select(b => b?.BackupFileName)
+                        .Where(n => !string.IsNullOrWhiteSpace(n))
+                        .Take(3);
+                    return ApiDataExtensions.ErrorResponse(result,
+                        $"Hiçbir yedek dosyası silinemedi ({totalCount} dosya kilitli olabilir: {string.Join(", ", kilitliler)})");
+                }
 
                 if (deletedCount < totalCount)
                     return ApiDataExtensions.SuccessResponse(result,
@@ -85,32 +92,42 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService.Co
             }
         }
 
-        public async Task<bool>  CleanupBackupFileAsync(string backupFilePath)
-        {
-            if(string.IsNullOrEmpty(backupFilePath) || !File.Exists(backupFilePath))
-            {
-                return false;
-            }
+        public async Task<bool> CleanupBackupFileAsync(string backupFilePath)
+            => (await TryDeleteBackupFileAsync(backupFilePath)).ok;
 
-            try
+        /// <summary>Tek yedek dosyası siler: salt-okunur bayrağı temizlenir, kilitlere karşı
+        /// 5 deneme (100/200/400/800ms) yapılır; sonuç + OS nedeni döner (yutulmaz).</summary>
+        public async Task<(bool ok, string neden)> TryDeleteBackupFileAsync(string backupFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(backupFilePath))
+                return (false, "Dosya yolu boş.");
+            if (!File.Exists(backupFilePath))
+                return (false, "Dosya diskte bulunamadı (başka bir işlem silmiş olabilir).");
+            string sonHata = string.Empty;
+            for (int i = 0; i < 5; i++)
             {
-                // 3 defa deneyelim (file lock olabilir)
-                for(int i = 0; i < 3; i++)
+                try
                 {
-                    try
-                    {
-                        File.Delete(backupFilePath);
-                        return true;
-                    } catch(IOException) when (i < 2) // Son deneme değilse
-                    {
-                        await Task.Delay(100 * (i + 1)); // Artan gecikme
-                    }
+                    try { File.SetAttributes(backupFilePath, FileAttributes.Normal); } catch { }
+                    File.Delete(backupFilePath);
+                    return (true, string.Empty);
                 }
-                return false;
-            } catch(Exception)
-            {
-                return false;
+                catch (IOException ex) when (i < 4)
+                {
+                    sonHata = ex.Message;
+                    await Task.Delay(100 * (1 << i));
+                }
+                catch (UnauthorizedAccessException ex) when (i < 4)
+                {
+                    sonHata = ex.Message;
+                    await Task.Delay(100 * (1 << i));
+                }
+                catch (Exception ex)
+                {
+                    return (false, ex.Message);
+                }
             }
+            return (false, string.IsNullOrWhiteSpace(sonHata) ? "Dosya silinemedi." : sonHata);
         }
     }
 }

@@ -16,6 +16,7 @@ public sealed partial class LoginView : Page
     {
         ViewModel = ServiceLocator.Current.GetService<LoginViewModel>();
         this.InitializeComponent();
+        SurumFooter.Text = Helpers.AppSurumBilgisi.Metin;
         this.InitializeContext();
     }
 
@@ -48,29 +49,17 @@ public sealed partial class LoginView : Page
         ctx.InitializeWithContext(DispatcherQueue, this);
     }
 
-    private async void OnTeshisClicked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void OnPageLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        // Kural 17 Katman 2: kart gölgeleri — receiver Loaded'da (ctor'da değil; Splash emsali).
         try
         {
-            var dlg = new Views.SistemKurulum.Components.QuickSistemDbDiagDialog();
-            var result = await MuhasibPro.Helpers.DialogHelper.ShowCenteredAsync(dlg);
-            if (result == ContentDialogResult.Secondary)
-            {
-                // "Detayli Teshis" secildi — SistemKurulumView'a navigate
-                ViewModel.NavigationService.Navigate<ViewModels.ViewModels.Sistem.SistemKurulumViewModel>(
-                    new ShellArgs { ViewModel = typeof(ViewModels.ViewModels.Sistem.SistemKurulumViewModel) });
-            }
-            else
-            {
-                // "Kapat" secildi veya dialog kapatildi — sadece DB durumunu yenile
-                await ViewModel.LoadAsync(new ShellArgs { ViewModel = typeof(LoginViewModel) });
-            }
+            AnaBorderShadow.Receivers.Add(RootGrid);
+            SistemDurumuShadow.Receivers.Add(RootGrid);
+            HizliGirisShadow.Receivers.Add(RootGrid);
+            GirisKartiShadow.Receivers.Add(RootGrid);
         }
-        catch
-        {
-            // Dialog acilamadigindan (baska dialog acik vb.) sessizce devam et
-            // SistemKurulum'a yonlendirme YAPMA — kullanici bunu istemedi
-        }
+        catch { }
     }
 
     protected override async void OnKeyDown(Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)

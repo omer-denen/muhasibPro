@@ -51,7 +51,7 @@ public sealed partial class SagaPipelineDialog : ContentDialog
     {
         StatusText.Text = text;
         var res = Microsoft.UI.Xaml.Application.Current?.Resources;
-        var key = failed ? "MuhasibDangerBrush" : "MuhasibPetrolBrush";
+        var key = failed ? "SystemFillColorCriticalBrush" : "MuhasibPetrolBrush";
         if (res != null && res.TryGetValue(key, out var brush) && brush is Brush b)
         {
             StatusText.Foreground = b;

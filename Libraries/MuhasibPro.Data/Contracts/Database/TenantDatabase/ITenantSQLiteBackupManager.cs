@@ -22,7 +22,5 @@ namespace MuhasibPro.Data.Contracts.Database.TenantDatabase
         Task<int> CleanOldBackupsAsync(string databaseName, int keepLast);
         Task<DatabaseRestoreExecutionResult> RestoreBackupDetailsAsync(string databaseName, string backupFileName);
         Task<bool> RestoreFromLatestBackupAsync(string databaseName);
-        Task<DatabaseDeletingExecutionResult> DeleteBackupDatabaseAsync(
-        string databaseName);
     }
 }

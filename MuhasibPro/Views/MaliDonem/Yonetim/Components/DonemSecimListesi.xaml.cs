@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml.Controls;
+using MuhasibPro.Helpers;
 
 namespace MuhasibPro.Views.MaliDonem.Yonetim.Components;
 
@@ -47,5 +48,21 @@ public sealed partial class DonemSecimListesi : UserControl
     {
         if (DataContext is ViewModels.ViewModels.Sistem.MaliDonemler.MaliDonemYonetimViewModel vm && vm.ArsivVM.ArsivCanNext)
             vm.ArsivVM.ArsivCurrentPage++;
+    }
+
+    private async void OnSilinenYedeklerClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (DataContext is not ViewModels.ViewModels.Sistem.MaliDonemler.MaliDonemYonetimViewModel vm)
+            return;
+        var dialog = new Dialogs.YetimYedeklerDialog { Vm = vm.BilinmeyenVM, Root = vm, BaslangicSekmesi = 0 };
+        await DialogHelper.ShowCenteredAsync(dialog);
+    }
+
+    private async void OnBilinmeyenYedeklerClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (DataContext is not ViewModels.ViewModels.Sistem.MaliDonemler.MaliDonemYonetimViewModel vm)
+            return;
+        var dialog = new Dialogs.YetimYedeklerDialog { Vm = vm.BilinmeyenVM, Root = vm, BaslangicSekmesi = 1 };
+        await DialogHelper.ShowCenteredAsync(dialog);
     }
 }

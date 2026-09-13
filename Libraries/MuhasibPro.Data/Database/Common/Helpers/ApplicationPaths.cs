@@ -216,8 +216,10 @@ namespace MuhasibPro.Data.Database.Common.Helpers
         #region Database Exists & Validation
         public bool SistemDatabaseFileExists()
         {
+            // NOT: SQLite bağlantı açarken yoksa 0 baytlık dosya oluşturur (analiz yan etkisi).
+            // 0 baytlık dosya veritabanı değildir — yok sayılır, ilk-kurulum dalına düşer.
             var filePath = GetSistemDatabaseFilePath();
-            return SafeFileExists(filePath);
+            return SafeFileExists(filePath) && GetFileSizeSafe(filePath) >= DatabaseConstants.MIN_SQLITE_FILE_SIZE;
 
         }
 

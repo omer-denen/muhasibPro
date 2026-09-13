@@ -292,7 +292,11 @@ namespace MuhasibPro.Data.Database.Common
 
             try
             {
-                var backups = Directory.GetFiles(backupDir, $"{databaseName}_*.backup")
+                // İki desen: çıplak ad + .db'li eski format (GetBackupsAsync ile uyumlu).
+                var desen1 = Directory.GetFiles(backupDir, $"{databaseName}_*.backup");
+                var desen2 = Directory.GetFiles(backupDir, $"{databaseName}.db_*.backup");
+                var backups = desen1.Concat(desen2)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
                     .Select(f => new FileInfo(f))
                     .OrderByDescending(f => f.CreationTimeUtc)
                     .Skip(keepLast)
@@ -335,6 +339,61 @@ namespace MuhasibPro.Data.Database.Common
             {
                 return false;
             }
+        }
+
+        public async Task<RestoreDosyaAnalizi> AnalyzeBackupFileAsync(string backupDir, string fileName)
+        {
+            var analiz = new RestoreDosyaAnalizi { DosyaAdi = fileName };
+            string path;
+            try { path = Path.Combine(backupDir ?? string.Empty, fileName ?? string.Empty); }
+            catch { return analiz; }
+            FileInfo info;
+            try
+            {
+                info = new FileInfo(path);
+                if (!info.Exists) return analiz;
+                analiz.DosyaVarMi = true;
+                analiz.DosyaBoyutu = info.Length;
+                analiz.YedekTarihi = info.LastWriteTime;
+            }
+            catch { return analiz; }
+
+            try
+            {
+                await using var connection = new SqliteConnection($"Data Source={path};Mode=ReadOnly;Pooling=False");
+                await connection.OpenAsync();
+
+                await using var integrityCmd = connection.CreateCommand();
+                integrityCmd.CommandText = "PRAGMA integrity_check;";
+                var integrity = (await integrityCmd.ExecuteScalarAsync())?.ToString() ?? string.Empty;
+                analiz.IntegrityMesaji = integrity;
+                analiz.IntegrityTamamMi = string.Equals(integrity, "ok", StringComparison.OrdinalIgnoreCase);
+                if (!analiz.IntegrityTamamMi) return analiz;
+
+                try
+                {
+                    await using var tableCmd = connection.CreateCommand();
+                    tableCmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';";
+                    analiz.TabloSayisi = Convert.ToInt32(await tableCmd.ExecuteScalarAsync());
+                }
+                catch { /* sayım best-effort */ }
+
+                try
+                {
+                    await using var historyCmd = connection.CreateCommand();
+                    historyCmd.CommandText = "SELECT MigrationId FROM \"__EFMigrationsHistory\" ORDER BY MigrationId DESC LIMIT 1;";
+                    analiz.GocGecmisiSurumu = (await historyCmd.ExecuteScalarAsync())?.ToString();
+                }
+                catch { /* history tablosu yoksa null kalır */ }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogDebug(ex, "Yedek-dosya analizi başarısız: {File}", fileName);
+                analiz.IntegrityTamamMi = false;
+                if (string.IsNullOrEmpty(analiz.IntegrityMesaji))
+                    analiz.IntegrityMesaji = "dosya açılamadı";
+            }
+            return analiz;
         }
 
         private async Task<IDisposable> AcquireFileLockAsync(string filePath, TimeSpan timeout)

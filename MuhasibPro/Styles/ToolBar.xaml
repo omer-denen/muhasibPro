@@ -3,7 +3,7 @@
     <!--  Disabled State Colors  -->
     <SolidColorBrush x:Key="ControlStrokeColorDisabledBrush" Color="Transparent" />
     <SolidColorBrush x:Key="ControlFillColorDisabledBrush" Color="Transparent" />
-    <SolidColorBrush x:Key="TextFillColorDisabledBrush" Color="{ThemeResource MuhasibTextTertiaryColor}" />
+    <SolidColorBrush x:Key="TextFillColorDisabledBrush" Color="{ThemeResource TextFillColorTertiary}" />
 
     <!--  ============================================  -->
     <!--  BASE STYLE - Modern Toolbar Button (Düzeltilmiş)  -->

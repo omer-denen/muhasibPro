@@ -27,6 +27,12 @@ namespace MuhasibPro.Domain.Models
         [YoneticiAyari]
         public bool ValidationStrict { get; set; } = true;
 
+        /// <summary>Son değiştiren (görünen ad). Denetim satırı için; yetki denetimine girmez.</summary>
+        public string SonDegistiren { get; set; } = string.Empty;
+
+        /// <summary>Son değişiklik tarihi (yerel saat). Hiç kaydedilmediyse default.</summary>
+        public DateTime SonDegisiklikTarihi { get; set; }
+
         public int GetAcikPageSize() => Math.Clamp(AcikPageSize, 1, 50);
         public int GetArsivPageSize() => Math.Clamp(ArsivPageSize, 1, 50);
 

@@ -1,4 +1,3 @@
-using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Dispatching;
 using MuhasibPro.Helpers;
 using Windows.UI.ViewManagement;
@@ -38,14 +37,8 @@ namespace MuhasibPro
 
         void WindowSettings()
         {
-            if (MicaController.IsSupported())
-            {
-                SystemBackdrop = new MicaBackdrop() { Kind = MicaKind.Base };
-            }
-            else if (DesktopAcrylicController.IsSupported())
-            {
-                SystemBackdrop = new DesktopAcrylicBackdrop();
-            }
+            // Backdrop tek kaynak: MainWindow.xaml'de <MicaBackdrop Kind="Base" /> (gerçek Mica).
+            // MS önerisi: XAML-only, fallback otomatiktir; code-behind tekrarı Kural 4 ihlalidir.
             ExtendsContentIntoTitleBar = true;
 
             this.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets/AppIcon.ico"));

@@ -9,20 +9,22 @@ using System.Windows.Input;
 
 namespace MuhasibPro.ViewModels.ViewModels.Settings
 {
+    /// <summary>Uygulama güncelleme orkestratörü (Denetim Güncelleme bölümü bunu host'lar).
+    /// Tek cümle: durum makinesi + komutlar + bildirimleri yönetir, servis/ayar/metin işini composition'a devreder.</summary>
     public partial class UpdateViewModel : ViewModelBase
     {
-        private readonly IUpdateService _updateService;
+        private readonly UpdateCheckCoordinator _koordinator;
+        private readonly UpdateSettingsStore _magaza;
         private readonly IEventBus _eventBus;
-        private UpdateSettingsModel _settings;
-        private Velopack.UpdateInfo? _currentUpdateInfo;
+        private UpdateSettingsModel _settings = new();
 
         #region Constructor
 
         public UpdateViewModel(IUpdateService updateService, ICommonServices commonServices, IEventBus eventBus = null!) : base(commonServices)
         {
-            _updateService = updateService;
+            _koordinator = new UpdateCheckCoordinator(updateService);
+            _magaza = new UpdateSettingsStore(updateService, eventBus);
             _eventBus = eventBus;
-            _settings = new UpdateSettingsModel();
         }
 
         #endregion
@@ -84,7 +86,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
             set => Set(ref _lastCheckText, value);
         }
 
-        // YENİ PROPERTY'LER
         public bool AutoCheckEnabled
         {
             get => Settings?.AutoCheckOnStartup == true;
@@ -94,7 +95,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
                 {
                     Settings.AutoCheckOnStartup = value;
                     NotifyPropertyChanged(nameof(AutoCheckEnabled));
-                    _ = SaveSettingsAsync(); // Otomatik kaydet
+                    _ = SaveSettingsAsync();
                 }
             }
         }
@@ -108,7 +109,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
                 {
                     Settings.ShowNotifications = value;
                     NotifyPropertyChanged(nameof(NotificationsEnabled));
-                    _ = SaveSettingsAsync(); // Otomatik kaydet
+                    _ = SaveSettingsAsync();
                 }
             }
         }
@@ -122,7 +123,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
                 {
                     Settings.IncludeBetaVersions = value;
                     NotifyPropertyChanged(nameof(IncludeBetaVersionsEnabled));
-                    _ = SaveSettingsAsync(); // Otomatik kaydet
+                    _ = SaveSettingsAsync();
                 }
             }
         }
@@ -136,7 +137,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
                 {
                     Settings.FeedUrl = value?.Trim() ?? string.Empty;
                     NotifyPropertyChanged(nameof(FeedUrl));
-                    _ = SaveSettingsAsync(); // Otomatik kaydet
+                    _ = SaveSettingsAsync();
                 }
             }
         }
@@ -149,6 +150,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
 
         private bool _updateCardVisible;
         public bool UpdateCardVisible { get => _updateCardVisible; set => Set(ref _updateCardVisible, value); }
+
         public UpdateSettingsModel Settings
         {
             get => _settings;
@@ -156,7 +158,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
             {
                 if (Set(ref _settings, value))
                 {
-                    // Settings değiştiğinde tüm ilgili property'leri güncelle
                     NotifyPropertyChanged(nameof(AutoCheckEnabled));
                     NotifyPropertyChanged(nameof(NotificationsEnabled));
                     NotifyPropertyChanged(nameof(IncludeBetaVersionsEnabled));
@@ -165,40 +166,22 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
             }
         }
 
-        // UI States - eski XAML bindingler
-        public string StatusText => GetStatusText(); // güncellendi.
-        public string VersionText => GetVersionText();
-        public string UpdateButtonText => GetButtonText();
-        public bool IsUpdateButtonEnabled => GetButtonEnabled();
-        public bool IsCheckButtonEnabled => CurrentState != UpdateState.Checking; // güncellendi.
+        public string StatusText => UpdateUiMetinleri.GetStatusText(CurrentState);
+        public string VersionText => UpdateUiMetinleri.GetVersionText(CurrentState, SurumMetni());
+        public string UpdateButtonText => UpdateUiMetinleri.GetButtonText(CurrentState);
+        public bool IsUpdateButtonEnabled => UpdateUiMetinleri.GetButtonEnabled(CurrentState);
+        public bool IsCheckButtonEnabled => CurrentState != UpdateState.Checking;
 
-        // Visibilities - eski XAML bindingler
+        public string StatusIconGlyph => UpdateUiMetinleri.GetStatusIcon(CurrentState);
 
+        public string UpdateSize => _koordinator.CurrentUpdateInfo?.TargetFullRelease.Size.ToString("N0") + " bytes" ?? string.Empty;
+        public string ReleaseDate => _koordinator.CurrentUpdateInfo?.TargetFullRelease.Version.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR")) ?? string.Empty;
 
-
-
-
-        // Icon and Colors - eski XAML bindingler
-        public string StatusIconGlyph => GetStatusIcon();// güncellendi.
-
-
-        // Update Info - eski XAML binding isimleri korundu
-        public string UpdateSize => _currentUpdateInfo?.TargetFullRelease.Size.ToString("N0") + " bytes" ?? string.Empty;
-        public string ReleaseDate => _currentUpdateInfo?.TargetFullRelease.Version.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR")) ?? string.Empty;
-
-        // Eski XAML'deki ChangelogUrl binding (manuel feed'e göre; GitHub dışı kaynakta boş)
         public string ChangelogUrl
-        {
-            get
-            {
-                if (_currentUpdateInfo == null)
-                    return string.Empty;
-                var feed = Settings?.FeedUrl?.Trim().TrimEnd('/');
-                if (!string.IsNullOrEmpty(feed) && feed.Contains("github.com", StringComparison.OrdinalIgnoreCase))
-                    return $"{feed}/releases/tag/v{_currentUpdateInfo.TargetFullRelease.Version}";
-                return string.Empty;
-            }
-        }
+            => UpdateUiMetinleri.GetChangelogUrl(Settings?.FeedUrl, SurumMetni());
+
+        private string SurumMetni()
+            => _koordinator.CurrentUpdateInfo?.TargetFullRelease.Version.ToString();
 
         #endregion
 
@@ -208,9 +191,8 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
 
         public async Task InitializeAsync()
         {
-            await LoadSettingsAsync(); // Settings yüklendi
+            await LoadSettingsAsync();
 
-            // ÖNCE UI'ı güncelle
             await ContextService.RunAsync(() =>
             {
                 NotifyPropertyChanged(nameof(AutoCheckEnabled));
@@ -218,36 +200,26 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
                 NotifyPropertyChanged(nameof(IncludeBetaVersionsEnabled));
             });
 
-            // SONRA state kontrolü yap
             await CheckInitialStateAsync();
         }
 
         private async Task LoadSettingsAsync()
         {
-            try
-            {
-                Settings = await _updateService.GetSettingsAsync();
-                UpdateLastCheckText();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Settings yükleme hatası: {ex.Message}");
-            }
+            Settings = await _magaza.LoadAsync();
+            UpdateLastCheckText();
         }
 
         private async Task CheckInitialStateAsync()
         {
             try
             {
-                // Uygulama başlarken bekleyen güncelleme var mı kontrol et
-                if (_updateService.IsUpdatePendingRestart)
+                if (await _koordinator.IsRestartPendingAsync())
                 {
                     CurrentState = UpdateState.RestartRequired;
                     ProgressText = "Yeniden başlatma bekleniyor";
                     return;
                 }
 
-                // Auto-check enabled ve kaynak adresi girilmişse kontrol yap
                 if (AutoCheckEnabled && !string.IsNullOrWhiteSpace(Settings?.FeedUrl))
                 {
                     await CheckForUpdatesAsync();
@@ -303,11 +275,10 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
                 ProgressText = "Güncelleştirmeler kontrol ediliyor...";
                 ErrorMessage = string.Empty;
 
-                var updateInfo = await _updateService.CheckForUpdatesAsync(IncludeBetaVersionsEnabled);
+                var updateInfo = await _koordinator.CheckAsync(IncludeBetaVersionsEnabled);
 
                 if (updateInfo != null)
                 {
-                    _currentUpdateInfo = updateInfo;
                     CurrentState = UpdateState.UpdateAvailable;
                     ProgressText = "Güncelleme indirilebilir";
                 }
@@ -358,7 +329,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
         {
             try
             {
-                if (_currentUpdateInfo == null) return;
+                if (_koordinator.CurrentUpdateInfo == null) return;
 
                 CurrentState = UpdateState.Downloading;
                 ProgressText = "İndiriliyor...";
@@ -373,7 +344,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
                     });
                 });
 
-                await _updateService.DownloadUpdatesAsync(progress);
+                await _koordinator.DownloadAsync(progress);
 
                 CurrentState = UpdateState.Downloaded;
                 ProgressText = "Güncelleme kurulmaya hazır";
@@ -391,12 +362,12 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
         {
             try
             {
-                if (_currentUpdateInfo == null) return;
+                if (_koordinator.CurrentUpdateInfo == null) return;
 
                 CurrentState = UpdateState.Installing;
                 ProgressText = "Uygulama yeniden başlatılıyor...";
 
-                _updateService.ApplyUpdatesAndRestart();
+                _koordinator.Apply();
             }
             catch (Exception ex)
             {
@@ -415,130 +386,20 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
 
         private async Task SaveSettingsAsync()
         {
-            try
-            {
-                // DEBUG: Hangi ayarın değiştiğini görelim
-                System.Diagnostics.Debug.WriteLine($"Settings saving - AutoCheck: {AutoCheckEnabled}, Notifications: {NotificationsEnabled}, Beta: {IncludeBetaVersionsEnabled}");
-
-                await _updateService.SaveSettingsAsync(Settings);
-                _eventBus?.Publish(this, new AppSettingsChangedEvent(UpdateSettingsModel.SettingsKey));
-
-                System.Diagnostics.Debug.WriteLine("Settings saved successfully");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Settings kaydetme hatası: {ex.Message}");
-            }
+            await _magaza.SaveAsync(Settings, this);
         }
 
         #endregion
 
-        #region UI Helper Methods - Eski method isimleri
-
-        private string GetStatusText()
-        {
-            return CurrentState switch
-            {
-                UpdateState.Idle => "Güncelsiniz",
-                UpdateState.Checking => "Güncelleştirmeler denetleniyor...",
-                UpdateState.UpdateAvailable => "Bir güncelleştirme hazır",
-                UpdateState.Downloading => "İndiriliyor...",
-                UpdateState.Downloaded => "Yüklemeye hazır",
-                UpdateState.Installing => "Yükleniyor...",
-                UpdateState.RestartRequired => "Yeniden başlatma bekleniyor",
-                UpdateState.Error => "Bir sorun oluştu",
-                _ => "Güncelsiniz"
-            };
-        } // güncellendi
-
-        private string GetVersionText()
-        {
-            return CurrentState switch
-            {
-                UpdateState.UpdateAvailable when _currentUpdateInfo != null => $"v{_currentUpdateInfo.TargetFullRelease.Version} hazır",
-                UpdateState.Downloaded when _currentUpdateInfo != null => $"v{_currentUpdateInfo.TargetFullRelease.Version} indirildi",
-                UpdateState.Error => "Uygulama güncellenemedi",
-                _ => "Lütfen bekleyin..."
-            };
-        }
-
-        private string GetButtonText()
-        {
-            return CurrentState switch
-            {
-                UpdateState.Idle => "Kontrol Et",
-                UpdateState.Checking => "Kontrol Ediliyor...",
-                UpdateState.UpdateAvailable => "İndir",
-                UpdateState.Downloading => "İndiriliyor...",
-                UpdateState.Downloaded => "Yükle ve Yeniden Başlat",
-                UpdateState.Installing => "Yükleniyor...",
-                UpdateState.RestartRequired => "Yeniden Başlatılıyor...",
-                UpdateState.Error => "Tekrar Dene",
-                _ => "Kontrol Et"
-            };
-        }
-
-        private bool GetButtonEnabled()
-        {
-            return CurrentState switch
-            {
-                UpdateState.Checking => false,
-                UpdateState.Downloading => false,
-                UpdateState.Installing => false,
-                UpdateState.RestartRequired => false,
-                _ => true
-            };
-        }
-
-        public bool ShouldShowUpdateCard()
-        {
-            return CurrentState switch
-            {
-                UpdateState.UpdateAvailable or
-                UpdateState.Downloading or
-                UpdateState.Downloaded or
-                UpdateState.Installing or
-                UpdateState.RestartRequired or
-                UpdateState.Error => true,
-                _ => false,
-            };
-        }
-
-        public bool ShouldShowDetails()
-        {
-            return CurrentState == UpdateState.UpdateAvailable ||
-                   CurrentState == UpdateState.Downloaded ||
-                   CurrentState == UpdateState.Downloading;
-        }
-
-        public bool IsProgressVisible()
-        {
-            return CurrentState == UpdateState.Downloading ||
-                   CurrentState == UpdateState.Installing;
-        }
-
-        private string GetStatusIcon()
-        {
-            return CurrentState switch
-            {
-                UpdateState.Idle or UpdateState.RestartRequired => "\uE930", // CheckmarkBold
-                UpdateState.Checking or UpdateState.Downloading or UpdateState.Installing => "\uE895", // Sync
-                UpdateState.UpdateAvailable or UpdateState.Downloaded => "\uE946", // Info
-                UpdateState.Error => "\uE783", // Error
-                _ => "\uE946",
-            };
-        }
-
-
+        #region UI Helpers
 
         private async Task UpdateUIProperties()
         {
             await ContextService.RunAsync(() =>
             {
-                ProgressVisible = IsProgressVisible();
-                DetailsVisible = ShouldShowDetails();
-                UpdateCardVisible = ShouldShowUpdateCard();
-                // Tüm eski binding property'leri güncelle
+                ProgressVisible = UpdateUiMetinleri.IsProgressVisible(CurrentState);
+                DetailsVisible = UpdateUiMetinleri.ShouldShowDetails(CurrentState);
+                UpdateCardVisible = UpdateUiMetinleri.ShouldShowUpdateCard(CurrentState);
                 NotifyPropertyChanged(nameof(StatusText));
                 NotifyPropertyChanged(nameof(VersionText));
                 NotifyPropertyChanged(nameof(UpdateButtonText));
@@ -558,33 +419,12 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
 
         private void UpdateLastCheckText()
         {
-            if (Settings?.LastCheckTime != null)
-            {
-                var timeAgo = DateTime.Now - Settings.LastCheckTime.Value;
-                string timeText;
-
-                if (timeAgo.TotalMinutes < 1)
-                    timeText = "Az önce";
-                else if (timeAgo.TotalMinutes < 60)
-                    timeText = $"{(int)timeAgo.TotalMinutes} dakika önce";
-                else if (timeAgo.TotalHours < 24)
-                    timeText = $"{(int)timeAgo.TotalHours} saat önce";
-                else if (timeAgo.TotalDays < 7)
-                    timeText = $"{(int)timeAgo.TotalDays} gün önce";
-                else
-                    timeText = Settings.LastCheckTime.Value.ToString("dd.MM.yyyy");
-
-                LastCheckText = $"Son denetleme: {timeText}";
-            }
-            else
-            {
-                LastCheckText = "Son denetleme: Hiçbir zaman";
-            }
+            LastCheckText = UpdateUiMetinleri.FormatLastCheckText(Settings?.LastCheckTime);
         }
 
         #endregion
 
-        #region Cleanup - Eski Unsubscribe method adı korundu
+        #region Cleanup
 
         public void Unsubscribe()
         {

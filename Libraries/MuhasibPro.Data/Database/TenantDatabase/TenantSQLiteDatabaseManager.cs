@@ -263,6 +263,44 @@ namespace MuhasibPro.Data.Database.TenantDatabase
             }
         }
 
+        /// <summary>Tenant geçişi/kopuşu öncesi: WAL içeriğini ana dosyaya işler
+        /// (<c>wal_checkpoint(TRUNCATE)</c>) ve havuz bağlantılarını bırakır.
+        /// busy>0 ise birleştirme tamamlanamaz — ok=false + çerçeve sayıları döner (doğrulama kanıtı).</summary>
+        public async Task<(bool ok, string message)> CheckpointAndReleaseAsync(string databaseName)
+        {
+            if (string.IsNullOrWhiteSpace(databaseName))
+                return (false, "Veritabanı adı boş.");
+            try
+            {
+                var dbPath = _applicationPaths.GetTenantDatabaseFilePath(databaseName);
+                if (!File.Exists(dbPath))
+                    return (false, $"Veritabanı dosyası bulunamadı: {databaseName}");
+                int busy = 0, log = 0, checkpointed = 0;
+                using (var conn = new SqliteConnection($"Data Source={dbPath};Mode=ReadWrite;Pooling=False;"))
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    using var cmd = conn.CreateCommand();
+                    cmd.CommandText = "PRAGMA wal_checkpoint(TRUNCATE);";
+                    using var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
+                    if (await reader.ReadAsync().ConfigureAwait(false))
+                    {
+                        busy = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
+                        log = reader.IsDBNull(1) ? 0 : reader.GetInt32(1);
+                        checkpointed = reader.IsDBNull(2) ? 0 : reader.GetInt32(2);
+                    }
+                }
+                SqliteConnection.ClearAllPools();
+                if (busy > 0)
+                    return (false, $"WAL birleştirilemedi (meşgul {busy}, log {log}, işlenen {checkpointed}). Havuz bırakıldı.");
+                return (true, $"WAL birleştirildi (log {log}, işlenen {checkpointed}). Havuz bırakıldı.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Checkpoint başarısız: {DatabaseName}", databaseName);
+                return (false, $"Checkpoint başarısız: {ex.Message}");
+            }
+        }
+
         /// <summary>Derin salt-okunur analiz: PRAGMA sayfa/bütünlük + tablo satır sayımları.</summary>
         public async Task<TenantDerinAnaliz> GetDerinAnalizAsync(string databaseName)
         {
@@ -271,7 +309,10 @@ namespace MuhasibPro.Data.Database.TenantDatabase
             {
                 var dbPath = _applicationPaths.GetTenantDatabaseFilePath(databaseName);
                 if (!File.Exists(dbPath))
+                {
+                    sonuc.Hata = "Veritabanı dosyası bulunamadı";
                     return sonuc;
+                }
                 sonuc.DosyaVar = true;
                 sonuc.DosyaBoyutu = new FileInfo(dbPath).Length;
                 var walPath = dbPath + "-wal";

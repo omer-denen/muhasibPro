@@ -2,6 +2,223 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
+## Denetim Masası Giriş'te firma "0 dönem" — dönem projeksiyonu eksik (ÇÖZÜLDÜ — 2026-09-13 — Oturum 251)
+- **Belirti:** Giriş sayfası firma kartı "0 dönem" gösteriyordu; aynı firma FirmaShell'de 3 dönemli (`2025/2026/2027`).
+- **Sebep:** `FirmaListelemeService.GetFirmalarWithUserId` `CreateFirmaModelAsync` sonrası `MaliDonemler` listesini modele **haritalamıyordu** (sorgu dönemleri getiriyordu; `GetFirmalarPageAsync` haritalıyordu, bu yol atlanmıştı).
+- **Çözüm:** `model.MaliDonemler = FirmaServiceExtensions.ToHafifDonemListesi(item.MaliDonemler)`; canlı kanıt: "3 dönem • 2025, 2026, 2027" (`ot251l_home.png`).
+- Tarih: 2026-09-13
+
+## Paralel Sistem.db analizi — paylaşımlı singleton context çakışması (ÇÖZÜLDÜ — 2026-09-13 — Oturum 251)
+- **Belirti:** Giriş sayfası Sistem.db kartı "Kontrol gerekli" döndü; log: `SistemMigrationManager: Database analizi başarısız` + `Failed executing DbCommand ... __EFMigrationsHistory` (1 ms).
+- **Sebep:** `ISistemDatabaseService`/`ISistemMigrationManager` **Singleton** ve tek `SistemDbContext` paylaşılıyor; analiz, güncelleme denetimiyle `Task.WhenAll` ile **paralel** koşunca eşzamanlı context erişimi komutu düşürdü (eşzamanlı ikinci analiz kaynağı logla kesinleşmedi; kanıt: paralel sürüm düştü, sıralı sürüm düzeldi).
+- **Çözüm:** `GirisDashboardViewModel.YukleAsync` sıralı `await` (UI kilitlenmez; ring'ler ayrı bayrakta). Kural: Sistem.db analizi/operasyonları paralel çağrılmaz. Canlı: `ot251k`/`ot251l` "Bağlı • Güncel • 1,04 MB".
+- Tarih: 2026-09-13
+
+## NavigationView'de seçim vurgusu düşüyor — kaynak yenileme + veri kaynaklı SelectedItem (ÇÖZÜLDÜ — 2026-09-13 — Oturum 251)
+- **Belirti:** Denetim Masası'nda başlık "Giriş" olmasına rağmen sol nav'da hiçbir madde seçili görünmüyordu (UIA: 7 maddede de `IsSelected=False`).
+- **Sebep:** `MenuItemsSource` + `MenuItemTemplate` ile veri kaynaklı `NavigationView`'de başlangıç `SelectedItem` görsel seçime dönüşmüyor; üstüne `GorunurMenuleriTazele` her çağrıda `Clear` + aynı örnekleri yeniden ekliyordu → görsel seçim sıfırlanıyordu (aynı örnek olduğu için binding yeniden atamıyor).
+- **Çözüm:** VM: liste yalnız gerçekten değiştiyse `Clear` (`SequenceEqual`); View: `NavSeciminiAynala` — aynı örnekte dahi `null → hedef` atamasıyla tazeleme (`SeciliMenu` bildiriminde de). Canlı UIA: `Giriş=True`, pill + accent çubuk görünür.
+- Tarih: 2026-09-13
+
+## Seed yönetici rolü boş — kullanıcı kartında rol satırı yok (ÇÖZÜLDÜ — 2026-09-13 — Oturum 251)
+- **Belirti:** Denetim Masası kullanıcı kartında ad vardı, rol satırı boştu (VM "Yerel Hesap" fallback'ine düşüyordu).
+- **Sebep:** Seed'de firma-rol (KFR) satırı üretilmez (firma-bağımlı); `AuthenticationService.CreateKullaniciModel` `Rol`'ü yalnız KFR varsa dolduruyordu — bootstrap "seed yöneticidir" kuralı sadece yetki denetiminde (`AyarYetkiDenetimi`) vardı.
+- **Çözüm:** `AuthenticationService` seed yöneticisi (`KullaniciSabitleri.SeedYoneticiId`) için `Rol = Yönetici` sentetik model (yetki denetimiyle aynı kural); VM fallback'i "Kullanıcı". Canlı: pane "Yönetici" (`ot251l_home.png`).
+- Tarih: 2026-09-13
+
+## Geçersiz Fluent renk anahtarları — XamlParse çöküşü (ÇÖZÜLDÜ — 2026-09-13 — Oturum 249 devam)
+- **Belirti:** Denetim Masası paneli açılırken pencere **siyah/boş** kalıyor; log'da `XamlParseException: Cannot find a Resource with the Name/Key TextFillColorTertiaryColor`. Ayrıca Mali Dönem Yönetim ayar dialogunda aynı aileden `ControlFillColorSecondaryColor`.
+- **Sebep:** Oturum 225 "token tek-anahtar süpürmesi" `MuhasibTextTertiaryColor` → `TextFillColorTertiaryColor` yazmış; WinUI'de doğru Color anahtarı `TextFillColorTertiary`'dir (`...Color` soneki yok; brush `TextFillColorTertiaryBrush`). Aynı süpürme `ControlFillColorSecondary` → `ControlFillColorSecondaryColor` bozmuş. Derleme yakalamaz (ThemeResource lazy), çalışma anında patlar.
+- **Çözüm:** `ToolBar.xaml` → `TextFillColorTertiary`; `YonetimAyarlarDialog.xaml` → `ControlFillColorSecondary`. Kural: sistem renk anahtarları `generic.xaml`'den doğrulanır (Color vs Brush ayrımı), ezberden `...Color` yazılmaz.
+- Tarih: 2026-09-13
+
+## Tema ayarı sahte — kullanıcı-bazlı kaydediliyor, açılışta global okunuyor (ÇÖZÜLDÜ — 2026-09-13 — Oturum 249 devam)
+- **Belirti:** Denetim Masası → Görünüm → Tema = "Açık" seçilip kaydediliyor (`LocalSettings.json` içinde `AppPlatformSettings:U5413300800.ThemeDefault="Light"` kanıtlı) ama uygulama açılışta ve oturumda **Dark** kalıyordu (Light hiç yansımıyor). Oturum 249 notundaki "Light render yansımadı" bulgusunun kök nedeni.
+- **Sebep:** İki katmanlı uyuşmazlık: (1) `AppPlatformSettingsProvider.Anahtar()` giriş yapılmışken `...:U{id}` döndürür; ama `ThemeSelectorService.LoadPlatformDefaultAsync()` **açılışta** (giriş öncesi) `AppPlatformSettings` **global** anahtarını okur — orada değer yok → `Default` → sistem (Dark). (2) `AppPlatformAyarlarViewModel.ThemeDefault` setter'ı `IThemeSelectorService`'i çağırmaz → canlı uygulama yok.
+- **Çözüm:** `ThemeSelectorService` artık `IEventBus.Subscribe<AppSettingsChangedEvent>` ile `AppPlatformSettings.SettingsKey` olayını dinler; kayıtta platform temasını okuyup `SetThemeAsync` ile **canlı** uygular (tüm pencereler) ve `AppBackgroundRequestedTheme` global anahtarına yazar → **açılışta da** okunur. Canlı kanıt: Görünüm'de "Açık" seçilince pencere anında Light; yeniden başlatmada Light korunuyor (`ot249f_after_light.png`, `ot249g_denetim_startup.png`). Build 0/0, test 481/481.
+- Tarih: 2026-09-13
+
+## Açılış yedeği + kapanış WAL aktarımı hiç inşa edilmemişti (ÇÖZÜLDÜ — 2026-09-13 — Oturum 241)
+- **Belirti:** Kullanıcı sordu: "açılışta Sistem.db yedekliyor musun, kapanışta WAL dosyalarını DB'ye aktarıyor musun?" — ikisi de YOK.
+- **Sebep:** `EnsureWeeklyBackupAsync` yalnız arşiv/LOG kaydında kaldı (kodda yok); `WeeklyBackupDays`/`HaftalikButunlukKontrolu` modelleri 0 tüketici; kapanış kolu (`TryTakeExitBackupAsync`) yalnız tenant'ı sarıyor + varsayılan kapalı — Sistem.db checkpoint/oto-yedek hattı hiç kurulmamıştı (Oturum 208 taramasında da "HİÇ İNŞA EDİLMEMİŞ" hükmü vardı).
+- **Çözüm:** `ISistemYasamDongusuService` (açılış: WAL checkpoint + eşik-aşan oto-yedek; kapanış: checkpoint her zaman + ayarlıysa yedek) + `ISistemBackupManager.CheckpointWalAsync` + 2 App kancası (DbTest / WindowHelper) + 6 test. Eşik/limit modelden. Build 0 hata, test 468/468.
+- Tarih: 2026-09-13
+
+## Yedek limiti listede uygulanmıyordu — "3 yazıyor 5 listeli" (ÇÖZÜLDÜ — 2026-09-13 — Oturum 239)
+- **Belirti:** Panel "En fazla 3 yedek saklanır" yazarken listede 5 yedek görünüyordu (canlı tur).
+- **Sebep:** `SistemYedekViewModel.YukleIcAsync` limiti hiç uygulamıyordu — `CleanOldBackupsAsync` yalnız `YedekAlAsync` sonunda çalışıyordu. Limit Denetim Masası'nda düşürülünce (veya yedek birikince) liste limit üstü kalıyordu. Üstüne `YedekAlAsync` temizlik sonucunu okumuyordu (sessiz; Oturum 202 dersi aynı aile). Denetim Masası↔panel aynı provider/modeli kullanıyordu — tutarsızlık davranıştaydı, veride değil.
+- **Çözüm:** Yüklemede limit-aşımı budanır + sonuç bildirilir (`Limit (3) aşıldığı için 2 eski yedek temizlendi` / temizlenemezse `Danger`); `YedekAlAsync` temizlik sonucunu okur. Regresyon: `Yukle_LimitAsilinca_Budar` + `YedekAl_TemizlikBasarisizsa_Uyarir`. Build 0 hata, test 462/462.
+- Tarih: 2026-09-13
+
+## Tanımsız CardCornerRadius — 10 dialogda XamlParse çöküşü (ÇÖZÜLDÜ — 2026-09-13 — Oturum 236)
+- **Belirti:** Listeden seçimde `XamlParseException: Cannot find a Resource with the Name/Key CardCornerRadius` (CustomContentDialog üzerinden). Derleme yeşil, çalışma anında patlar.
+- **Sebep:** `CardCornerRadius` anahtarı hiçbir sözlükte tanımlı değil (sistemde `Control/OverlayCornerRadius`, bizde `MuhasibCardCornerRadius` var). Ezberden yazım; 10 dialog chrome'unda aynı mayın (QuickDialog Oturum 230'da tekildi, tarama eksikti).
+- **Çözüm:** 10 dosya `ControlCornerRadius`; çıplak `CardCornerRadius` grep 0 (kalanlar tanımlı `Muhasib*`). Kural pekişti: CornerRadius anahtarı sözlükten kopyalanır + yeni dialog eklenince chrome anahtarları grep'lenir. Build 0 hata, test 446/446.
+- Tarih: 2026-09-13
+
+## Yedek saati UTC — kullanıcı saatiyle uyuşmuyor (ÇÖZÜLDÜ — 2026-09-13 — Oturum 236)
+- **Belirti:** Yedekleme saati kullanıcının saatinden 3 saat geride (TR UTC+3).
+- **Sebep:** Görüntülenen tarihler UTC ile üretiliyordu (`DateTime.UtcNow`, `LastWriteTimeUtc`, `CreationTimeUtc`; tenant listede `LastAccessTimeUtc` — okuyunca bile değişir).
+- **Çözüm:** Görüntüye çıkan 6 nokta local'e alındı (`Now`, `LastWriteTime`, `CreationTime`; sistem + tenant). DB'de saklanan kayıtlar (`OperationTime`, versiyon damgaları) UTC kaldı — doğru pratik. Kural: kullanıcıya gösterilen saat her zaman local, saklanan UTC.
+- Tarih: 2026-09-13
+
+## TwoWay seçim setter'ında Notify → StackOverflow çöküşü (ÇÖZÜLDÜ — 2026-09-13 — Oturum 236)
+- **Belirti:** Yedek listesinde satıra tıklayınca `System.StackOverflowException` (stack izlenemez) + uygulama ölür. VS ile 3 yedek alındı, liste doldu, tıklama çökertti.
+- **Sebep:** `SistemYedekViewModel.SeciliYedek` setter'ı `Set()` sonrası fazladan `NotifyPropertyChanged(SeciliYedek)` çağırıyordu (`YükleKomutDurumu`) — `SelectedItem TwoWay` ile ListView↔VM sonsuz gidip-gelme. `Set` zaten bildirir; setter içinde aynı property'e tekrar bildirim yasaktır.
+- **Çözüm:** Fazladan bildirim + ölü `YükleKomutDurumu` silindi (grep 0). Kural: TwoWay bağlı property'nin setter'ında aynı property'e `NotifyPropertyChanged` YOK (`Set` yeter).
+- Tarih: 2026-09-13
+
+## Login zinciri beyaz-beyaz metin — StaticResource tema kilidi (ÇÖZÜLDÜ — 2026-09-13 — Oturum 230)
+- **Belirti:** OS Dark iken login zincirinde tüm metinler görünmez (beyaz zemin + beyaz yazı).
+- **Sebep:** Tema-bağımlı fırçalar kullanım yerinde `{StaticResource}` ile bağlanmıştı (~60 nokta) — StaticResource load-time kilitlenir (Dark beyazına), `{ThemeResource}` app temasına geçer (Light beyazı). MS kuralı: kullanım yerinde ThemeResource, ThemeDictionaries içinde StaticResource.
+- **Çözüm:** Login zinciri sweep (Static→Theme + Muhasib alias→sistem: Petrol→AccentFill, Tint→AttentionBackground, Deep/Border→AttentionBrush) + tema ayarlanabilir (varsayılan sistemi takip, Denetim Masası'ndan Sistem/Açık/Koyu) + dialog Light zorlaması kalktı. Kural AGENTS.md'ye işlendi. Build 0 hata, test 436/436.
+- Tarih: 2026-09-13
+
+## QuickSistemDbDiagDialog tanımsız CardCornerRadius — dialog açılınca patlar (ÇÖZÜLDÜ — 2026-09-13 — Oturum 230)
+- **Belirti:** `QuickSistemDbDiagDialog.xaml:12` `CornerRadius="{StaticResource CardCornerRadius}"` — bu anahtar hiçbir sözlükte tanımlı değil (sistemde Control/OverlayCornerRadius, bizde MuhasibCardCornerRadius var).
+- **Sebep:** Ezberden yazım; derleme yakalamaz, çalışma anında XAML parse patlar (teşhis dialogu hiç açılamıyordu).
+- **Çözüm:** `ControlCornerRadius` (sistem). Kural: CornerRadius anahtarları `DesignTokens`/sistem sözlüğünden kopyalanır, ezberden yazılmaz.
+- Tarih: 2026-09-13
+
+## KurulumSplash Kural 14 ihlali — araştırmasız view oluşturuldu (SÜREÇ İHLALİ — 2026-09-13 — Oturum 229)
+- **Belirti:** KurulumSplash (yeni view+VM) araştırma yapılmadan kodlandı. Kod çalışıyor ama Kural 14 sırası ihlal edildi.
+- **Sebep:** Hız baskısı — "zaten Splash tarzı basit bir sayfa" varsayımıyla araştırma atlandı, doğrudan kodlamaya geçildi. Kullanıcı uyardı.
+- **Çözüm:** Geriye dönük araştırma yapıldı (QuickBooks/TallyPrime/Logo Tiger ilk kurulum deneyimi + MS Fluent progress kılavuzu). Bulgular mevcut kodu doğruladı (kod değişikliği gerekmedi) ama süreç ihlali kaydedildi. AGENTS.md Kural 14'e presedans eklendi: "Oturum 229 presedanı: KurulumSplash araştırmasız yazıldı, geriye dönük düzeltildi — tekrarı kabul edilmez."
+- **Ders (AGENTS kuralı):** Kod araştırmadan ÖNCE yazılamaz — yeni view/sayfa veya mevcut view dokunuşunda araştırma → LOG → uygulama sırası zorunlu. Geriye dönük doğrulansa bile süreç ihlali hükmünde.
+- Tarih: 2026-09-13
+
+## GetByMaliDonemIdAsync kayıp satırda Success+null dönüyordu (ÇÖZÜLDÜ — 2026-09-12 — Oturum 212)
+- **Belirti:** `MaliDonemServiceTests.GetById_Bulunamadi` kırmızısı (Oturum 211 test seferberliği yakaladı): kayıp id'de `Success=True, Data=null` (Windows: 425 geçti, 1 kaldı).
+- **Sebep:** `MaliDonemService:55` `if (item == null)` dalı hiç tutmuyor — extension null değil `ErrorApiDataResponse` döner (`MaliDonemServiceExtensions:89-92`); üstüne aynı dalda `item.Message` NRE'liydi (null olsaydı patlardı).
+- **Çözüm:** `item == null || !item.Success || item.Data == null` → Error (extension mesajı korunur, null-güvenli fallback'li). Çağıran taraması: hepsi `Success+Data` çift kontrollü veya `??` fallback'li — regresyon yok.
+- Tarih: 2026-09-12
+
+## Kayıt-dışı liste dönem detayına konulmaz (DERS — 2026-09-12 — Oturum 203)
+- **Belirti:** "Silinen Dönem Yedekleri" + Bilinmeyen kartları seçili dönemin detay sayfasına konuldu; kullanıcı itirazı: bu veriler firma-seviyesi yetim veri, dönem detayıyla ilgisiz.
+- **Sebep:** Kolay yerleşim tercihi; doman-model uyumu düşünülmedi.
+- **Çözüm:** Kartlar sayfadan çıkarıldı; sekmeli `YetimYedeklerDialog` (silinen/bilinmeyen sekmeleri, mevcut paneller reuse) + navbar'da 2 sayaçlı buton. Kural: firma-seviyesi yetim veri dönem-detay sayfasına gömülmez, dialogda açılır.
+- Tarih: 2026-09-12
+
+## Yedek silme sonucu kontrol edilmedi — koşulsuz "Silindi" (ÇÖZÜLDÜ — 2026-09-12 — Oturum 202)
+- **Belirti:** Yedek silinince "Yedek Silindi" bildirimi çıkıyor ama liste yenilenince dosya geri geliyor.
+- **Sebep:** `DonemYedeklerViewModel:257` (`TemizleAsync:176` dahil) `CleanupBackupFileAsync` bool'unu okumuyordu; servis tüm hataları `false`'a gömüyor (`TenantBackupService:88-114`), sonraki `YukleAsync` diski doğru tarayıp silinmemiş dosyayı geri listeliyordu. Refresh kırık değildi — silme-sonuç kontrolü yoktu.
+- **Çözüm:** bool kontrolü → başarısızda `Danger` ("dosya kilitli olabilir") + gerçek liste; çift-refresh sadeleşti. Regresyon: `YonetimSilmeYuklemeTests` 2 test. Kural: `bool` dönen silme çağrısının sonucu okunmadan bildirim verilmez.
+- Tarih: 2026-09-12
+
+## Kilitli yedek dönem silmeyi blokluyordu (ÇÖZÜLDÜ — 2026-09-12 — Oturum 202)
+- **Belirti:** Yedekleri olan dönem silinemiyor (dialog inline hata, satır kalıyor).
+- **Sebep:** `TenantDatabaseSagaStep:104-114` `CleanAllBackupsAsync` başarısız olunca tüm sagayı abort ediyordu (`BackupDeleteCompleted = deletedCount > 0`); `DeleteAllTenantBackup=false` yolu saga'da vardı ama dialog hep `true` gönderiyordu. Yan: ad-eşleşme case-sensitive (`:433`).
+- **Çözüm:** DeleteGuard'a "Yedekleri de sil" checkbox (varsayılan işaretli); işaretsizse yedekler korunup "Silinen Dönem Yedeği" listesinde gösterilir (kimlik-id eşleşmesi, migration yok); abort mesajı kilitli dosya adlarını söyler; ad-eşleşme `OrdinalIgnoreCase`.
+- Tarih: 2026-09-12
+
+## Tüm bölümler gerçeğe geçince placeholder ölü kalır (ÇÖZÜLDÜ — 2026-09-12 — Oturum 201)
+- **Belirti:** `YakindaViewModel/Sayfası` + Startup kaydı + `DenetimMasasiViewModel.Yakinda` routing Firma/Dönem gerçeğe geçince 0 caller'a düştü (test dışında).
+- **Sebep:** Placeholder altyapısı son bölüm gerçeğe geçerken sökülmemiş.
+- **Çözüm:** Kural 4 ile silindi (VM + Sayfa x2 + kayıt + prop + test; yerine `FirmaDonem_Cocuklari_Bagli` testi). Kural: son placeholder kalkınca çerçeve de silinir, "belki lazım olur" tutulmaz.
+- Tarih: 2026-09-12
+
+## IStatusMessageService Contracts.UIServices'te, CommonServices'te değil (ÇÖZÜLDÜ — 2026-09-12 — Oturum 201)
+- **Belirti:** yeni testte `CommonServices.IStatusMessageService` CS0234 verdi.
+- **Sebep:** `ICommonServices` CommonServices'te ama `IStatusMessageService` bir üst `Contracts.UIServices`'ta (`IStatusMessageService.cs:9`); `GuncellemeAyarTests` using'i üst paketten geliyordu.
+- **Çözüm:** tam-ad `Business.Contracts.UIServices.IStatusMessageService`. Kural: `ICommonServices` üye tipi için interface dosyasının kendi namespace'i grep'lenir, üye-tutan interface'in paketi varsayılmaz.
+- Tarih: 2026-09-12
+
+## IUpdateService metodu SaveSettingsAsync, SaveAsync değil (ÇÖZÜLDÜ — 2026-09-12 — Oturum 201)
+- **Belirti:** `UpdateSettingsStore` ilk yazımda `SaveAsync` CS1061 verdi.
+- **Sebep:** Ezberden yazım; arayüzde `GetSettingsAsync/SaveSettingsAsync` çifti var (`IUpdateService.cs:10-11`).
+- **Çözüm:** Derleyici yakaladı, tek satır düzeltme. Kural: split/taşımada metot adları arayüzden kopyalanır (CEKIRDEK plan dersi: ezberden yazma).
+- Tarih: 2026-09-12
+
+## SimpleWebSource timeout 0 — "must be greater than TimeSpan.Zero" (ÇÖZÜLDÜ — 2026-09-11 — Oturum 200)
+- **Belirti:** Güncelleme → "Bağlantıyı Dene" → "Güncelleme kaynağına ulaşılamadı (http://127.0.0.1:8321): value ('00:00:00') must be greater than '00:00:00'" (canlı, kurulu 1.1.1).
+- **Sebep:** `UpdateFeedSourceFactory.Create` 3. parametreye `0` geçiyordu; o parametre `double` **dakika** (`Velopack.xml`: `Timeout`) → HttpClient sıfır timeout'u reddeder. Oturum 199'da sayfa daha önce donduğu için bu bug hiç ağa çıkamamış, gizli kalmış.
+- **Çözüm:** `30` (protokol sabiti, kural 9) + `UpdateFeedSourceTests.DuzAdres_TimeoutGecerliOlur` regresyonu. Canlı: "v1.1.2 hazır, İndir". Kural: harici API ctor parametresinin birimi doc'tan doğrulanır (`DefaultTimeout` ms→s dersiyle aynı aile, Oturum 127).
+- Tarih: 2026-09-11
+
+## İlk kurulum restore dalına düşüyor — 0-baytlık dosya + yanlış mesaj (ÇÖZÜLDÜ — 2026-09-11 — Oturum 200)
+- **Belirti:** Taze kurulumda "Kurulumu Başlat" → "Veritabanı meşgul veya kilitli, geri yüklenemediği için işlem durduruldu" (canlı, 2 deneme).
+- **Sebep (2 katman):** (1) SQLite bağlantı açarken dosya yoksa **0 baytlık dosya** oluşturur (analiz yan etkisi — açılıştaki durum sorgusu tetikler) → `SistemDatabaseFileExists()` true döner → create dalı yerine migrate dalı çalışır → geçersiz DB → yedek olmayan restore başarısız olur. (2) Mesaj yedek-yokluğunu kilit gibi gösteriyordu.
+- **Çözüm:** `SistemDatabaseFileExists()` 0-bayt dosyayı yok sayar (`>= MIN_SQLITE_FILE_SIZE`, mevcut sabit — yeni eşik yok) + mesaj dürüstleşti ("yedek bulunamadı veya dosya kilitli"). Canlı: kurulum tek seferde 7/7. Kural: `File.Exists` ile "veritabanı var" denmez — SQLite dünyasında boyut+header bakılır (`IsSistemDatabaseValid` deseni).
+- Tarih: 2026-09-11
+
+## Güncelleme sayfası açılınca donma (ÇÖZÜLDÜ — 2026-09-11 — Oturum 199)
+- **Belirti:** Denetim → Güncelleme bölümü açılınca uygulama donuyor (canlı, kurulu 1.1.0).
+- **Sebep:** `UpdateViewModel.CheckInitialStateAsync → IUpdateService.IsUpdatePendingRestart` (sync property) içinde `GetSettingsAsync().GetAwaiter().GetResult()` — UI thread bloklanıp file-IO continuation'ı bekliyor → klasik sync-over-async deadlock. Ağ çağrısı hiç başlamıyordu (logda iz yok).
+- **Çözüm:** `IsUpdatePendingRestartAsync()` (interface + servis + VM çağrısı; sync üye silindi, Kural 4). Regresyon: `GuncellemeAyarTests` 2 test (fake servis). Kural: UI yolundaki her servis çağrısı `await` edilir, `.Result/.Wait()/GetResult()` yasak.
+- Tarih: 2026-09-11
+
+## Seed admin girişi FormatException ile çöküyor (ÇÖZÜLDÜ — 2026-09-11 — Oturum 199)
+- **Belirti:** `korkutomer / Ok241341` ile girişte "Sistem Hatası" dialogu (canlı, kurulu 1.1.0).
+- **Sebep:** Seed `ParolaHash` 78 karakter (bozuk — base64 uzunluğu 4'ün katı olmalı; geçerli Identity V3 84) → `PasswordHasher.VerifyHashedPassword` içinde `FromBase64String` patlıyor. Kök: hash koda kesik yapıştırılmış (üretilen geçerli hash ile aynı `AQAAAAIAAYagAAAAE` öneki).
+- **Çözüm:** Seed'e geçerli hash (`makehash` ile üretildi) + `SeedHashDuzeltme` migration'ı + `AuthenticationRepository.Login` `FormatException` → `InvalidPasswordException` guard'ı (legacy `PBKDF2$` yolu artık gerçekten işler). Regresyon: `GirisHashTests` 3 test. Kural: seed gizli-değerler (hash/anahtar) `makehash` benzeri üreticiyle yazılır, elle yapıştırılmaz.
+- Tarih: 2026-09-11
+
+## Yöneticiyle girişte ayar satırları "yalnızca yönetici" kilitli (ÇÖZÜLDÜ — 2026-09-11 — Oturum 197)
+- **Belirti:** Seed yönetici (`korkutomer`) ile girişte Denetim Masası'ndaki tüm rozetli ayarlar kilitli + kayıt `UnauthorizedAccessException` → tam test edilemiyor.
+- **Sebep:** Seed yalnızca kullanıcıyı + rolleri üretir, `KullaniciFirmaRol` satırı üretmez (KFR anahtarı `KullaniciId+FirmaId`, seed firma yok; firma kaydında da KFR üreten kod yok) → `CreateKullaniciModel:178` `FirstOrDefault()` boş gelir → `model.Rol` null → `KullaniciYoneticiMi` false. İkinci sıra: satır olsa bile ilk satır admin olmayabilirdi.
+- **Çözüm:** `AyarYetkiDenetimi.KullaniciYoneticiMi` seed fallback'i (`GetCurrentUserId == SeedYoneticiId`, Oturum 129/130 presedanı) + `CreateKullaniciModel` yönetici-satır tercihi + 3 Denetim VM'i tek kaynağa (`AyarYetkiDenetimi`, Kural 4). Regresyon: `AyarYetkiDenetimiTests` 6 test. Kural: rol ataması firma-bağımlıysa seed/bootstrap kimliği rol satırına bakılmadan tanınır.
+- Tarih: 2026-09-11
+
+## ContentDialogSmokeFill override şablona ulaşmıyor (ÇÖZÜLDÜ — 2026-09-10 — Oturum 155, canlı kanıtlı)
+- **Belirti:** `ContentDialogSmokeFill → Transparent/acrylic` override'ı NE app-merge NE dialog-instance `Resources` düzeyinde karartma perdesini kaldırmadı (piksel kanıtı: aynı bölge açık ~87 / kapalı ~219).
+- **Sebep:** Şablon `{ThemeResource ContentDialogSmokeFill}` okumasına rağmen iki kapsam da canlıda etkisiz kaldı (nedeni deşilemedi — zincir varsayımına güvenilmedi).
+- **Çözüm:** `ShowAsync(ContentDialogPlacement.Popup)` — smoke'suz resmi API (şablondaki `DialogShowingWithoutSmokeLayer` durumu). Kural: dialog perdesiyle resource üzerinden boğuşulmaz, yerleşim API'si kullanılır.
+- Tarih: 2026-09-10
+
+## WinUI3 Style'da Resources yok — WMC0011 (ÇÖZÜLDÜ — 2026-09-10 — Oturum 147)
+- **Belirti:** `Cards.xaml` içine yazılan `MuhasibDialogStyle` içindeki `<Style.Resources>` bloğu `XamlCompiler error WMC0011: Unknown member 'Resources' on element 'Style'` verdi.
+- **Sebep:** WPF kalıbı sanıldı; WinUI3/UWP `Style`'ında `Resources` property'si yok (yalnız `Setters/BasedOn/TargetType`).
+- **Çözüm:** Tema-anahtar override'ı (`ContentDialogSmokeFill`) merged-dictionary düzeyinde tek satır olarak yazıldı (stil dışına). Kural: şablonun okuduğu tema anahtarını stil-içi ezmek gerekiyorsa ya dialog `Resources`'ına (tekil) ya merged-dictionary'ye (paylaşılan) yazılır, `Style.Resources` denenmez.
+- **Ek (Oturum 148):** `AcrylicBrush`'ta `BackgroundSource`/`BlurAmount` da XAML'de yoktur (aynı WMC0011) — WinUI3'te blur miktarı SDK-sabittir, WPF örneklerinden kopyalanamaz. Blur hissi yalnız `TintOpacity`/`TintLuminosityOpacity` ile ayarlanır.
+- Tarih: 2026-09-10
+
+## Moq Setup'ta opsiyonel parametre CS0854 (ÇÖZÜLDÜ — 2026-09-09 — Oturum 143)
+
+## ContentDialog DefaultButton accent ezmesi (ÇÖZÜLDÜ — 2026-09-10 — Oturum 145, canlı kanıtlı)
+- **Belirti:** `YonetimAyarlarDialog` `Kapat` butonu mavi render oluyordu (SDK accent).
+- **Sebep:** `DefaultButton="Close"` — WinUI default butona accent basar (Oturum 96 dersi aynı: `DefaultButton="Primary"` yasağı).
+- **Çözüm:** `DefaultButton="None"` (doğru kalıp: QuickSistemDbDiagDialog/SagaPipeline/YeniDonem/TenantDatabaseUpdate). Kural: dialogda `DefaultButton` yalnızca `None` olur.
+- Tarih: 2026-09-10
+
+## ContentDialog SDK max-width tuzağı (ÇÖZÜLDÜ — 2026-09-10 — Oturum 145, canlı kanıtlı)
+- **Belirti:** Hamburger-menülü dialogda pane+içerik üst üste bindi, metinler çakıştı (önce `MaxWidth="1000"` attribute'u denendi — işlemedi).
+- **Sebep:** Template `MaxWidth`'i `{ThemeResource ContentDialogMaxWidth}` (~640) ile sabitler; dışarıdan `MaxWidth` attribute'u ezilmez.
+- **Çözüm:** dialog `Resources`'ına `<x:Double x:Key="ContentDialogMaxWidth">960</x:Double>` (yerel override, global etkilenmez). Kural: geniş dialog gerekiyorsa bu resource, attribute değil.
+- Tarih: 2026-09-10
+
+## Birincil aksiyon scroll altında kaldı (DERS — 2026-09-10 — Oturum 145)
+- **Belirti:** "Varsayılanlara dön" butonu vardı ama scroll altında olduğu için kullanıcı hiç görmedi, "ekleyelim" istedi.
+- **Sebep/Ders:** Birincil aksiyonlar scroll gerektirmeden görünür olmalı (header/footer sabit alana alınır). `YonetimAyarlarDialog` v2'de buton header-sağ durum butonu oldu.
+- Tarih: 2026-09-10
+- **Belirti:** `ITenantSettingsProvider.GetAsync()`'e `firmaId = 0` eklendikten sonra `TenantDerinBaglantiTests.cs:126` `Setup(a => a.GetAsync())` derlenmedi (CS0854: ifade ağacı opsiyonel bağımsız değişken içeremez).
+- **Sebep:** Moq `Setup` expression-tree'dir; C# ifade ağaçlarında opsiyonel-argüman çağrısı yasak.
+- **Çözüm:** `Setup(a => a.GetAsync(It.IsAny<long>()))`. Kural: interface'e opsiyonel parametre eklenince tüm Moq `Setup`/`Verify` çağrıları taranır.
+- Tarih: 2026-09-09
+
+## Yedek pagination barı görünür ama butonlar ölü (ÇÖZÜLDÜ — 2026-09-09 — Oturum 142)
+- **Belirti:** 4+ yedekte pagination barı (`‹ 1 / 2 ›`) görünüyor ama `‹/›` butonları basılmıyordu (`IsEnabled=false` takılı).
+- **Sebep:** 4 VM'deki (`DonemYedekler/ArsivDonemler/BilinmeyenYedek/MaliDonemYonetim-Acik`) `UpdatePaged*` yalnızca `TotalPages/HasPagination/PageInfo` bildiriyordu; `CanPrev/CanNext` bildirimi yalnız `CurrentPage` setter'ındaydı. Liste yüklenince sayfa zaten 1 olduğundan setter `Set` false dönüp bildirim yapmıyordu → binding bayat kaldı. Ek: liste kısalınca sayfa clamp'lenmiyordu (son sayfada silme → boş dilim).
+- **Çözüm:** `UpdatePaged*`'a `CanPrev/CanNext/CurrentPage` bildirimi + sayfa clamp eklendi (4 VM). Regresyon: `YedekPaginationTests.cs` 3 test (bildirim varlığı + dilim + kısalma). Kural: computed `Can*`/`*Info` her `UpdatePaged*` içinde bildirilir, setter bildirimine güvenilmez.
+- Tarih: 2026-09-09
+
+## BilinmeyenPanel kayıtlı dönem yedeklerini listeliyordu (ÇÖZÜLDÜ — 2026-09-09 — Oturum 141, canlı kanıtlı)
+- **Belirti:** `BilinmeyenPanel.TaraAsync` kayıtlı `MaliDonem.DatabaseName`'ye ait `.backup` dosyalarını da listeliyordu (HATALAR B3).
+- **Sebep:** Disk taraması ile dönem listesi aynı kanonik adla eşleşmiyordu.
+- **Çözüm:** `TaraAsync` her çağrıda diski yeniden tarar (cache yok) + `TumDonemAdlariniYukleAsync` `HashSet<kanonikAd>` (`TrimDbSuffixLocal`, `OrdinalIgnoreCase` — iki taraf simetrik) + E2 olaylarında oto-tazeleme (`TenantBackup/RestoreCompleted`). Canlı: 18 kayıtlı yedek → 0 listelenme; sentetik yetim `db-YABANCI_2099` → 1 listelenme + Temizle. Kural: disk↔DB eşleşen her listede iki taraf aynı kanonikleştirmeden geçer.
+- Tarih: 2026-09-09
+
+## slnx→sln dönüşümü kaynak-tarayan tüm testleri kör bıraktı (ÇÖZÜLDÜ — 2026-09-09 — Oturum 140)
+- **Belirti:** `MuhasibPro.slnx` silinip `MuhasibPro.sln` oluşturulduktan sonra `ArchitectureTests` dahil 9 kaynak-tarama testi yeşil geçmeye devam etti — ama `RepoRoot()` ankrajı (`slnx` dosyası) artık bulunamadığı için tarama boş kümeye düşüyor, yasaklı metin hiç aranmıyordu (yanlış-yeşil).
+- **Sebep:** Ankraj tek dosya adına bağımlıydı; `slnx`'in opsiyonel dönüşümü (KONTROL Faz 0) test ankrajlarıyla eşgüdümsüz yapıldı.
+- **Çözüm:** 9 dosyada ankraj `slnx || sln` kabul eder hale geldi + `CircularDependencyTests`'e kör-tarama guard'ı (`kenarlar > 100`, `appKenar > 10`) eklendi — evren boşsa test kasten kızarır. Kural: kaynak-tarayan her teste körlük guard'ı şart; çözüm-dosyası adı değişiminde test ankrajları aynı PR'da güncellenir.
+- Tarih: 2026-09-09
+
+## AuthenticationService ↔ IdentitySettingsProvider DI döngüsü — uygulama açılışta patlıyordu (ÇÖZÜLDÜ — 2026-09-09 — Oturum 140)
+- **Belirti:** Uygulama ilk DI çözümünde `A circular dependency was detected for the service of type 'IAuthenticationService'` — Login'e bile gelmeden çöküş. Zincir: `AuthenticationService` (Singleton, ctor'da `IIdentitySettingsProvider`) → `IdentitySettingsProvider` (Singleton, ctor'da `IAuthenticationService`).
+- **Sebep:** Faz 2'de `IdentitySettingsProvider`'a yetki denetimi için `IAuthenticationService` ctor'dan verildi; oysa `AuthenticationService` zaten kilit eşiklerini modelden okumak için `IIdentitySettingsProvider` istiyordu. MS DI opsiyonel (`= null!`) parametreyi kayıtlıysa çözer — `null` varsayılanı döngüyü kırmaz.
+- **Çözüm:** Provider ctor'dan `IAuthenticationService` çıkarıldı → `IServiceProvider` (`[ActivatorUtilitiesConstructor]`, construction-dışı `SaveAsync` içinde `GetService<IAuthenticationService>()`); `AyarYetkiTests` yeni imzaya uyarlandı. Kural: ayar-provider ↔ tüketici-servis arasında ctor'dan karşılıklı bağımlılık yasak — yetki gerektiren provider `IServiceProvider` ile tembel çözer. Bekçi: `CircularDependencyTests.DI_Circular_Baglanti_Olmamali` (ctor-graf + gerçek DI kayıt haritası + App kaynak taraması; HEAD sürümünde zinciri birebir yakaladığı kontrollü deneyle kanıtlı).
+- Tarih: 2026-09-09
+
 ## 70 birikmiş derleme uyarısı — faz kuralı (0/0) yıllarca esnetilmiş (ÇÖZÜLDÜ — 2026-09-09 — Oturum 133, Mühür)
 - **Belirti:** full `--no-incremental` build'de 70 uyarı (benzersiz ~35): CS8625 `= null` (testler), CS8600 cast'ler, xUnit1031 `.Result`, xUnit1012 `InlineData(null)`, CS0618 Velopack `IsUpdatePendingRestart`, IL2072 COM `CreateInstance`, CA1416 Registry. Her faz "eski aileler" notuyla kapatılmış.
 - **Sebep:** Uyarı sayacı artımlı build'de küçük göründüğü (2) için tam süpürme hiç yapılmamış.
@@ -91,10 +308,38 @@ Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 - **Durum:** tüm `bin/obj` silinip temiz derlendi (tek `x64`); ancak Libraries `bin\Debug`, App `bin\x64\Debug` üretiyor — platform konfigürasyonu karışık, çalışıyor ama dağınık. slnx platform birleştirmesi izlenecek.
 - Tarih: 2026-09-08
 
-## Continue sonrası MainShell yerine Mali Dönem Yönetimi (AÇIK — 2026-09-08 — Oturum 119, canlı)
+## Tenant güncelleme akışı — product-ready geçişi için modüler yapı zorunluluğu (AÇIK — 2026-09-09 — Oturum 138, kullanıcı beyanı)
+- **Geçiş sebebi:** Tenant veritabanlarına yeni migration uygulama akışı `FirmaShellView`'de dönem seçildiğinde `TenantDatabaseUpdateDialog` (Güncelle/Daha sonra/Vazgeç) olarak kurgulanmıştı; karar değişip `TenantDatabaseUpdateView` tam sayfasına (Yedek→Göç→Doğrulama→oto geri alma) geçildi. Asıl amaç **developer mod → product-ready** (çekirdek) adımı — güncelleme hattı tek dialog ile yönetilemedi, modüler yapıya (CEKIRDEK-MODUL-PLAN L3 M5 + L4 politika) geçildi.
+- **Tetkik:** Dialog→Sayfa geçişi + `TenantDatabaseUpdateCoordinator` / `ITenantDatabaseUpdateService` ayrımı bu geçişin kod izidir. Kapatılma kriteri: `TenantUpdated` → `MainShell` tek yol, `Continue` anomalisi dahil, canlı E2E ile doğrulanır.
+- Tarih: 2026-09-09
+
+## MaliDonemListControl — güncelleme rozeti tek dönemle sınırlı (ÇÖZÜLDÜ — 2026-09-10 — Oturum 183, A şıkkı)
+- **Belirti:** `MaliDonemListControl` bir dönemde `Güncelleme Gerekli` rozeti gösteriyor, aynı firmanın diğer dönemlerinde aynı şema farkı varken uyarı çıkmıyor. `TenantUpdateAvailableEvent` tekillik şüphesi.
+- **Şüphe:** `MaliDonemListViewModel` abonesi (`TenantUpdateAvailableEvent` → rozet) filtrelemeyi `DatabaseName` eşleşmesi yerine ilk seçili veya tekil dönem üzerinden kuruyor olabilir; `Task.WhenAll` + per-item `GetTenantDatabaseStateAsync` analizinden sonra `DbDurum=RequiredUpdating` tüm listeye yayılmıyor. `FirmaShellViewModel` status/toast bacağı ayrı çalışıyor.
+- **Planlı çözüm:** Liste yenilemede her `MaliDonemModel` için `GetTenantDatabaseStateAsync` + `TenantDatabaseUpdateService.CheckUpdateRequiredAsync` çiftinden gelen `RequiredUpdating` tüm satırlara işletilir, `IEventBus` abonesi `DatabaseName` bazlı eşleştirir, `NotifyPropertyChanged` + `SecimiListeyeYenidenDuyur` ile korunur. Test: 2 dönemli firma, yalnız 1 DB eski şemada → 1 rozet → upgrade sonrası 0.
+- **Çözüm (uygulandı):** `LoadDataAsync` sonunda `_ = AnalyzeAllDbStatusesAsync(snapshot)` (Task.WhenAll; AnalyzeDbStatusAsync zaten per-item try/catch'li, WhenAll savunma try/catch'li) — seçili + seçili-olmayan tüm kartlar paralel analizlenir. E1 abonesi `==` → `OrdinalIgnoreCase` (farklı harfli event de rozeti düşürür). Regresyon: `MaliDonemTopluAnalizTests` 2 test (toplu rozet + case-insensitive E1). Build 0/0, test 253/253, smoke OK. Canlı rozet teyidi kullanıcıda.
+- Tarih: 2026-09-10
+
+## MaliDonemYonetimView — güncelleme gerekli uyarısı var, Güncelle butonu yok (ÇÖZÜLDÜ — 2026-09-10 — Oturum 183)
+- **Belirti:** Yönetim sayfasında seçili dönem `DbGuncellemeGerekliMi=true` iken `Güncelleme Gerekli` uyarı barı çıkıyor ama `Güncelle` butonu (`OnGuncelleClick` → `TenantDatabaseUpdateView`) listelenmiyor. `DonemOzetCard` split’inde buton `Visibility` yanlış kaynağa bağlanmış olabilir.
+- **Şüphe:** `DonemOzetCard.xaml` + `MaliDonemYonetimView.xaml` Row A birleşik kartında `GuncelleClick` `Visibility="{Binding SelectedDonem.DbGuncellemeGerekliMi}"` `TrueToVis` doğru kaynaktan beslenmiyor veya `DonemOzetCard` `Root/DataContext` ataması `OnNavigatedTo`’da eksik (paket split’i sonrası `Root` yalnız `DonemKartlar`/`DonemYedekler`’e verilmişti, `DonemOzet` sonradan eklendi). Buton `PrimaryCompactButtonStyle` mevcut, tetik yok.
+- **Planlı çözüm:** `OnNavigatedTo`’da `DonemOzet.DataContext + Root` atanması doğrulanır (`MaliDonemYonetimView.xaml.cs:24` paket sonrası eklendi, HEAD’e geri alınmıştı — tekrar eklenir), `Visibility` doğrudan `SelectedDonem.DbGuncellemeGerekliMi`’ye bağlanır, tıklama `ShellArgs(SelectedFirma, SelectedDonem)` ile `TenantDatabaseUpdateView`’a `Navigate` eder. Canlı: `Güncelleme Gerekli` iken buton görünür → sayfa Yedek→Göç→Doğrulama.
+- **Çözüm (teşhis):** Rapor Oturum 138'den kalma; mevcut ağaçta zincir eksiksiz: `DonemOzetCard.xaml:75` uyarı barı + `:88` buton (`SelectedDonem.DbGuncellemeGerekliMi`), sayfa `:28-29` DataContext+Root, `:178` `GuncelleClick→OnGuncelleClick→TenantDatabaseUpdateView`, model iki setter'da `DbGuncellemeGerekliMi` bildirimi, sayfa setter'ı `DonemDegistiAsync` ile analiz tetikler. Kod değişikliği gerekmedi; kanıt: `YonetimGuncelleAksiyonTests` (bayat seçim → koşul true). Not: 3 dönem de güncel (Oturum 167) → butonun gizli kalması DOĞRU davranış; bayat-senaryo görseli kullanıcıda.
+- Tarih: 2026-09-10
+
+## BilinmeyenPanel — varolan döneme ait yedekler Bilinmeyen’de listeleniyor (ÇÖZÜLDÜ — 2026-09-09 Oturum 141 canlı + 2026-09-10 Oturum 184 regresyon testi)
+- **Belirti:** `BilinmeyenPanel` (önetic `BilinmeyenVeritabanlariVM.TaraAsync`) kayıtlı bir `MaliDonem.DatabaseName`’ye ait `.backup` dosyalarını da listeliyor; beklenen: yalnızca `MaliDonemler` tablosunda karşılığı olmayan (öksüz) dosyalar.
+- **Kök neden şüphesi:** `ParseDatabaseName` → kanonik ada normalize (`ParseDatabaseName` Oturum 112’de iki desen için düzeltildi) sonrası filtre `GetAllBackupsAsync` içinde `DatabaseName` set’i ile birebir eşleşmiyor; `GetBackupsAsync` iki desen (`çıplak + .db’li`) dedupe ederken `Bilinmeyen` taraması `MaliDonem` listesinden bağımsız disk taraması ile dolduruyor. `TenantSettings` / `MaliDonem` listesi ile `Backup` listesi ortak sözleşme (`IDatabaseBackupManager`) üzerinden konuşmuyor (Kural 10 ihlali şüphesi).
+- **Planlı çözüm:** `TaraAsync` önce `IMaliDonemService.GetMaliDonemlerWithFirmaId` (veya tüm firmalar) → `HashSet<kanonikAd>` → diskteki `*.backup` dosyaları `ParseDatabaseName` → set’te varsa **atlanır**, yoksa Bilinmeyen’e eklenir. `GetAllBackupsAsync` ile aynı kanonikleştirme kullanılır. Test: 2 dönem * 1 yedek → Bilinmeyen 0; diske yabancı `db-YABANCI_2099_*.backup` → Bilinmeyen 1.
+- **Not (Oturum 184):** Bu AÇIK kaydı Oturum 138'den kalma çift kayıt — aynı belirti Oturum 141'de çözülüp canlı kanıtlanmıştı (`HATALAR.md` üstteki B3 kaydı: 18 kayıtlı → 0, sentetik yetim → 1). Mevcut kod teyit edildi (`TaraAsync:130` her çağrıda yeniden tarar + simetrik `TrimDbSuffixLocal` + `OrdinalIgnoreCase` + E2 abonelikleri). Eksik halka olan planlı test eklendi: `YedekOlayTests.Bilinmeyen_KayitliDonemYedegini_Listelemez_Yabanciyi_Listeler` (çıplak + `.db`'li desen dahil). Build 0/0, test 255/255.
+- Tarih: 2026-09-10
+
+## Continue sonrası MainShell yerine Mali Dönem Yönetimi (ÇÖZÜLDÜ — 2026-09-10 — Oturum 185)
 - **Belirti:** güncelleme sayfasında "Çalışma Alanına Geç" sonrası beklenen MainShell yerine Mali Dönem Yönetimi penceresi görüldü.
 - **Şüphe:** UIA otomasyonu ana-pencere ağacından detay-pencere butonlarını da gördüğü için yanlış butona (ana `DevamEt`?) basılmış olabilir — otomasyon artefaktı da olabilir, gerçek akış hatası da. Teşhis edilmedi.
-- Tarih: 2026-09-08
+- **Kök neden (bulundu):** `OnTenantUpdated` yalnız yerel `Selection.SelectedMaliDonem` ile `==` eşleştiriyordu. Yönetim sayfasından girilen akışta (`OnGuncelleClick`) yerel seçim eşleşmez → guard sessizce düşer → `ExecuteDevamEt` hiç koşmaz → update penceresi kapanır, kullanıcı yönetim sayfasında kalır. (UIA-artefakt şüphesi geçersiz değil ama bu yol gerçek akış hatasıdır.)
+- **Çözüm:** ayna-yedeği — yerel eşleşmezse Continue'un garanti yazdığı `_selectedService` aynasına `OrdinalIgnoreCase` bakılır; eşleşirse `Selection` aynadan doldurulup `ExecuteDevamEt` koşar; alakasız DB'de geçiş yok. Regresyon: `ContinueNavigasyonTests` 3 test (ayna-yedeği / eşleşen-yerel / alakasız). Build 0/0, test 258/258, smoke OK. Tam canlı E2E (bayat DB + Continue → MainShell) kullanıcıda.
+- Tarih: 2026-09-10
 
 ## FirmaShellViewModel god-class — SwitchToTenantAndUpdateState 5 sorumluluk (ÇÖZÜLDÜ — 2026-09-08 — Oturum 116)
 - **Belirti:** `FirmaShellViewModel.cs:359` `SwitchToTenantAndUpdateState` seçim + `GetTenantDatabaseStateAsync` + `DialogService.ShowAsync` (onay) + `SwitchTenantAsync` (backup-önce-migrate) + `IsUpdating/UpdateStatus/Progress` 5 sorumluluk tek metotta → 379 satır, `AGENTS.md:1` 150 satır tetikleyici aşıldı, SRP ihlali. `IsUpdating` ayrı `IsBusy`'den dallanıyor.
@@ -509,3 +754,23 @@ Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 - Kök neden: `Visibility="{Binding IsTumuSegmenti}"` panel elementinin ÜZERİNDEYDİ ama code-behind `GenelBakisPanel.DataContext = GenelBakisVM` yapıyordu (IsTumuSegmenti ana VM'de). Yol çözülemeyince converter HİÇ çalışmaz, Visibility varsayılanda (Visible) kalır — Oturum 78'deki "bool-dışı false" notu yalnızca converter'a ULAŞAN değerler içindir.
 - Çözüm: Visibility, sayfa DataContext'ini gören SARMALAYICI elemente taşınır; DataContext'i değişen elementin kendine görünürlük binding'i konmaz. Diğer paneller tarandı (hero/analiz ana VM; Yedekler/Arşiv/Bilinmeyen parent'ta) — tuzak yalnızca buradaydı.
 - Tarih: 2026-09-04
+
+## Oturum 170 — Uydurma `StaticResource` anahtarı (`IconShutdown`)
+- Yeniden yazılan XAML'e sözlükte olmayan ikon anahtarı kondu → canlıda `XamlParseException` (`InitializeComponent`).
+- Ders: XML parse'ı anahtar çözümlemez; eklenen HER `StaticResource` `Icons.xaml`/`DesignTokens.xaml`'a karşı `grep` ile doğrulanır. Tekrarı yasak.
+
+## Oturum 188 — `x:Bind` iç-içe yol null-patlar (DERS)
+- Belirti: `{x:Bind ViewModel.SeciliFirma.KisaUnvani}` — liste boşken `SeciliFirma` null → NRE (Visibility gizlese bile binding değerlendirilir).
+- Ders: `x:Bind` null-yayılımı yapmaz; ara-nesne null olabiliyorsa VM'de null-güvenli DÜZ prop (`SeciliFirmaUnvani ?? string.Empty`) açılır, XAML düz yola bağlanır. Tekrarı yasak.
+- Tarih: 2026-09-10
+
+## Oturum 248 — Dialog zemini yarı saydam → arkası sızıyor (DERS)
+- Belirti: `YardimDialog` arkasındaki Login içeriği görünüyordu ("arka plan transparent gibi").
+- Kök neden: `ContentDialog.Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"` — Fluent kart fırçası yarı saydam (~%70); dialog blur hattı geri alındığı için arkası örtülmüyordu.
+- Ders: Dialog zemini **opak** `SolidBackgroundFillColorBaseBrush` olur; `CardBackgroundFillColorDefaultBrush` dialog zemini olarak kullanılmaz (Kural 17).
+- Tarih: 2026-09-13
+
+## Oturum 248 — MVVM dışı code-behind command mantığı (DERS)
+- Belirti: `LoginView.xaml.cs`'te `OnYardimClick`/`OnTeshisClicked` (kullanıcı: "code-behind metodla dolu").
+- Ders: View'a bağlı command mantığı (yardım/teşhis/navigasyon) ViewModel command'ına taşınır; View chrome gerektiren dialog App katmanındaki `IDialogService` üzerinden açılır (`ShowYardimAsync`). Code-behind yalnız lifecycle + gölge receiver taşır.
+- Tarih: 2026-09-13

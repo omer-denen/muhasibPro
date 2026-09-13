@@ -53,5 +53,6 @@
     <x:String x:Key="IconPlay">&#xE768;</x:String>
     <x:String x:Key="IconTerminal">&#xE756;</x:String>
     <x:String x:Key="IconHelpCircle">&#xE897;</x:String>
+    <x:String x:Key="IconClear">&#xE711;</x:String>
 
 </ResourceDictionary>

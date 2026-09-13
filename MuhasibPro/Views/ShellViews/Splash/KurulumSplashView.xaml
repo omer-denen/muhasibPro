@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="MuhasibPro.Views.ShellViews.Splash.KurulumSplashView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:MuhasibPro.Views.ShellViews.Splash"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Loaded="OnPageLoaded"
+    mc:Ignorable="d"
+    Background="Transparent">
+
+    <Page.Resources>
+        <Storyboard x:Name="CardEntranceStoryboard">
+            <DoubleAnimation
+                Storyboard.TargetName="SplashCard"
+                Storyboard.TargetProperty="Opacity"
+                From="0" To="1" Duration="0:0:0.4">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="CardTransform"
+                Storyboard.TargetProperty="Y"
+                From="12" To="0" Duration="0:0:0.4">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </Page.Resources>
+
+    <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + ~%87 opak tint). -->
+    <Border x:Name="SplashOverlay" CornerRadius="0">
+        <Grid>
+            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+
+        <!-- Kural 17 — Katman 2: icerik karti (Fluent: CardBackground + OverlayCornerRadius + elevation) -->
+        <Border
+            x:Name="SplashCard"
+            Width="460"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Translation="0,0,32"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="{StaticResource OverlayCornerRadius}"
+            Padding="16">
+            <Border.Shadow>
+                <ThemeShadow x:Name="CardShadow" />
+            </Border.Shadow>
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="CardTransform" />
+            </Border.RenderTransform>
+
+            <StackPanel Spacing="16">
+
+                <!-- Logo + baslik -->
+                <StackPanel Spacing="10" HorizontalAlignment="Center" Margin="0,8,0,4">
+                    <Image Width="56" Height="56" Source="ms-appx:///Assets/AppIcon.png" Stretch="Uniform" HorizontalAlignment="Center" />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        Style="{StaticResource SubtitleTextBlockStyle}"
+                        Text="MuhasibPro" />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                        Text="Ilk Kurulum" />
+                </StackPanel>
+
+                <!-- Durum yazisi -->
+                <local:SplashStatusControl x:Name="StatusControl" />
+
+                <!-- Progress karti -->
+                <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                        Padding="14">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ProgressBar
+                            x:Name="ProgressBar"
+                            Grid.Column="0"
+                            Height="6"
+                            VerticalAlignment="Center"
+                            Maximum="100"
+                            Value="{x:Bind ViewModel.ProgressValue, Mode=OneWay}" />
+                        <Border Grid.Column="1"
+                                Padding="12,5" CornerRadius="{StaticResource MuhasibPillCornerRadius}"
+                                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                            <TextBlock FontSize="11" FontWeight="Bold"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       HorizontalAlignment="Center">
+                                <Run Text="{x:Bind ViewModel.ProgressValue, Mode=OneWay}" />
+                                <Run Text="%" />
+                            </TextBlock>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Hata alani (varsayilan gizli) -->
+                <Border x:Name="ErrorPanel"
+                        Visibility="Collapsed"
+                        Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                        Padding="14">
+                    <StackPanel Spacing="8">
+                        <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                   TextWrapping="Wrap"
+                                   Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                        <Button x:Name="RetryButton"
+                                Content="Tekrar Dene"
+                                Click="OnRetryClick"
+                                Style="{StaticResource AccentButtonStyle}"
+                                HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Border>
+
+        <!-- Footer -->
+        <Grid Padding="24,0,24,14" VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Column="0"
+                HorizontalAlignment="Left"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                Opacity="0.5"
+                Text="{x:Bind Version}" />
+            <TextBlock
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                Opacity="0.5"
+                Text="{x:Bind CopyrightText}" />
+        </Grid>
+        </Grid>
+    </Border>
+</Page>

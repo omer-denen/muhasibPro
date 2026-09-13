@@ -254,7 +254,7 @@ public class DataMigrationFlowTests
                 logger: null!);
 
             result.HasError.Should().BeTrue();
-            result.Message.Should().Contain("geri yüklenemediği");
+            result.Message.Should().Contain("geri yüklenemedi");
             restoreCalls.Should().Be(3);
         }
         finally { keepAlive.Dispose(); ctx.Dispose(); }

@@ -13,7 +13,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] `docs/LOG.md` oluşturuldu
 - [x] Çözüm iskeleti kopyalandı: `MuhasibPro.slnx` + `Libraries/MuhasibPro.{Domain,Data,Business,ViewModels}` + `MuhasibPro` (master’dan)
 - [x] İskelet build 0/0 doğrulaması — `MuhasibPro.csproj` MSBuild 18 x64 → 0 hata (NU1903 AutoMapper hariç, kaldırılacak) ✅ Eklendi 🧪 Test edildi
-- [ ] `MuhasibPro.slnx` → `MuhasibPro.sln` klasik formata çevir (opsiyonel) ⬜
+- [x] `MuhasibPro.slnx` → `MuhasibPro.sln` klasik formata çevir (Oturum 140'ta kalıcılaştı; test ankrajları `slnx || sln` uyumlu) ✅ Eklendi 🧪 Test edildi
 
 **Durum:** ✅ Eklendi 🧪 Test edildi
 
@@ -173,8 +173,8 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] **FirmaShell god-class önlendi (2026-08-24):** `FirmaShellViewModel.cs:13` `FirmalarViewModel` kalıtımı → `ViewModelBase` + `FirmalarVM/MaliDonemVM` composition; `Firmalar`/`MaliDönemler` ayrı UserControl’ler (`FirmalarList`/`FirmaMaliDonemler`) korunuyor, kritik saga’lar (`Firma oluşturma` → `FirmaDetailsViewModel`, `MaliDönem oluşturma/silme` → `MaliDonemDetailsViewModel`/`MaliDonemListViewModel` via `IMaliDonemSagaManager`) kendi sınıflarında, `FirmaShell` sadece `SelectedFirma/SelectedMaliDonem/HasSelection/DevamEt/SwitchToTenant` + `LocalSettings` son seçimden sorumlu ✅ Eklendi 🧪 Test edildi
 - [x] **UpdateService birleşik tasarım (DB migration + Velopack) (2026-08-26):** `Services/UIService/UpdateService.cs:12` `IUpdateService` `Scoped` (`ILocalSettingsService + ISistemDatabaseService/SistemMigrationManager + ILogger + Velopack`) — `Get/SaveSettings` `LocalSettings`, `CheckForUpdates/Download` Velopack stub (`null`/`false`, `LastCheckTime` güncellenir, `MUHASIBPRO_UPDATE_SOURCE` GithubSource hazır), `Apply` `VelopackApp.Build().Run()`, `PrepareForUpdateAsync` `GetState CanConnect`, `PostUpdateDatabaseSyncAsync` `InitializeSistemDatabaseAsync` backup-önce-migrate; `ExtendedSplash ShouldRedirectToSetupAsync` ve `UpdateViewModel CheckNow/Download/Install` aynı `IUpdateService`’i kullanacak — tekrar kod yok ✅ Eklendi 🧪 Test edildi
 - [x] `MainShell` NavigationView token uyumu — `MainShellView.xaml:1` `TitleBarControl + NavSidebarControl 240 + Breadcrumb 52 + Snapshot PrimaryLight` ile webToWinui3 stiline taşındı (Oturum 31) — *FirmaShell yanında sade NavigationView, ayrı faz değil* ✅ Eklendi 🧪 Test edildi
-- [ ] `MuhasibPro.slnx` → `MuhasibPro.sln` klasik formata çevir (opsiyonel) ⬜
-- [ ] **E2E canlı test (etkileşimli):** `Yeni Firma → Yeni Dönem Saga (pipeline dialog canlı 5 adım) → kart seçimi → DevamEt → MainShell` + silme guard dialog — Oturum 51 smoke test OK, etkileşimli akış kullanıcı doğrulaması bekliyor ⬜
+- [x] `MuhasibPro.slnx` → `MuhasibPro.sln` klasik formata çevir (Oturum 140'ta kalıcılaştı; test ankrajları `slnx || sln` uyumlu) ✅ Eklendi 🧪 Test edildi
+- [ ] **E2E canlı test (etkileşimli):** `Yeni Firma → Yeni Dönem Saga (pipeline dialog canlı 5 adım) → kart seçimi → DevamEt → MainShell` + silme guard dialog — Oturum 140'ta Login→FirmaShell→MainShell canlı doğrulandı (screenshot), etkileşimli saga akışı kullanıcı doğrulaması bekliyor ⬜
 - [x] **`FirmaShellViewModel : FirmalarViewModel` kalıtımı** — AGENTS kural 1 ihlali (composition'a çevrildi — Oturum 63) ✅ Eklendi 🧪 Test edildi
 - [ ] **Mapster** ile AutoMapper `NU1903` kalıcı temizliği (Faz B öncesi; `AutoMapperSistemMapping.cs` 5 CreateMap → manual/Mapster) ⬜
 
@@ -505,7 +505,7 @@ Sıra: Splash → paylaşılan stiller → SistemKurulum → FirmaShell → Mali
 - [x] **Kaynak:** `UpdateFeedSourceFactory` (Business — github→`GithubSource`, diğer→`SimpleWebSource`, boş→null) + 3 test; Velopack 0.0.1298 API paket XML'den doğrulandı ✅ Eklendi 🧪 Test edildi
 - [x] **Servis:** gerçek Check/Download/Pending + feed-yok sessizliği + hata mesajları ✅ Eklendi
 - [x] **VM + sayfa:** `FeedUrl`/guard/görünürlük propları + `Views/Settings/UpdateView` (Pivot Güncelleme|Ayarlar) + `Startup.Register` ✅ Eklendi (canlı görsel kullanıcıda)
-- [ ] **Follow-up:** menü giriş noktası + açılış otomatik kontrolü; CI `velopack pack/upload` ⬜
+- [ ] **Follow-up:** menü giriş noktası + açılış otomatik kontrolü; CI `velopack pack/upload` ✅ kısmi (Oturum 200: `.github/workflows/release.yml` eklendi — tag → publish → pack → upload, sürüm tek kaynağı tag; ilk gerçek koşu `v1.1.3` ile bekleniyor) ⬜
 
 ## Faz 6.50 — DB güncelleme sayfası: ön-dialog + full sayfa (✅ eklendi 🧪 build 0 hata, test 111/111 — Oturum 118)
 - [x] **Ön-dialog:** slim bilgi (versiyon şeridi + ana değişiklik) + 3 buton (Güncelle/Daha sonra/Vazgeç); `TenantUpdateDecision` + contract/App impl ✅ Eklendi 🧪 Test edildi
@@ -605,3 +605,328 @@ Sıra: Splash → paylaşılan stiller → SistemKurulum → FirmaShell → Mali
 - [x] **Denetim:** ham `Send("` 0, Subscribe = Unsubscribe ✅ Eklendi
 - [ ] **Canlı toplu E2E (kullanıcıda):** Splash→MainShell + güncelleme + geri yükleme + FIFO 5 + çift-pencere + lisans/kullanıcı ⬜
 - [ ] **Canlı:** yetki/lisans + ayar-değişimi yayını + Teşhis→Kapat refresh + pencere kapatma — kullanıcıda ⬜
+
+## Faz 6.60 — Tenant güncelleme 3 bug (product-ready geçişinden kalan — 2026-09-09, 🔨 açık)
+- [x] **B1 MaliDonemListControl tek dönem rozeti:** `AnalyzeAllDbStatusesAsync` (Task.WhenAll) + E1 `OrdinalIgnoreCase`; `MaliDonemTopluAnalizTests` 2 test — build 0/0, test 253/253 ✅ Eklendi 🧪 Test edildi (Oturum 183)
+- [x] **B2 Yönetim Güncelle butonu eksik:** `DonemOzetCard` split'iyle `Visibility DbGuncellemeGerekliMi` + `OnNavigatedTo` `DonemOzet.DataContext/Root` ataması tamamlandı (Oturum 141, kod-doğrulamalı; DB'ler Güncel olduğundan canlı tetiklenemedi — eski şemalı DB ile teyit bekliyor) ✅ Eklendi
+- [x] **B3 Bilinmeyen yedek sızıntısı:** `TaraAsync` cache'siz yeniden tarama + simetrik kanonik `HashSet` + E2 oto-tazeleme; canlı: 18 kayıtlı → 0, sentetik yetim → 1 + Temizle (Oturum 141) ✅ Eklendi 🧪 Test edildi
+- [ ] **Geçiş sebebi kaydı:** `HATALAR.md` “Tenant güncelleme akışı — product-ready geçişi” + `FirmaShell Dialog→Sayfa` kararı loglandı ✅ Eklendi
+
+## Faz 6.61 — Per-View Ayar Panelleri (her view kendi işleminin ayarını yapar — 2026-09-09, 📋 plan)
+- Plan: `docs/AYARLAR-PANEL-PLAN.md` 9 view haritası (Splash→AppPlatform, Login→Identity, Firma→EntityRegistry, MaliDonemYonetim→Tenant+SystemDb, FirmaShell→M3+M5, DatabaseSettings/Update/SistemKurulum). Kural: her panel `CustomModernCard` + `Expander/Flyout` içinde `NumberBox/Toggle` + `[YoneticiAyari]` rozeti + `AyarYetkiDenetimi` + `I*SettingsProvider` Get/Save+Clamp, AI Studio yalnız XAML (biz kod).
+- [x] **Splash — AppPlatform:** `AppPlatformAyarlarViewModel` (4 alan + otomatik kayıt + `Kaydedildi`, rename) + DI Transient + `AppPlatformAyarlarTests` 5 test — splash Expander GERİ ALINDI (transient ekranda ayar olmaz; panel Denetim Masası'na taşınıyor) — build 0/0, test 263/263 ✅ Eklendi 🧪 Test edildi (Oturum 187)
+- [x] **Login — Identity:** `IdentityAyarlarViewModel` (7 alan + `IsYonetici` kilidi + otomatik kayıt) + `IdentityAyarlarPaneli` (4 kritik rozetli) + `DenetimMasasiViewModel.Giris` + `IdentityAyarlarTests` 4 test — Identity GLOBAL kalır (güvenlik); +2 alan (`SessionTimeoutMin`, `SonGirisBilgisiniGoster`) tüketici-borçlu rafta — build 0/0, test 273/273 ✅ Eklendi 🧪 Test edildi (Oturum 188)
+- [ ] **Firma — EntityRegistry:** `EntityRegistrySettings.cs:10` 5 alan → `FirmaView.xaml:1` / `FirmalarView.xaml:1` `⚙️ Flyout` “Firma Kayıt Ayarları” ⬜
+- [ ] **MaliDonemYonetim — Tenant:** `TenantSettings.cs:14` 8 alan → `MaliDonemYonetimView.xaml:1` sağ kolon `Expander` “Tenant Veritabanı Ayarları” + `DonemYedeklerPanel.xaml:1` `Yedek & Saklama` genişletmesi ⬜
+- [ ] **MaliDonemYonetim — SystemDb:** `DatabaseSettingsModel.cs:7` 8 alan → aynı view içinde `DatabaseSettings` kartı (mevcut `DatabaseSettingsView.xaml:15` 4 kart korunur) ⬜
+- [ ] **FirmaShell — M3+M5:** `FirmalarListControl.xaml:1` / `MaliDonemlerListControl.xaml:1` başlık `⚙️ Settings Flyout` (ortak `/Controls/ViewSettingsFlyout`) ⬜
+- [ ] **AI Studio dar brief:** `AI-STUDIO-VIEW-BRIEF.md:7` “yalnız ayar paneli XAML’i, mevcut View’lara dokunmaz, `x:Bind` koru” — biz seçerek alırız ⬜
+
+## Faz 6.62 — Circular DI fix + kör bekçi onarımı + DI döngü bekçisi (2026-09-09, ✅🧪)
+- [x] **Döngü:** `AuthenticationService` ↔ `IdentitySettingsProvider` (ikisi de Singleton, karşılıklı ctor) — provider `IServiceProvider` tembel çözüme (`[ActivatorUtilitiesConstructor]`, `SaveAsync` içi `GetService`) alındı, yetki denetimi korundu; `AyarYetkiTests` uyarlandı ✅ Eklendi 🧪 Test edildi
+- [x] **Kör bekçi:** `slnx` silinince 9 kaynak-tarama testinin `RepoRoot()` ankrajı boşa düştü (yanlış-yeşil) — ankrajlar `slnx || sln` + `CircularDependencyTests` körlük guard'ı ✅ Eklendi 🧪 Test edildi
+- [x] **Bekçi testi:** `CircularDependencyTests.DI_Circular_Baglanti_Olmamali` (ctor-graf + DI kayıt haritası + App kaynak taraması + zincir raporu; HEAD'de kırmızıyı kontrollü deneyle kanıtlı) ✅ Eklendi 🧪 Test edildi
+- [x] **Doğrulama:** `dotnet build MuhasibPro.sln --no-incremental` 0/0 + `dotnet test` 236/236 + canlı Login→FirmaShell→MainShell (screenshot, circular yok) ✅ Eklendi 🧪 Test edildi
+
+## Faz 6.63 — AI-Yönetim devralma: component split + sol pane + hamburger/blur/row-scroll (2026-09-09, ✅🧪)
+- [x] **Seçerek alma:** `DonemOzetCard` (164+50) + `TopluIslemlerPanel` (39+17) zip ile `fc /b` birebir; sayfa 372→~211; binding/handler sözleşmesi aynen ✅ Eklendi 🧪 Test edildi
+- [x] **Bilinmeyen sola:** sağ karttan sol SplitView Pane'e (liste altı, ayrı `CustomModernCard`); `x:Name/DataContext/Root` korunur; ArsivPanel sağda ✅ Eklendi 🧪 Test edildi
+- [x] **Hamburger + blur + row-scroll:** eşik 900→1500 (ilk açılışta hamburger), `PaneBackground` acrylic, Row-0 yatay ScrollViewer (`MinWidth=940`, kart boyları optimal 2*/1*) ✅ Eklendi 🧪 Test edildi
+- [x] **Doğrulama:** build 0/0 + test 236/236 + canlı (hamburger overlay, Son Yedek/Boyut görünür, B3 yetim testi) ✅ Eklendi 🧪 Test edildi
+- [ ] **Sonraki:** 6.61 ayar panelleri sol pane'e (Tenant/SystemDb); B1 rozet; B2 canlı tetikleme ⬜
+
+## Faz 6.65 — MaliDonemYonetim firma-bazlı ayarlar (2026-09-09, ✅ eklendi 🧪 build 0/0, test 246/246)
+- [x] **Karar:** facade VM + hamburger-altı buton + QuickDialog + firma-kapsam (`:F{id}`); kullanıcı-bazlı elendi (paylaşımlı FIFO + per-firma liste — LOG Oturum 143 dörtlü) ✅
+- [x] **Domain/Business:** `FirmaAyarAnahtari` + 3 modele denetim alanları + 2 provider firma-anahtarlı Get/Save + `FirmaAyarlari` etkili okuyucu ✅ Eklendi 🧪 Test edildi
+- [x] **VM:** 3 alt VM firma-anahtarlı okuma + orkestratör `AyarlarVM`/`AyarSonrasiTazeleAsync` + `YonetimAyarlarViewModel` (snapshot+çakışma barı+rozet+sıfırlama) + DI ✅ Eklendi 🧪 Test edildi
+- [x] **View (sınıf bazlı onay 4/4):** `YonetimAyarlarDialog` (rozet + Liste/Saklama + çakışma/hata barları + Varsayılanlara dön) + pane en-alt Ayarlar butonu + `OnAyarlarClick` ✅ Eklendi 🧪 Test edildi
+- [x] **Test:** `YonetimAyarlarTests` 7 test + CS0854 Moq fix — build 0/0, test 246/246 ✅ Eklendi 🧪 Test edildi
+- [x] **Docs:** `AYARLAR-PANEL-PLAN.md:12` revizyonu (dialog sayfa-yerel — Ortak Controls Kaydı'na girmez) ✅ Eklendi
+- [ ] **Canlı (kullanıcıda):** F1/F2 izolasyon + çakışma onayı + Varsayılan rozeti; B1 rozet + B2 tetikleme hâlâ açık ⬜
+
+## Faz 6.66 — Ayar dialogu v2 (Oturum 145 planı → Oturum 158 uygulaması — ✅ kod, 🧪 Windows'ta)
+- Plan: `AYARLAR-PANEL-PLAN.md:5` (§5 tablo, 8 madde) — menü `Genel/Panel Görünüm/Yedekleme`, header durum-butonu (rozet kalkar), footer kalkar, `AyarGenelPanel` (firma kartı + oluşturan), SettingsCard emülasyonu (paket yok), `Kaydedildi` mini bildirimi, duman=system.
+- [x] **VM (Oturum 158):** `DurumButonMetni/Ipucu` + `Firma/DetaySatiri/KayitTarihi` + `DonemSayisi` + `OlusturanAdi` (best-effort) + `Kaydedildi` (seri-sayaçlı, UI-thread Post) + 4 kayıt yoluna kanca + 2 opsiyonel servis; `SonDegisiklikMetni` silindi (0 ref), `RozetMetni` yaşıyor (test) ✅ Eklendi
+- [x] **View (sınıf bazlı onaylı):** YENİ `AyarGenelPanel` + dialog menü/header/footer + panel başlık eşitleme + ölü `FalseToVis` silindi; yeni handler yok ✅ Eklendi
+- [x] **Orkestratör:** 2 opsiyonel ctor + `DonemSayisi` dağıtımı (Load + Refresh) ✅ Eklendi
+- [x] **Test:** 5 YENİ — beklenti 251/251 ✅ Eklendi
+- [ ] **Windows'ta:** `dotnet build --no-incremental` 0/0 + `dotnet test` 251/251 + canlı (Genel kart + durum turu + bildirim) — bu ortamda dotnet kırık (Oturum 158) ⬜
+
+> Not (Oturum 157 — GERİ ALINDI): Oturum 146-156 dialog-blur hattı (acrylic zeminler, `MuhasibDialogStyle`, `MuhasibDialogAcrylicBrush`, `DialogBackdropBlur`, tek-kapı yönlendirmeleri, `ShowAsync(Popup)`, AGENTS tutarlılık maddesi) kullanıcı kararıyla **orijinal yapıya geri alındı** — kodda iz yok (detay `LOG` ciltlerinde). İlerde popup geçişi ya da WinSDK blur güncellemesiyle ele alınacak.
+
+## Faz 6.64 — Yedek pagination fix + chevron ortalama + teknik parametre Expander'sız (2026-09-09, ✅🧪)
+- [x] **Pagination kök neden:** 4 VM'de `UpdatePaged*` `CanPrev/CanNext` bildirimi yapmıyordu — liste yüklenince `IsEnabled` binding'i bayat `false`'ta kalıyor, bar görünür ama butonlar ölüydü ✅ Eklendi 🧪 Test edildi
+- [x] **VM fix:** `DonemYedekler/ArsivDonemler/BilinmeyenYedek/MaliDonemYonetim(Acik)` — `UpdatePaged*`'a `CanPrev/CanNext/CurrentPage` bildirimi + sayfa clamp (liste kısalınca taşma yok) ✅ Eklendi 🧪 Test edildi
+- [x] **Chevron ortalama:** `‹/›` metin içerik (taban çizgisi kayık) → `IconChevronLeft/Right` FontIcon + 32x32 + Padding 0 + Önceki/Sonraki sayfa tooltip (`DonemYedeklerPanel/DonemSecimListesi×2/BilinmeyenPanel`, sınıf bazlı onaylı) ✅ Eklendi 🧪 Test edildi
+- [x] **Teknik parametre:** `MaliDonemYonetimView` `Expander` kaldırıldı → `DonemParametrePanel` doğrudan `Row 2/Col 2` (sınıf bazlı onaylı) ✅ Eklendi 🧪 Test edildi
+- [x] **Regresyon:** `YedekPaginationTests.cs` 3 test (bildirim + dilim + kısalma-clamp) — `dotnet build` 0/0 + `dotnet test` 239/239 ✅ Eklendi 🧪 Test edildi
+- [ ] **Canlı:** 4+ yedekli dönemde sayfa geçişi + chevron görseli — kullanıcıda ⬜
+## Faz 6.67 — Ayar paneli refactor: VM bölünmesi + ComboBox (Oturum 159-160 — ✅ kod, 🧪 Windows'ta)
+- [x] **Teşhis:** `YonetimAyarlarViewModel` 638 satır 6 sorumluluk (AGENTS kural 1 ihlali); XAML temizdi — bölünme yalnız VM'de ✅
+- [x] **Araştırma (Oturum 159):** MS ayar kılavuzu + Toolkit SettingsCard + sektör (saklama 3/7/14/30, VACUUM INTO yedek); sonuç: NumberBox→ComboBox dersi + 2 ayar adayı ✅
+- [x] **Kapsam kararı:** +2 ayar (`VacuumOnBackup`/`WeeklyBackupDays`) RAFTA — 0 tüketici, Kural 7 (ölü UI yok); tesisat ayrı faz ✅
+- [x] **Yeni:** `AyarDestek` (preset/damga/çakışma-metni/sıfırlama-yazımı/fallback-okuma) + `AyarBolumViewModel`/`IAyarHatti` + 3 çocuk (`Genel` 114 / `Liste` ~150 / `Saklama` 128) + facade ince orkestratör (~224, tek cümle: dialog orkestrasyonu) ✅ Eklendi
+- [x] **Davranış düzeltmesi:** snapshot artık ham-kayıtlı (bölüm-kapsamlı) — paylaşılan 8'li snapshot'ın paneller-arası sahte çakışması kapandı; preset-dışı kayıt en yakına çekilir, rozet ham değere bakar ✅ Eklendi
+- [x] **View (sınıf bazlı onaylı):** 5 NumberBox→ComboBox (sayfa 2/4/8/12/20, saklama 3/5/7/14/20) + dialog `.xaml.cs` 3 DataContext satırı; dialog/panel yapısı ve binding adları aynen ✅ Eklendi
+- [x] **Test:** 12 test çocuk yollarına taşındı + 1 preset/çakışma testi — beklenti 247/247 ✅ Eklendi
+- [ ] **Windows'ta:** `dotnet build --no-incremental` 0/0 + `dotnet test` 247/247 + canlı (ComboBox turu + Genel kart + Kaydedildi) — bu ortamda dotnet kırık ⬜
+
+## Cilt 9 rötuşlar (Oturum 161-172 — ✅ kod, 🧪 Windows'ta; build/test/can bu ortamda dotnet kırık)
+- [x] **161:** 8 dialog kökü `MuhasibCardBackgroundSubtleBrush` (5 kart-zemini + 2 akrilik; iç kartlar korundu) ✅ Eklendi
+- [x] **162:** Login sağ kolon başlık+kart (`KULLANICI GİRİŞİ` 16px; iç 22px silindi) ✅ Eklendi
+- [x] **163:** FirmaShell başlıkları — dönem başlığına takvim ikonu; sayaçlar zeytin+`Circle(999)` birliği ✅ Eklendi
+- [x] **164:** Radio hover warm yıkama (YENİ `MuhasibWarmWashBrush`); seçili petrol korundu; `Disabled` 0.55 ✅ Eklendi
+- [x] **165:** Teşhis — analiz yalnız seçili karta (B1 canlı karşılığı); 2025/26 güncel, yalnız 2027 eski (disk kanıtlı); fix adayı A/B/C onay bekliyor 🔍
+- [x] **166:** "Yeni Mali Dönem Aç" petrol kontur hap (ölçü aynen) ✅ Eklendi
+- [x] **167:** 2027 elle göç (yedek + 5 kolon + history + 1.1.0 damga; kimlik NULL — uygulama göçü gibi) ✅ Veri
+- [x] **168:** Seçili kartta hover kapalı (perde Collapse/Visible); buton tabanı beyaz (hover görünür) ✅ Eklendi
+- [x] **169:** Ayar dialogu ekran-görüntüsü dili — menü petrol hap vurgu + 11 satır-başı beyaz kart ✅ Eklendi
+- [x] **170:** `IconShutdown` çöküşü → `IconLogOut` (ders HATALAR'da) ❌→✅
+- [x] **171-172:** Dialog `Kapat` → sağ-üst 32px X (`IconClear` yeni) + durum-X aralığı ✅ Eklendi
+- [ ] **Windows'ta:** build 0/0 + test 247/247 + canlı tur (tüm üst maddeler) ⬜
+
+## Sıradaki iş kuyruğu (Oturum 180 envanteri → Oturum 181 kaydı; ilk açılışta bu sıra)
+- [x] **0. Windows borcu:** build 0/0 + test 251/251 + smoke (20 sn, çökme yok) — Oturum 182 ✅🧪; CS8625 `null!` fix; KONTROL'deki "beklenti 247/247" notu gerçek 251 ile düzeltildi sayılır
+- [x] **0-canlı piksel tur (kullanıcıda):** 161-172 rötuşları + 6.66/6.67 — kullanıcı onayı ✅ (Oturum 182)
+- [x] **1. B1 rozet:** A seçildi (kullanıcı) — `LoadDataAsync` artık `AnalyzeAllDbStatusesAsync` (Task.WhenAll, Oturum 72 deseni) + E1 abonesi `OrdinalIgnoreCase`; `MaliDonemTopluAnalizTests` 2 test — build 0/0, test 253/253, smoke OK ✅🧪 (Oturum 183)
+- [x] **2. Güncelle butonu yok:** zincir tam kuruluymuş (rapor-öncesi kalmış) — DonemOzetCard uyarı barı + buton (`DbGuncellemeGerekliMi`), DataContext/Root, `GuncelleClick→OnGuncelleClick→UpdateView`; `YonetimGuncelleAksiyonTests` 1 test — build 0/0, test 254/254, smoke OK ✅🧪 (Oturum 183)
+- [x] **3. B2 güncelleme tetikleme:** wiring Oturum 141'den ✅'ydi; B1-A ile tetikleme genişledi (her liste yüklemede tüm dönemler + seçimde sayfa analizi) ve testli (`MaliDonemTopluAnalizTests` + `YonetimGuncelleAksiyonTests`) — kod değişikliği yok; canlı tetik eski-şemalı DB ister (3 dönem güncel) → kullanıcıda ✅ (Oturum 184)
+- [x] **4. BilinmeyenPanel yanlış listeleme:** Oturum 138'den kalma çift kayıt — Oturum 141'de çözülmüştü; kod teyit + planlı filtre testi eklendi (`YedekOlayTests` 6/6) — build 0/0, test 255/255 ✅🧪 (Oturum 184)
+- [x] **5. Continue anomalisi** (MainShell yerine Yönetim): kök neden bulundu — yönetim sayfasından girilen akışta yerel seçim eşleşmeyip guard sessizce düşüyordu; fix: ayna-yedeği + `OrdinalIgnoreCase`; `ContinueNavigasyonTests` 3 test — build 0/0, test 258/258, smoke OK ✅🧪 (Oturum 185)
+- [x] **6. Ölü dialog:** `TenantDatabaseUpdateDialog` ölü DEĞİL — `Coordinator:57` ön-dialog (`ShowTenantUpdateConfirmAsync` → Güncelle/Daha sonra/Vazgeç → UpdateView), testli (`TenantDatabaseUpdateTests:279,309`); silinmedi, bağ doğrulandı ✅ (Oturum 185)
+- [x] **7. 6.61 diğer view ayar panelleri** ✅🧪 — **Oturum 201: Firma/Dönem GERÇEK bölümler** (`FirmaKayitAyarlarViewModel` desen+durum-enum+sayfa/strict + `DonemAyarlarViewModel` 8 eşik + Denetim composition + 2 Panel + 2 Sayfa + routing + Startup + `DenetimFirmaDonemTests` 6 test; `YakindaViewModel/Sayfası` Kural-4 silindi) — build 0/0, test 312/312, smoke OK; canlı bölüm turu kullanıcıda
+- [x] **8. Mapster (NU1903)** ✅🧪 — **Oturum 201: AutoMapper SİLİNDİ** (`AutoMapperSistemMapping` Profile + klasör + 4 csproj referansı; `IMapper` kullanımı 0'dı, Mapster'a gerek kalmadı) — build 0/0
+- [x] **9. Legacy 6 dosya → Faz B** ✅ — **Oturum 201: 6 dosya da CANLI** (Startup Register + host caller'lı) → silinemez; kullanıcı kararı "Faz olarak ekle" — Faz B kapsamına faz-kaydı işlendi
+- [ ] **Kullanıcı sepeti (paralel):** E2E saga, splash/kurulum, hover-tooltip, login tıklama, sayaç-grafik, 6.64/6.65 görselleri ⬜
+
+## Faz 6.69 — Mali Dönem Yönetim revizyonu (4 kritik sorun + Kural 11 — Oturum 202, ✅🧪)
+- [x] **AGENTS Kural 11:** busy bayrağı + ring + sonuç + zaman aşımı (sürekli dönme yasak) — `AGENTS.md:11` ✅ Eklendi
+- [x] **1. Açılış lazy-load:** `DurumAnalizleriniYukleAsync` + `DerinAnalizleriYukleAsync` bulk döngüleri silindi (ölü kod); `YenileAsync` filtre+KPI'ya indi; `TaraAsync` açılıştan çıktı (fire-and-forget + sayaç tazeleme); KPI derin-yokken dürüst metin ✅ Eklendi 🧪 Test edildi
+- [x] **2. Dönem silme:** DeleteGuard "Yedekleri de sil" checkbox (varsayılan işaretli) + `DeleteAllTenantBackup=false` yolu bağlandı; "Silinen Dönem Yedeği" ayrı listesi (kimlik-id, migration yok); ad-eşleşme `OrdinalIgnoreCase`; kilitli-dosya-adlı abort mesajı ✅ Eklendi 🧪 Test edildi
+- [x] **3. Yedek silme:** `YedekSilAsync` + `TemizleAsync` bool kontrolü (başarısızda Danger + liste gerçeği); çift-refresh sadeleşti (ağır `RefreshAllAsync` → vitrin sayacı + `TazeleSayaclar`) ✅ Eklendi 🧪 Test edildi
+- [x] **4. Sayfa düzeni:** sol pane yalnız dönem listesi; sağ sıklık sırası (yedek+parametre → işlemler → silinen+bilinmeyen → analiz → ayarlar); ölü sekme sistemi silindi ✅ Eklendi 🧪 Test edildi
+- [x] **Kural 11 uygulaması:** 6 busy bayrağı + 4 boş-durum bayrağı + 30sn tarama/yükleme tavanı; `YonetimSilmeYuklemeTests` 4 test — build 0/0, test 316/316, smoke OK ✅ Eklendi 🧪 Test edildi
+- [ ] **Canlı (kullanıcıda):** açılış hızı + dönem silme (checkbox'lı) + yedek-silme başarısızlığı + panel sırası/ring'ler ⬜
+
+## Faz 6.70 — Yerleşim düzeltme + silme sertleştirme + saklama koruması (Oturum 203, ✅🧪)
+- [x] **Sekmeli dialog:** `YetimYedeklerDialog` (Silinen/Bilinmeyen sekmeleri + sayaçlı başlıklar, mevcut paneller reuse) + navbar'da 2 sayaçlı buton; Row-3 kartları sayfadan çıkarıldı ✅ Eklendi 🧪 Test edildi
+- [x] **Silme sertleştirme:** `TryDeleteBackupFileAsync` (neden-plumbing + salt-okunur temizliği + 5 deneme); Danger nedeni söyler; temp-dosya regresyon testi ✅ Eklendi 🧪 Test edildi
+- [x] **Saklama koruması:** sayı `GetManuelKeep` altına düşecekse `YedekSilOnayDialog` yazılı onayı (kod = dosya adı); `IDialogService.ShowBackupDeleteGuardAsync` + 3 test ✅ Eklendi 🧪 Test edildi
+- [x] **Doğrulama:** build 0/0, test 320/320, smoke OK ✅🧪
+- [ ] **Canlı (kullanıcıda):** dialog sekmeleri + yazılı onay + silme sonucu (hiçbir şey mi / neden-mesajı mı) ⬜
+
+## Faz 6.71 — Refactoring: testler → bug → yıkım → progress → RAF (Oturum 204 plan, Oturum 205 faz kaydı)
+- [x] **Plan + Kural 12:** 4 salt-okur tarama (sağlık/bildirim/gerçeklik/envanter) + `AGENTS.md:12` işlem-görseli disiplini 📋
+- [x] **1. Test seferberliği (davranış mührü):** ✅🧪 (Oturum 211: 4 dosya ~98 nokta; Oturum 212: GetById guard fixi; Windows `dotnet test` 426/426)
+  - [x] `TenantSilmeServisTests` (yeni): `DeleteTenantDatabaseAsync` varyantları (id≤0, ad-null, satır-ad uyuşmazlığı, case-farklı ad kabulü, `IsDeleteDatabase=false`, before-backup true/false, yedek-korulu, kısmi silme) + `CleanAllBackupsAsync` (kısmi/0/dizin-yok/boş-liste) + `TryDelete` retry yolu ✅ kod eklendi (Oturum 211; 🧪 Windows'ta)
+  - [x] `TenantOperationTests` (yeni): `RestoreBackupAsync`/`CreateBackupAsync` hata dalları, `BakimCalistirAsync`, `GetDerinAnalizAsync` (Hata-dolu dal dahil), `CleanOldBackupsAsync` FIFO (`keepLast<1`, valid≤keep, `deletedCount≤0`), `GetBackupHistoryAsync`/`GetAllBackupsAsync`, `GetLastBackupDate`, `RestoreFromLatestBackupAsync`, `DeleteBackupDatabaseAsync` ✅ kod eklendi (Oturum 211; 🧪 Windows'ta)
+  - [x] `MaliDonemServiceTests` (yeni): `GetByMaliDonemIdAsync`, `GetMaliDonemlerPageAsync`, `IsMaliDonemAny/ExistsAsync`, `GetMaliDonemlerCountAsync`, `CreateNewMaliDonemForFirmaAsync`, `UpdateMaliDonemAsync`, `RestoreMaliDonemAsync`, `DeleteMaliDonemAsync` guard'ları, `GetMaliDonemlerWithFirmaId` ✅ kod eklendi (Oturum 211; 🧪 Windows'ta)
+  - [x] `YonetimViewModelTests` (yeni): `LoadAsync`/`RefreshAllAsync` (sayaç+seçim koruma), `AyarSonrasiTazeleAsync`, `DerinAnalizYukleAsync` (null/busy/exception), `BakimCalistirAsync` (TUMU/tek/kısmi-ok), `DonemSeciliMi`, `TazeleSayaclar`, `YedekAlAsync` (FIFO dahil), `GeriYukleAsync` (null/boş/onay-false/fail), `Arsivle/ArsivdenCikar` (null/onay-false/fail), `Temizle/SilinenTemizle` (null/onay-false/fail), `YenileAsync`/`Filtrele`/KPI dalları, `TopluYedekle/TopluTest/TopluBakim` ✅ kod eklendi (Oturum 211; 🧪 Windows'ta)
+- [x] **2. Kritik bug kapanışı:** ✅🧪 (Oturum 213: 4 madde + 4 test; 430/430)
+  - [x] Yazılı-onay reti Info toast'ı + OrdinalIgnoreCase (YedekSilOnayDialog + DonemYedeklerViewModel)
+  - [x] LoadAsync/RefreshAllAsync 30sn timeout + Warning toast "mevcut veriler gösterilmektedir"
+  - [x] KPI hibrit-c: analizliDurum=0 → "Durum analizi bekleniyor" (%0 yalanı kapandı); TopluAnalizTamamlandi olayı + KPI tazeleme
+  - [x] Bayat-exe derleme zamanı footer'a (AppSurumBilgisi.DerlemeZamani — exe GetLastWriteTime)
+- [ ] **3. View yıkım + yeniden tasarım (ATLANDI — kullanıcı kararı, Oturum 218):** ⏭️ MaliDonemView tasarımı atlandı, silme/yıkım yapılmadan hedefli onarım çizgisine geçildi (saf Fluent fırsatçı migrate ilkesiyle uyumlu); detay mesajı gelirse tekil Kural-8 onayıyla ele alınır
+  - [ ] Silinecek 16 XAML ünitesi (32 dosya): `MaliDonemYonetimView.xaml(+cs)` + 9 UserControl (`DonemSecimListesi`, `DonemOzetCard`, `TopluIslemlerPanel`, `DonemYedeklerPanel`, `DonemParametrePanel`, `DonemIslemKartlariPanel`, `DerinAnalizPanel`, `BilinmeyenPanel`, `SilinenDonemYedekleriPanel`) + 3 dialog (`YetimYedeklerDialog`, `YonetimAyarlarDialog`, `YedekSilOnayDialog`) + 3 ayar alt-paneli; `MaliDonemView/Details` + Shell dialogları (`DeleteGuard`, `RestoreVerify`) KAPSAM DIŞI
+  - [ ] Kayıtlar: `Startup.cs:63` Yonetim kaydı silinir; `FirmalarListControl:51` + `GirisDashboard:120` caller'ları yeni hedefe (sessiz `catch` teşhisli yapılır); `DialogService:148` `YedekSilOnayDialog` bağı taşınır/korunur; `AddAppViewModelHostBuilderExtensions:40-41` VM kayıtları kalır (VM'ler korunur)
+  - [ ] Yeni tasarım (detay mesajı gelince netleşir) + Kural-12 akış-planı/bekleme-animasyonu + Kural-8 sınıf-bazlı onaylar
+- [ ] **4. Progress/bildirim disiplini (Kural 12):** 🔨 (D1 ✅🧪 Oturum 218 + D2 ✅🧪 Oturum 220: 5 VM gruplandı + DerinAnaliz bildirimi, 435/435; D3-View **6.75 sonrası** — Oturum 221 kararı, çöp-iş engeli; D3-VM yüzdeleri önden yapılabilir)
+  - [ ] Uzun işlemler (`TopluYedekle/Test/Bakim`, `YedekAl`, `BakimCalistir`, derin analiz, göç): `Is*Calisiyor` + determinate (`i/N`, `%`, mevcut iş) + bitince TEK özet; ara-adım toast'u kaldırılır
+  - [ ] Silme `MaliDonemDeletionViewModel` yoluna bağlanır (`ProgressPercentage` reuse); `TenantDatabaseUpdateViewModel` adım rozetine yüzde (Yedek ~30, Göç ~70, Doğrulama ~100)
+  - [ ] `NotificationService`: `tag/group` replace + tip-ikon ayrımı (Success/Warning/Danger görsele yansır)
+- [ ] **5. RAF panel temizliği (16 kart — model+provider+test kalır, panel kalkar):** ⬜ AppPlatform 5 (Splash gecikmesi, status süresi, Notification ikizi, klasör ikilisi) · Identity 3 (Pbkdf2 **önce provider'a bağlanır** — güvenlik; SessionTimeout + SonGiris rafta) · Database 7 (kapanış-yedeği, haftalık-kontrol, aralık, VACUUM flag, M4 busy/journal/sync) · License CheckIntervalDays 1
+- [ ] **Kapılar (her faz):** build 0/0 + test yeşil + smoke + docs ⬜
+
+## Faz 6.72 — Çekirdek Stabilizasyon (saf Fluent + Faz B kilidi — Oturum 206, 📋 plan)
+- [x] **Kararlar:** görsel dil = saf WinUI Fluent (AGENTS + ROADMAP karar logu); önce çekirdek, sonra Faz B (mühür = build 0/0 + test + smoke + canlı E2E) 📋
+- [x] **Dalga 0 — Bug kuyruğu (öncelik: crash/veri-kaybı → yanlış-veri → UX):** ✅ Eklendi 🧪 Test edildi (Oturum 214 Kol A 7/9 + Oturum 215 Kol B 3/5 + Kol C 4/4 + Oturum 216 son 4 → **18/18 kapandı**; Oturum 217: build 0 hata + test 429/429 + 25sn smoke; canlı E2E kullanıcıda)
+  - [ ] HATALAR AÇIK: product-ready geçiş kaydı (Oturum 138 süreci — kapanış kriteri `TenantUpdated → MainShell` canlı E2E)
+  - [ ] Sepet: E2E saga etkileşimli akışı (Yeni Firma → Yeni Dönem pipeline → kart seçimi → DevamEt → MainShell) + silme guard dialog
+  - [ ] Sepet: splash/kurulum görsel turu + hover-tooltip gerçek-fare teyidi + login tıklama + sayaç-grafik + 6.64/6.65 görselleri
+  - [ ] 6.69/6.70 canlı sepeti: açılış hızı + checkbox'lı dönem silme + yedek-silme sonucu + panel sırası/ring'ler + dialog sekmeleri + yazılı onay
+  - [ ] **Kullanıcı "her yerde bug" listesi (Oturum 207 — ALINDI, Oturum 208 teşhis TAMAMLANDI):** ✅
+    - [x] Güncelleme (akışı) — 4 KIRIK (Apply kurmuyor, LastCheckTime ezilmesi, sahte Geri Al + yedeksiz geçiş, sessiz catch + versiyon kumarı)
+    - [x] SistemVeritabanı açılış — 3 KIRIK (splash timeout'suz, routing fail-open, history onarımı yok) + Sistem conn-string çıplak
+    - [x] Kapanış yedeği — HİÇ İNŞA EDİLMEMİŞ (okuyucu 0, exit handler yok) + haftalık yedek de yok
+    - [x] Güncelleme altyapısı — yukarıdaki 4 + feed-null imza riski
+    - [x] Tenant yedekleme altyapısı — 6 KIRIK (compensate yolu, create log yalanı, desen uyumsuzluğu, FIFO körlüğü, derin-analiz sahte Success)
+    - [x] Tenant silme altyapısı — 5 KIRIK (`DeleteBackupDatabaseAsync` isim-yalanı + ölü, safety no-op, outer ölü dal, yetim + sahte Success, CompensateAll yok)
+- [ ] **Dalga 1 — Kritik akış mührü (saf Fluent dokunuşu yok, davranış):** Splash→Kurulum→Login→FirmaShell→dönem→MainShell→güncelleme→yedek/geri-yükleme; her halka build+test+smoke+canlı ⬜
+- [ ] **Dalga 2 — Denetim gerçekliği:** 16 RAF kartı panelden kaldırılır (Faz 6.71/5 ile aynı liste); Pbkdf2 provider'a bağlanır ⬜
+- [ ] **Dalga 3 — Bildirim/progress disiplini:** Faz 6.71/4 ile aynı kapsam (çekirdek ekranlarına uygulanır) ⬜
+- [ ] **Mühür hükmü (kullanıcıda):** canlı E2E onayı → Faz B (Cari pilotu, saf Fluent) açılır ⬜
+
+## Faz 6.73 — Tenant geçiş doğrulaması: WAL checkpoint + dispose + DB log (Oturum 209, 📋 plan)
+- [ ] **Data:** `ITenantSQLiteDatabaseManager.CheckpointAndReleaseAsync(db)` — `PRAGMA wal_checkpoint(TRUNCATE)` + havuz bırakma + `(ok, message)` kanıtı ⬜
+- [ ] **Business:** `SwitchTenantAsync` + `DisconnectCurrentTenantAsync` eski-tenant kapatması (uyarı-logla devam, geçişi engellemez) + Sistem.db bilgi/hata logları ⬜
+- [ ] **Kullanıcı değişimi notu:** `ShellViewModel.Logout()` ölü yol (çağıranı yok) — yeni kullanıcı tenant seçince switch zaten eskiyi kapatır; logout diriltilirse `DisconnectCurrentTenantAsync` çağırmak zorunda ⬜
+- [ ] **Testler:** Data gerçek-dosya testi (WAL + TRUNCATE) + Business testleri (çağrı adı, log yazımı, fail'de devam, tenantsız pas) ⬜
+- [ ] **Kapı:** build 0/0 + test + smoke + docs ⬜
+
+## Faz 6.75 — Windows 11 Fluent geçişi (Mica-uyumlu, tüm ekranlar — Oturum 219, 📋 plan)
+- [x] **Kararlar:** görsel dil = Windows 11 Fluent tüm proje (AGENTS genel kural güncellendi; "toplu re-skin yok" kalktı) + Mica-uyumluluk zorunlu + **Kural 14** (view-öncesi tasarım araştırması) 📋
+- [x] **Araştırma (Kural 13/14):** MS Mica + System-backdrop bulgusu LOG-221'de ✅ (pencereler Mica'lı, 10 view opak `AppBackgroundBrush` kapatıyor; XAML+code-behind çift-set Kural-4 adayı)
+- [ ] **Geçiş sırası:** `VIEW-BAGIMLILIK.md` topolojik sırayla, view view (çekirdek akış önce: Splash→Kurulum→Login→FirmaShell→Yönetim→Update→MainShell) ⬜
+- [ ] **Her view'da kapı:** Kural 14 araştırması + Kural-8 sınıf onayı + build 0/0 + test + canlı (Mica + Light/Dark) + Kural 13 yardım sayfası ⬜
+- [ ] **Kapsam dışı:** davranış değişikliği yok (yalnız tasarım;-style token'ları `DesignTokens`/`Styles` tek kaynağında) ⬜
+- [x] **Token tek-anahtar süpürmesi (Oturum 225):** 19 anahtar→sistem, 61 tanım silindi, eski-grep 0 — 0 hata + 435/435 + smoke ✅🧪
+- [x] **Login zinciri tema onarımı (Oturum 230):** 8 dosya Static→Theme + alias→sistem eşlemesi + `CardCornerRadius` kırık anahtar fix + CTA'lar AccentButton + Buttons/Cards sistem-renkleri + tema ayarlanabilir (Default=sistem) + dialog miras — 0 hata + 436/436 ✅🧪 (canlı tur kullanıcıda; downstream kendi turunda)
+- [x] **Gerçek Mica tek kaynak (Oturum 238):** 2 pencerede `<MicaBackdrop Kind="Base" />` açık yazım + code-behind `MicaController/DesktopAcrylic` bloğu silindi (XAML tek kaynak, Kural 4) + Yönetim SplitView pane acrylic→Transparent — 0 hata + 446/446 ✅🧪 (canlı Light/Dark görseli kullanıcıda)
+- [ ] **Sıradaki (Oturum 227 devri):** SK alt bileşenler (DatabaseInfoPanel/SystemTestsPanel/KurulumKayitPanel) → Login → FirmaShell; her view muhasebe yazılımı bağlamında araştırılır ⬜
+
+## Faz 6.76 — SistemKurulum→SistemDbYonetim + KurulumSplash akış yeniden tasarımı (Oturum 227, onaylı plan)
+
+**Bağlam:** Kural 14 sektör araştırması — muhasebe yazılımlarında ilk kurulum = firma+dönem sihirbazı; DB işlemleri kullanıcıya gösterilmez. Mevcut SistemKurulum hem ilk kurulum hem güncelleme hem teşhis — hepsini kapsıyor. Hedef: ilk kurulum Splash'te otomatik, güncelleme ayrı ekranda.
+
+### Adım 1 — Business: 3 yollu karar mantığı ✅🧪 (Oturum 227)
+- [x] `SplashTarget` enum'a `FirstSetup` + `MigrationRequired` ekle (mevcut: `SetupRequired` + `Login`) ✅ Eklendi 🧪 Test edildi
+- [x] `SplashRoutingService.DecideRouteAsync` 3 yollu: DB yok → `FirstSetup`, migration var → `MigrationRequired`, hazır → `Login` ✅ Eklendi 🧪 Test edildi
+- [x] Mevcut testler güncelle + yeni karar testleri (5→8 test) ✅ Eklendi 🧪 Test edildi
+
+### Adım 2 — KurulumSplash (yeni View + VM) ✅🧪 (Oturum 229)
+- [x] `KurulumSplashViewModel` (composition: ISistemDatabaseService — otomatik RunSetupAsync, progress, hata yönetimi) ✅ Eklendi 🧪 Test edildi
+- [x] `KurulumSplashView.xaml` (Splash tarzı tek kart, Fluent: logo + "İlk Kurulum" + SplashStatusControl + determinate ProgressBar + % pill + hata paneli) ✅ Eklendi 🧪 Test edildi
+- [x] `KurulumSplashView.xaml.cs` (OnPageLoaded → VM.RunSetupAsync → başarı: Login navigate; başarısızlık: ErrorPanel + Tekrar Dene) ✅ Eklendi 🧪 Test edildi
+- [x] Startup.cs + DI kaydı (Transient + NavigationService.Register) ✅ Eklendi 🧪 Test edildi
+
+### Adım 3 — Rename: SistemKurulum → SistemDbYonetim (15 dosya + 2 klasör) ✅🧪 (Oturum 228, geriye dönük kayıt)
+- [x] View klasörü: `Views/SistemKurulum/` → `Views/SistemDbYonetim/` ✅ Eklendi 🧪 Test edildi
+- [x] View: `SistemKurulumView.xaml(.cs)` → `SistemDbYonetimView.xaml(.cs)` ✅ Eklendi 🧪 Test edildi
+- [x] ViewModel: `SistemKurulumViewModel.cs` → `SistemDbYonetimViewModel.cs` ✅ Eklendi 🧪 Test edildi
+- [x] VM klasörü: `ViewModels/Sistem/SistemKurulum/` → `ViewModels/Sistem/SistemDbYonetim/` ✅ Eklendi 🧪 Test edildi
+- [x] 4 alt VM namespace güncelle ✅ Eklendi 🧪 Test edildi
+- [x] 5 Component namespace güncelle ✅ Eklendi 🧪 Test edildi
+- [x] Harici referanslar güncelle (Startup, DI, SplashNavigator, LoginView, ExtendedSplash) ✅ Eklendi 🧪 Test edildi
+
+### Adım 4 — SistemDbYonetim içerik daraltması ✅🧪 (Oturum 229)
+- [x] `_firstSetupMode` bayrağı + `SetFirstSetupMode()` kaldırıldı (ilk kurulum artık KurulumSplash'te) ✅ Eklendi 🧪 Test edildi
+- [x] Yeni `SetMigrationMode()` metodu + `UpdateStatusMessage` dali güncellendi ✅ Eklendi 🧪 Test edildi
+- [x] Kalan: RepairDatabaseCommand + TestSystemClassesCommand + GoToLoginCommand + DatabaseInfoPanel + KurulumKayitPanel (migration/onarım bağlamında korundu) ✅ Eklendi
+
+### Adım 5 — Navigasyon: SplashNavigator 3 yol ✅🧪 (Oturum 229)
+- [x] `SplashNavigator.NavigateToNextAsync` → `FirstSetup` → KurulumSplash, `MigrationRequired` → SistemDbYonetimView, `Login` → LoginView ✅ Eklendi 🧪 Test edildi
+- [x] SistemDbYonetimView: `SetFirstSetupMode()` → `SetMigrationMode()` güncellendi ✅ Eklendi 🧪 Test edildi
+
+### Kapı
+- [x] `dotnet build` 0/0 ✅ Eklendi 🧪 Test edildi
+- [x] `dotnet test` tüm testler yeşil (436/436) ✅ Eklendi 🧪 Test edildi
+- [x] **Sayfa yeniden yazımı (Oturum 231):** Kural 14 arş + komple rewrite (ilk-kurulum hero/adım göstergesi 0, durum hapı + BodyStrong bölümler) + titlebar Light kalıntısı temizlendi ✅ Eklendi 🧪 Test edildi
+- [ ] Smoke: Splash→KurulumSplash→Login (ilk kurulum) + Splash→Login (normal) + Splash→SistemDbYonetim (migration) akışı ⬜
+- [ ] Fluent geçişi: KurulumSplash + SistemDbYonetim Mica-uyumlu ⬜
+
+## Faz 6.74 — Büyük-iş akış detayı + DB log + log altyapısı (Oturum 208 kararı, 📋 plan)
+- [ ] **Akış detayı:** migration/yedek/sil/güncelle işlerine adım rozetli plan + determinate bar + tek özet (Kural 12); `DeleteGuardDialog`'a akış planı UI'ı ⬜
+- [ ] **Hata→DB eşleşmesi:** tenant-hatası tenant DB (`AppLogs`), sistem-hatası Sistem.db — kural tablosu `AKIS-PLANI §7`-tipi dokümana ⬜
+- [ ] **Log süpürmesi:** sessiz `catch{}`/`continue` envanteri + `SistemLogExceptionAsync` kapsama denetimi (bekçi adayı) + seviye disiplini (info/warning/error) ⬜
+- [ ] **Kapı:** build 0/0 + test + smoke + docs ⬜
+
+## Faz 6.77 — SistemDb Yönetim Operasyonları: yedekle / geri-yükle / güncelle (Oturum 233, 📋 plan)
+
+**Bağlam (kullanıcı tespiti):** SistemDbYonetim sayfası dashboard gibi — durum/analiz/log var, yönetim operasyonu yok. Yedek yalnızca Login→Teşhis dialogunda (code-behind direkt `ISistemBackupManager`), restore'un sistem tarafında UI yolu 0, bekleyen göçü uygulayan UI yok.
+
+**Araştırma bulguları (Oturum 233, Kural 13/14):**
+- Sage 50: Yedekle (tarihli ad, üzerine-yazma uyarısı, otomatik-hatırlatıcı) → Geri yükle (dosya seç + Üzerine-yaz/Yeni-kopya + seçenek demeti + özet-onay + bitince aç) → yükseltmede önce Verify + yedek, hata→yedekten dön.
+- QuickBooks: company-file update = hazırla (Verify, konum notu, tüm kullanıcılar çıkış) → otomatik yedek → Update Now → Done; hata→yedeği geri yükle.
+- SQLite resmi: canlı kopya = Online Backup API (`Microsoft.Data.Sqlite BackupDatabase`) veya `VACUUM INTO` (küçük, tutarlı snapshot); restore = dosya-değişimi + `integrity_check` doğrulama; `VACUUM` öncesi yedek şart.
+- MS Fluent: uzun iş = determinate bar + adım + TEK özet (Kural 12); yıkıcı iş = çift onay.
+
+**Mevcut envanter:**
+| Operasyon | Data | Contract (UI yolu) | UI |
+|---|---|---|---|
+| Durum/analiz/test | ✅ | ✅ `ISistemDatabaseService` | ✅ paneller + log |
+| Kurulum/onarım (sil+kur) | ✅ | ✅ | ✅ DatabaseInfoPanel |
+| Yedek al/listele/temizle | ✅ `SistemBackupManager` | ❌ (dialog code-behind direkt erişim — Kural 5 ihlali) | 🔶 yalnız QuickDialog |
+| Geri yükle | ✅ manager'da | ❌ | ❌ 0 caller |
+| Bekleyen göçü listele | ✅ `GetPendingMigrationsAsync` | ✅ servis | ❌ UI yok |
+| Bekleyen göçü uygula | ❌ (yalnız initialize akışında otomatik) | ❌ | ❌ |
+
+**Adımlar:**
+- [x] **0. SON İŞ (Sorun 2 — Oturum 239):** yönlendirme 3-yollu doğrulandı (kısayol kodda yok); `SplashRouteDecision.KararOzeti` (exists/ready/pending/target) + `SplashNavigator` kararı `ShellArgs.Parameter` ile sayfaya taşır + `SetMigrationMode(ozet)` sayfa günlüğüne `[YÖNLENDİRME]` satırı düşer + 2 karar-izi testi — build 0 hata, test 462/462 ✅ Eklendi 🧪 Test edildi
+- [x] **5. Yedek-panel revizyonu (Oturum 239, canlı tur):** KeepLast yüklemede uygulanır (HATALAR kaydı) + ListView→ItemsControl satır-butonlu (seçim/hover karmaşası bitti, `SeciliYedek`/`GeriYukleCommand` silindi) + tarih-birincil satır (`YedekTarihMetni`, dosya adı tooltip) + satır danger "Geri Yükle" + boş-durum kartı + yardım maddesi güncellendi + 4 test — build 0 hata, test 462/462 ✅ Eklendi 🧪 Test edildi (canlı tur kullanıcıda)
+- [x] **6.77 kapısı (Oturum 239):** build 0 hata + test 462/462 + Adım 0 içinde; smoke/canlı tur kullanıcıda ✅🧪
+- [x] **1. Business zinciri (Oturum 234):** `ISistemDatabaseService.ApplyPendingSistemMigrationsAsync` (contract + impl: bekleyen-kontrol → manuel yedek → `Initialize` göç → doğrulama; `ISistemBackupManager` ctor'a, Singleton-güvenli) + `SistemDatabaseGuncellemeTests` 4 test (yok/yedek-patlar/göç-patlar/başarı) — build 0 hata, test 440/440 ✅ Eklendi 🧪 Test edildi (not: `ISistemDatabaseOperationService` zaten vardı — QuickDialog onu bypass ediyor, VM taşıma Adım 2'de)
+- [x] **2. View (Oturum 235):** `SistemYedekViewModel` (liste + al + FIFO `SistemKeepLast` + seçili-geri-yükle onaylı) + `SistemGuncellemeViewModel` (bekleyen liste + akış-planlı uygula: 1/3→3/3 + determinate) + orkestratör composition + `SistemYedekPanel`/`SistemGuncellemePanel` + sayfa "Yedekleme ve güncelleme" bölümü + QuickDialog VM'e bağlandı (code-behind direkt `ISistemBackupManager`/`LocalSettings` 0) + 6 VM testi — build 0 hata, test 446/446 ✅ Eklendi 🧪 Test edildi (canlı tur kullanıcıda)
+- [x] **3. QuickDialog kararı (Oturum 236):** "Dialog kalksın" (kullanıcı) — `QuickSistemDbDiagDialog.xaml(+cs)` silindi (Kural 4), Login Teşhis doğrudan SistemDbYonetim sayfasına gider, ölü `SistemYedekViewModel` DI kaydı kaldırıldı — build 0 hata, test 446/446 ✅ Eklendi 🧪 Test edildi (canlı tur kullanıcıda)
+- [x] **4. Yardım dialogu (Oturum 236, Kural 13):** AGENTS Kural 13'e desen+kapsam işlendi (? dialogu, yalnız fonksiyonlu view; splash muaf); ortak `Views/Components/YardimDialog` (Kural 8 kaydı) + sayfa başlığında ? butonu + 6 maddelik içerik — build 0 hata, test 446/446 ✅ Eklendi 🧪 Test edildi (canlı tur kullanıcıda)
+- [ ] **Kapı (kalan):** 6.77 canlı tur ✅ (Oturum 240: panel tasarım-uyumu 5/5 + 5→3 budama canlı kanıtlı) → sonra 6.78 Adım 2 (tenant bağlama) ⬜
+
+## Faz 6.78 — Ortak Restore Analizi: geri-yüklemeden önce çift-veritabanı hükmü (Oturum 237, 🔨 aktif)
+
+**Bağlam (kullanıcı):** Sistem.db geri-yükleme basit dialogla olmamalı — kritik işlem. Yedekteki MaliDonem kayıtları güncelden eski olabilir (yedekten sonra açılan dönemler kaybolur), tenant dosyaları yedekte yoktur. İki veritabanı da analiz edilmeli. Altyapı tenant restore'unu da kapsamalı (ortak analiz → sonraki işler kolaylaşır).
+
+**Araştırma (Kural 13/14):**
+- QuickBooks: Verify → hasar varsa Rebuild (**yedek zorunlu**) → tekrar Verify → temizse devam; son çare restore. Restore öncesi mevcut dosyanın yedeği alınır.
+- Mevcut: `RestoreVerdictEvaluator` (tenant, saf fn: Block/Warning/RequireCode/Allow + kod + audit + `RestoreVerifyDialog` tek kapı) — sistem tarafında hüküm YOK (direkt restore).
+
+**Analiz ekseni (2 katman):**
+1. **Yedek-dosya analizi:** `integrity_check` + tablo sayımı + `__EFMigrationsHistory` sürümü + boyut/tarih (yedek dosya salt-okunur açılır).
+2. **Mevcut↔yedek farkı (sistem):** MaliDonem/firma/kullanıcı satır farkı (yedekten sonra açılanlar kaybolur listesi) + tenant DB dosya varlığı + kurulum/makine kimliği.
+
+**Adımlar:**
+- [x] **1. Ortak çekirdek (Oturum 239):** `RestoreAnaliz` DTO'ları (dosya+fark+girdi) + `RestoreAnalizDegerlendirici` (saf fn, `RestoreVerdictKind` reuse) + `IDatabaseBackupManager.AnalyzeBackupFileAsync` (salt-okunur: integrity+sayım+history) + `RestoreAnalizTests` 11 test (matris 8 + gerçek-dosya 3) — build 0 hata, test 462/462 ✅ Eklendi 🧪 Test edildi
+- [x] **2. Tenant hattı (Oturum 242):** `RestoreVerdictEvaluator` ince adaptöre indirildi — firma/dönem/ad kıyası `RestoreAnalizGirdisi.KimlikUyusmazlik*`'e yazılır, hüküm `RestoreAnalizDegerlendirici.Degerlendir`'den alınır; ortak sıra tenant önceliğine çekildi (dosya → kimliksiz → kimlik → sürüm → kayıp → kurulum/makine); eski gömülü sürüm/kurulum dalları silindi (Kural 3/4). `RestoreAnalizTests` +3, `RestoreVerdictTests` 10 değişmeden yeşil — 0 hata + 471/471 ✅ Eklendi 🧪 Test edildi
+- [x] **3. Sistem hattı (Oturum 243):** `ISistemSnapshotReader` (salt-okunur snapshot) + `ISistemRestoreAnalizService` (dosya analizi + mevcut↔yedek farkı → ortak çekirdek hüküm) + `SistemRestoreAnalizSonuc` DTO; `SistemYedekViewModel.GeriYukleAsync` tek kapı (analiz → hüküm dialogu → onay/kod → restore, Block'ta durur); `ISistemDbYonetimView` Kural-17 Katman 1 + `SistemRestoreVerifyDialog` + `IDialogService.ShowSistemRestoreVerifyAsync`; yardım maddesi güncellendi — 0 hata + 482/482 ✅ Eklendi 🧪 Test edildi
+- [ ] **4. UI (Kural 8/11/12):** 🔨 fark listesi + hüküm rozeti + 6-haneli kod alanı + Block'ta pasif Primary + güvenli Vazgeç **dialog içinde** karşılandı (Oturum 243); busy bayrağı/tek özet VM'de var; kalan: canlı Light/Dark + Mica turu ve gerekirse determinate bar ⬜
+- [ ] **Kapı:** build 0/0 + test (hüküm matris testleri) + smoke (sistem + tenant restore turu) + docs ⬜
+
+---
+
+## Faz 6.79 — Sistem.db yaşam-döngüsü güvenliği: açılış yedeği + kapanış WAL aktarımı (Oturum 241, ✅🧪)
+
+**Bağlam (kullanıcı sorusu):** "Açılışta Sistem.db yedekliyor musun, uygulama kapanışında WAL'i DB'ye aktarıyor musun gibi kritik işlemleri yapıyor musun?"
+**Tarama bulgusu (dürüst kayıt):** Açılışta oto-yedek çağrısı **0**; kapanışta WAL checkpoint **0** (kapanış yedeği vardı ama yalnız tenant + kapalı varsayılan); `EnsureWeeklyBackupAsync` kodda **yok** (yalnız arşiv kaydı); `WeeklyBackupDays` modeli var ama **0 tüketici**.
+
+**Araştırma (Kural 13/14):**
+- **Sage 50:** otomatik yedek "dosyayı kapatınca" tetiklenir (gün-ilk) + saklama aralığı ayarlı; tüm kullanıcılar çıkmalı.
+- **QuickBooks:** "Save backup copy automatically when I close my company file" + kaç yedek saklanacağı (retention) + "Complete verification".
+- **SQLite resmi:** WAL checkpoint TRUNCATE kapanışta önerilir (pasif kapanış WAL bırakabilir); açılış/kapanışta busy-timeout + integrity.
+
+**Uygulanan (onaylı: "Hepsi"):**
+- **Data:** `ISistemBackupManager.CheckpointWalAsync` (+impl, `ExecuteWalCheckpointAsync` TRUNCATE reuse) — best-effort, fırlatmaz.
+- **Business:** `ISistemYasamDongusuService` + `SistemYasamDongusuService` (tek sorumluluk, Kural 1): `EnsureStartupSafetyAsync` (WAL checkpoint + `GetLastBackupDate` eşik-aşımı → `CreateBackupAsync(Automatic)` + FIFO `GetSistemKeep`) / `EnsureShutdownSafetyAsync` (checkpoint her zaman + ayarlıysa yedek). Eşik/keep/limit **modelden** (Kural 7: `WeeklyBackupDays`, `GetSistemKeep`).
+- **DI:** `AddSingleton<ISistemYasamDongusuService, SistemYasamDongusuService>` (yalnız Singleton'lara yaslanır — döngü yok).
+- **App kancaları:** açılış → `StartupApplicationExtensions.DbTest` (DB geçerliyse, splash adımı); kapanış → `WindowHelper.TryTakeExitBackupAsync` (Sistem kolu her zaman + ayarlıysa tenant kolu korunur).
+- **Ayarlar:** kapanış toggle metinleri "açık dönem + sistem" (2 dosya) — ayar adı korundu (migration yok, Kural 6).
+- **Test:** `SistemYasamDongusuTests` 6 test (açılış bayat/taze/checkpoint-fail/yedek-patlar + kapanış kapalı/açık) — **0 hata + 468/468**.
+
+**Kapı:** `dotnet build --no-incremental` 0 hata (25 uyarı: bilinen eski aileler) + `dotnet test` 468/468 ✅🧪; canlı WAL/backup turu kullanıcıda.
+
+---
+
+## Faz 6.80 — Katmanlı sayfa yapısı (zemin → ana border → kartlar, tema-resimli zemin) (Oturum 241; ana border + tint kararı Oturum 248, 🔨 devam)
+
+**Kullanıcı kuralı (kesin, Oturum 248 güncel):** Her yeni/güncellenen view 3 katmana oturur: (1) **zemin** — kök `Border` (tüm sayfa; `Image` UniformToFill + tema tonlu tint `SolidBackgroundFillColorBaseBrush` **~%35**, ham resim gösterilmez, statik), (2) **ana border** — zeminin üzerinde tüm içeriği kapsayan çerçeveli panel (`CardBackgroundFillColorSecondaryBrush` + `CardStrokeColorDefaultBrush` 1px + `OverlayCornerRadius` + `Padding 24` + `ThemeShadow`, kenarlardan boşluklu), (3) **içerik kartları** — ana border içinde ayrı `Border` (`CardBackgroundFillColorDefaultBrush` + `ControlCornerRadius`/`OverlayCornerRadius` + `CardStrokeColorDefaultBrush` 1px + `ThemeShadow` + `Translation` + `Padding` 16/12/20, kart arası 12px, iç içe >2 seviye yasak). **Dialog zemini opak** (`SolidBackgroundFillColorBaseBrush`). Sadece Fluent ThemeResource; hardcode hex yasak. Yasak: kök Grid+Background; ana border'sız zemine kart.
+- [x] Kaynak assetler: `Assets/Images/light.jpg` + `dark.jpg` (kullanıcı ekledi) ✅
+- [x] Kural kaydı: `AGENTS.md` Kural 17 (Oturum 248 güncel: zemin→ana border→kartlar + tint ~%35 + opak dialog) + `docs/TASARIM-KURALLARI.md` ✅
+- [x] **LoginView pilotu TAM** (Oturum 248): zemin(0.35)→ana border→kartlar; marka yatay + login sağda + `AppIcon.png` + `?` ana border sağ üst köşesinde; `?`/Teşhis VM command (`IDialogService.ShowYardimAsync`); `YardimDialog` opak; canlı kanıt (`ot248_login_v3_1440.png`/`ot248_login_light.png`/`ot248_help2.png`) ✅🧪
+- [x] Tüm view'larda tint 0.35 (11 dosya) ✅
+- [x] **KurulumSplash/SistemDbYonetim/FirmaShell/DenetimMasasi/ExtendedSplash** zemin + tint 0.35 ✅🧪
+- [x] **FirmaShellView ana border paneli** (Oturum 249): tüm içerik tek `AnaBorder` paneline alındı (`Margin 24,48,24,24` + `CardBackgroundFillColorSecondaryBrush` + stroke 1px + `OverlayCornerRadius` + `Padding 24` + `ThemeShadow`, Loaded receiver); `CustomGlassPanel`/`SecimGorunumu` kaldırıldı + ölü `CustomGlassPanel` stili silindi; `?` `YardimCommand` (6 madde) ana border sağ üst köşesinde; Sage 50 + MS Fluent araştırması → `REFERANSLAR.md` 2 satır; 0 hata + 482/482 + canlı Dark kanıt (`ot249_firmashell.png`/`ot249_help.png`); Light teyit bekliyor ✅🧪
+
+### Denetim Masası → Windows 11 Ayarlar yeniden tasarımı (Oturum 249 devam + devam 2, ✅🧪)
+- [x] **Kararlar:** Mica zemin (Kural 17 Mica istisnası) + resmi **CommunityToolkit `SettingsCard`** + içerik/metin komple yeniden tasarım + **sahte ayar & "Kaydedildi" metni yasak** ✅
+- [x] **Paket:** `DevWinUI 10.0.0` (net8; 10.4.1 net10 olduğu için çalışmıyordu) + `CommunityToolkit.WinUI.Controls.SettingsControls 8.2.251219` (namespace `using:CommunityToolkit.WinUI.Controls`) ✅
+- [x] **Kabuk (`DenetimMasasiView`):** kök `Border` (transparent/Mica) + `NavigationView` Left (kenardan kenara; `AutoSuggestBox` pane'de) + büyük başlık + `?` + `Frame` (max 1000) ✅
+- [x] **Giriş = Windows Ayarlar Home:** hero + kategori kartları ızgarası (`SettingsCard IsClickEnabled`) + Firmalarım + firma-yok ✅
+- [x] **Paneller:** `AppPlatform`/`Identity`/`FirmaKayit`/`Donem` + **Veritabanı tek view** → `SettingsCard` + bölüm başlıkları + yeni metinler; sahte satırlar (Oturum süresi/Son giriş/Haftalık bütünlük) kaldırıldı ✅
+- [x] **Veritabanı tek view (devam 2):** nav tek `Veritabanı`; yeni `VeritabaniAyarlarPaneli` iki `SettingsExpander` (`Sistem Veritabanı` + `Mali Dönem Veritabanları`) + `VeritabaniAyarSayfasi`; eski 4 dosya silindi (Kural 4); arama açıklamada da eşleşir; MS SettingsExpander + Sage/QB yedek araştırması → REFERANSLAR 5 satır ✅
+- [x] **Bugfix (canlı testte):** `ToolBar.xaml` `TextFillColorTertiaryColor`→`TextFillColorTertiary` + `YonetimAyarlarDialog.xaml` `ControlFillColorSecondaryColor`→`ControlFillColorSecondary` (XamlParse → boş/siyah pencere) ✅
+- [x] **Tema sahte→gerçek:** `ThemeSelectorService` `AppSettingsChangedEvent` aboneliği → canlı uygula + `AppBackgroundRequestedTheme`'e yaz (açılışta okunur) ✅
+- [x] **Canlı test (Kural 18 — agent):** Dark (`ot249c_veritabani.png`/`ot249d_top.png`/`ot249e_bottom.png`) + Light canlı (`ot249f_after_light.png`) + açılışta Light (`ot249g_denetim_startup.png`) + Veritabanı Light (`ot249g_veritabani_light.png`); UIA dökümleri; **kullanıcı onayı ALINDI (2026-09-13)** ✅
+- [x] **Borç temizliği:** `KaydedildiMetni` (6 VM + testler) + `Identity.SessionTimeoutMin`/`SonGirisBilgisiniGoster` (sahte) + `DenetimMasasiView` yardım maddeleri güncellendi ✅
+
+### Denetim Masası Giriş sayfası yeniden tasarımı + canlı denetimler (Oturum 251, ✅🧪)
+- [x] **Karşılaştırma (Kural 14/18):** Gerçek Windows 11 25H2 Ayarlar Giriş canlı ekran görüntüsü alındı (`ot251_winsettings.png`) + Denetim Masası ile fark listesi çıkarıldı; REFERANSLAR'a işlendi ✅
+- [x] **Kabuk:** pane üstü **hesap kartı** (PersonPicture + ad + rol; `NavigationView.PaneHeader`) + **nav seçim vurgusu fix** (VM `SequenceEqual` tazeleme + `NavSeciminiAynala`; canlı UIA `Giriş=True`) + arama pane'de kaldı (`AutoSuggestBox`) ✅
+- [x] **Giriş sayfası:** "Ayarlar" bölüm kartları kaldırıldı (ayar içinde ayar yok — kullanıcı kararı); üst satır **DevWinUI `RichButton`** (kart kabı yok, Win11 dili): MuhasibPro (ReadOnly) · Sistem Veritabanı (Bağlı • Güncel • boyut) · Güncelleme (son denetim); altında **Kullanıcıya Ait Firmalar** kartı — her firma `SettingsExpander`, içinde mali dönem listesi (+ Gelişmiş Yönetim) ✅
+- [x] **Paket:** `App.xaml`'e `ms-appx:///DevWinUI/Themes/Generic.xaml` merge (RichButton stil kaynağı; paket Win2D bağımlılığı getirir) — REFERANSLAR kaydı ✅
+- [x] **Rol:** seed yöneticisinin KFR satırı yok → `AuthenticationService` bootstrap kuralıyla `Rol=Yönetici` doldurur (canlı "Yönetici"); VM fallback "Kullanıcı" ✅
+- [x] **Busy + dinamik denetim:** Sistem.db analizi `ProgressRing` + "Analiz ediliyor…"; güncelleme denetimi **her Denetim Masası girişinde** (pencere başına 1), UI kilitlenmez (`IsGuncellemeDenetleniyor` + ring), **20 sn tavan**, her durumda sonuç (kaynak yok / denetlenemedi / güncel / güncelleme var / zaman aşımı) ✅
+- [x] **Veri bug fix:** `GetFirmalarWithUserId` dönem projeksiyonu (`0 dönem` → gerçek dönemler) — HATALAR kaydı ✅
+- [x] **Doğrulama:** build 0 hata + test **481/481**; canlı kanıt `ot251l_home.png` (+ `ot251i`/`ot251j`/`ot251k`, UIA dökümleri); **kullanıcı onayı ALINDI (2026-09-13)** ✅
+
+- [ ] **Ana border paneli** kalan view'lara tek tek (MaliDonemYonetim, TenantDatabaseUpdate, Update, MainShell, ShellView, DatabaseSettings, SistemDbYonetim, DenetimMasasi) + ilgili dialog opaklığı + `?` panel köşesi ⬜
+- [ ] Kalan 3 logo (`ExtendedSplash`/`KurulumSplash`/`SistemDbYonetim`) canlı doğrulama (FirmaShell logosu Oturum 249 canlı kanıtında görünür) ⬜
+- [ ] FirmaShell Light/Mica canlı teyidi (Dark ✅; **tema fix'i sonrası Light global çalışıyor** — FirmaShell Light kanıtı sıradaki turda) ⬜
+- [ ] Sıradaki view'lar topolojik sıra: `MaliDonemYonetimView` → `TenantDatabaseUpdateView` → `UpdateView` → `MainShellView` → `ShellView` → `DatabaseSettingsView` ⬜

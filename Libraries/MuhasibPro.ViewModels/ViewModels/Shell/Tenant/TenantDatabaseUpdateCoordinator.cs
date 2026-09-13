@@ -43,9 +43,10 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
 
                 if (!result.Success)
                 {
-                    var geriAl = await _dialogs.ShowAsync("Güncelleme Hatası", $"{result.ErrorMessage}\n\nYedekten geri alınsın mı? (otomatik yedek mevcutsa geri yüklenecek)", "Geri Al", "Kapat");
-                    if (geriAl)
-                        await _dialogs.ShowAsync("Bilgi", "Mali Dönem Yönetim → Dönem Yedekleri → Geri Yükle ile en son yedeği geri yükleyebilirsiniz.", "Tamam");
+                    // C3 fix: "Geri Al" butonu gerçek restore yapmıyor — dürüst bilgi ver.
+                    await _dialogs.ShowAsync("Geçiş Hatası",
+                        $"{result.ErrorMessage}\n\nMali Dönem Yönetim → Dönem Yedekleri → Geri Yükle ile en son yedeği geri yükleyebilirsiniz.",
+                        "Tamam");
                 }
                 return;
             }

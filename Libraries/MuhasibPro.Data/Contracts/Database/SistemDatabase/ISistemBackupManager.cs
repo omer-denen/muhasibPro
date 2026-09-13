@@ -18,6 +18,9 @@ namespace MuhasibPro.Data.Contracts.Database.SistemDatabase
         Task<List<DatabaseBackupResult>> GetBackupsAsync();
         DateTime? GetLastBackupDate();
         Task<int> CleanOldBackupsAsync(int keepLast);
+
+        /// <summary>Faz 6.79: WAL içeriğini ana dosyaya aktarır (TRUNCATE, best-effort). Fırlatmaz.</summary>
+        Task<bool> CheckpointWalAsync();
         
         Task<bool> RestoreFromLatestBackupAsync();
     }

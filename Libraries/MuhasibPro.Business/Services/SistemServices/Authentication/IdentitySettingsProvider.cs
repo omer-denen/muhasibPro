@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Domain.Models;
@@ -7,13 +8,17 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
     public class IdentitySettingsProvider : IIdentitySettingsProvider
     {
         private readonly ILocalSettingsService _localSettings;
-        private readonly IAuthenticationService _auth;
+        private readonly IServiceProvider _serviceProvider;
 
-        public IdentitySettingsProvider(ILocalSettingsService localSettings, IAuthenticationService auth = null!)
+        [ActivatorUtilitiesConstructor]
+        public IdentitySettingsProvider(ILocalSettingsService localSettings, IServiceProvider serviceProvider)
         {
             _localSettings = localSettings;
-            _auth = auth;
+            _serviceProvider = serviceProvider;
         }
+
+        public IdentitySettingsProvider(ILocalSettingsService localSettings)
+            : this(localSettings, (IServiceProvider)null!) { }
 
         public async Task<IdentitySettings> GetAsync()
         {
@@ -32,7 +37,8 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
         {
             var clamped = Clamp(settings ?? new IdentitySettings());
             var kayitli = await GetAsync();
-            AyarYetkiDenetimi.KritikDegisiklikleriDogrula(clamped, kayitli, _auth);
+            var auth = _serviceProvider?.GetService<IAuthenticationService>();
+            AyarYetkiDenetimi.KritikDegisiklikleriDogrula(clamped, kayitli, auth);
             await _localSettings.SaveSettingAsync(IdentitySettings.SettingsKey, clamped);
         }
 

@@ -2,7 +2,9 @@
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Services.SistemServices.LogServices;
 using MuhasibPro.Data.Contracts.Database.SistemDatabase;
+using MuhasibPro.Data.Contracts.Database.SistemDatabase;
 using MuhasibPro.Data.Database.Extensions;
+using MuhasibPro.Domain.Enum.DatabaseEnum;
 using MuhasibPro.Domain.Models.DatabaseResultModel;
 using MuhasibPro.Domain.Models.DatabaseResultModel.DatabaseDiagModel;
 using MuhasibPro.Domain.Utilities.Responses;
@@ -12,12 +14,14 @@ namespace MuhasibPro.Business.Services.DatabaseServices.SistemDatabaseService
     public class SistemDatabaseService : ISistemDatabaseService
     {
         private readonly ISistemMigrationManager _migrationManager;        
+        private readonly ISistemBackupManager _backupManager;
         private readonly ILogService _logService;
 
-        public SistemDatabaseService(ILogService logService, ISistemMigrationManager migrationManager)
+        public SistemDatabaseService(ILogService logService, ISistemMigrationManager migrationManager, ISistemBackupManager backupManager)
         {
             _logService = logService;
             _migrationManager = migrationManager;
+            _backupManager = backupManager;
         }
 
         public async Task<ApiDataResponse<DatabaseConnectionAnalysis>> GetSistemDatabaseStateAsync()
@@ -64,6 +68,31 @@ namespace MuhasibPro.Business.Services.DatabaseServices.SistemDatabaseService
         }
 
         public async Task<List<string>> GetPendingMigrationsAsync() => await _migrationManager.GetPendingMigrationsAsync();
+
+        public async Task<(bool success, string message)> ApplyPendingSistemMigrationsAsync()
+        {
+            try
+            {
+                var pending = await _migrationManager.GetPendingMigrationsAsync();
+                if (pending.Count == 0)
+                    return (false, "Bekleyen sistem güncellemesi yok.");
+
+                var backup = await _backupManager.CreateBackupAsync(DatabaseBackupType.Manual);
+                if (backup == null || !backup.IsBackupComleted)
+                    return (false, "Güncelleme öncesi yedek alınamadı — işlem durduruldu.");
+
+                var (ok, msg) = await _migrationManager.InitializeSistemDatabaseAsync();
+                if (!ok)
+                    return (false, msg);
+
+                var (valid, validMsg) = await ValidateSistemDatabaseAsync();
+                return valid ? (true, msg) : (false, validMsg);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Güncelleme sırasında hata: {ex.Message}");
+            }
+        }
 
         public async Task<DatabaseHealtyDiagReport> GetSistemDatabaseFullDiagStateAsync(IProgress<AnalysisProgress> progressReporter = null, AnalysisOptions options = null) => await _migrationManager.GetSistemDatabaseFullDiagStateAsync(progressReporter, options);
     }

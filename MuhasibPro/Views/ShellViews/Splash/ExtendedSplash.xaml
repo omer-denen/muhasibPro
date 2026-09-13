@@ -8,10 +8,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Loaded="OnPageLoaded"
     mc:Ignorable="d"
-    Background="{ThemeResource AppBackgroundBrush}">
+    Background="Transparent">
 
     <Page.Resources>
-        <!-- Kart giriş animasyonu -->
+        <!-- Kart giris animasyonu -->
         <Storyboard x:Name="CardEntranceStoryboard">
             <DoubleAnimation
                 Storyboard.TargetName="SplashCard"
@@ -32,16 +32,26 @@
         </Storyboard>
     </Page.Resources>
 
-    <Grid x:Name="SplashOverlay" Background="{ThemeResource AppBackgroundBrush}">
+    <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + ~%87 opak tint). Statik; icerik degisince yeniden olusmaz. -->
+    <Border x:Name="KokZemin" CornerRadius="0">
+        <Grid>
+            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
 
-        <!-- Buzlu anakart (Invent: beyaz iç kartlar üstte yüzer) -->
+    <Grid x:Name="SplashOverlay" Background="Transparent">
+
+        <!-- Ana kart (Fluent: CardBackground + OverlayCornerRadius + elevation 8) -->
         <Border
             x:Name="SplashCard"
             Width="460"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Translation="0,0,32"
-            Style="{StaticResource CustomElevatedCard}">
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="{StaticResource OverlayCornerRadius}"
+            Padding="16">
             <Border.Shadow>
                 <ThemeShadow x:Name="CardShadow" />
             </Border.Shadow>
@@ -51,32 +61,31 @@
 
             <StackPanel Spacing="16">
 
-                <!-- Logo + başlık -->
+                <!-- Logo + baslik -->
                 <StackPanel Spacing="10" HorizontalAlignment="Center" Margin="0,8,0,4">
-                    <Border Width="56" Height="56" CornerRadius="{StaticResource MuhasibCardCornerRadius}" HorizontalAlignment="Center"
-                            Background="{StaticResource MuhasibPetrolBrush}">
-                        <TextBlock Text="M" FontSize="28" FontWeight="Bold" Foreground="{StaticResource MuhasibOnPetrolBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
+                    <Image Width="56" Height="56" Source="ms-appx:///Assets/AppIcon.png" Stretch="Uniform" HorizontalAlignment="Center" />
                     <TextBlock
                         HorizontalAlignment="Center"
-                        FontSize="22"
-                        FontWeight="Bold"
-                        Foreground="{StaticResource MuhasibTextPrimaryBrush}"
+                        Style="{StaticResource SubtitleTextBlockStyle}"
                         Text="MuhasibPro" />
                     <TextBlock
                         HorizontalAlignment="Center"
                         TextAlignment="Center"
                         TextWrapping="Wrap"
-                        FontSize="13"
-                        Foreground="{StaticResource MuhasibSageTertiaryBrush}"
-                        Text="Yeni Nesil Ön Muhasebe" />
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                        Text="Yeni Nesil On Muhasebe" />
                 </StackPanel>
 
-                <!-- Durum yazısı (buz üstünde çıplak — animasyonlu metne beyaz hub yok) -->
+                <!-- Durum yazisi -->
                 <local:SplashStatusControl x:Name="StatusControl" />
 
-                <!-- Progress kartı -->
-                <Border Style="{StaticResource InventCardStyle}" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Padding="14">
+                <!-- Progress karti (Fluent: ic kart + accent ProgressBar) -->
+                <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                        Padding="14">
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -87,15 +96,13 @@
                             Grid.Column="0"
                             Height="6"
                             VerticalAlignment="Center"
-                            Background="{StaticResource MuhasibSoftBorderBrush}"
-                            Foreground="{StaticResource MuhasibPetrolBrush}"
                             Maximum="100"
                             Value="{x:Bind ProgressValue, Mode=OneWay}" />
                         <Border Grid.Column="1"
                                 Padding="12,5" CornerRadius="{StaticResource MuhasibPillCornerRadius}"
-                                Background="{StaticResource MuhasibPetrolTintBrush}"
-                                BorderBrush="{StaticResource MuhasibPetrolBorderBrush}" BorderThickness="1">
-                            <TextBlock FontSize="11" FontWeight="Bold" Foreground="{StaticResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center">
+                                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                            <TextBlock FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center">
                                 <Run Text="{x:Bind ProgressValue, Mode=OneWay}" />
                                 <Run Text="%" />
                             </TextBlock>
@@ -103,31 +110,10 @@
                     </Grid>
                 </Border>
 
-                <!-- Sistem rozeti (buz üstünde beyaz hap) -->
-                <Border
-                    Padding="10,6"
-                    CornerRadius="{StaticResource MuhasibPillCornerRadius}"
-                    HorizontalAlignment="Center"
-                    Background="{StaticResource MuhasibInventCardBrush}"
-                    BorderBrush="{StaticResource MuhasibSoftBorderBrush}"
-                    BorderThickness="1">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon
-                            Glyph="{StaticResource IconDatabase}"
-                            FontSize="11"
-                            Foreground="{StaticResource MuhasibSageTertiaryBrush}"
-                            VerticalAlignment="Center" />
-                        <TextBlock
-                            Text="SQLite WAL • Multi-Tenant"
-                            FontSize="10"
-                            Foreground="{StaticResource MuhasibSageTertiaryBrush}"
-                            VerticalAlignment="Center" />
-                    </StackPanel>
-                </Border>
             </StackPanel>
         </Border>
 
-        <!-- Footer — sürüm / telif -->
+        <!-- Footer — surum / telif -->
         <Grid Padding="24,0,24,14" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -136,17 +122,19 @@
             <TextBlock
                 Grid.Column="0"
                 HorizontalAlignment="Left"
-                FontSize="10"
-                Foreground="{StaticResource MuhasibSageTertiaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                 Opacity="0.5"
                 Text="{x:Bind Version}" />
             <TextBlock
                 Grid.Column="1"
                 HorizontalAlignment="Right"
-                FontSize="10"
-                Foreground="{StaticResource MuhasibSageTertiaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                 Opacity="0.5"
                 Text="{x:Bind CopyrightText}" />
         </Grid>
     </Grid>
+        </Grid>
+    </Border>
 </Page>

@@ -12,7 +12,7 @@
     <Frame x:Name="MainFrame" x:FieldModifier="public" />
 
     <Window.SystemBackdrop>
-        <MicaBackdrop />
+        <MicaBackdrop Kind="Base" />
     </Window.SystemBackdrop>
 
 

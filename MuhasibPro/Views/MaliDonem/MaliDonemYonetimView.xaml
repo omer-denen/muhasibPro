@@ -9,22 +9,25 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource AppBackgroundBrush}">
+    Background="Transparent">
 
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
         <converters:BoolToVisibilityConverter x:Key="FalseToVis" TrueValue="Collapsed" FalseValue="Visible" />
-        <Storyboard x:Name="ArsivBilgiKaybol">
-            <DoubleAnimation Storyboard.TargetName="ArsivBilgiBar" Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.6" />
-        </Storyboard>
     </Page.Resources>
+
+    <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + ~%87 opak tint). Statik; icerik degisince yeniden olusmaz. -->
+    <Border x:Name="KokZemin" CornerRadius="0">
+        <Grid>
+            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
 
     <Grid x:Name="RootLayout" RowSpacing="12" Padding="20,16,20,16">
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="AdaptiveStates">
                 <VisualState x:Name="WideState">
                     <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="900" />
+                        <AdaptiveTrigger MinWindowWidth="1500" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="MainSplitView.DisplayMode" Value="Inline" />
@@ -68,14 +71,17 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Button x:Name="HamburgerButton" Visibility="Collapsed" Click="OnHamburgerClick" VerticalAlignment="Center" Style="{StaticResource GhostLargeButtonStyle}" ToolTipService.ToolTip="Dönem listesini göster/gizle">
-                        <FontIcon Glyph="&#xE700;" FontSize="16" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
+                        <FontIcon Glyph="&#xE700;" FontSize="16" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                     </Button>
                     <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                        <TextBlock Text="Veritabanı &amp; Yedekleme Motoru" FontSize="20" FontWeight="Bold" Foreground="{StaticResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" />
-                        <TextBlock Text="Soldan dönem seçin — sağda işlem kartları açılır." FontSize="13" Foreground="{StaticResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="Veritabanı &amp; Yedekleme Motoru" FontSize="20" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <TextBlock Text="Soldan dönem seçin — sağda işlem kartları açılır." FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                            <ProgressRing Width="12" Height="12" IsActive="{Binding IsSayfaYukleniyor, Mode=OneWay}" Foreground="{ThemeResource MuhasibPetrolBrush}" Visibility="{Binding IsSayfaYukleniyor, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
+                        </StackPanel>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding SelectedFirma.KisaUnvani, FallbackValue='—'}" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding SelectedFirma.KisaUnvani, FallbackValue='—'}" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                         <Border Padding="7,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}" BorderBrush="{ThemeResource MuhasibPetrolBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
                             <TextBlock Text="{Binding SelectedFirma.FirmaKodu, FallbackValue='—'}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
                         </Border>
@@ -97,31 +103,31 @@
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <FontIcon Glyph="{StaticResource IconDatabase}" FontSize="14" Foreground="{ThemeResource MuhasibPetrolBrush}" VerticalAlignment="Center" />
                             <StackPanel Spacing="0" VerticalAlignment="Center">
-                                <TextBlock FontSize="14" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}">
+                                <TextBlock FontSize="14" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}">
                                     <Run Text="{Binding GenelBakisVM.FiltreliDonemler.Count, FallbackValue='0'}" /><Run Text=" Dönem DB" />
                                 </TextBlock>
-                                <TextBlock Text="{Binding GenelBakisVM.KayitliDbAltMetni}" FontSize="10" Foreground="{ThemeResource MuhasibSuccessBrush}" />
+                                <TextBlock Text="{Binding GenelBakisVM.KayitliDbAltMetni}" FontSize="10" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <FontIcon Glyph="{StaticResource IconHardDrive}" FontSize="14" Foreground="{ThemeResource MuhasibPetrolBrush}" VerticalAlignment="Center" />
                             <StackPanel Spacing="0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding GenelBakisVM.ToplamDepolamaMetni}" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
-                                <TextBlock Text="{Binding GenelBakisVM.OrtalamaDepolamaMetni}" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
+                                <TextBlock Text="{Binding GenelBakisVM.ToplamDepolamaMetni}" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{Binding GenelBakisVM.OrtalamaDepolamaMetni}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <FontIcon Glyph="{StaticResource IconZap}" FontSize="14" Foreground="{ThemeResource MuhasibWarningBrush}" VerticalAlignment="Center" />
+                            <FontIcon Glyph="{StaticResource IconZap}" FontSize="14" Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" />
                             <StackPanel Spacing="0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding GenelBakisVM.WalModuMetni}" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource MuhasibSuccessBrush}" />
-                                <TextBlock Text="Write-Ahead Logging devrede" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
+                                <TextBlock Text="{Binding GenelBakisVM.WalModuMetni}" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                <TextBlock Text="Write-Ahead Logging devrede" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <FontIcon Glyph="{StaticResource IconShield}" FontSize="14" Foreground="{ThemeResource MuhasibSuccessBrush}" VerticalAlignment="Center" />
+                            <FontIcon Glyph="{StaticResource IconShield}" FontSize="14" Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" />
                             <StackPanel Spacing="0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding GenelBakisVM.ButunlukSkoruMetni}" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
-                                <TextBlock Text="{Binding GenelBakisVM.ButunlukAltMetni}" FontSize="10" Foreground="{ThemeResource MuhasibSuccessBrush}" />
+                                <TextBlock Text="{Binding GenelBakisVM.ButunlukSkoruMetni}" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{Binding GenelBakisVM.ButunlukAltMetni}" FontSize="10" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                             </StackPanel>
                         </StackPanel>
                     </Grid>
@@ -130,7 +136,8 @@
                 <!-- Icerik: sol liste + sag kart izgarasi — hamburger responsive -->
                 <SplitView x:Name="MainSplitView" Grid.Row="2" DisplayMode="Inline" IsPaneOpen="True" OpenPaneLength="320" CompactPaneLength="0" PaneBackground="Transparent">
                     <SplitView.Pane>
-                        <Grid Style="{StaticResource CompactElevatedCard}">
+                        <!-- Sol pane yalnız dönem listesi (sıklık dışı kartlar sağda) -->
+                        <Grid Style="{StaticResource CompactElevatedCard}" RowSpacing="8">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <components:DonemSecimListesi x:Name="DonemSecimListe" />
                             </ScrollViewer>
@@ -152,215 +159,49 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <!-- Row A: birlesik donem karti (hero + bilgi seridi) -->
-                            <Border Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource CustomModernCard}" Padding="16,14">
-                                <StackPanel Spacing="12">
-                                    <!-- Hero: sol yil+meta, sag aksiyonlar — sade 2 kolon, relative yok -->
-                                    <Grid ColumnSpacing="16">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding SelectedDonem.MaliYil, FallbackValue='—'}" FontSize="34" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" />
-                                            <StackPanel Spacing="4" VerticalAlignment="Center">
-                                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                                    <Border Padding="8,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibSuccessBgBrush}" BorderBrush="{ThemeResource MuhasibSuccessBrush}" BorderThickness="1" Visibility="{Binding SelectedDonem.DbGuncelMi, Converter={StaticResource TrueToVis}}">
-                                                        <TextBlock Text="Açık" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSuccessBrush}" />
-                                                    </Border>
-                                                    <Border Padding="8,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibDangerBgBrush}" BorderBrush="{ThemeResource MuhasibDangerBrush}" BorderThickness="1" Visibility="{Binding SelectedDonem.DbDosyaYokMu, Converter={StaticResource TrueToVis}}">
-                                                        <TextBlock Text="Dosya Yok" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibDangerBrush}" />
-                                                    </Border>
-                                                    <Border Padding="8,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" BorderBrush="{ThemeResource MuhasibWarningBrush}" BorderThickness="1" Visibility="{Binding SelectedDonem.ArsivliMi, Converter={StaticResource TrueToVis}}">
-                                                        <TextBlock Text="Arşivli" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibWarningBrush}" />
-                                                    </Border>
-                                                </StackPanel>
-                                                <TextBlock Text="{Binding DonemBaslik}" FontSize="12" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" TextTrimming="CharacterEllipsis" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                            <Button ToolTipService.ToolTip="Seçili dönemin VACUUM INTO yedeğini al" Click="OnHizliYedekleClick" Style="{StaticResource PrimaryCompactButtonStyle}" VerticalAlignment="Center">
-                                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                                    <FontIcon Glyph="{StaticResource IconAdd}" FontSize="12" Foreground="{ThemeResource MuhasibOnInkBrush}" />
-                                                    <TextBlock Text="Şimdi Yedekle" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibOnInkBrush}" />
-                                                </StackPanel>
-                                            </Button>
-                                            <Button x:Name="DonemSilButton" AutomationProperties.Name="Dönemi Sil" Click="OnDonemSilClick" Style="{StaticResource GhostLargeButtonStyle}" VerticalAlignment="Center" ToolTipService.ToolTip="Dönemi Sil">
-                                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                                    <FontIcon Glyph="{StaticResource IconTrash}" FontSize="12" Foreground="{ThemeResource MuhasibDangerBrush}" />
-                                                    <TextBlock Text="Sil" FontSize="12" Foreground="{ThemeResource MuhasibDangerBrush}" />
-                                                </StackPanel>
-                                            </Button>
-                                        </StackPanel>
-                                    </Grid>
+                            <!-- Row 0: ozet + toplu — dar ekranda sıkışmaz, satır yatay kayar -->
+                            <ScrollViewer Grid.Row="0" Grid.ColumnSpan="3" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                            <Grid ColumnSpacing="12" MinWidth="940">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                            <!-- Row A sol: birlesik donem karti (hero + bilgi seridi) -->
+                            <components:DonemOzetCard x:Name="DonemOzet" Grid.Column="0"
+                                                      HizliYedekleClick="OnHizliYedekleClick"
+                                                      DonemSilClick="OnDonemSilClick"
+                                                      DurumYenileClick="OnDurumYenileClick"
+                                                      GuncelleClick="OnGuncelleClick"
+                                                      ArsivdenCikarClick="OnArsivdenCikarClick" />
 
-                                    <Rectangle Height="1" Fill="{ThemeResource MuhasibSoftBorderBrush}" Opacity="0.45" />
+                            <!-- Row A sag: toplu islemler -->
+                            <components:TopluIslemlerPanel x:Name="TopluIslemler" Grid.Column="1"
+                                                           TopluYedekleClick="OnTopluYedekleClick"
+                                                           TopluTestClick="OnTopluTestClick"
+                                                           TopluBakimClick="OnTopluBakimClick" />
+                            </Grid>
+                            </ScrollViewer>
 
-                                    <!-- Bilgi seridi: 3 esit kolon, dikey ayraç yok — spacing ile ayrim -->
-                                    <Grid ColumnSpacing="24">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" Spacing="8" VerticalAlignment="Top">
-                                            <TextBlock Text="DURUM" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
-                                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                <Border Padding="8,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibSuccessBgBrush}" BorderBrush="{ThemeResource MuhasibSuccessBrush}" BorderThickness="1" VerticalAlignment="Center" Visibility="{Binding SelectedDonem.DbGuncelMi, Converter={StaticResource TrueToVis}}">
-                                                    <TextBlock Text="Güncel" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-                                                <Border Padding="8,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" BorderBrush="{ThemeResource MuhasibWarningBrush}" BorderThickness="1" VerticalAlignment="Center" Visibility="{Binding SelectedDonem.DbGuncellemeGerekliMi, Converter={StaticResource TrueToVis}}">
-                                                    <TextBlock Text="Güncelleme Gerekli" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibWarningBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-                                                <Border Padding="8,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibDangerBgBrush}" BorderBrush="{ThemeResource MuhasibDangerBrush}" BorderThickness="1" VerticalAlignment="Center" Visibility="{Binding SelectedDonem.DbDosyaYokMu, Converter={StaticResource TrueToVis}}">
-                                                    <TextBlock Text="Dosya Yok" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibDangerBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-                                            </StackPanel>
-                                            <Button ToolTipService.ToolTip="PRAGMA bütünlük + dosya analizini yenile" Click="OnDurumYenileClick" Style="{StaticResource GhostTintOliveButtonStyle}" HorizontalAlignment="Stretch" Margin="0,4,0,0">
-                                                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="{StaticResource IconRefresh}" FontSize="12" Foreground="{ThemeResource MuhasibOliveBrush}" />
-                                                    <TextBlock Text="Durumu Yenile" FontSize="12" Foreground="{ThemeResource MuhasibOliveBrush}" />
-                                                </StackPanel>
-                                            </Button>
-                                            <Button Click="OnGuncelleClick" Style="{StaticResource PrimaryCompactButtonStyle}" HorizontalAlignment="Stretch" Visibility="{Binding SelectedDonem.DbGuncellemeGerekliMi, Converter={StaticResource TrueToVis}}">
-                                                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                                                    <FontIcon Glyph="{StaticResource IconUpload}" FontSize="12" Foreground="{ThemeResource MuhasibOnInkBrush}" />
-                                                    <TextBlock Text="Veritabanını Güncelle" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibOnInkBrush}" />
-                                                </StackPanel>
-                                            </Button>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Top">
-                                            <TextBlock Text="VERİTABANI" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
-                                            <Grid RowSpacing="4">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
-                                                </Grid.RowDefinitions>
-                                                <TextBlock Text="WAL:" FontSize="12" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                                <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="{Binding SelectedDonem.DbWalMetni, FallbackValue='—'}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibOliveBrush}" VerticalAlignment="Center" />
-                                                <TextBlock Grid.Row="1" Text="Tablo &amp; Kayıt:" FontSize="12" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                                <TextBlock Grid.Row="1" Grid.Column="1" Margin="10,0,0,0" Text="{Binding SelectedDonem.DbTabloKayitMetni, FallbackValue='—'}" FontSize="12" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                                            </Grid>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Top">
-                                            <TextBlock Text="YEDEK" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
-                                            <Grid RowSpacing="4">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
-                                                </Grid.RowDefinitions>
-                                                <TextBlock Text="Son Yedek:" FontSize="12" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                                <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="{Binding SelectedDonem.SonYedekMetni, FallbackValue='—'}" FontSize="12" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                                <TextBlock Grid.Row="1" Text="Boyut:" FontSize="12" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                                <TextBlock Grid.Row="1" Grid.Column="1" Margin="10,0,0,0" Text="{Binding SelectedDonem.BoyutMetni, FallbackValue='—'}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibOliveBrush}" VerticalAlignment="Center" />
-                                            </Grid>
-                                        </StackPanel>
-                                    </Grid>
+                            <!-- 1. Yedek listesi (en sık) -->
+                            <components:DonemYedeklerPanel x:Name="DonemYedekler" Grid.Row="1" Grid.ColumnSpan="2" />
 
-                                    <!-- Uyari barlari -->
-                                    <StackPanel Spacing="8">
-                                        <Grid Padding="12,9" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" BorderBrush="{ThemeResource MuhasibWarningBrush}" BorderThickness="1" Visibility="{Binding SelectedDonem.ArsivliMi, Converter={StaticResource TrueToVis}}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Bu dönemi kullanmak mı istiyorsunuz? Arşivden çıkararak yeniden aktif hale getirin." FontSize="12" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                                            <Button Grid.Column="1" ToolTipService.ToolTip="Arşivli dönemi yeniden aktif hale getir" Click="OnArsivdenCikarClick" Style="{StaticResource GhostPillButtonStyle}" VerticalAlignment="Center">
-                                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                                    <FontIcon Glyph="{StaticResource IconUpload}" FontSize="11" Foreground="{ThemeResource MuhasibWarningBrush}" />
-                                                    <TextBlock Text="Arşivden Çıkar" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibWarningBrush}" />
-                                                </StackPanel>
-                                            </Button>
-                                        </Grid>
-                                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Visibility="{Binding SelectedDonem.DbDosyaYokMu, Converter={StaticResource TrueToVis}}">
-                                            <FontIcon Glyph="{StaticResource IconAlertCircle}" FontSize="13" Foreground="{ThemeResource MuhasibDangerBrush}" VerticalAlignment="Center" />
-                                            <TextBlock Text="Veritabanı dosyası bulunamadı — aşağıdaki yedek listesinden “Geri Yükle” ile kurtarın ya da Sil ile kaydı temizleyin." FontSize="11" Foreground="{ThemeResource MuhasibDangerBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                                        </StackPanel>
-                                        <Grid x:Name="ArsivBilgiBar" Padding="12,9" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource MuhasibSuccessBgBrush}" BorderBrush="{ThemeResource MuhasibSuccessBrush}" BorderThickness="1" Visibility="Collapsed">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <FontIcon Glyph="{StaticResource IconCheckCircle}" FontSize="14" Foreground="{ThemeResource MuhasibSuccessBrush}" VerticalAlignment="Center" />
-                                            <TextBlock x:Name="ArsivBilgiMetni" Grid.Column="1" Margin="8,0,0,0" FontSize="12" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                                        </Grid>
-                                        <Grid Padding="12,9" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" BorderBrush="{ThemeResource MuhasibWarningBrush}" BorderThickness="1" Visibility="{Binding IsDonemSeciliDegil, Converter={StaticResource TrueToVis}}">
-                                            <TextBlock Text="Dönem seçilemedi — devam etmek için soldaki listeden bir dönem seçin." FontSize="12" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                                        </Grid>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
+                            <!-- 2. Teknik parametreler (yedek yanında) -->
+                            <components:DonemParametrePanel x:Name="DonemParametreler" Grid.Row="1" Grid.Column="2" VerticalAlignment="Top" />
 
-                            <!-- 3. Yedek listesi -->
-                            <components:DonemYedeklerPanel x:Name="DonemYedekler" Grid.Row="2" Grid.ColumnSpan="2" />
+                            <!-- 3. Donem islemleri (4 kutu) -->
+                            <components:DonemIslemKartlariPanel x:Name="DonemKartlar" Grid.Row="2" Grid.ColumnSpan="3" />
 
-                            <!-- 4. Donem islemleri (4 kutu) -->
-                            <components:DonemIslemKartlariPanel x:Name="DonemKartlar" Grid.Row="1" Grid.ColumnSpan="3" />
-
-                            <!-- 5. Analiz dagilimi -->
+                            <!-- 4. Analiz dagilimi -->
                             <components:DerinAnalizPanel x:Name="DerinAnalizPanel" Grid.Row="3" Grid.ColumnSpan="3" />
 
-                            <!-- 6. Arsiv (Row C sag) -->
-                            <Border Style="{StaticResource CustomModernCard}" Padding="14,12" Grid.Row="2" Grid.Column="2">
-                                <StackPanel Spacing="12">
-                                    <components:ArsivPanel x:Name="ArsivPanel" />
-                                    <components:BilinmeyenPanel x:Name="BilinmeyenPanel" />
+                            <!-- 5. Ayarlar (en seyrek, en altta) -->
+                            <Button Grid.Row="4" Grid.ColumnSpan="3" Click="OnAyarlarClick" Style="{StaticResource GhostLargeButtonStyle}" HorizontalAlignment="Right" ToolTipService.ToolTip="Bu firmanın liste ve yedek saklama ayarları">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <FontIcon Glyph="{StaticResource IconSettings}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Ayarlar" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                                 </StackPanel>
-                            </Border>
-                            <!-- Row A sag: toplu islemler -->
-                            <Border Style="{StaticResource CustomModernCard}" Padding="14,12" Grid.Row="0" Grid.Column="2">
-                                <StackPanel Spacing="8">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <Border Width="24" Height="24" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}">
-                                            <FontIcon Glyph="{StaticResource IconZap}" FontSize="11" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Border>
-                                        <TextBlock Text="Toplu İşlemler" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                    <TextBlock Text="Tüm dönemlere tek seferde uygula." FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" />
-                                    <Button ToolTipService.ToolTip="Tüm dönemlerin yedeğini al (VACUUM INTO)" Click="OnTopluYedekleClick" Style="{StaticResource PrimaryCompactButtonStyle}" HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                                            <FontIcon Glyph="{StaticResource IconDownload}" FontSize="12" Foreground="{ThemeResource MuhasibOnInkBrush}" />
-                                            <TextBlock Text="Tümünü Yedekle" FontSize="12" Foreground="{ThemeResource MuhasibOnInkBrush}" />
-                                        </StackPanel>
-                                    </Button>
-                                    <Button ToolTipService.ToolTip="Tüm dönemlerde bütünlük testi çalıştır (PRAGMA integrity_check)" Click="OnTopluTestClick" Style="{StaticResource GhostLargeButtonStyle}" HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                                            <FontIcon Glyph="{StaticResource IconShield}" FontSize="12" Foreground="{ThemeResource MuhasibSuccessBrush}" />
-                                            <TextBlock Text="Bütünlük Kontrolü" FontSize="12" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
-                                        </StackPanel>
-                                    </Button>
-                                    <Button ToolTipService.ToolTip="Tüm dönemlerde disk temizliği + indeks yenileme (VACUUM + REINDEX)" Click="OnTopluBakimClick" Style="{StaticResource GhostLargeButtonStyle}" HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
-                                            <FontIcon Glyph="{StaticResource IconRefresh}" FontSize="12" Foreground="{ThemeResource MuhasibWarningBrush}" />
-                                            <TextBlock Text="Toplu Bakım" FontSize="12" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
-                                        </StackPanel>
-                                    </Button>
-                                </StackPanel>
-                            </Border>
+                            </Button>
 
-                            <!-- 7. Teknik parametreler (3 kolon) -->
-                            <Expander Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" IsExpanded="False"
-                                      CornerRadius="{StaticResource MuhasibHeroCornerRadius}">
-                                <Expander.Header>
-                                    <Grid Padding="4,6" ColumnSpacing="10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Border Width="24" Height="24" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibInventPaleBrush}">
-                                            <FontIcon Glyph="{StaticResource IconInfo}" FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Border>
-                                        <TextBlock Grid.Column="1" Text="Veritabanı Teknik Parametreleri" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                    </Grid>
-                                </Expander.Header>
-                                <Expander.Content>
-                                    <components:DonemParametrePanel x:Name="DonemParametreler" Margin="4,4,4,0" />
-                                </Expander.Content>
-                            </Expander>
                         </Grid>
                         </ScrollViewer>
                     </SplitView.Content>
@@ -369,4 +210,6 @@
             </Grid>
         </Border>
     </Grid>
+        </Grid>
+    </Border>
 </Page>

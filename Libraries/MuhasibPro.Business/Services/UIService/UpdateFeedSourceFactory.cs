@@ -15,6 +15,8 @@ public static class UpdateFeedSourceFactory
         var url = feedUrl.Trim().TrimEnd('/');
         if (url.Contains("github.com", StringComparison.OrdinalIgnoreCase))
             return new GithubSource(url, null, includePrereleases, null);
-        return new SimpleWebSource(url, null, 0);
+        // SimpleWebSource 3. parametre = dakika cinsinden timeout; 0 geçersiz
+        // (HttpClient "must be greater than TimeSpan.Zero" atar — canlı 1.1.1 bulgusu).
+        return new SimpleWebSource(url, null, 30);
     }
 }

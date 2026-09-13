@@ -92,13 +92,30 @@ public class DonemGenelBakisViewModel : ViewModelBase
         private set => Set(ref _butunlukSkoruMetni, value);
     }
 
-    /// <summary>Liste yenilendiğinde çağrılır: filtre + durum analizi + derin analizler + KPI.</summary>
+    private bool _isGenelBakisYukleniyor;
+    /// <summary>KPI şeridi tazelenirken iskelet/ring gösterir (Kural 11).</summary>
+    public bool IsGenelBakisYukleniyor
+    {
+        get => _isGenelBakisYukleniyor;
+        private set => Set(ref _isGenelBakisYukleniyor, value);
+    }
+
+    /// <summary>Liste yenilendiğinde çağrılır: filtre + KPI (bellek-içi, hızlı).
+    /// Ağır işler burada YOK: durum rozetleri liste akışının paralel analizinden,
+    /// derin analizler "Derin Analiz Çalıştır" butonundan gelir (lazy).</summary>
     public async Task YenileAsync()
     {
-        Filtrele();
-        await DurumAnalizleriniYukleAsync();
-        await DerinAnalizleriYukleAsync();
-        HesaplaKpi();
+        IsGenelBakisYukleniyor = true;
+        try
+        {
+            Filtrele();
+            HesaplaKpi();
+            await Task.CompletedTask;
+        }
+        finally
+        {
+            IsGenelBakisYukleniyor = false;
+        }
     }
 
     public void Filtrele()
@@ -114,35 +131,6 @@ public class DonemGenelBakisViewModel : ViewModelBase
         GosterilenMetni = $"Gösterilen: {FiltreliDonemler.Count} / {tum.Count} Veritabanı";
     }
 
-    /// <summary>Tüm dönemlerin Tenant durum analizi (Güncel/Güncelleme/Dosya Yok) — KPI ve rozetler için.</summary>
-    private async Task DurumAnalizleriniYukleAsync()
-    {
-        var tum = MaliDonemList.ItemsSource?.Where(m => m != null).ToList() ?? new List<MaliDonemModel>();
-        foreach (var model in tum)
-        {
-            try { await MaliDonemList.AnalyzeDbStatusAsync(model); }
-            catch { /* tek satır tabloyu kırmaz */ }
-        }
-    }
-
-    private async Task DerinAnalizleriYukleAsync()
-    {
-        var tum = MaliDonemList.ItemsSource?.Where(m => m != null).ToList() ?? new List<MaliDonemModel>();
-        foreach (var model in tum)
-        {
-            if (model.DbDerin != null)
-                continue;
-            try
-            {
-                // Not: ConfigureAwait(false) YOK — DbDerin set'i UI thread'de olmalı (WinUI RPC_E_WRONG_THREAD sessiz kapanması).
-                var response = await OperationService.GetDerinAnalizAsync(model.DatabaseName);
-                if (response?.Data != null)
-                    model.DbDerin = response.Data;
-            }
-            catch { /* tek satır tabloyu kırmaz */ }
-        }
-    }
-
     private void HesaplaKpi()
     {
         var tum = MaliDonemList.ItemsSource?.Where(m => m != null).ToList() ?? new List<MaliDonemModel>();
@@ -151,12 +139,24 @@ public class DonemGenelBakisViewModel : ViewModelBase
         int aktif = tum.Count(m => !m.KapaliMi);
         KayitliDbAltMetni = $"{aktif} Aktif Çalışma Dönemi";
         OrtalamaDepolamaMetni = tum.Count == 0 ? "Ortalama: —" : $"Ortalama: {FormatBoyut(toplam / tum.Count)}/DB";
+
+        // Derin analiz yapılmış dönemleri sayarak dürüst KPI üret (analiz bitmeden %0 yalanı kapanır).
+        int analizli = tum.Count(m => m.DbDerin != null);
+        int analizliDurum = tum.Count(m => m.DbAnalizYapildi);
         int wal = tum.Count(m => string.Equals(m.DbDerin?.JournalModu, "wal", StringComparison.OrdinalIgnoreCase));
-        WalModuMetni = tum.Count == 0 ? "—" : $" %{100 * wal / tum.Count} WAL Aktif";
+        WalModuMetni = analizli == 0 ? "—" : $" %{100 * wal / tum.Count} WAL Aktif";
+
+        // Sağlıklı skoru: durum analizi yapılmamış dönemler hesaptan dışlanır.
         int saglikli = tum.Count(m => m.DbGuncelMi);
-        ButunlukSkoruMetni = tum.Count == 0 ? "—" : $" %{100 * saglikli / tum.Count} Sağlıklı";
+        if (analizliDurum == 0)
+            ButunlukSkoruMetni = "Durum analizi bekleniyor";
+        else if (tum.Count == 0)
+            ButunlukSkoruMetni = "—";
+        else
+            ButunlukSkoruMetni = $" %{100 * saglikli / analizliDurum} Sağlıklı ({analizliDurum}/{tum.Count} analiz)";
+
         int hata = tum.Count(m => m.DbKontrolGerekliMi);
-        ButunlukAltMetni = $"PRAGMA Doğrulandı ({hata} Hata)";
+        ButunlukAltMetni = analizli == 0 ? "Derin analiz bekleniyor" : $"PRAGMA Doğrulandı ({hata} Hata)";
     }
 
     /// <summary>Tek dönem yedekle (tablo satırı). Satır yazımı çağıran yapar (RefreshAllAsync).</summary>
@@ -170,14 +170,16 @@ public class DonemGenelBakisViewModel : ViewModelBase
             bool ok = response.Success && response.Data != null && response.Data.IsBackupComleted;
             if (ok)
                 await SatirVitrininiYazAsync(model, response.Data);
-            NotificationService.Show(ok ? "Yedek Alındı" : "Yedek Alınamadı",
+            NotificationService.ShowTagged(ok ? "Yedek Alındı" : "Yedek Alınamadı",
                 ok ? $"{model.MaliYil} dönemi yedeklendi." : response.Message,
-                ok ? NotificationType.Success : NotificationType.Warning);
+                ok ? NotificationType.Success : NotificationType.Warning,
+                "Yedekle", NotificationGroups.Yedek);
             return ok;
         }
         catch (Exception ex)
         {
-            NotificationService.Show("Yedek Hatası", ex.Message, NotificationType.Danger);
+            NotificationService.ShowTagged("Yedek Hatası", ex.Message, NotificationType.Danger,
+                "Yedekle", NotificationGroups.Yedek);
             return false;
         }
     }
@@ -198,7 +200,8 @@ public class DonemGenelBakisViewModel : ViewModelBase
             }
             catch { /* tek satır batch'i durdurmaz */ }
         }
-        NotificationService.Show("Toplu Yedek", $"{ok}/{tum.Count} dönem yedeklendi.", ok == tum.Count ? NotificationType.Success : NotificationType.Warning);
+        NotificationService.ShowTagged("Toplu Yedek", $"{ok}/{tum.Count} dönem yedeklendi.", ok == tum.Count ? NotificationType.Success : NotificationType.Warning,
+            "TopluYedekle", NotificationGroups.DonemIslemleri);
     }
 
     /// <summary>Başarılı yedek sonrası Global.db satırına vitrin verisini işler (Son Yedek + Boyut).</summary>
@@ -225,7 +228,8 @@ public class DonemGenelBakisViewModel : ViewModelBase
             catch { /* devam */ }
         }
         HesaplaKpi();
-        NotificationService.Show("Toplu Test", $"{tum.Count} dönem analiz edildi.", NotificationType.Success);
+        NotificationService.ShowTagged("Toplu Test", $"{tum.Count} dönem analiz edildi.", NotificationType.Success,
+            "TopluTest", NotificationGroups.DonemIslemleri);
     }
 
     public async Task TopluBakimAsync()
@@ -243,7 +247,8 @@ public class DonemGenelBakisViewModel : ViewModelBase
             }
             catch { /* devam */ }
         }
-        NotificationService.Show("Toplu Bakım", $"{ok}/{tum.Count} dönemde VACUUM+REINDEX tamamlandı.", ok == tum.Count ? NotificationType.Success : NotificationType.Warning);
+        NotificationService.ShowTagged("Toplu Bakım", $"{ok}/{tum.Count} dönemde VACUUM+REINDEX tamamlandı.", ok == tum.Count ? NotificationType.Success : NotificationType.Warning,
+            "TopluBakim", NotificationGroups.DonemIslemleri);
     }
 
     private static string FormatBoyut(long bytes)

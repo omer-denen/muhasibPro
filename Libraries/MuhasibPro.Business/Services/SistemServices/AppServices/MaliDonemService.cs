@@ -52,8 +52,11 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
                         _maliDonemRepository,
                         _bitmapToolsService,
                         malidonemId);
-                if (item == null)
-                    return new ErrorApiDataResponse<MaliDonemModel>(data: null, message: item.Message);
+                // Extension null değil Error-response döner → Success bayrağına bakılır;
+                // eski `item == null` dalı hiç tutmuyordu (kayıp satır Success+null Data dönüyordu).
+                if (item == null || !item.Success || item.Data == null)
+                    return new ErrorApiDataResponse<MaliDonemModel>(
+                        data: null, message: item?.Message ?? "⚠️ Mali Dönem bulunamadı");
                 return new SuccessApiDataResponse<MaliDonemModel>(item.Data, item.Message);
             }
             catch (Exception ex)

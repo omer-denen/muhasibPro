@@ -336,7 +336,7 @@ namespace MuhasibPro.Data.Migrations
                             KaydedenId = 5413300800L,
                             KayitTarihi = new DateTime(2025, 3, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             KullaniciAdi = "korkutomer",
-                            ParolaHash = "AQAAAAIAAYagAAAAECnYdlrjFiWFJc+FGeGDmvR87uz20oU/Z0K4JE9ddoF2VUnmHw0idEFX8UPOb4cpzQ==",
+                            ParolaHash = "AQAAAAIAAYagAAAAEPm/gfxm9YLZq6cmA6QUFfQZfChx8epMnb8PmvRVXPH/Eq3aYjvyXNvclwOM2HHmdg==",
                             Soyadi = "Korkut",
                             Telefon = "0 (541) 330 0800"
                         });

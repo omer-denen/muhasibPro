@@ -14,8 +14,6 @@ namespace MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices
         Task<ApiDataResponse<bool>> RestoreFromLatestBackupAsync(string databaseName);
         DateTime? GetLastBackupDate(string databaseName);
         Task<ApiDataResponse<int>> CleanOldBackupsAsync(string databaseName, int keepLast);
-        Task<DatabaseDeletingExecutionResult> DeleteBackupDatabaseAsync(
-        string databaseName);
         /// <summary>Derin salt-okunur analiz (PRAGMA + tablo sayımları).</summary>
         Task<ApiDataResponse<TenantDerinAnaliz>> GetDerinAnalizAsync(string databaseName);
         /// <param name="komut">"VACUUM" / "REINDEX" / "WAL"</param>

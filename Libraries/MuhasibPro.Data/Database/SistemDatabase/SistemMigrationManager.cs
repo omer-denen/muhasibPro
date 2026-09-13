@@ -143,8 +143,13 @@ namespace MuhasibPro.Data.Database.SistemDatabase
             }
             catch (Exception ex)
             {
+                // B3: __EFMigrationsHistory tablosu bozuk/eksikse buraya düşer.
+                // Fail-safe: false döner → SistemKurulum ekranına yönlendirilir (B2 fail-closed).
+                var message = ex.Message.Contains("MigrationsHistory", StringComparison.OrdinalIgnoreCase)
+                    ? $"Migration geçmişi tablosu hasarlı — veritabanı onarımı gerekebilir. ({ex.Message})"
+                    : ex.Message;
                 _logger.LogError(ex, "Initialize database hatası: {Database}", _databaseName);
-                return (initializeState: false, message: ex.Message);
+                return (initializeState: false, message: message);
             }
         }
 

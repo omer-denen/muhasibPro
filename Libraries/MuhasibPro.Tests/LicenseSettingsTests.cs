@@ -115,7 +115,7 @@ public class LicenseSettingsTests
         var dir = AppContext.BaseDirectory;
         for (int i = 0; i < 10; i++)
         {
-            if (File.Exists(Path.Combine(dir, "MuhasibPro.slnx"))) break;
+            if (File.Exists(Path.Combine(dir, "MuhasibPro.slnx")) || File.Exists(Path.Combine(dir, "MuhasibPro.sln"))) break;
             dir = Path.GetDirectoryName(dir)!;
         }
         var src = File.ReadAllText(Path.Combine(dir,

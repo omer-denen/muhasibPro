@@ -95,6 +95,8 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
                         message: "🟢 Zaten aktif bir bağlantı bulunamadı");
                 }
 
+                var eskiAd = CurrentTenant?.DatabaseName ?? string.Empty;
+                await EskiTenantıKapatAsync(eskiAd, "Bağlantı kesme");
                 ClearCurrentTenantAsync();
 
                 await _logService.SistemLogService.SistemLogInformationAsync(
@@ -149,6 +151,10 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
                     data: CurrentTenant,
                     message: "Zaten bu mali dönemi kullanıyorsunuz!");
             }
+            // Eski tenant: WAL birleştir + bağlantıyı bırak + Sistem.db'ye logla.
+            // Başarısızlık geçişi engellemez (WAL dosyası diskte durur, veri kaybolmaz) — uyarı loglanır.
+            if (IsTenantLoaded && !string.IsNullOrWhiteSpace(CurrentTenant?.DatabaseName))
+                await EskiTenantıKapatAsync(CurrentTenant.DatabaseName, "Tenant geçişi");
             // Bağlantı/göç eşikleri kullanıcı ayarından (Oturum 127 derin bağlantı).
             // Sağlayıcı yoksa veya okunamazsa null taşınır → Data varsayılanları korunur.
             var ayar = await BaglantiAyariniOkuAsync();
@@ -206,6 +212,39 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
                 return new ErrorApiDataResponse<TenantContext>(
                     data: null,
                     message: $"[HATA] İşlem başarısız: {ex.Message}");
+            }
+        }
+
+        /// <summary>Eski tenant'ı güvenli bırakır: WAL checkpoint + havuz boşaltma (Data),
+        /// sonuç Sistem.db'ye yazılır (doğrulama kanıtı). Hata fırlatmaz.</summary>
+        private async Task EskiTenantıKapatAsync(string eskiDatabaseName, string neden)
+        {
+            if (string.IsNullOrWhiteSpace(eskiDatabaseName))
+                return;
+            try
+            {
+                var (ok, mesaj) = await _databaseManager.CheckpointAndReleaseAsync(eskiDatabaseName);
+                if (ok)
+                {
+                    await _logService.SistemLogService.SistemLogInformationAsync(
+                        "Mali Dönem Seçimi",
+                        "Tenant Bağlantı Kapatma",
+                        $"{neden}: '{eskiDatabaseName}' güvenli bırakıldı.",
+                        mesaj);
+                }
+                else
+                {
+                    await _logService.SistemLogService.SistemLogErrorAsync(
+                        "Mali Dönem Seçimi",
+                        "Tenant Bağlantı Kapatma",
+                        $"{neden}: '{eskiDatabaseName}' WAL birleştirilemedi.",
+                        mesaj);
+                }
+            }
+            catch (Exception ex)
+            {
+                await _logService.SistemLogService.SistemLogExceptionAsync(
+                    "Mali Dönem Seçimi", "Tenant Bağlantı Kapatma", ex);
             }
         }
 

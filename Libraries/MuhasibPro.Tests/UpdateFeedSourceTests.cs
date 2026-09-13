@@ -29,4 +29,14 @@ public class UpdateFeedSourceTests
 
         source.Should().BeOfType<SimpleWebSource>();
     }
+
+    [Fact]
+    public void DuzAdres_TimeoutGecerliOlur()
+    {
+        // Canlı 1.1.1 bulgusu: timeout 0 → HttpClient "must be greater than TimeSpan.Zero".
+        var source = UpdateFeedSourceFactory.Create("https://ornek.com/feed", false) as SimpleWebSource;
+
+        source.Should().NotBeNull();
+        source!.Timeout.Should().BeGreaterThan(0);
+    }
 }

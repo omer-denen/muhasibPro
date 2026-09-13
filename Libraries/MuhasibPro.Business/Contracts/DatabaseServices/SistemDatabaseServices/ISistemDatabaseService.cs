@@ -11,6 +11,8 @@ namespace MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices
         Task<ApiDataResponse<DatabaseConnectionAnalysis>> GetSistemDatabaseStateAsync();
         Task<(bool initializeState, string message)> InitializeSistemDatabaseAsync();
         Task<List<string>> GetPendingMigrationsAsync();
+        /// <summary>Bekleyen sistem göçlerini yedek-önce-göç ile uygular (Sage deseni: yedek → göç → doğrula). Bekleyen yoksa (false, bilgi).</summary>
+        Task<(bool success, string message)> ApplyPendingSistemMigrationsAsync();
         Task<DatabaseHealtyDiagReport> GetSistemDatabaseFullDiagStateAsync(IProgress<AnalysisProgress> progressReporter = null, AnalysisOptions options = null);
     }
 }

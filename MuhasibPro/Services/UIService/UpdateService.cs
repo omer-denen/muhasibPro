@@ -24,25 +24,23 @@ public class UpdateService : IUpdateService
     private Velopack.UpdateManager _manager;
     private Velopack.UpdateInfo _lastUpdate;
 
-    public bool IsUpdatePendingRestart
+    /// <summary>UI thread'den await edilir — içeride bloklayan çağrı yok (deadlock'suz).</summary>
+    public async Task<bool> IsUpdatePendingRestartAsync()
     {
-        get
+        try
         {
-            try
-            {
-                if (_manager != null)
-                    return _manager.UpdatePendingRestart != null;
-                var feed = GetSettingsAsync().GetAwaiter().GetResult()?.FeedUrl;
-                if (string.IsNullOrWhiteSpace(feed))
-                    return false;
-                var manager = new Velopack.UpdateManager(BuildSource(feed, false));
-                return manager.UpdatePendingRestart != null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "IsUpdatePendingRestart failed");
+            if (_manager != null)
+                return _manager.UpdatePendingRestart != null;
+            var feed = (await GetSettingsAsync())?.FeedUrl;
+            if (string.IsNullOrWhiteSpace(feed))
                 return false;
-            }
+            var manager = new Velopack.UpdateManager(BuildSource(feed, false));
+            return manager.UpdatePendingRestart != null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "IsUpdatePendingRestart failed");
+            return false;
         }
     }
 
@@ -64,7 +62,8 @@ public class UpdateService : IUpdateService
     {
         try
         {
-            settings.LastCheckTime = DateTime.Now;
+            // C2 fix: LastCheckTime yalnız CheckForUpdatesAsync'te set edilir;
+            // ayar panelinden "Kaydet" yapılınca son kontrol zamanı ezilmez.
             await _localSettings.SaveSettingAsync(UpdateSettingsModel.SettingsKey, settings);
         }
         catch (Exception ex) { _logger.LogWarning(ex, "SaveSettingsAsync failed"); }
@@ -120,7 +119,12 @@ public class UpdateService : IUpdateService
         try
         {
             _logger.LogInformation("ApplyUpdatesAndRestart called with {Args}", string.Join(",", restartArgs));
-            VelopackApp.Build().Run();
+            if (_manager == null || _lastUpdate == null)
+            {
+                _logger.LogWarning("ApplyUpdatesAndRestart: manager veya lastUpdate null — güncelleme uygulanamıyor");
+                return;
+            }
+            _manager.ApplyUpdatesAndRestart(_lastUpdate, restartArgs);
         }
         catch (Exception ex) { _logger.LogError(ex, "ApplyUpdatesAndRestart failed"); }
     }

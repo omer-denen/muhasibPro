@@ -230,6 +230,10 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
+                // Saga geri alımı: yarım kalmış dosya/satır temizlenir (A8 fix).
+                try { await saga.CompensateAllAsync(); }
+                catch (Exception compEx) { _logger.LogWarning(compEx, "Create saga kompansasyonu başarısız"); }
+
                 result.MarkAsError($"Beklenmeyen hata: {ex.Message}");
                 _logger.LogError(
                     ex,
@@ -430,7 +434,7 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
             // yokluğu silmeyi engellemez (yetim satır temizlenebilmeli). Satır varlığı + ad eşleşmesi yeterli.
             var maliDonemResponse = await _maliDonemService.GetByMaliDonemIdAsync(request.MaliDonemId);
             result.CompleteStep(DeletionStepStatus.Calisiyor, maliDonemResponse.Message);
-            if (!maliDonemResponse.Success || maliDonemResponse.Data == null || maliDonemResponse.Data.DatabaseName != request.DatabaseName)
+            if (!maliDonemResponse.Success || maliDonemResponse.Data == null || !string.Equals(maliDonemResponse.Data.DatabaseName, request.DatabaseName, StringComparison.OrdinalIgnoreCase))
             {
                 var message = maliDonemResponse.Message;
                 result.CompleteStep(DeletionStepStatus.Hata, message);
@@ -488,27 +492,22 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
 
                     if (request.DeleteAllTenantBackup)
                     {
-                        if (result.DeletedBackupFiles.Count > 0)
+                        // Saga zaten yedekleri sildi (DeleteTenantDatabase:104-113).
+                        // Sonuçları üst result'a aktar.
+                        result.BackupDeleteCompleted = response.BackupDeleteCompleted;
+                        result.DeletedBackupCount = response.DeletedBackupCount;
+                        result.DeletedBackupFiles = response.DeletedBackupFiles;
+
+                        if (response.BackupDeleteCompleted || (response.DeletedBackupFiles?.Count ?? 0) > 0)
                         {
                             result.StartStep(TenantDeletionStep.VeritabaniYedekleriSiliniyor);
-                            if (response.BackupDeleteCompleted)
-                            {
-                                result.BackupDeleteCompleted = response.BackupDeleteCompleted;
-                                result.DeletedBackupCount = response.DeletedBackupCount;
-                                result.DeletedBackupFiles = response.DeletedBackupFiles;
-                                result.CompleteStep(DeletionStepStatus.Tamamlandi, "Veritabanı yedekleri başarıyla silindi");
-                                result.MarkAsSuccess("Veritabanı yedekleri başarıyla silindi");
-                            }
-                            else
-                            {
-                                result.BackupDeleteCompleted = false;
-                                result.DeletedBackupCount = 0;
-                                result.DeletedBackupFiles = null;
-                                result.CompleteStep(DeletionStepStatus.Hata, "Veritabanı yedekleri silme işlemi başarısız");
-                                result.MarkAsError(deletingDatabaseResponse.Message);
-                            }
+                            result.CompleteStep(DeletionStepStatus.Tamamlandi,
+                                $"Veritabanı yedekleri silindi ({response.DeletedBackupCount} dosya)");
                         }
-                        result.CompleteStep(DeletionStepStatus.Tamamlandi, "Silinecek veritabanı yedeği bulunamadı");
+                        else
+                        {
+                            result.CompleteStep(DeletionStepStatus.Tamamlandi, "Silinecek veritabanı yedeği bulunamadı");
+                        }
                     }
                     else
                     {
@@ -561,11 +560,21 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
                         "Mali Dönem kaydı silme işlemi kullanıcı tarafından atlandı");
                 }
 
-                result.CompleteStep(DeletionStepStatus.Tamamlandi, "Silme işlemi başarıyla tamamlandı");
-                result.DeleteCompleted = true;
-              
-                result.MarkAsSuccess("Silme işlemi başarılı");
-                return ApiDataExtensions.SuccessResponse(result, "Silme işlemi başarıyla tamamlandı");
+                // Sonuç: gerçekten bir işlem yapıldıysa başarı, aksi halde uyarı.
+                bool gercekIslemYapildi = result.DatabaseDeleted || result.MaliDonemDeleted || result.BackupDeleteCompleted;
+                if (gercekIslemYapildi)
+                {
+                    result.CompleteStep(DeletionStepStatus.Tamamlandi, "Silme işlemi başarıyla tamamlandı");
+                    result.DeleteCompleted = true;
+                    result.MarkAsSuccess("Silme işlemi başarılı");
+                    return ApiDataExtensions.SuccessResponse(result, "Silme işlemi başarıyla tamamlandı");
+                }
+                else
+                {
+                    result.CompleteStep(DeletionStepStatus.Uyari, "Hiçbir silme işlemi gerçekleştirilmedi (tüm seçimler kullanıcı tarafından atlandı)");
+                    result.DeleteCompleted = false;
+                    return ApiDataExtensions.SuccessResponse(result, "Silme işlemi tamamlandı — hiçbir veri silinmedi");
+                }
             }
             catch (Exception ex)
             {

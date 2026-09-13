@@ -6,10 +6,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="RootDialog"
-    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    BorderBrush="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
     BorderThickness="1"
-    CornerRadius="{StaticResource CardCornerRadius}"
+    CornerRadius="{StaticResource ControlCornerRadius}"
     DefaultButton="None">
 
     <ContentDialog.Resources>
@@ -31,7 +31,7 @@
                     Margin="0,0,12,0"
                     VerticalAlignment="Center"
                     FontSize="24"
-                    Foreground="{ThemeResource MuhasibSuccessBrush}"
+                    Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                     Glyph="&#xE73E;"
                     Visibility="Collapsed" />
 
@@ -41,7 +41,7 @@
                     Margin="0,0,12,0"
                     VerticalAlignment="Center"
                     FontSize="24"
-                    Foreground="{ThemeResource MuhasibDangerBrush}"
+                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                     Glyph="&#xE783;"
                     Visibility="Collapsed" />
 
@@ -51,7 +51,7 @@
                     Margin="0,0,12,0"
                     VerticalAlignment="Center"
                     FontSize="24"
-                    Foreground="{ThemeResource MuhasibWarningBrush}"
+                    Foreground="{ThemeResource SystemFillColorCautionBrush}"
                     Glyph="&#xE7BA;"
                     Visibility="Collapsed" />
 

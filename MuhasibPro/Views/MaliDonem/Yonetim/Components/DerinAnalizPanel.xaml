@@ -23,8 +23,8 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Spacing="2" VerticalAlignment="Center">
-                    <TextBlock Text="Veritabanı Analiz &amp; Bütünlük Taraması" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
-                    <TextBlock Text="Seçili dönem için PRAGMA kontrolleri, sayfa yapısı ve tablo depolama dağılımı." FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="Veritabanı Analiz &amp; Bütünlük Taraması" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    <TextBlock Text="Seçili dönem için PRAGMA kontrolleri, sayfa yapısı ve tablo depolama dağılımı." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                     <ProgressRing Width="14" Height="14" IsActive="{Binding IsDerinAnalizYukleniyor}" Foreground="{ThemeResource MuhasibPetrolBrush}" Visibility="{Binding IsDerinAnalizYukleniyor, Converter={StaticResource TrueToVis}}" />
@@ -38,8 +38,8 @@
             </Grid>
         </Border>
 
-        <TextBlock Text="Derin analiz sonucu yok — Tam Analiz Çalıştır ile üretin." FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" Visibility="{Binding DerinAnaliz.Basarili, Converter={StaticResource FalseToVis}, FallbackValue=Visible}" />
-        <TextBlock Text="{Binding DerinAnaliz.Hata, FallbackValue=''}" FontSize="11" Foreground="{ThemeResource MuhasibDangerBrush}" TextWrapping="Wrap" />
+        <TextBlock Text="Derin analiz sonucu yok — Tam Analiz Çalıştır ile üretin." FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{Binding DerinAnaliz.Basarili, Converter={StaticResource FalseToVis}, FallbackValue=Visible}" />
+        <TextBlock Text="{Binding DerinAnaliz.Hata, FallbackValue=''}" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
 
         <StackPanel Spacing="12" Visibility="{Binding DerinAnaliz.Basarili, Converter={StaticResource TrueToVis}, FallbackValue=Collapsed}">
             <!-- Skor kartları -->
@@ -50,31 +50,31 @@
                 <Border Style="{StaticResource CustomModernCard}" Padding="14,12">
                     <Grid>
                         <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                        <TextBlock Text="GENEL SAĞLIK SKORU" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
+                        <TextBlock Text="GENEL SAĞLIK SKORU" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,6,0,0" VerticalAlignment="Center">
-                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="{ThemeResource MuhasibSuccessBrush}" VerticalAlignment="Center">
+                            <TextBlock FontSize="18" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center">
                                 <Run Text="{Binding DerinAnaliz.IntegrityHataSayisi, FallbackValue='—'}" /><Run Text=" Hata" />
                             </TextBlock>
-                            <Border Padding="7,2" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibSuccessBgBrush}" BorderBrush="{ThemeResource MuhasibSuccessBrush}" BorderThickness="1" VerticalAlignment="Center">
-                                <TextBlock Text="Temiz" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSuccessBrush}" />
+                            <Border Padding="7,2" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                <TextBlock Text="Temiz" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                             </Border>
                         </StackPanel>
                         <StackPanel Grid.Row="2" Spacing="2" Margin="0,8,0,0">
                             <Grid>
-                                <TextBlock Text="PRAGMA integrity_check" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSuccessBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="PRAGMA integrity_check" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Run Text="OK (" /><Run Text="{Binding DerinAnaliz.IntegrityHataSayisi}" /><Run Text=" Hata)" />
                                 </TextBlock>
                             </Grid>
                             <Grid>
-                                <TextBlock Text="Journal / SQLite" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                <TextBlock FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="Journal / SQLite" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Run Text="{Binding DerinAnaliz.JournalModu}" /><Run Text="  •  " /><Run Text="{Binding DerinAnaliz.SqliteSurumu}" />
                                 </TextBlock>
                             </Grid>
                             <Grid>
-                                <TextBlock Text="Dosya / WAL" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                <TextBlock FontSize="11" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="Dosya / WAL" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock FontSize="11" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Run Text="{Binding DerinAnaliz.DosyaBoyutu}" /><Run Text=" B  •  WAL: " /><Run Text="{Binding DerinAnaliz.WalBoyutu}" /><Run Text=" B" />
                                 </TextBlock>
                             </Grid>
@@ -84,24 +84,24 @@
                 <Border Grid.Column="1" Style="{StaticResource CustomModernCard}" Padding="14,12">
                     <Grid>
                         <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                        <TextBlock Text="SAYFA &amp; PARÇALANMA (B-TREE)" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
-                        <TextBlock Grid.Row="1" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" Margin="0,6,0,0">
+                        <TextBlock Text="SAYFA &amp; PARÇALANMA (B-TREE)" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Grid.Row="1" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" Margin="0,6,0,0">
                             <Run Text="{Binding DerinAnaliz.SayfaSayisi, FallbackValue='—'}" /><Run Text=" Sayfa" />
                         </TextBlock>
                         <StackPanel Grid.Row="2" Spacing="2" Margin="0,8,0,0">
                             <Grid>
-                                <TextBlock Text="Sayfa Boyutu" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                <TextBlock FontSize="11" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="Sayfa Boyutu" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock FontSize="11" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Run Text="{Binding DerinAnaliz.SayfaBoyutu}" /><Run Text=" B" />
                                 </TextBlock>
                             </Grid>
                             <Grid>
-                                <TextBlock Text="Boş Sayfalar (Freelist)" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding DerinAnaliz.BosSayfaSayisi}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibWarningBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                <TextBlock Text="Boş Sayfalar (Freelist)" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding DerinAnaliz.BosSayfaSayisi}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
                             </Grid>
                             <Grid>
-                                <TextBlock Text="Tablolar / Kayıtlar" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
-                                <TextBlock FontSize="11" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="Tablolar / Kayıtlar" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock FontSize="11" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Run Text="{Binding DerinAnaliz.TabloSayisi}" /><Run Text=" tablo  •  " /><Run Text="{Binding DerinAnaliz.ToplamKayit}" /><Run Text=" kayıt" />
                                 </TextBlock>
                             </Grid>
@@ -120,12 +120,12 @@
                             <ColumnDefinition Width="110" />
                             <ColumnDefinition Width="160" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="TABLO ADI" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
-                        <TextBlock Grid.Column="1" Text="KAYIT SAYISI" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Right" />
-                        <TextBlock Grid.Column="2" Text="DEPOLAMA" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Right" />
-                        <TextBlock Grid.Column="3" Text="DAĞILIM" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
+                        <TextBlock Text="TABLO ADI" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="KAYIT SAYISI" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="2" Text="DEPOLAMA" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="3" Text="DAĞILIM" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                     </Grid>
-                    <Rectangle Height="1" Fill="{ThemeResource MuhasibSoftBorderBrush}" Opacity="0.6" />
+                    <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.6" />
                     <ItemsControl ItemsSource="{Binding DerinAnaliz.Tablolar}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -136,10 +136,10 @@
                                         <ColumnDefinition Width="110" />
                                         <ColumnDefinition Width="160" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding TabloAdi}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="{Binding KayitSayisi}" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding BoyutMetni}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                    <ProgressBar Grid.Column="3" Value="{Binding BoyutBayt}" Maximum="{Binding ElementName=KokPanel, Path=DataContext.DerinAnaliz.DosyaBoyutu}" Height="6" VerticalAlignment="Center" Foreground="{ThemeResource MuhasibPetrolBrush}" Background="{ThemeResource MuhasibSoftBorderBrush}" />
+                                    <TextBlock Text="{Binding TabloAdi}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding KayitSayisi}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding BoyutMetni}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    <ProgressBar Grid.Column="3" Value="{Binding BoyutBayt}" Maximum="{Binding ElementName=KokPanel, Path=DataContext.DerinAnaliz.DosyaBoyutu}" Height="6" VerticalAlignment="Center" Foreground="{ThemeResource MuhasibPetrolBrush}" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

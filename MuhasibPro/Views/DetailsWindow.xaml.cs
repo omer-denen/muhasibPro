@@ -1,7 +1,6 @@
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-using Microsoft.UI.Composition.SystemBackdrops;
 using MuhasibPro.Helpers.WindowHelpers;
 
 namespace MuhasibPro.Views
@@ -20,15 +19,8 @@ namespace MuhasibPro.Views
 
         private void WindowSetting()
         {
+            // Backdrop tek kaynak: DetailsWindow.xaml'da <MicaBackdrop Kind="Base" /> (gerçek Mica).
             this.ExtendsContentIntoTitleBar = true;
-            if (MicaController.IsSupported())
-            {
-                SystemBackdrop = new MicaBackdrop() { Kind = MicaKind.Base };
-            }
-            else if (DesktopAcrylicController.IsSupported())
-            {
-                SystemBackdrop = new DesktopAcrylicBackdrop();
-            }
         }
         private void InitializeModalWindow()
         {            

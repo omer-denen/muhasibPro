@@ -6,6 +6,7 @@ using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.ResultModels.TenantResultModels;
+using MuhasibPro.Business.Services.CommonServices;
 using MuhasibPro.Domain.Models;
 using MuhasibPro.Domain.Models.DatabaseResultModel;
 using MuhasibPro.ViewModels.Infrastructure.Common;
@@ -24,12 +25,14 @@ public class DonemYedeklerViewModel : ViewModelBase
         ITenantBackupService backupService,
         IMaliDonemService maliDonemService,
         ILocalSettingsService localSettingsService = null,
-        IEventBus eventBus = null) : base(commonServices)
+        IEventBus eventBus = null,
+        ITenantSettingsProvider tenantAyarlari = null) : base(commonServices)
     {
         OperationService = operationService;
         BackupService = backupService;
         MaliDonemService = maliDonemService;
         LocalSettingsService = localSettingsService;
+        TenantAyarlari = tenantAyarlari;
         _eventBus = eventBus;
     }
 
@@ -37,6 +40,7 @@ public class DonemYedeklerViewModel : ViewModelBase
     public ITenantBackupService BackupService { get; }
     public IMaliDonemService MaliDonemService { get; }
     public ILocalSettingsService LocalSettingsService { get; }
+    public ITenantSettingsProvider TenantAyarlari { get; }
 
     /// <summary>Yedeği alınan dönem (sayfa DonemDegistiAsync'te atar — satır yazımı için).</summary>
     public MaliDonemModel BagliDonem { get; set; }
@@ -51,6 +55,7 @@ public class DonemYedeklerViewModel : ViewModelBase
             if (Set(ref _yedekler, value))
             {
                 NotifyPropertyChanged(nameof(HasYedek));
+                NotifyPropertyChanged(nameof(IsYedekListesiBos));
                 YedekCurrentPage = 1;
                 UpdatePagedYedek();
             }
@@ -58,6 +63,9 @@ public class DonemYedeklerViewModel : ViewModelBase
     }
 
     public bool HasYedek => Yedekler.Count > 0;
+
+    /// <summary>Boş-durum: yükleme bitti + 0 yedek (Kural 11: ring ile aynı anda görünmez).</summary>
+    public bool IsYedekListesiBos => !IsYedeklerYukleniyor && !HasYedek;
 
     // ── Pagination: Yedekler (boyut TenantSettings'ten) ──
     private int _yedekPageSize = new TenantSettings().GetYedekPageSize();
@@ -105,11 +113,20 @@ public class DonemYedeklerViewModel : ViewModelBase
     public System.Windows.Input.ICommand YedekNextCommand => new RelayCommand(() => YedekCurrentPage++, () => YedekCanNext);
     private void UpdatePagedYedek()
     {
+        // Liste kısalınca sayfa taşmasın (öz. son sayfada silme sonrası boş liste bug'ı).
+        var total = YedekTotalPages;
+        if (_yedekCurrentPage > total)
+            _yedekCurrentPage = total;
+        if (_yedekCurrentPage < 1)
+            _yedekCurrentPage = 1;
         var src = Yedekler ?? new List<DatabaseBackupResult>();
         PagedYedekler = src.Skip((YedekCurrentPage - 1) * YedekPageSize).Take(YedekPageSize).ToList();
+        NotifyPropertyChanged(nameof(YedekCurrentPage));
         NotifyPropertyChanged(nameof(YedekTotalPages));
         NotifyPropertyChanged(nameof(YedekHasPagination));
         NotifyPropertyChanged(nameof(YedekPageInfo));
+        NotifyPropertyChanged(nameof(YedekCanPrev));
+        NotifyPropertyChanged(nameof(YedekCanNext));
     }
 
     private DatabaseBackupResult _selectedYedek;
@@ -117,6 +134,18 @@ public class DonemYedeklerViewModel : ViewModelBase
     {
         get => _selectedYedek;
         set => Set(ref _selectedYedek, value);
+    }
+
+    private bool _isYedeklerYukleniyor;
+    /// <summary>Liste okunurken/silme sürerken panel ring gösterir (Kural 11: try/finally ile kapanır).</summary>
+    public bool IsYedeklerYukleniyor
+    {
+        get => _isYedeklerYukleniyor;
+        private set
+        {
+            if (Set(ref _isYedeklerYukleniyor, value))
+                NotifyPropertyChanged(nameof(IsYedekListesiBos));
+        }
     }
 
     public async Task YukleAsync(string databaseName)
@@ -129,7 +158,12 @@ public class DonemYedeklerViewModel : ViewModelBase
         }
         try
         {
-            if (LocalSettingsService != null)
+            if (TenantAyarlari != null)
+            {
+                var ayar = await TenantAyarlari.GetAsync(BagliDonem?.FirmaId ?? 0);
+                YedekPageSize = ayar.GetYedekPageSize();
+            }
+            else if (LocalSettingsService != null)
             {
                 var ayar = await LocalSettingsService.ReadSettingAsync<TenantSettings>(TenantSettings.SettingsKey);
                 if (ayar != null)
@@ -137,15 +171,28 @@ public class DonemYedeklerViewModel : ViewModelBase
             }
         }
         catch { /* model varsayılanı korunur */ }
+        IsYedeklerYukleniyor = true;
         try
         {
-            var response = await OperationService.GetBackupHistoryAsync(databaseName);
+            var gorev = OperationService.GetBackupHistoryAsync(databaseName);
+            var tamamlanan = await Task.WhenAny(gorev, Task.Delay(TimeSpan.FromSeconds(30)));
+            if (tamamlanan != gorev)
+            {
+                StatusError("Yedek listesi zaman aşımına uğradı (30sn). Disk yanıt vermiyor olabilir.");
+                return;
+            }
+            var response = await gorev;
             Yedekler = response?.Data ?? new List<DatabaseBackupResult>();
             SelectedYedek = Yedekler.FirstOrDefault();
         }
-        catch
+        catch (Exception ex)
         {
+            StatusError($"Yedek listesi alınamadı: {ex.Message}");
             Yedekler = new List<DatabaseBackupResult>();
+        }
+        finally
+        {
+            IsYedeklerYukleniyor = false;
         }
     }
 
@@ -159,14 +206,15 @@ public class DonemYedeklerViewModel : ViewModelBase
             if (response.Success && response.Data != null && response.Data.IsBackupComleted)
             {
                 await SatirVitrininiYazAsync(response.Data);
-                NotificationService.Show("Yedek Alındı", $"{_databaseName} yedeklendi.", NotificationType.Success);
-                // FIFO: fazlalık en eski otomatik silinir (modelden gelen gerçek değer)
+                NotificationService.ShowTagged("Yedek Alındı", $"{_databaseName} yedeklendi.", NotificationType.Success,
+                    "YedekAl", NotificationGroups.Yedek);
+                // FIFO: fazlalık en eski otomatik silinir (firma-kapsamlı modelden gelen gerçek değer)
                 try
                 {
                     if (LocalSettingsService != null)
                     {
-                        var dbSettings = await LocalSettingsService.ReadSettingAsync<DatabaseSettingsModel>(DatabaseSettingsModel.SettingsKey)
-                            ?? new DatabaseSettingsModel();
+                        var dbSettings = await FirmaAyarlari.EtkiliVeritabaniAyariniOkuAsync(
+                            LocalSettingsService, BagliDonem?.FirmaId ?? 0);
                         if (dbSettings.OtomatikTemizlemeAcik)
                             await OperationService.CleanOldBackupsAsync(_databaseName, dbSettings.GetManuelKeep());
                     }
@@ -174,12 +222,15 @@ public class DonemYedeklerViewModel : ViewModelBase
                 catch { }
             }
             else
-                NotificationService.Show("Yedek Alınamadı", response.Message, NotificationType.Warning);
+                NotificationService.ShowTagged("Yedek Alınamadı", response.Message, NotificationType.Warning,
+                    "YedekAl", NotificationGroups.Yedek);
             await YukleAsync(_databaseName);
+            VitrinSayaclariniYaz();
         }
         catch (Exception ex)
         {
-            NotificationService.Show("Yedek Hatası", ex.Message, NotificationType.Danger);
+            NotificationService.ShowTagged("Yedek Hatası", ex.Message, NotificationType.Danger,
+                "YedekAl", NotificationGroups.Yedek);
         }
     }
 
@@ -198,13 +249,16 @@ public class DonemYedeklerViewModel : ViewModelBase
                 return;
             var response = await OperationService.RestoreBackupAsync(_databaseName, yedek.BackupFileName);
             if (response.Success && response.Data != null && response.Data.IsRestoreSuccess)
-                NotificationService.Show("Geri Yüklendi", $"'{yedek.BackupFileName}' geri yüklendi.", NotificationType.Success);
+                NotificationService.ShowTagged("Geri Yüklendi", $"'{yedek.BackupFileName}' geri yüklendi.", NotificationType.Success,
+                    "GeriYukle", NotificationGroups.Yedek);
             else
-                NotificationService.Show("Geri Yüklenemedi", response.Message ?? "İşlem başarısız.", NotificationType.Danger);
+                NotificationService.ShowTagged("Geri Yüklenemedi", response.Message ?? "İşlem başarısız.", NotificationType.Danger,
+                    "GeriYukle", NotificationGroups.Yedek);
         }
         catch (Exception ex)
         {
-            NotificationService.Show("Geri Yükleme Hatası", ex.Message, NotificationType.Danger);
+            NotificationService.ShowTagged("Geri Yükleme Hatası", ex.Message, NotificationType.Danger,
+                "GeriYukle", NotificationGroups.Yedek);
         }
     }
 
@@ -230,20 +284,89 @@ public class DonemYedeklerViewModel : ViewModelBase
             return;
         try
         {
-            bool onay = await DialogService.ShowConfirmationAsync(
-                "Yedeği Sil",
-                $"'{yedek.BackupFileName}' kalıcı olarak silinecek.\n\nDevam edilsin mi?",
-                "Sil", "Vazgeç");
-            if (!onay)
-                return;
-            await BackupService.CleanupBackupFileAsync(yedek.BackupFilePath);
-            NotificationService.Show("Yedek Silindi", $"'{yedek.BackupFileName}' silindi.", NotificationType.Success);
-            await YukleAsync(_databaseName);
+            // Saklama alt-sınır koruması: silme sonrası sayı Denetim Masası'ndaki
+            // saklama rakamının altına düşecekse yazılı onay istenir (DeleteGuard deseni).
+            var altSinir = await SaklamaAltSiniriniOkuAsync();
+            if (altSinir != null && Yedekler.Count - 1 < altSinir.Value)
+            {
+                bool yaziliOnay = await DialogService.ShowBackupDeleteGuardAsync(
+                    yedek.BackupFileName, Yedekler.Count - 1, altSinir.Value);
+                if (!yaziliOnay)
+                {
+                    NotificationService.ShowTagged("Silme İptal Edildi",
+                        "Yazılı onay tamamlanmadı, yedek silinmedi.",
+                        NotificationType.Info,
+                        "YedekSil", NotificationGroups.Yedek);
+                    return;
+                }
+            }
+            else
+            {
+                bool onay = await DialogService.ShowConfirmationAsync(
+                    "Yedeği Sil",
+                    $"'{yedek.BackupFileName}' kalıcı olarak silinecek.\n\nDevam edilsin mi?",
+                    "Sil", "Vazgeç");
+                if (!onay)
+                    return;
+            }
+            IsYedeklerYukleniyor = true;
+            try
+            {
+                var (silindi, neden) = await BackupService.TryDeleteBackupFileAsync(yedek.BackupFilePath);
+                if (!silindi)
+                {
+                    NotificationService.ShowTagged("Yedek Silinemedi",
+                        $"'{yedek.BackupFileName}' silinemedi. Neden: {neden}",
+                        NotificationType.Danger,
+                        "YedekSil", NotificationGroups.Yedek);
+                }
+                else
+                {
+                    NotificationService.ShowTagged("Yedek Silindi", $"'{yedek.BackupFileName}' silindi.", NotificationType.Success,
+                        "YedekSil", NotificationGroups.Yedek);
+                }
+                await YukleAsync(_databaseName);
+                VitrinSayaclariniYaz();
+            }
+            finally
+            {
+                IsYedeklerYukleniyor = false;
+            }
         }
         catch (Exception ex)
         {
-            NotificationService.Show("Silme Hatası", ex.Message, NotificationType.Danger);
+            NotificationService.ShowTagged("Silme Hatası", ex.Message, NotificationType.Danger,
+                "YedekSil", NotificationGroups.Yedek);
         }
+    }
+
+    /// <summary>Denetim Masası'ndaki saklama rakamı (okunamazsa null → koruma pasif, normal onay).</summary>
+    private async Task<int?> SaklamaAltSiniriniOkuAsync()
+    {
+        try
+        {
+            if (LocalSettingsService == null)
+                return null;
+            var ayar = await FirmaAyarlari.EtkiliVeritabaniAyariniOkuAsync(
+                LocalSettingsService, BagliDonem?.FirmaId ?? 0);
+            return ayar?.GetManuelKeep();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Silme sonrası bağlı dönemin vitrin sayaçlarını listeden günceller
+    /// (tam sayfa yenilemeye gerek kalmaz — ağır RefreshAllAsync çağrılmaz).</summary>
+    private void VitrinSayaclariniYaz()
+    {
+        var donem = BagliDonem;
+        if (donem == null || !string.Equals(donem.DatabaseName, _databaseName, StringComparison.OrdinalIgnoreCase))
+            return;
+        donem.DbYedekSayisi = Yedekler.Count;
+        donem.DbYedekVarMi = Yedekler.Count > 0;
+        donem.RefreshVitrin();
     }
 
     public void Subscribe()

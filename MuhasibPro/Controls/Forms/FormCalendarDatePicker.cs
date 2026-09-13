@@ -190,7 +190,7 @@ public class FormCalendarDatePicker : CalendarDatePicker, IFormControl
             if (HasError && !string.IsNullOrEmpty(ErrorMessage))
             {
                 // Koyu temaya uygun kırmızı border
-                _backgroundBorder.BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Microsoft.UI.Xaml.Application.Current.Resources["MuhasibDangerBrush"];
+                _backgroundBorder.BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Microsoft.UI.Xaml.Application.Current.Resources["SystemFillColorCriticalBrush"];
                 _backgroundBorder.BorderThickness = new Thickness(2);
 
                 // Hata mesajını göster

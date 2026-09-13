@@ -8,8 +8,8 @@ namespace MuhasibPro.Domain.Models
     {
         public const string SettingsKey = "AppPlatformSettings";
 
-        /// <summary>Kayıtlı tema yoksa / Default ise kullanılacak tema adı. Geçerli: Light, Dark.</summary>
-        public string ThemeDefault { get; set; } = "Light";
+        /// <summary>Kayıtlı tema yoksa / Default ise kullanılacak tema adı. Geçerli: Default (sistemi takip et), Light, Dark.</summary>
+        public string ThemeDefault { get; set; } = "Default";
 
         /// <summary>Splash adımları arası yapay bekleme (ms). 0-5000 arası, varsayılan 150.</summary>
         public int SplashStepDelayMs { get; set; } = 150;

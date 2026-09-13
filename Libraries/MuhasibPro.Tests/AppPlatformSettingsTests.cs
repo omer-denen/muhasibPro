@@ -1,7 +1,11 @@
 using FluentAssertions;
+using Moq;
+using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
+using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.Services.UIService;
+using MuhasibPro.Domain.Entities.SistemEntity;
 using MuhasibPro.Domain.Models;
 
 namespace MuhasibPro.Tests;
@@ -33,6 +37,18 @@ public class AppPlatformSettingsTests
         public void Unsubscribe(object target) { }
     }
 
+    private static IAuthenticationService Kimlik(long kullaniciId, KullaniciRolTip rol = KullaniciRolTip.Kullanici)
+    {
+        var auth = new Mock<IAuthenticationService>();
+        auth.SetupGet(a => a.IsAuthenticated).Returns(true);
+        auth.SetupGet(a => a.CurrentAccount).Returns(new HesapModel
+        {
+            KullaniciId = kullaniciId,
+            KullaniciModel = new KullaniciModel { Rol = new KullaniciRolModel { RolTip = rol } }
+        });
+        return auth.Object;
+    }
+
     [Fact]
     public async Task Get_KayitYoksa_VarsayilanlariDoner()
     {
@@ -40,7 +56,7 @@ public class AppPlatformSettingsTests
 
         var ayar = await saglayici.GetAsync();
 
-        ayar.ThemeDefault.Should().Be("Light");
+        ayar.ThemeDefault.Should().Be("Default");
         ayar.SplashStepDelayMs.Should().Be(150);
         ayar.StatusAutoHideMs.Should().Be(3000);
         ayar.NotificationEnabled.Should().BeTrue();
@@ -62,7 +78,7 @@ public class AppPlatformSettingsTests
 
         var ayar = await saglayici.GetAsync();
 
-        ayar.ThemeDefault.Should().Be("Light");
+        ayar.ThemeDefault.Should().Be("Default");
         ayar.SplashStepDelayMs.Should().Be(150);
         ayar.StatusAutoHideMs.Should().Be(3000);
         ayar.ApplicationDataFolder.Should().Be("MuhasibPro/ApplicationData");
@@ -84,5 +100,30 @@ public class AppPlatformSettingsTests
         bus.Olaylar.Should().ContainSingle()
             .Which.Should().BeOfType<AppSettingsChangedEvent>()
             .Which.SettingsKey.Should().Be(AppPlatformSettings.SettingsKey);
+    }
+
+    [Fact]
+    public async Task Kayit_KullaniciyaOzel_Izolasyonlu()
+    {
+        var bellek = new BellekAyarlari();
+        var bus = new YakalayanBus();
+        var bir = new AppPlatformSettingsProvider(bellek, bus, Kimlik(1));
+        var iki = new AppPlatformSettingsProvider(bellek, bus, Kimlik(2));
+
+        await bir.SaveAsync(new AppPlatformSettings { ThemeDefault = "Dark" });
+
+        (await bir.GetAsync()).ThemeDefault.Should().Be("Dark");
+        (await iki.GetAsync()).ThemeDefault.Should().Be("Default", "başka kullanıcının kaydı görünmemeli");
+        bellek.Kutu.Should().ContainKey($"{AppPlatformSettings.SettingsKey}:U1");
+    }
+
+    [Fact]
+    public async Task Get_KullaniciKaydiYoksa_GlobaleDuser()
+    {
+        var bellek = new BellekAyarlari();
+        bellek.Kutu[AppPlatformSettings.SettingsKey] = new AppPlatformSettings { ThemeDefault = "Dark" };
+        var saglayici = new AppPlatformSettingsProvider(bellek, new YakalayanBus(), Kimlik(9));
+
+        (await saglayici.GetAsync()).ThemeDefault.Should().Be("Dark");
     }
 }

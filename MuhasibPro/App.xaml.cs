@@ -29,7 +29,8 @@ namespace MuhasibPro
 
         public static DispatcherQueue _dispatcherQueue;
 
-        private static Window MainWindow => new MainWindow();
+        private static Window _mainWindow;
+        private static Window MainWindow => _mainWindow ??= new MainWindow();
 
         public static IThemeSelectorService ThemeSelectorService => ServiceLocator.Current
             .GetService<IThemeSelectorService>();

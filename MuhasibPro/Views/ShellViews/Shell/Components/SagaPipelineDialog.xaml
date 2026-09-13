@@ -11,10 +11,10 @@
     PrimaryButtonStyle="{StaticResource InventDialogPrimaryStyle}"
     CloseButtonText="Vazgeç"
     DefaultButton="None"
-    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
     BorderThickness="1"
-    CornerRadius="{StaticResource CardCornerRadius}">
+    CornerRadius="{StaticResource ControlCornerRadius}">
 
     <ContentDialog.Title>
         <Grid ColumnSpacing="12">
@@ -26,8 +26,8 @@
                 <FontIcon Glyph="{StaticResource IconZap}" FontSize="18" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
-                <TextBlock Text="Saga Pipeline" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
-                <TextBlock Text="Yeni Mali Dönem" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}"/>
+                <TextBlock Text="Saga Pipeline" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" CharacterSpacing="60"/>
+                <TextBlock Text="Yeni Mali Dönem" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
             </StackPanel>
         </Grid>
     </ContentDialog.Title>
@@ -80,7 +80,7 @@
                                         Grid.Column="0"
                                         FontSize="12"
                                         FontWeight="SemiBold"
-                                        Foreground="{ThemeResource MuhasibTextPrimaryBrush}">
+                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}">
                                         <Run Text="Adım " />
                                         <Run Text="{x:Bind StepNumber, Mode=OneWay}" />
                                         <Run Text=": " />
@@ -91,12 +91,12 @@
                                         Text="{x:Bind Timestamp, Mode=OneWay}"
                                         FontSize="10"
                                         FontFamily="{ThemeResource MuhasibMonospaceFontFamily}"
-                                        Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
+                                        Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                 </Grid>
                                 <TextBlock
                                     Text="{x:Bind Description, Mode=OneWay}"
                                     FontSize="11"
-                                    Foreground="{ThemeResource MuhasibSageSecondaryBrush}"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                     TextWrapping="Wrap" />
                             </StackPanel>
                         </Grid>
@@ -109,8 +109,8 @@
         <Border
             Padding="12"
             CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
-            Background="{ThemeResource MuhasibInventPaleBrush}"
-            BorderBrush="{ThemeResource MuhasibSoftBorderBrush}"
+            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1">
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <FontIcon x:Name="StatusIcon" Glyph="{StaticResource IconLoader}" FontSize="16" Foreground="{ThemeResource MuhasibPetrolBrush}" />
@@ -118,7 +118,7 @@
                     x:Name="StatusText"
                     Text="Saga hattı bekleniyor — başlatmak için devam edin."
                     FontSize="12"
-                    Foreground="{ThemeResource MuhasibSageSecondaryBrush}"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     TextWrapping="Wrap" />
             </StackPanel>
         </Border>

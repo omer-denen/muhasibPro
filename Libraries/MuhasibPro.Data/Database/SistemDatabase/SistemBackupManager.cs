@@ -37,7 +37,7 @@ namespace MuhasibPro.Data.Database.SistemDatabase
             {
                 DatabaseName = _databaseName,
                 BackupType = backupType,
-                LastBackupDate = DateTime.UtcNow,
+                LastBackupDate = DateTime.Now,
                 IsBackupComleted = false,
             };
             try
@@ -183,8 +183,8 @@ namespace MuhasibPro.Data.Database.SistemDatabase
                             BackupFileName = fileInfo.Name,
                             BackupFilePath = fileInfo.FullName,
                             BackupFileSizeBytes = fileInfo.Length,
-                            // Use LastWriteTimeUtc - reflects last modification
-                            LastBackupDate = fileInfo.LastWriteTimeUtc,
+                            // Yerel saatle gösterim (kullanıcı saatiyle uyumlu)
+                            LastBackupDate = fileInfo.LastWriteTime,
                             BackupType = _backupManager.DetermineBackupType(fileInfo.Name),
                             DatabaseName = _databaseName,
                             IsBackupComleted = isValidBackup && isSqliteValid, // ✅ İkisi birden
@@ -220,10 +220,10 @@ namespace MuhasibPro.Data.Database.SistemDatabase
                 var searchPattern = string.Format(BACKUP_FILE_PATTERN, _databaseName);
                 var lastBackup = Directory.GetFiles(backupDir, searchPattern)
                     .Select(filePath => new FileInfo(filePath))
-                    .OrderByDescending(f => f.CreationTimeUtc)
+                    .OrderByDescending(f => f.CreationTime)
                     .FirstOrDefault();
 
-                return lastBackup?.CreationTimeUtc;
+                return lastBackup?.CreationTime;
             }
             catch (Exception ex)
             {
@@ -465,6 +465,25 @@ namespace MuhasibPro.Data.Database.SistemDatabase
             {
                 _logger?.LogError(ex, "Eski backup'lar temizlenemedi: {DatabaseName}", _databaseName);
                 return 0;
+            }
+        }
+
+        public async Task<bool> CheckpointWalAsync()
+        {
+            try
+            {
+                var sourceFilePath = _applicationPaths.GetSistemDatabaseFilePath();
+                if (!File.Exists(sourceFilePath))
+                    return false;
+                // SQLite önerisi: kapanış/açılışta TRUNCATE checkpoint (pasif kapanış WAL bırakabilir).
+                await _backupManager.ExecuteWalCheckpointAsync(sourceFilePath, _databaseName);
+                _backupManager.CleanupSqliteWalFiles(sourceFilePath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogDebug(ex, "WAL checkpoint başarısız: {DatabaseName}", _databaseName);
+                return false;
             }
         }
     }

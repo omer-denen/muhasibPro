@@ -24,11 +24,17 @@
 | Cilt 4 | 61-80 | LOG/LOG-61-80.md | arsiv |
 | Cilt 5 | 81-100 | LOG/LOG-81-100.md | arsiv |
 | Cilt 6 | 101-120 | LOG/LOG-101-120.md | arsiv |
-| Cilt 7 | 121-140 | LOG/LOG-121-140.md | aktif |
+| Cilt 7 | 121-140 | LOG/LOG-121-140.md | dolu |
+| Cilt 8 | 141-160 | LOG/LOG-141-160.md | dolu |
+| Cilt 9 | 161-180 | LOG/LOG-161-180.md | dolu |
+| Cilt 10 | 181-200 | LOG/LOG-181-200.md | dolu |
+| Cilt 11 | 201-220 | LOG/LOG-201-220.md | dolu |
+| Cilt 12 | 221-240 | LOG/LOG-221-240.md | dolu (241 taşındı) |
+| Cilt 13 | 241-260 | LOG/LOG-241-260.md | aktif |
 
 ---
 
-## Oturum İndeksi (136 oturum, 7 cilt)
+## Oturum İndeksi (251 oturum, 13 cilt)
 
 | # | Tarih | Baslik | Durum | Cilt | Ozet |
 |---|-------|--------|-------|------|------|
@@ -169,6 +175,122 @@
 | 134 | 2026-09-09 | Tasarım brief bakımı | ✅ docs | C7 | Güncel dil kararı (Custom*); şablon + AI Studio brief yenileme |
 | 135 | 2026-09-09 | Git + AI Studio hazırlığı | ✅ | C7 | .gitignore + ilk push (muhasibPro) + prompt teslimi |
 | 136 | 2026-09-09 | AI Studio tek-tip geçiş başladı | 🔨 devam | C7 | Prompt verildi, hazırlık yapıyor; viewpackage.zip + RAPOR.md bekleniyor |
+| 137 | 2026-09-09 | MaliDonemYonetimView seçerek alındı (AI Studio) | ✅🧪 | C7 | 373→209 + DonemOzetCard 164 + TopluIslemlerPanel 39; 2 M + 4 yeni; build 0/0 235/235; Login/FirmaShell korunuyor |
+| 138 | 2026-09-09 | Tenant güncelleme 3 bug loglandı — modüler geçiş sebebi | ✅ docs | C7 | HATALAR.md 3 AÇIK B1-B3 (tek dönem rozeti / Güncelle butonu yok / Bilinmeyen sızıntı) + KONTROL 6.60; viewpackage full overwrite geri alındı |
+| 139 | 2026-09-09 | Per-view ayar panelleri planı (her view kendi ayarı) | 📋 plan | C7 | docs/AYARLAR-PANEL-PLAN.md 9 view haritası + KONTROL 6.61; AI Studio yalnız ayar paneli XAML’i, biz kod |
+| 140 | 2026-09-09 | Circular DI + kör bekçi fix + canlı E2E | ✅🧪 | C7 | Auth↔IdentitySettings döngüsü IServiceProvider tembelliğine + 9 ankraj sln uyumu + CircularDependencyTests bekçisi; build 0/0, test 236/236, Login→FirmaShell→MainShell canlı |
+| 141 | 2026-09-09 | AI-Yönetim devralma + Bilinmeyen sola + hamburger/blur/row-scroll + B3 kapanışı | ✅🧪 | C8 | DonemOzetCard/TopluIslemlerPanel seçerek alındı, Bilinmeyen sol pane ayrı kart, eşik 1500 + acrylic + Row-0 scroll; B3 canlı kapandı; build 0/0, test 236/236 |
+| 142 | 2026-09-09 | Yedek pagination fix + chevron + Expander'sız parametre | ✅🧪 | C8 | 4 VM CanPrev/CanNext bildirimi + clamp; chevron FontIcon 32x32; Expander kalktı; YedekPaginationTests 3; build 0/0, test 239/239 |
+| 143 | 2026-09-09 | MaliDonemYonetim firma-bazlı ayarlar (HANDOFF) | 🔨 devam | C8 | Facade VM + provider firma-anahtarı + 7 test; build 0/0, test 246/246; View (dialog+buton) Muse Code'a devredildi |
+| 144 | 2026-09-09 | 6.65 kapanış: ayar dialog + pane butonu + docs | ✅🧪 | C8 | View onayı 4/4 + dialog + buton + AYAR-PLAN revizyonu; build 0/0, test 246/246 |
+| 145 | 2026-09-10 | Canlı test + dialog v2 + 6.66 planı | 🔨 plan | C8 | Kayıt/rozet/sayfalama canlı OK; DefaultButton-mavi + MaxWidth tuzakları çözüldü; 6.66 planı yazıldı |
+| 146 | 2026-09-10 | Dialog blur (tüm zeminler acrylic) | ✅🧪 | C8 | 7 opak dialog → AcrylicBackgroundFillColorDefaultBrush (iç kartlar opak); build 0/0, test 246/246 |
+| 147 | 2026-09-10 | Dialog chrome tekilleştirme + smoke-blur | ✅🧪 | C8 | MuhasibDialogStyle tek kaynak + 9 dialog dönüşümü + ContentDialogSmokeFill→acrylic (kararma→blur); WMC0011 dersi; build 0/0, test 246/246 |
+| 148 | 2026-09-10 | Dialog blur artırma | ✅🧪 | C8 | MuhasibDialogAcrylicBrush (tint 0.30) + stil/smoke yeniden bağlama; BlurAmount WMC0011 dersi; build 0/0, test 246/246 |
+| 149 | 2026-09-10 | Composition backdrop-blur (DialogHelper tek kapı) | ✅🧪 | C8 | DialogBackdropBlur (ref-sayaçlı, BlurAmount 40) + smoke→Transparent; acrylic-smoke popup'ta blur üretmiyor; build 0/0, test 246/246 |
+| 150 | 2026-09-10 | Dialog tek kapı tamam + tutarlılık kuralı | ✅🧪 | C8 | DialogService/App ShowAsync→ShowCenteredAsync + AGENTS.md tutarlılık maddesi; build 0/0, test 246/246 |
+| 151 | 2026-09-10 | Blur şiddeti + kapanış kasması | ✅🧪 | C8 | BlurAmount 40→16 (GPU maliyeti + görünüm); build 0/0, test 246/246 |
+| 152 | 2026-09-10 | Takılı blur fix + minik blur | ✅🧪 | C8 | Closed yedeği + Apply try-içine + BlurAmount 6; build 0/0, test 246/246 |
+| 153 | 2026-09-10 | Blur 3px | ✅🧪 | C8 | Kapanış beklemesi için 6→3; build 0/0, test 246/246 |
+| 154 | 2026-09-10 | Kapanış beklemesi (Closing anı) | ✅🧪 | C8 | Temizlik animasyon-sonrasından kapanış-başına alındı; build 0/0, test 246/246 |
+| 155 | 2026-09-10 | Kararma perdesi: Popup yerleşim (canlı) | ✅🧪 | C8 | ShowAsync(Popup) resmi smoke'suz API; perde yok + t350 temiz kapanış canlı; build 0/0, test 246/246 |
+| 156 | 2026-09-10 | Takılı blur teşhis enstrümantasyonu | 🔨 teşhis | C8 | [BLUR] sayaç+kaldırma-doğrulama logu; build 0/0, test 246/246 |
+| 157 | 2026-09-10 | Dialog-blur hattı geri alındı | ↩️ geri alma | C8 | Orijinal yapıya eksiksiz dönüş (kodda iz 0); build 0/0, test 246/246 |
+| 158 | 2026-09-10 | 6.66 v2 ayar dialogu uygulaması | ✅ kod 🧪❌ | C8 | Genel panel + durum butonu + Kaydedildi bildirimi + 5 test; dotnet kırık → build/test Windows'ta |
+| 159 | 2026-09-10 | Ayar paneli internet araştırması | 📋 bulgu | C8 | MS kılavuz + Toolkit + sektör; +2 ayar adayı, NumberBox→ComboBox dersi; 6.67 önerisi |
+| 160 | 2026-09-10 | 6.67 ayar refactor uygulaması | ✅ kod 🧪❌ | C8 | 638→6 dosya bölünme + ComboBox + sahte-çakışma fix; +2 ayar rafta; build/test Windows'ta |
+| 161 | 2026-09-10 | Dialog zeminleri SubtleBrush | ✅ kod 🧪❌ | C9 | 8/8 kök `MuhasibCardBackgroundSubtleBrush`, iç kartlar korundu; build/canlı Windows'ta |
+| 162 | 2026-09-10 | Login sağ kolon başlık+kart | ✅ kod 🧪❌ | C9 | Dış 16px başlık + iç 22px silindi; CRLF dersi; build/canlı Windows'ta |
+| 163 | 2026-09-10 | FirmaShell başlık ikon+chip | ✅ kod 🧪❌ | C9 | Dönem başlığına takvim ikonu, sayaçlar zeytin+Circle; işaretli ekran görüntüsü bekleniyor |
+| 164 | 2026-09-10 | Radio kart arkaplan uyumu | ✅ kod 🧪❌ | C9 | Hover warm yıkama (yeni token), seçili petrol korundu, Disabled 0.55; canlı Windows'ta |
+| 165 | 2026-09-10 | Dönem durum + 2027 teşhisi | 🔍 teşhis | C9 | Analiz yalnız seçili karta; 2025/26 güncel, yalnız 2027 eski (disk kanıtlı); fix onayı bekliyor |
+| 166 | 2026-09-10 | Yeni dönem buton görünürlüğü | ✅ kod 🧪❌ | C9 | Petrol tint hap (ölçü aynen); hover/pressed/disabled şablondan; canlı Windows'ta |
+| 167 | 2026-09-10 | 2027 elle göç + damga | ✅ veri 🧪❌ | C9 | Yedek + 5 kolon + history + 1.1.0 damga; 3 dönem güncel; canlı teyit Windows'ta |
+| 168 | 2026-09-10 | Seçili-hover yok + buton hover | ✅ kod 🧪❌ | C9 | Perde Collapse/Visible, buton beyaz-taban; ekran görüntüsü bekleniyor |
+| 169 | 2026-09-10 | Ayar dialogu ekran-görüntüsü tasarımı | ✅ kod 🧪❌ | C9 | Menü petrol hap vurgu + satır-başı beyaz kartlar (11 kart); canlı Windows'ta |
+| 170 | 2026-09-10 | IconShutdown çöküşü | ❌→✅ | C9 | Uydurma anahtar → IconLogOut; ders HATALAR'da; canlı teyit Windows'ta |
+| 171 | 2026-09-10 | Dialog Kapat→X | ✅ kod 🧪❌ | C9 | Alt buton kalktı, sağ-üst 32px X (IconClear yeni); canlı Windows'ta |
+| 172 | 2026-09-10 | Durum-X aralığı | ✅ kod 🧪❌ | C9 | X'e 8px sol margin (~20px nefes); canlı Windows'ta |
+| 173 | 2026-09-10 | Toplu log kapanışı | 📋 docs | C9 | KONTROL Cilt-9 + ROADMAP 6.66/6.67 + AYARLAR §7; eksik halkalar kapandı |
+| 174 | 2026-09-10 | Ön muhasebe modül araştırması | 📋 bulgu | C9 | TR+global çekirdek modüller + diagram + MuhasibPro eşleşmesi |
+| 175 | 2026-09-10 | Çekirdek iskelet araştırması | 📋 bulgu | C9 | Açılış→dönem-seçimi hattı + diagram; göç seçimde (toplu döngü yok) |
+| 176 | 2026-09-10 | Güncelleme altyapısı | 📋 bulgu | C9 | Tenant göç hattı diagramı + uygulama-güncellemesi + eşleşme |
+| 177 | 2026-09-10 | View bağımlılık haritası | 📋 docs | C9 | docs/VIEW-BAGIMLILIK.md: 52 View, 19 kök, topolojik sıra |
+| 178 | 2026-09-10 | Güncelleme yapısı diagramda mı | ❓ cevap | C9 | View adları var ama akış VM saga+navigasyonda (4 adım) |
+| 179 | 2026-09-10 | Güncelleme altyapı denetimi | ✅ hazır | C9 | 3 view + saga gövdeli + koordinatör bağlı; eksik yok, B1 adayı açık |
+| 180 | 2026-09-10 | Açık faz envanteri | 📋 liste | C9 | 10 kod işi + canlı sepeti (KONTROL/HATALAR taraması) |
+| 181 | 2026-09-10 | İş kuyruğu kaydı | 📋 plan | C9 | KONTROL'de 0-9 sıralı kuyruk; ilk açılışta işletilir |
+| 182 | 2026-09-10 | 0. Windows borcu (build/test/smoke) | ✅🧪 | C10 | 0/0 + 251/251 + 20sn smoke; piksel tur kullanıcıda; B1 seçimi bekleniyor |
+| 183 | 2026-09-10 | 1. B1 rozet A + 2. Güncelle butonu | ✅🧪 | C10 | Toplu analiz + E1 + 3 test; zincir kurulu (kod yok); 0/0 + 254/254 + smoke |
+| 184 | 2026-09-10 | 3. B2 tetikleme + 4. BilinmeyenPanel | ✅ | C10 | Tetikleme testli/kullanıcıda; çift kayıt + filtre testi; 0/0 + 255/255 + smoke |
+| 185 | 2026-09-10 | 5. Continue + 6. Ölü dialog | ✅🧪 | C10 | Ayna-yedeği + 3 test; dialog bağlı (silinmedi); 0/0 + 258/258 + smoke |
+| 186 | 2026-09-10 | 7. plan + Faz 0/1 (break-fix, rename) | ✅🧪 | C10 | Splash ayarsız + AppPlatformAyarlarViewModel; 0/0 + 263/263 + smoke |
+| 187 | 2026-09-10 | Faz 2 iskelet + kullanıcı-anahtarı | ✅🧪 | C10 | DenetimMasasi VM+View+panel onaylı + 6 test; 0/0 + 269/269 + smoke |
+| 188 | 2026-09-10 | Faz 3 Giriş Güvenliği + oturum ekleri | ✅🧪 | C10 | Identity VM+panel onaylı + 4 test; 0/0 + 273/273 + smoke; 2 tüketici rafta |
+| 189 | 2026-09-10 | Retrofit + avatar | ✅🧪 | C10 | PersonPicture + byte[] decode + 2 test; 0/0 + 275/275 + smoke; canlı foto kullanıcıda |
+| 190 | 2026-09-10 | Denetim Masası: menu-driven NavigationView + iç Frame | ✅🧪 | C10 | NavView menu-driven + Frame + Yakinda 3 Page; 0/0 + 279/279 |
+| 191 | 2026-09-10 | Win11 Ayarlar dili + kullanıcı-bazlı ayar JSON'u | ✅🧪 | C10 | Arama süzgeci + büyük başlık + SeciliMenuSimge; 0/0 + 285/285 |
+| 192 | 2026-09-10 | Menü: Giriş en üst + Güvenlik | ✅🧪 | C10 | GirisPaneli en üst varsayılan; 0/0 + 285/285 |
+| 193 | 2026-09-10 | Veritabanı Yönetimi ağacı + dashboard | ✅🧪 | C10 | 3-seviye nav ağacı + dashboard; 0/0 + 285/285 |
+| 194 | 2026-09-10 | Firma sökümü + başlık tek-butonu | ✅🧪 | C10 | Firma izi silindi + tek buton kapsül; 0/0 + 285/285 |
+| 195 | 2026-09-11 | FirmaShell header tek kapsül + ikonlu başlıklar + bugfix | ✅🧪 | C10 | Tek kapsül sticky + UserInfo compact + header ikon + WarningTint fix + SeciliMenuSimge; 0/0 |
+| 196 | 2026-09-11 | M4 DatabaseSettings altyapısı (provider + 2 bölüm) | ✅🧪 | C10 | U-anahtar provider + 2 VM + 2 Panel + 2 Sayfa + routing; 0/0 + 292/292 + smoke |
+| 197 | 2026-09-11 | Yönetici kilidi bug'ı (seed fallback) | ✅🧪 | C10 | Rol-satırı yok + yönetici-satır tercihi + VM tekilleştirme; 0/0 + 298/298 + smoke |
+| 198 | 2026-09-11 | Denetim Güncelleme bölümü (UpdateView gömülü) | ✅🧪 | C10 | Çerçeve Sayfa + GomuluUygula + doğrudan route, yeni VM yok; 0/0 + 300/300 + smoke |
+| 199 | 2026-09-11 | Canlı güncelleme testi + seed-hash + donma fix'leri | ✅🧪 | C10 | vpk pack + kurulum + yerel feed :8321; 2 bug çözüldü; 0/0 + 305/305 |
+| 200 | 2026-09-11 | 1.1.1 canlı tur: 0-byte kurulum + timeout + converter fix + release workflow | ✅🧪 | C10 | Kısayol köke + kurulum 7/7 + Güncelleme donmadan + v1.1.2 bulundu; 0/0 + 306/306 |
+| 201 | 2026-09-12 | Firma/Dönem gerçek bölümler + footer dinamik + AutoMapper silme + UpdateViewModel split | ✅🧪 | C11 | 2 VM + 2 Panel/Sayfa + Yakinda silindi + AppSurumBilgisi; 0/0 + 312/312 + smoke |
+| 202 | 2026-09-12 | Mali Dönem Yönetim 4 kritik + Kural 11 (busy/result) | ✅🧪 | C11 | Lazy-load + silme checkbox/Silinen listesi + yedek-sonuç + sıklık-düzeni + 6 busy; 0/0 + 316/316 + smoke |
+| 203 | 2026-09-12 | Yerleşim düzeltme (sekmeli dialog) + silme sertleştirme + saklama koruması | ✅🧪 | C11 | YetimYedeklerDialog + navbar butonları + neden-plumbing + yazılı onay; 0/0 + 320/320 + smoke |
+| 204 | 2026-09-12 | Refactoring planı + Kural 12 (işlem-görseli disiplini) | 📋 plan | C11 | 4 tarama + Faz 6.71 (testler→bug→yıkım→progress→RAF); kod yok |
+| 205 | 2026-09-12 | Faz 6.71 kaydı (kod yok, checklist genişletme) | 📋 faz | C11 | Test/view/RAF maddeleri tek tek; sırada tasarım detayı + Faz 1 |
+| 206 | 2026-09-12 | Saf Fluent + stabilizasyon fazı (Faz 6.72, kod yok) | 📋 faz | C11 | AGENTS/ROADMAP dil kararı + bug kuyruğu; bekleyen: bug listesi + tasarım detayı |
+| 209 | 2026-09-12 | Faz 6.73 + 6.74 kaydı + Kural 13 (kod yok) | 📋 faz | C11 | Checkpoint planı + akış/DB-log planı; en son toplu başlanacak |
+| 210 | 2026-09-12 | Kapanış + MuseCode devir notu (kod yok) | 📋 devir | C11 | Kirli ağaç uyarısı + kilitli kararlar + faz haritası + mayınlar |
+| 207 | 2026-09-12 | Dalga 0: 6 alanlık bug listesi alındı, teşhis başladı | 🔨 aktif | C11 | Güncelleme + SistemDb açılış/kapanış + tenant yedek/silme |
+| 208 | 2026-09-12 | Dalga 0 sonuçları + büyük-iş tasarım kararı (akış detayı + DB logu) | 📋 kayıt | C11 | 18 kırık halka + akış/DB-log/log-altyapı kararları |
+| 209 | 2026-09-12 | Faz 6.73 + 6.74 kaydı + Kural 13 (kod yok) | 📋 faz | C11 | Checkpoint planı + akış/DB-log planı; en son toplu başlanacak |
+| 210 | 2026-09-12 | Kapanış + MuseCode devir notu (kod yok) | 📋 devir | C11 | Kirli ağaç uyarısı + kilitli kararlar + faz haritası + mayınlar |
+| 211 | 2026-09-12 | Faz 6.71/1 test seferberliği (4 dosya ~98 nokta) | ✅ kod 🧪❌ | C11 | Üretim kodu değişmeden; quirk pinleri (outer ölü dal/before-backup/count-0); dotnet kırık → build/test Windows'ta |
+| 212 | 2026-09-12 | GetById_Bulunamadi kırmızısı → ürün fixi | ✅🧪 | C11 | Guard düzeltildi + HATALAR; tekrar test 426/426, 6.71/1 mühürlendi |
+| 213 | 2026-09-12 | Faz 6.71/2 kritik bug kapanışı (4 madde) | ✅🧪 | C11 | Yazılı-onay Info toast + OrdinalIgnoreCase; Load/Refresh 30sn timeout; KPI dürüst metin + TopluAnalizTamamlandi; exe derleme zamanı footer; 0/0 + 430/430 |
+| 214 | 2026-09-12 | Dalga 0 Kol A: Tenant yedek/silme 7/9 kırık | ✅🧪 | C11 | DeleteBackupDatabaseAsync SİLİNDİ (veri-kaybı); FIFO iki desen; outer ölü dal + sahte Success fix; create CompensateAll; DerinAnaliz Hata alanı; 0/0 + 429/429 |
+| 215 | 2026-09-12 | Dalga 0 Kol B+C: SistemDb + Güncelleme 7/9 | ✅🧪 | C11 | B2 fail-closed; B4 WAL+Busy PRAGMA; B1 splash 30sn timeout; C1 gerçek Velopack Apply; C2 LastCheckTime korunur; C3 sahte GeriAl kaldırıldı; C4 sessiz catch loglama; 0/0 + 429/429 |
+| 216 | 2026-09-12 | Dalga 0 son 4 kırık: B5+B3+A2+A5 | ✅🧪 | C11 | Kapanış yedeği inşa; migration-history mesajı; safety .db→.backup + dosya adı fix + compensate loglama; 18/18 kapandı; 0/0 + 429/429 |
+| 217 | 2026-09-12 | Dalga 0 mühürleme (doğrulama + kayıt, kod yok) | ✅🧪 | C11 | 0 hata (23 uyarı bilinen) + 429/429 + 25sn smoke; KONTROL Dalga 0 ✅🧪 + ROADMAP 6.72 🔨; canlı E2E kullanıcıda |
+| 218 | 2026-09-12 | 6.71/4-D1 bildirim arş. + ShowTagged | ✅🧪 | C11 | Oturum-159 usulü arş. (MS+Toolkit+paket XML); ShowTagged overload + NotificationGroups; 0 hata + 435/435; sırada D2 |
+| 219 | 2026-09-12 | Fluent+Mica tam geçiş + Kural 14 + Faz 6.75 | 📋 karar | C11 | "toplu re-skin yok" kalktı; view-öncesi arş. kuralı; D2 beklemede |
+| 220 | 2026-09-12 | 6.71/4-D2 VM gruplama kapanışı | ✅🧪 | C11 | 5 VM ShowTagged + DerinAnaliz bildirimi; 15 beklenti taşındı; 0 hata + 435/435; sırada D3 |
+| 221 | 2026-09-12 | 6.75 araştırması (Mica+backdrop) | 📋 bulgu | C11 | MS 2 kaynak; pencere Mica'lı ama 10 view opak kapatıyor; öneri: ilk Splash |
+| 222 | 2026-09-12 | 6.75 ilk view Splash Mica geçişi | ✅🧪 | C11 | Mini-arş + onaylı tek dosya (zemin Transparent); 0 hata + 435/435 + smoke; Mica görseli kullanıcıda |
+| 223 | 2026-09-12 | 6.75 ikinci view SistemKurulum | ✅🧪 | C11 | İçerik+tasarım arş. (3 bulgu); zemin+jargon+süs + sabit alt bar; 0 hata + 435/435 + smoke |
+| 225 | 2026-09-12 | Token tek-anahtar süpürmesi | ✅🧪 | C11 | 19 anahtar→sistem, 61 tanım silindi, eski-grep 0; 0 hata + 435/435 + smoke; canlı renk turu kullanıcıda |
+| 226 | 2026-09-12 | Kapanış + devir notu (kod yok) | 📋 devir | C11 | 217-225 zincir özeti; sırada token kararları → Splash'ten tekrar; kirli ağaç sürüyor |
+| 227 | 2026-09-13 | Fluent token geçişi + Splash/SistemKurulum view turu + Faz 6.76 Adım 1 | ✅🧪 | C12 | DesignTokens Fluent (Petrol→accent, Olive→birleşti, ölü sil); Cards.xaml aliaslar; Splash+SK AccentFill+tip rampası; Kural 14 sektör genişletme; Faz 6.76 planlandı + Adım 1: SplashTarget 3 yollu karar (FirstSetup/MigrationRequired/Login) + 8 test; 0/0 + 436/436 |
+| 228 | 2026-09-13 | Faz 6.76 Adım 3: SistemKurulum→SistemDbYonetim rename (geriye dönük kayıt) | ✅🧪 | C12 | View 10 dosya + VM 5 dosya rename + tüm referanslar güncellendi; 0/0 + 436/436 |
+| 229 | 2026-09-13 | Faz 6.76 Adım 2+4+5: KurulumSplash + içerik daraltma + 3 yol navigasyon | ✅🧪 | C12 | Yeni KurulumSplashView+VM (otomatik DB oluşturma splash); SplashNavigator 3 yol (FirstSetup/MigrationRequired/Login); firstSetupMode kaldırıldı; 0/0 + 436/436 |
+| 230 | 2026-09-13 | Login zinciri tema onarımı (beyaz-beyaz + ayarlanabilir tema) | ✅🧪 | C12 | Static→Theme sweep (8 dosya) + alias→sistem + CardCornerRadius fix + AccentButton CTA + tema Default (sistemi takip) + dialog miras; 0 hata + 436/436; canlı tur + Sorun 2 sırada |
+| 231 | 2026-09-13 | SistemDbYonetim sayfa yeniden yazımı (migration/onarım) | ✅🧪 | C12 | Kural 14 arş (QuickBooks Verify/Rebuild + MS settings deseni); sayfa komple rewrite (ilk-kurulum hero/adım göstergesi kalktı, durum hapı + BodyStrong bölümler); titlebar Light kalıntısı temizlendi; 0 hata + 436/436; sırada Sorun 2 yönlendirme |
+| 232 | 2026-09-13 | DatabaseInfoPanel iki kart tek satır | ✅🧪 | C12 | Sistem Durumu sol + Veritabanı İşlemleri sağ (`*`/`*` Grid); 0 hata + 436/436 |
+| 233 | 2026-09-13 | Faz 6.77 planı: SistemDb yönetim operasyonları | 📋 plan | C12 | Arş (Sage/QuickBooks/SQLite/MS); envanter (restore UI 0, yedek zincirsiz); Adım 0 Sorun 2 + Adım 1 zincir + Adım 2 view; kod yok |
+| 234 | 2026-09-13 | Faz 6.77 Adım 1: ApplyPending yedek-önce-göç zinciri | ✅🧪 | C12 | Contract+impl (yedek→göç→doğrula) + 4 test; operasyon servisinin zaten var olduğu düzeltildi; 0 hata + 440/440 |
+| 235 | 2026-09-13 | Faz 6.77 Adım 2: sayfa yönetim bölümleri + VM zinciri | ✅🧪 | C12 | 2 çocuk VM + 2 panel + sayfa bölümü + QuickDialog zincire bağlandı + YukleIcAsync bugfix + 6 test; 0 hata + 446/446 |
+| 236 | 2026-09-13 | Faz 6.77 Adım 3: QuickDialog kaldırıldı | ✅🧪 | C12 | Dialog silindi (Kural 4), Teşhis→sayfa direkt, ölü DI kaydı kalktı; 0 hata + 446/446 |
+| 237 | 2026-09-13 | Faz 6.78 planı: ortak restore analizi | 📋 plan | C12 | Arş (QB Verify/Rebuild + mevcut hüküm motoru); çift-katman analiz + 4 adım; kod yok |
+| 238 | 2026-09-13 | Gerçek Mica tek kaynak (Base + pane şeffaflığı) | ✅🧪 | C12 | XAML Kind=Base açık + code-behind bloğu silindi (2 pencere) + Yönetim pane Transparent; 0 hata + 446/446; canlı görsel kullanıcıda |
+| 239 | 2026-09-13 | Kuyruk kapanışı: yedek-panel + Adım 0 + 6.78 Adım 1 | ✅🧪 | C12 | Limit-yüklemede + satır-butonlu/danger + karar-izi + analiz çekirdeği; 0 hata + 462/462; canlı tur kullanıcıda |
+| 240 | 2026-09-13 | Canlı tur: yedek-panel tasarım-uyum denetimi | ✅🧪 | C12 | Salt-okunur UIA turu (Login→FirmaShell→SistemDbYonetim); 5→3 budama canlı kanıtlı; 5 uyum maddesi ✅; uygulama kapatıldı |
+| 241 | 2026-09-13 | Faz 6.79: Sistem.db açılış/kapanış güvenliği + Faz 6.80 kuralı | ✅🧪 | C13 | Yaşam-döngüsü servisi (açılış oto-yedek + kapanış WAL/sistem yedeği) + 6 test; 0 hata + 468/468; 2-katmanlı görsel kural kaydı |
+| 242 | 2026-09-13 | Faz 6.78 Adım 2: tenant hattı ortak restore çekirdeğine bağlandı | ✅🧪 | C13 | `RestoreVerdictEvaluator` ince adaptör; kimlik uyuşmazlığı ortak çekirdeğe; +3 test; 0 hata + 471/471 |
+| 243 | 2026-09-13 | Faz 6.78 Adım 3: sistem restore tek kapı (altyapı + Kural-17 zemin + UI) | ✅🧪 | C13 | Snapshot reader + SistemRestoreAnalizService + SistemRestoreVerifyDialog + VM tek kapı + Kural-17 Katman 1; 0 hata + 482/482 |
+| 244 | 2026-09-13 | Denetim Masası FirmaShell'den ayrıldı → ayrı modal pencere (Kural 14+17) | ✅🧪 | C13 | 30 dosya Views/DenetimMasasi'ya taşındı + Page/Katman-1/accent/help; FirmaShell toggle söküldü + Katman-1; 0 hata + 482/482 |
+| 245 | 2026-09-13 | Kural 18: canlı testi agent yapar, kanıt kullanıcı onayına sunulur | 📋 kural | C13 | "Canlı test kullanıcıda" yasağı; ekran görüntüsü+UIA+referans zorunlu; AGENTS Kural 18 + plan/tasarım/ROADMAP kaydı; kod değişikliği yok |
+| 246 | 2026-09-13 | Kural 19: referans defteri (araştırma → nereye uygulandı) | 📋 kural | C13 | `docs/REFERANSLAR.md` açıldı + seed; AGENTS Kural 19 + zorunlu-okuma + oturum-sonu 9; Denetim Masası canlı test denemesi (erişilemedi, dürüst kayıt) |
+| 247 | 2026-09-13 | Canlı test devri: Denetim Masası turu yeni oturumda | 📋 devir | C13 | UIA betikleri + ekran kanıtları + kök-neden hipotezi + UIA Türkçe tuzağı + 6 adımlı plan kayda geçti; kod değişikliği yok |
+| 248 | 2026-09-13 | Login pilotu: Fluent 2 + ana border + MVVM yardım + logo | ✅🧪 | C13 | Zemin(0.35)→ana border→kartlar katmanı; marka yatay, login sağda, AppIcon, ? panel köşesinde; `?`/Teşhis VM command + `IDialogService.ShowYardimAsync`; YardimDialog opak; Kural 17 (zemin→ana border→kartlar) + TASARIM-KURALLARI güncellendi; 0/0 |
+| 249 | 2026-09-13 | Kural 17 Katman 2: FirmaShellView + Denetim Masası Windows Ayarlar yeniden tasarımı (KISMİ) | ✅🧪 | C13 | FirmaShell Katman 2 tam (0 hata + 482/482 + canlı Dark); Denetim Masası: Mica istisnası + CommunityToolkit SettingsCard (+DevWinUI 10.0.0 net8) + kabuk (`NavigationView` Left/arama/büyük başlık) + Giriş=Windows Ayarlar Home (kategori ızgarası) + 4/6 panel SettingsCard + içerik/metin yeniden tasarımı; SistemVeritabanı/YedekSaklama + canlı test + Kaydedildi/sahte-ayar temizliği YENİ OTURUMDA |
+| 250 | 2026-09-13 | Oturum 249 devam 2: Veritabanı tek view + token/tema bugfix + canlı Light/Dark | ✅🧪 | C13 | İki panel `SettingsCard` + 6 VM `KaydedildiMetni` + Identity sahte alanlar temizlendi; Veritabanı tek sayfa iki `SettingsExpander` (Sistem + Dönem), eski 4 dosya silindi; `TextFillColorTertiaryColor`/`ControlFillColorSecondaryColor` XamlParse fix; tema sahte→gerçek (`AppSettingsChangedEvent` aboneliği, canlı+açılışta Light); 0 hata + 481/481; canlı Dark/Light kanıt; **kullanıcı onayı ALINDI** |
+| 251 | 2026-09-13 | Denetim Masası Giriş: Win11 karşılaştırma → RichButton + rol/busy/canlı güncelleme denetimi | ✅🧪 | C13 | Gerçek Win11 25H2 canlı karşılaştırma; pane üstü hesap kartı + nav seçim vurgusu fix; Giriş = kart kapsız 3 `dev:RichButton` (MuhasibPro/Sistem.db/Güncelleme) + Kullanıcıya Ait Firmalar (firma expander → mali dönem listesi); DevWinUI Generic.xaml merge; seed yönetici rolü "Yönetici"; Sistem.db ring + **her girişte** 20sn-tavanlı güncelleme denetimi; `GetFirmalarWithUserId` dönem fix; 4 HATALAR kaydı; 0 hata + 481/481; canlı `ot251l`; **kullanıcı onayı ALINDI** |
 ---
 
 ## Son Oturum Özeti (hızlı context)

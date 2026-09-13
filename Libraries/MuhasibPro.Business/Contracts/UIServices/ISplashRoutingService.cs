@@ -3,7 +3,11 @@ namespace MuhasibPro.Business.Contracts.UIServices
     /// <summary>Splash sonrası hedef — View, kararın karşılığını (View/ViewModel tipi) kendi eşler.</summary>
     public enum SplashTarget
     {
-        SetupRequired,
+        /// <summary>DB yok — ilk kurulum gerekiyor (KurulumSplash otomatik oluşturur).</summary>
+        FirstSetup,
+        /// <summary>DB var ama migration/güncelleme gerekiyor (SistemDbYonetim ekranına yönlendir).</summary>
+        MigrationRequired,
+        /// <summary>DB hazır — doğrudan Login'e geç.</summary>
         Login
     }
 
@@ -11,7 +15,23 @@ namespace MuhasibPro.Business.Contracts.UIServices
     public class SplashRouteDecision
     {
         public bool IsDatabaseReady { get; set; }
-        public SplashTarget Target => IsDatabaseReady ? SplashTarget.Login : SplashTarget.SetupRequired;
+        public bool IsDatabaseExists { get; set; }
+        public bool HasPendingMigrations { get; set; }
+        public int PendingMigrationCount { get; set; }
+
+        public SplashTarget Target
+        {
+            get
+            {
+                if (!IsDatabaseExists) return SplashTarget.FirstSetup;
+                if (!IsDatabaseReady || HasPendingMigrations) return SplashTarget.MigrationRequired;
+                return SplashTarget.Login;
+            }
+        }
+
+        /// <summary>Karar izi: neden bu hedef seçildi (Adım 0 tanısı — sayfa günlüğüne düşer).</summary>
+        public string KararOzeti =>
+            $"exists={IsDatabaseExists} ready={IsDatabaseReady} pending={PendingMigrationCount} target={Target}";
     }
 
     /// <summary>Taşınmış-veri taraması sonucu — dialog gösterimi View'a aittir (Business dialog bilmez).</summary>

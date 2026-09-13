@@ -23,7 +23,16 @@ public class AuthenticationRepository : IAuthenticationRepository
         var kullanici = await _userRepository.GetByUsernameAsync(username).ConfigureAwait(false);
         if (kullanici == null)
             throw new UserNotFoundException(username);
-        var passwordResult = _passwordHasher.VerifyHashedPassword(kullanici, kullanici.ParolaHash, password);
+        PasswordVerificationResult passwordResult;
+        try
+        {
+            passwordResult = _passwordHasher.VerifyHashedPassword(kullanici, kullanici.ParolaHash, password);
+        }
+        catch (FormatException ex)
+        {
+            // Bozuk/legacy formatlı hash hasher'ı patlatır — legacy yoluna düş (AuthenticationService yakalar).
+            throw new InvalidPasswordException("Parola doğrulanamadı (hash biçimi).", ex, username, password);
+        }
         if (passwordResult != PasswordVerificationResult.Success)
             throw new InvalidPasswordException(username, password);
         return kullanici;

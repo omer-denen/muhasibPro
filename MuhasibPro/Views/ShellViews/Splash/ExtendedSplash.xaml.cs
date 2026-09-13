@@ -61,7 +61,17 @@ namespace MuhasibPro.Views.ShellViews.Splash
             CardEntranceStoryboard.Begin();
             _ = StatusControl.ShowMessageAsync("Başlatılıyor…");
 
-            var success = await _startupService.InitializeAsync();
+            bool success;
+            try
+            {
+                // B1 fix: 30sn timeout — DB kilitli/bozuksa sonsuz bekleme önlenir.
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                success = await _startupService.InitializeAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                success = false;
+            }
 
             if (success)
             {

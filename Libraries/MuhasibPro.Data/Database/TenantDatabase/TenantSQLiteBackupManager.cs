@@ -61,7 +61,7 @@ namespace MuhasibPro.Data.Database.TenantDatabase
             {
                 DatabaseName = databaseName,
                 BackupType = databaseBackup,
-                LastBackupDate = DateTime.UtcNow,
+                LastBackupDate = DateTime.Now,
                 IsBackupComleted = false,
             };
             try
@@ -135,83 +135,6 @@ namespace MuhasibPro.Data.Database.TenantDatabase
                 return result;
             }
         }
-        public async Task<DatabaseDeletingExecutionResult> DeleteBackupDatabaseAsync(
-        string databaseName)
-        {
-            var deletingResult = new DatabaseDeletingExecutionResult
-            {
-                IsDeletedSuccess = false,
-                HasError = true,
-                OperationTime = DateTime.UtcNow,
-            };
-
-            var result = _applicationPaths.TenantDatabaseFileExists(databaseName);
-            if (!result)
-            {
-                deletingResult.HasError = true;
-                deletingResult.Message = "🔴 Silinecek Yedek veritabanı bulunamadı";
-                return deletingResult;
-            }
-            try
-            {
-                if (!await _globalDeletionLock.WaitAsync(TimeSpan.FromSeconds(LOCK_TIMEOUT_SECONDS)))
-                {
-                    deletingResult.HasError = true;
-                    deletingResult.Message = "🔴Yedek Veritabanını silme işlemi zaman aşımına uğradı. Lütfen tekrar deneyin.";
-                    return deletingResult;
-                }
-                for (int attempt = 1; attempt <= 3; attempt++)
-                {
-                    try
-                    {
-                        SqliteConnection.ClearAllPools();
-
-                        await Task.Delay(100 * attempt); // Bağlantıların kapanması için bekleme süresi
-                        var dbPath = _applicationPaths.GetTenantDatabaseFilePath(databaseName);
-                        if (File.Exists(dbPath))
-                        {
-                            File.Delete(dbPath);
-                            if (File.Exists(dbPath))
-                            {
-                                deletingResult.HasError = true;
-                                deletingResult.Message = "��Yedek Veritabanını silme işlemi başarısız oldu.";
-                                return deletingResult;
-                            }
-                        }
-                        _applicationPaths.CleanupSqliteWalFiles(databaseName);
-                        deletingResult.IsDeletedSuccess = true;
-                        deletingResult.Message = "✅ Yedek Veritabanı başarıyla silindi.";
-                        return deletingResult;
-                    }
-                    catch (IOException ex)
-                    {
-                        _logger.LogWarning(
-                            ex,
-                            "Yedek Veritabanı silme hatası (Deneme {Attempt}): {DatabaseName}",
-                            attempt,
-                            databaseName);
-                        if (attempt == 3)
-                        {
-                            deletingResult.HasError = true;
-                            deletingResult.Message = $"[Hata] ❌ Yedek Veritabanı kullanımda. Silinemedi: {ex.Message}";
-                            return deletingResult;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Yedek Veritabanı silme hatası: {DatabaseName}", databaseName);
-                        deletingResult.HasError = true;
-                        deletingResult.Message = $"[Hata] ❌ Yedek Veritabanı silinemedi: {ex.Message}";
-                        return deletingResult;
-                    }
-                }
-            }
-            finally
-            {
-                _globalDeletionLock.Release();
-            }
-            return deletingResult;
-        }
         public Task<List<DatabaseBackupResult>> GetBackupsAsync(string databaseName)
         {
             try
@@ -249,7 +172,7 @@ namespace MuhasibPro.Data.Database.TenantDatabase
                                 BackupFileName = fileInfo.Name,
                                 BackupFilePath = fileInfo.FullName,
                                 BackupFileSizeBytes = fileInfo.Length,
-                                LastBackupDate = fileInfo.LastAccessTimeUtc,
+                                LastBackupDate = fileInfo.LastWriteTime,
                                 BackupType = _backupManager.DetermineBackupType(fileInfo.Name),
                                 DatabaseName = databaseName,
                                 IsBackupComleted = isValidBackup && isSqliteValid, // ✅ İkisi birden
@@ -392,10 +315,10 @@ namespace MuhasibPro.Data.Database.TenantDatabase
                 var searchPattern = string.Format(BACKUP_FILE_PATTERN, databaseName);
                 var lastBackup = Directory.GetFiles(backupDir, searchPattern)
                     .Select(filePath => new FileInfo(filePath))
-                    .OrderByDescending(f => f.CreationTimeUtc)
+                    .OrderByDescending(f => f.CreationTime)
                     .FirstOrDefault();
 
-                return lastBackup?.CreationTimeUtc;
+                return lastBackup?.CreationTime;
             }
             catch (Exception ex)
             {

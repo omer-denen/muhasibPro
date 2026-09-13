@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="MuhasibPro.Views.SistemDbYonetim.Components.KurulumKayitPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Loaded="OnLoaded">
+
+    <Border Style="{StaticResource CustomModernCard}" Padding="16">
+        <StackPanel Spacing="10">
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Border Width="28" Height="28" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Background="{ThemeResource SystemFillColorAttentionBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorAttentionBrush}" BorderThickness="1">
+                    <FontIcon Glyph="{StaticResource IconShield}" FontSize="14" Foreground="{ThemeResource SystemFillColorAttentionBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="Kurulum Kaydı" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                    <TextBlock Text="Bu kurulumun kimliği — yedeklere damgalanır" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
+                </StackPanel>
+            </Grid>
+            <StackPanel Spacing="6">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="90"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="KurulumId" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.KurulumId, Mode=OneWay}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" IsTextSelectionEnabled="True"/>
+                </Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="90"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="MakineId" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.MachineGuid, Mode=OneWay}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" IsTextSelectionEnabled="True"/>
+                </Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="90"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="Oluşturma" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="{x:Bind ViewModel.OlusturmaTarihi, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

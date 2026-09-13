@@ -24,25 +24,25 @@
                 <MenuFlyoutItem Text="Giriş Ekranına Dön" Click="OnLogoutClick" />
             </MenuFlyout>
         </Button.Flyout>
-        <Border CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="Transparent" BorderThickness="0" Padding="4,2">
-            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Grid Width="32" Height="32" VerticalAlignment="Center">
-                    <Border CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibInventCardBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1">
-                        <TextBlock x:Name="InitialsText" Text="Ö" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Border CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="Transparent" BorderThickness="0" Padding="4,2" MinHeight="28">
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Grid Width="24" Height="24" VerticalAlignment="Center">
+                    <Border CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                        <TextBlock x:Name="InitialsText" Text="Ö" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
-                    <Border Width="10" Height="10" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibSuccessBrush}" BorderBrush="{ThemeResource MuhasibInventCardBrush}" BorderThickness="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-1,-1"/>
+                    <Border Width="8" Height="8" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource SystemFillColorSuccessBrush}" BorderBrush="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1.5" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-1,-1"/>
                 </Grid>
-                <StackPanel Spacing="1" VerticalAlignment="Center" MinWidth="92">
-                    <TextBlock x:Name="NameText" Text="Ömer Korkut" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource MuhasibTextPrimaryBrush}"/>
-                    <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                        <Border Background="{ThemeResource MuhasibInventPaleBrush}" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="5,1,5,2" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1">
-                            <TextBlock Text="Admin" FontSize="9" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageSecondaryBrush}"/>
+                <StackPanel Spacing="0" VerticalAlignment="Center" MinWidth="82">
+                    <TextBlock x:Name="NameText" Text="Ömer Korkut" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextFillColorPrimaryBrush}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                        <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="4,0,4,1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                            <TextBlock Text="Admin" FontSize="8" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         </Border>
-                        <TextBlock Text="•" FontSize="9" Foreground="{StaticResource MuhasibSageTertiaryBrush}" VerticalAlignment="Center"/>
-                        <TextBlock Text="Aktif oturum" FontSize="9" Foreground="{StaticResource MuhasibSageTertiaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="•" FontSize="8" Foreground="{StaticResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="Aktif oturum" FontSize="8" Foreground="{StaticResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
-                <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="{StaticResource MuhasibSageTertiaryBrush}" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                <FontIcon Glyph="&#xE70D;" FontSize="8" Foreground="{StaticResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="1,0,0,0"/>
             </StackPanel>
         </Border>
     </Button>

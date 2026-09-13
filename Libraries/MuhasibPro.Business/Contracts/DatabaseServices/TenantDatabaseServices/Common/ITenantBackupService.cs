@@ -7,5 +7,7 @@ namespace MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices.
     {
         Task<ApiDataResponse<TenantDeletingResult>> CleanAllBackupsAsync(string databaseName);
         Task<bool> CleanupBackupFileAsync(string backupFilePath);
+        /// <summary>Tek dosya silme + başarısızlık nedeni (VM Danger mesajı için).</summary>
+        Task<(bool ok, string neden)> TryDeleteBackupFileAsync(string backupFilePath);
     }
 }

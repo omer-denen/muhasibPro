@@ -7,12 +7,18 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:MuhasibPro.Converters"
     mc:Ignorable="d"
-    Background="{ThemeResource AppBackgroundBrush}">
+    Background="Transparent">
 
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
         <converters:BoolToVisibilityConverter x:Key="FalseToVis" TrueValue="Collapsed" FalseValue="Visible" />
     </Page.Resources>
+
+    <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + ~%87 opak tint). Statik; icerik degisince yeniden olusmaz. -->
+    <Border x:Name="KokZemin" CornerRadius="0">
+        <Grid>
+            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="12" Padding="24,18,24,24" MaxWidth="640" HorizontalAlignment="Center">
@@ -27,11 +33,11 @@
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="Geri" Style="{StaticResource SecondaryCompactButtonStyle}" Command="{x:Bind ViewModel.GoBackCommand, Mode=OneWay}" VerticalAlignment="Center" ToolTipService.ToolTip="Firma seçimine dön" />
                     <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                        <TextBlock Text="Veritabanı Güncelleme" FontSize="18" FontWeight="Bold" Foreground="{StaticResource MuhasibTextPrimaryBrush}" />
-                        <TextBlock FontSize="12" Foreground="{StaticResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap">
+                        <TextBlock Text="Veritabanı Güncelleme" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextFillColorPrimaryBrush}" />
+                        <TextBlock FontSize="12" Foreground="{StaticResource TextFillColorSecondaryBrush}" TextWrapping="Wrap">
                             <Run Text="{x:Bind ViewModel.FirmaUnvani, Mode=OneWay}" /><Run Text=" • " /><Run Text="{x:Bind ViewModel.DonemYili, Mode=OneWay}" /><Run Text=" Mali Dönemi" />
                         </TextBlock>
-                        <TextBlock Text="{x:Bind ViewModel.Args.DatabaseName, Mode=OneWay}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
+                        <TextBlock Text="{x:Bind ViewModel.Args.DatabaseName, Mode=OneWay}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
                     </StackPanel>
                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
                         <Button Content="Yedekle ve Güncelle" Style="{StaticResource MuhasibPrimaryButtonStyle}" Command="{x:Bind ViewModel.StartUpdateCommand, Mode=OneWay}" IsEnabled="{x:Bind ViewModel.CanStart, Mode=OneWay}" Visibility="{x:Bind ViewModel.ShowContinue, Mode=OneWay, Converter={StaticResource FalseToVis}}" />
@@ -43,7 +49,7 @@
             <!-- Versiyon şeridi: mevcut → güncellenecek -->
             <Border Style="{StaticResource CustomModernCard}" Padding="16">
                 <StackPanel Spacing="6">
-                    <TextBlock Text="Sürüm" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
+                    <TextBlock Text="Sürüm" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" CharacterSpacing="60"/>
                     <Grid ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -53,20 +59,20 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
-                            <TextBlock Text="Mevcut sürüm" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}"/>
-                            <Border Padding="10,4" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibInventCardBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1">
-                                <TextBlock Text="{x:Bind ViewModel.Check.CurrentVersion, Mode=OneWay}" FontSize="12" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="Mevcut sürüm" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
+                            <Border Padding="10,4" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                                <TextBlock Text="{x:Bind ViewModel.Check.CurrentVersion, Mode=OneWay}" FontSize="12" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
                             </Border>
                         </StackPanel>
                         <TextBlock Grid.Column="1" Text="→" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" VerticalAlignment="Center"/>
                         <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
-                            <TextBlock Text="Güncellenecek sürüm" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}"/>
+                            <TextBlock Text="Güncellenecek sürüm" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
                             <Border Padding="10,4" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}">
                                 <TextBlock Text="{x:Bind ViewModel.Check.TargetVersion, Mode=OneWay}" FontSize="12" FontWeight="Bold" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" VerticalAlignment="Center"/>
                             </Border>
                         </StackPanel>
-                        <Border Grid.Column="4" Padding="8,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" BorderBrush="{ThemeResource MuhasibWarningBrush}" BorderThickness="1" VerticalAlignment="Center">
-                            <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibWarningBrush}" VerticalAlignment="Center">
+                        <Border Grid.Column="4" Padding="8,3" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1" VerticalAlignment="Center">
+                            <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center">
                                 <Run Text="{x:Bind ViewModel.Check.PendingCount, Mode=OneWay}" /><Run Text=" göç" />
                             </TextBlock>
                         </Border>
@@ -77,22 +83,22 @@
             <!-- Değişiklik: başlık + tablo açılır listeleri -->
             <Border Style="{StaticResource CustomModernCard}" Padding="16">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="Değişiklik" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
-                    <TextBlock Text="{x:Bind ViewModel.Headline, Mode=OneWay}" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" TextWrapping="Wrap"/>
+                    <TextBlock Text="Değişiklik" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" CharacterSpacing="60"/>
+                    <TextBlock Text="{x:Bind ViewModel.Headline, Mode=OneWay}" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap"/>
                     <ItemsControl ItemsSource="{x:Bind ViewModel.TableDisplays, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Expander Margin="0,0,0,6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                     <Expander.Header>
-                                        <TextBlock Text="{Binding TitleLine, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding TitleLine, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap"/>
                                     </Expander.Header>
                                     <StackPanel Spacing="6" Padding="0,4,0,0">
                                         <StackPanel Spacing="2" Visibility="{Binding HasAdded, Mode=OneWay, Converter={StaticResource TrueToVis}}">
-                                            <TextBlock Text="Eklenen kolonlar" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}"/>
+                                            <TextBlock Text="Eklenen kolonlar" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
                                             <ItemsControl ItemsSource="{Binding Added, Mode=OneWay}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock FontSize="11" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,2">
+                                                        <TextBlock FontSize="11" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,2">
                                                             <Run Text="•  " /><Run Text="{Binding}" />
                                                         </TextBlock>
                                                     </DataTemplate>
@@ -100,11 +106,11 @@
                                             </ItemsControl>
                                         </StackPanel>
                                         <StackPanel Spacing="2" Visibility="{Binding HasUpdated, Mode=OneWay, Converter={StaticResource TrueToVis}}">
-                                            <TextBlock Text="Güncellenen kolonlar" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}"/>
+                                            <TextBlock Text="Güncellenen kolonlar" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
                                             <ItemsControl ItemsSource="{Binding Updated, Mode=OneWay}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock FontSize="11" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,2">
+                                                        <TextBlock FontSize="11" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,2">
                                                             <Run Text="•  " /><Run Text="{Binding}" />
                                                         </TextBlock>
                                                     </DataTemplate>
@@ -112,11 +118,11 @@
                                             </ItemsControl>
                                         </StackPanel>
                                         <StackPanel Spacing="2" Visibility="{Binding HasRemoved, Mode=OneWay, Converter={StaticResource TrueToVis}}">
-                                            <TextBlock Text="Kaldırılanlar" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}"/>
+                                            <TextBlock Text="Kaldırılanlar" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
                                             <ItemsControl ItemsSource="{Binding Removed, Mode=OneWay}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock FontSize="11" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,2">
+                                                        <TextBlock FontSize="11" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,2">
                                                             <Run Text="•  " /><Run Text="{Binding}" />
                                                         </TextBlock>
                                                     </DataTemplate>
@@ -134,7 +140,7 @@
             <!-- İşlem adımları -->
             <Border Style="{StaticResource CustomModernCard}" Padding="16">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="İşlem adımları" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
+                    <TextBlock Text="İşlem adımları" FontSize="10" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" CharacterSpacing="60"/>
                     <ItemsControl ItemsSource="{x:Bind ViewModel.Steps, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -144,20 +150,20 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid Grid.Column="0" Width="28" Height="28" VerticalAlignment="Center">
-                                        <Border CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="Transparent" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1.5" Visibility="{Binding IsPending, Mode=OneWay, Converter={StaticResource TrueToVis}}">
-                                            <TextBlock Text="{Binding Number, Mode=OneWay}" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Border CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="Transparent" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1.5" Visibility="{Binding IsPending, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                                            <TextBlock Text="{Binding Number, Mode=OneWay}" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                         <ProgressRing Width="20" Height="20" IsActive="{Binding IsRunning, Mode=OneWay}" Foreground="{ThemeResource MuhasibPetrolBrush}" Visibility="{Binding IsRunning, Mode=OneWay, Converter={StaticResource TrueToVis}}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        <Border CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibSuccessBrush}" Visibility="{Binding IsDone, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                                        <Border CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource SystemFillColorSuccessBrush}" Visibility="{Binding IsDone, Mode=OneWay, Converter={StaticResource TrueToVis}}">
                                             <TextBlock Text="✓" FontSize="13" FontWeight="Bold" Foreground="{ThemeResource MuhasibOnPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
-                                        <Border CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibDangerBrush}" Visibility="{Binding IsFaulted, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                                        <Border CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource SystemFillColorCriticalBrush}" Visibility="{Binding IsFaulted, Mode=OneWay, Converter={StaticResource TrueToVis}}">
                                             <TextBlock Text="!" FontSize="13" FontWeight="Bold" Foreground="{ThemeResource MuhasibOnPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                     </Grid>
                                     <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Title, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}"/>
-                                        <TextBlock Text="{Binding Detail, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Title, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                                        <TextBlock Text="{Binding Detail, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>
@@ -166,15 +172,17 @@
                     <ProgressBar IsIndeterminate="True" Height="3" Foreground="{StaticResource MuhasibPetrolBrush}" Background="Transparent" Visibility="{x:Bind ViewModel.IsRunning, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
 
                     <!-- Sonuç bantları -->
-                    <Border Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource MuhasibDangerBgBrush}" BorderBrush="{ThemeResource MuhasibDangerBrush}" BorderThickness="1" Visibility="{x:Bind ViewModel.HasError, Mode=OneWay, Converter={StaticResource TrueToVis}}">
-                        <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource MuhasibDangerBrush}" TextWrapping="Wrap"/>
+                    <Border Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1" Visibility="{x:Bind ViewModel.HasError, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                        <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap"/>
                     </Border>
-                    <Border Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource MuhasibSuccessBgBrush}" BorderBrush="{ThemeResource MuhasibSuccessBrush}" BorderThickness="1" Visibility="{x:Bind ViewModel.ShowContinue, Mode=OneWay, Converter={StaticResource TrueToVis}}">
-                        <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource MuhasibSuccessBrush}" TextWrapping="Wrap"/>
+                    <Border Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1" Visibility="{x:Bind ViewModel.ShowContinue, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                        <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" TextWrapping="Wrap"/>
                     </Border>
                 </StackPanel>
             </Border>
 
         </StackPanel>
     </ScrollViewer>
+        </Grid>
+    </Border>
 </Page>

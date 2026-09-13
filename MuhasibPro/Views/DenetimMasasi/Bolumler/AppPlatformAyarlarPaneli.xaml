@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="MuhasibPro.Views.DenetimMasasi.Bolumler.AppPlatformAyarlarPaneli"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    mc:Ignorable="d">
+
+    <!-- Görünüm bölümü (Windows Ayarlar dili): bölüm başlıkları + SettingsCard.
+         DataContext = AppPlatformAyarlarViewModel (sayfa verir; başlık kabukta). -->
+    <StackPanel Spacing="24">
+
+        <!-- Görünüm -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Görünüm" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
+            <controls:SettingsCard Header="Tema" Description="Uygulamanın açık veya koyu görünümü. 'Sistemi kullan' Windows ayarını izler.">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconSettings}" />
+                </controls:SettingsCard.HeaderIcon>
+                <ComboBox SelectedValuePath="Tag" SelectedValue="{Binding ThemeDefault, Mode=TwoWay}" MinWidth="150">
+                    <ComboBoxItem Content="Sistemi kullan" Tag="Default" />
+                    <ComboBoxItem Content="Açık" Tag="Light" />
+                    <ComboBoxItem Content="Koyu" Tag="Dark" />
+                </ComboBox>
+            </controls:SettingsCard>
+        </StackPanel>
+
+        <!-- Başlangıç -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Başlangıç" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
+            <controls:SettingsCard Header="Açılış adımı beklemesi" Description="Açılış ekranı adımları arasındaki kısa bekleme (ms). Düşük değer daha hızlı açılış.">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconZap}" />
+                </controls:SettingsCard.HeaderIcon>
+                <ComboBox SelectedValue="{Binding SplashStepDelayMs, Mode=TwoWay}" MinWidth="150">
+                    <x:Int32>0</x:Int32>
+                    <x:Int32>150</x:Int32>
+                    <x:Int32>300</x:Int32>
+                    <x:Int32>500</x:Int32>
+                </ComboBox>
+            </controls:SettingsCard>
+            <controls:SettingsCard Header="Durum mesajı süresi" Description="Alt durum çubuğundaki mesajın ekranda kalma süresi (ms).">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconRefresh}" />
+                </controls:SettingsCard.HeaderIcon>
+                <ComboBox SelectedValue="{Binding StatusAutoHideMs, Mode=TwoWay}" MinWidth="150">
+                    <x:Int32>1000</x:Int32>
+                    <x:Int32>3000</x:Int32>
+                    <x:Int32>5000</x:Int32>
+                    <x:Int32>10000</x:Int32>
+                    <x:Int32>30000</x:Int32>
+                </ComboBox>
+            </controls:SettingsCard>
+        </StackPanel>
+
+        <!-- Bildirimler -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Bildirimler" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
+            <controls:SettingsCard Header="Bildirimler" Description="İşlem sonuçlarını Windows bildirimi olarak göster.">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconInfo}" />
+                </controls:SettingsCard.HeaderIcon>
+                <ToggleSwitch IsOn="{Binding NotificationEnabled, Mode=TwoWay}" />
+            </controls:SettingsCard>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

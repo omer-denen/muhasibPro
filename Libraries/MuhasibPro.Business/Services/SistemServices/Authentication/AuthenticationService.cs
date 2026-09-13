@@ -6,6 +6,7 @@ using MuhasibPro.Business.DTOModel;
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.Infrastructure.Security;
 using MuhasibPro.Data.Contracts.Repository.SistemRepos.Authentication;
+using MuhasibPro.Domain.Entities;
 using MuhasibPro.Domain.Entities.SistemEntity;
 using MuhasibPro.Domain.Exceptions;
 using MuhasibPro.Domain.Models;
@@ -175,11 +176,21 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
                         model.ResimOnizlemeSource = _bitmapTools.CreateLazyImageLoader(entity.ResimOnizleme);
                         model.Resim = entity.Resim;
                         model.ResimSource = entity.Resim;
-                        var kfr = entity.KullaniciFirmaRoller?.FirstOrDefault();
+                        // Birden çok firma rolü varsa yönetici satırı tercih edilir (ilk satır
+                        // admin olmayabilir — aksi halde yönetici kilitli kalır).
+                        var roller = entity.KullaniciFirmaRoller;
+                        var kfr = roller?.FirstOrDefault(x => x?.Rol?.RolTip == KullaniciRolTip.Yönetici)
+                            ?? roller?.FirstOrDefault();
                         if (kfr?.Rol != null)
                         {
                             model.Rol = CreateKullaniciRol(kfr.Rol);
                             model.RolId = kfr.RolId;
+                        }
+                        else if (source.Id == KullaniciSabitleri.SeedYoneticiId)
+                        {
+                            // Seed'de firma-rol satırı üretilmez (firma-bağımlı); yönetici kilidi
+                            // bootstrap kuralıyla aynı: seed yöneticisi "Yönetici" sayılır (Oturum 129/130).
+                            model.Rol = new KullaniciRolModel { RolAdi = "Yönetici", RolTip = KullaniciRolTip.Yönetici };
                         }
                         if (includes)
                         {

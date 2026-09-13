@@ -14,6 +14,14 @@ namespace MuhasibPro.Views.Settings
 
         public UpdateViewModel ViewModel { get; }
 
+        /// <summary>Denetim Masası içi gömülü mod: başlık satırı gizlenir (kabukta zaten
+        /// 28px başlık var) + zemin saydamlaşır (çift başlık/çift zemin olmaz).</summary>
+        public void GomuluUygula()
+        {
+            BaslikSatiri.Visibility = Visibility.Collapsed;
+            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        }
+
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);

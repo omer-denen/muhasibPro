@@ -7,8 +7,11 @@ using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
+using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService;
 using MuhasibPro.Data.Contracts.Database.TenantDatabase;
+using MuhasibPro.Domain.Common;
+using MuhasibPro.Domain.Entities.SistemEntity;
 using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Enum.DatabaseEnum;
 using MuhasibPro.Domain.Models.DatabaseResultModel;
@@ -182,6 +185,38 @@ public class YedekOlayTests
         })).Should().BeTrue();
 
         vm.Unsubscribe();
+    }
+
+    [Fact]
+    public async Task Bilinmeyen_KayitliDonemYedegini_Listelemez_Yabanciyi_Listeler()
+    {
+        // HATALAR B3 planlı testi: 2 dönem × 1 yedek → Bilinmeyen 0;
+        // yabancı dosya → Bilinmeyen 1 (simetrik kanonik eşleşme regresyonu).
+        var bus = new AtesleyenBus();
+        var ortak = OrtakServisler();
+        var operasyon = new Mock<ITenantSQLiteDatabaseOperationService>();
+        operasyon.Setup(o => o.GetAllBackupsAsync()).ReturnsAsync(
+            new SuccessApiDataResponse<List<DatabaseBackupResult>>(new List<DatabaseBackupResult>
+            {
+                new() { DatabaseName = "db-F-0001_2026", BackupFileName = "db-F-0001_2026_20260910_120000_a1.backup" },
+                new() { DatabaseName = "db-F-0001_2027.db", BackupFileName = "db-F-0001_2027.db_20260910_120000_b2.backup" },
+                new() { DatabaseName = "db-YABANCI_2099", BackupFileName = "db-YABANCI_2099_20260910_120000_c3.backup" }
+            }, "ok"));
+        var donemler = new Mock<IMaliDonemService>();
+        donemler.Setup(s => s.GetMaliDonemlerPageAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DataRequest<MaliDonem>>()))
+            .ReturnsAsync(new SuccessApiDataResponse<IList<MaliDonemModel>>(new List<MaliDonemModel>
+            {
+                new() { Id = 1, DatabaseName = "db-F-0001_2026" },
+                new() { Id = 2, DatabaseName = "db-F-0001_2027" }
+            }, "ok"));
+        var vm = new BilinmeyenYedekViewModel(ortak.Object, operasyon.Object,
+            Mock.Of<ITenantBackupService>(), donemler.Object, null!, bus);
+
+        await vm.TaraAsync();
+
+        vm.BilinmeyenYedekler.Should().ContainSingle(
+            ".db'li + çıplak desenler kanonik eşleşmeli, yalnız yabancı kalmalı");
+        vm.BilinmeyenYedekler[0].DatabaseName.Should().Be("db-YABANCI_2099");
     }
 
     [Fact]

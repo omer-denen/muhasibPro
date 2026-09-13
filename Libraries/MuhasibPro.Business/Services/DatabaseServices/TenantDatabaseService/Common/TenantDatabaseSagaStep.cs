@@ -110,7 +110,7 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService.Co
                         result.DeletedBackupFiles = allDeletingBackups.Data.DeletedBackupFiles;
                         result.DeletedBackupCount = allDeletingBackups.Data.DeletedBackupCount;                        
                         result.BackupDeleteCompleted = allDeletingBackups.Data.BackupDeleteCompleted;
-                        return ApiDataExtensions.ErrorResponse(result, $"Veritabanı yedekleri silinemedi");
+                        return ApiDataExtensions.ErrorResponse(result, $"Veritabanı yedekleri silinemedi ({allDeletingBackups.Message}). Dosya kilitli olabilir — yedekleri koruyarak da silebilirsiniz ('Yedekleri de sil' seçimini kaldırın).");
                     }
                 } else
                 {
@@ -180,7 +180,7 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService.Co
                             if (File.Exists(sourceDbPath))
                             {
                                 var backupPath = _applicationPaths.GetTenantBackupFolderPath();
-                                var backupFileName = $"safety_{request.DatabaseName}_{DateTime.Now:yyyyMMdd_HHmmss}.db";
+                                var backupFileName = $"safety_{request.DatabaseName}_{DateTime.Now:yyyyMMdd_HHmmss}.backup";
                                 var backupFilePath = Path.Combine(backupPath, backupFileName);
 
                                 SqliteConnection.ClearAllPools();
@@ -214,13 +214,16 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService.Co
                             {
                                 try
                                 {
+                                    // A2+A5 fix: dosya adı gönder (tam yol değil — RestoreBackupAsync kendi dizinini ekler).
+                                    var safetyFileName = Path.GetFileName(result.BackupFilePath);
                                     var restoreResponse = await _operationService.RestoreBackupAsync(
                                         request.DatabaseName,
-                                        result.BackupFilePath);
-
+                                        safetyFileName);
                                 }
-                                catch (Exception)
+                                catch (Exception ex)
                                 {
+                                    System.Diagnostics.Debug.WriteLine(
+                                        $"[SAGA-COMPENSATE] Safety restore başarısız: {ex.Message}");
                                 }
                             }
                         });

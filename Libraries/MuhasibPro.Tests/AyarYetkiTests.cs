@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices;
@@ -40,6 +41,13 @@ public class AyarYetkiTests
             }
             : null!);
         return auth.Object;
+    }
+
+    private static IServiceProvider ServiceProviderWithAuth(IAuthenticationService auth)
+    {
+        var sp = new Mock<IServiceProvider>();
+        sp.Setup(s => s.GetService(typeof(IAuthenticationService))).Returns(auth);
+        return sp.Object;
     }
 
     [Fact]
@@ -89,7 +97,7 @@ public class AyarYetkiTests
     [Fact]
     public async Task Saglayici_Kritigi_Kullaniciya_Kaydetmez()
     {
-        var saglayici = new IdentitySettingsProvider(new BellekAyarlari(), Kimlik(KullaniciRolTip.Kullanici));
+        var saglayici = new IdentitySettingsProvider(new BellekAyarlari(), ServiceProviderWithAuth(Kimlik(KullaniciRolTip.Kullanici)));
 
         var eylem = () => saglayici.SaveAsync(new IdentitySettings { MaxFailedAttempts = 3 });
 
@@ -100,7 +108,7 @@ public class AyarYetkiTests
     public async Task Saglayici_Kritigi_Yoneticiye_Kaydeder()
     {
         var bellek = new BellekAyarlari();
-        var saglayici = new IdentitySettingsProvider(bellek, Kimlik(KullaniciRolTip.Yönetici));
+        var saglayici = new IdentitySettingsProvider(bellek, ServiceProviderWithAuth(Kimlik(KullaniciRolTip.Yönetici)));
 
         await saglayici.SaveAsync(new IdentitySettings { MaxFailedAttempts = 3 });
 

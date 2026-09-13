@@ -122,7 +122,7 @@ namespace MuhasibPro.Data.Database.Extensions
                     if (!restored)
                     {
                         result.HasError = true;
-                        result.Message = "Veritabanı meşgul veya kilitli, geri yüklenemediği için işlem durduruldu.";
+                        result.Message = "Veritabanı geri yüklenemedi (yedek bulunamadı veya dosya kilitli), işlem durduruldu.";
                         return result;
                     }
 

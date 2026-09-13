@@ -46,6 +46,9 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
             EventBus = eventBus;
         }
 
+        /// <summary>Toplu analiz tamamlandığında tetiklenir (KPI tazeleme için).</summary>
+        public event Action TopluAnalizTamamlandi;
+
         /// <summary>Verilirse E1 güncelleme olayında kart rozeti refresh'siz güncellenir.</summary>
         public IEventBus EventBus { get; }
 
@@ -63,6 +66,14 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
         private readonly SemaphoreSlim _dbGate = new(1, 1);
 
         private string Header => "Mali Dönem";
+
+        private bool _isListeYukleniyor;
+        /// <summary>Liste Global.db'den okunurken kart ring gösterir (Kural 11: try/finally ile kapanır).</summary>
+        public bool IsListeYukleniyor
+        {
+            get => _isListeYukleniyor;
+            private set => Set(ref _isListeYukleniyor, value);
+        }
 
         public MaliDonemListArgs ViewModelArgs { get; private set; }
 
@@ -109,7 +120,8 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
         {
             if (e == null || string.IsNullOrWhiteSpace(e.DatabaseName))
                 return;
-            var model = ItemsSource?.FirstOrDefault(m => m != null && m.DatabaseName == e.DatabaseName);
+            var model = ItemsSource?.FirstOrDefault(m => m != null
+                && string.Equals(m.DatabaseName, e.DatabaseName, StringComparison.OrdinalIgnoreCase));
             if (model == null)
                 return;
             await ContextService.RunAsync(() =>
@@ -135,6 +147,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
         public async Task<bool> RefreshAsync()
         {
             // Kapı bilerek ConfigureAwait'siz — devam eden NotifyPropertyChanged UI thread'inde koşar.
+            IsListeYukleniyor = true;
             await _dbGate.WaitAsync();
             try
             {
@@ -150,6 +163,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
             finally
             {
                 _dbGate.Release();
+                IsListeYukleniyor = false;
             }
         }
 
@@ -172,7 +186,9 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
                 ItemsCount = count?.Data ?? 0;
                 var items = await MaliDonemService.GetMaliDonemlerWithFirmaId(request,firmaId:ViewModelArgs.FirmaId);
                 Items = items?.Data;
-                // Not: toplu analiz pasif — kart seçildiğinde tekil analiz yapılır (AnalyzeDbStatusAsync)
+                // B1-A: firma seçiminde TÜM dönemler paralel analizlenir (Oturum 72 deseni:
+                // Task.WhenAll + per-item try/catch AnalyzeDbStatusAsync içinde). Seçili
+                // kart + ProgressRing yanında seçili-olmayan kartlar da rozetini alır.
                 if (Items != null)
                 {
                     await ContextService.RunAsync(
@@ -198,13 +214,32 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
                                 SelectedItem = pick;
                             }
                         });
-                    // Seçili kart varsa otomatik tekil analiz tetikle (IsBusy + ProgressRing).
-                    // Güvenli: tenant analizi kendi bağlantısını açar; içindeki Global.db
-                    // backfill'i _dbGate'ten geçer, kapı tutuluyorsa kuyrukta bekler.
-                    if (SelectedItem != null)
-                        _ = AnalyzeDbStatusAsync(SelectedItem);
+                    // Tüm kartlar paralel analizlenir (seçili + seçili-olmayan). Fire-and-forget:
+                    // liste akışı bloklanmaz; tenant analizi kendi bağlantısını açar, içindeki
+                    // Global.db backfill'i _dbGate'ten geçer, kapı tutuluyorsa kuyrukta bekler.
+                    _ = AnalyzeAllDbStatusesAsync(ItemsSource.Where(m => m != null).ToList());
                 }
             }
+        }
+
+        /// <summary>
+        /// Listedeki TÜM dönemlerin tenant DB'sini paralel analiz eder (B1-A).
+        /// AnalyzeDbStatusAsync exception-safe'dir (içi try/catch) — tek kartın arızası
+        /// listeyi kırmaz; WhenAll yine de savunma amaçlı try/catch ile sarılıdır.
+        /// </summary>
+        public async Task AnalyzeAllDbStatusesAsync(IReadOnlyList<MaliDonemModel> items)
+        {
+            if (items == null || items.Count == 0 || TenantDatabaseService == null)
+                return;
+            try
+            {
+                await Task.WhenAll(items.Where(m => m != null).Select(m => AnalyzeDbStatusAsync(m))).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Savunma: AnalyzeDbStatusAsync fırlatmaz; liste akışı yine de kırılmaz.
+            }
+            TopluAnalizTamamlandi?.Invoke();
         }
 
         /// <summary>

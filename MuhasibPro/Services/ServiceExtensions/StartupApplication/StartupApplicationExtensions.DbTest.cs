@@ -52,6 +52,18 @@ namespace MuhasibPro.Services.ServiceExtensions.StartupApplication
 
                         await service.ReportSubProgressAsync("Veritabanı hazırlanıyor...", 80, ct);
                         await Task.Delay(200, ct);
+
+                        // Faz 6.79: açılış güvenlik paketi (WAL checkpoint + eşiği-aşan oto-yedek) — best-effort, açılışı engellemez
+                        try
+                        {
+                            var yasam = MuhasibPro.HostBuilders.ServiceLocator.Current.GetService<MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices.ISistemYasamDongusuService>();
+                            if (yasam != null)
+                            {
+                                var (checkpoint, yedekAlindi, mesaj) = await yasam.EnsureStartupSafetyAsync();
+                                await service.ReportSubProgressAsync(mesaj, 90, ct);
+                            }
+                        }
+                        catch { /* best-effort */ }
                     }
                     else
                     {

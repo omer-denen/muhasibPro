@@ -16,5 +16,7 @@ namespace MuhasibPro.Data.Contracts.Database.Common
             string databaseName,
             string backupSourcePath,
             string targetDbPath);
+        /// <summary>Faz 6.78 Adım 1: yedek-dosya salt-okunur analizi (integrity + sayım + history). Fırlatmaz.</summary>
+        Task<RestoreDosyaAnalizi> AnalyzeBackupFileAsync(string backupDir, string fileName);
     }
 }

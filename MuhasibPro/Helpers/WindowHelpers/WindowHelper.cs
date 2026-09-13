@@ -1,4 +1,8 @@
-﻿using MuhasibPro.Business.Contracts.UIServices.CommonServices;
+﻿using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
+using MuhasibPro.Business.Contracts.SistemServices.AppServices;
+using MuhasibPro.Business.Contracts.UIServices;
+using MuhasibPro.Business.Contracts.UIServices.CommonServices;
+using MuhasibPro.Domain.Models;
 using MuhasibPro.HostBuilders;
 using System.Collections.Concurrent;
 
@@ -120,6 +124,9 @@ namespace MuhasibPro.Helpers.WindowHelpers
 
                 if (shouldClose)
                 {
+                    // B5+Faz 6.79: kapanış güvenlik paketi — Sistem.db WAL checkpoint (her zaman) + ayarlıysa sistem/tenant yedeği.
+                    await TryTakeExitBackupAsync();
+
                     // Onaylayan pencere kapanıyor — tekrar onay isteme
                     try { window.AppWindow.Closing -= OnMainWindowClosing; } catch { }
                     if (!ReferenceEquals(window, MainWindow))
@@ -156,6 +163,61 @@ namespace MuhasibPro.Helpers.WindowHelpers
             finally
             {
                 _isShowingCloseDialog = false;
+            }
+        }
+
+        /// <summary>
+        /// Kapanış güvenlik paketi (B5 + Faz 6.79): Sistem.db WAL checkpoint (her zaman) +
+        /// KapanistaOtomatikYedek ayarı açıksa sistem + aktif tenant yedeği.
+        /// Best-effort: hata kapanışı engellemez, 10sn timeout (tenant kolu).
+        /// </summary>
+        private static async Task TryTakeExitBackupAsync()
+        {
+            try
+            {
+                var localSettings = ServiceLocator.Current.GetService<ILocalSettingsService>();
+                if (localSettings == null) return;
+
+                var dbSettings = await localSettings.ReadSettingAsync<DatabaseSettingsModel>(DatabaseSettingsModel.SettingsKey);
+                bool kapanisYedegiAcik = dbSettings != null && dbSettings.KapanistaOtomatikYedek;
+
+                // Faz 6.79: Sistem.db kapanış paketi (checkpoint her zaman + ayarlıysa yedek)
+                try
+                {
+                    var yasam = ServiceLocator.Current.GetService<MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices.ISistemYasamDongusuService>();
+                    if (yasam != null)
+                    {
+                        string sonuc = await yasam.EnsureShutdownSafetyAsync(kapanisYedegiAcik);
+                        System.Diagnostics.Debug.WriteLine("[KapanışGüvenliği] " + sonuc);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[KapanışGüvenliği] Best-effort hata: {ex.Message}");
+                }
+
+                if (!kapanisYedegiAcik) return;
+
+                var selectedService = ServiceLocator.Current.GetService<IFirmaWithMaliDonemSelectedService>();
+                var databaseName = selectedService?.SelectedMaliDonem?.DatabaseName;
+                if (string.IsNullOrWhiteSpace(databaseName)) return;
+
+                var operationService = ServiceLocator.Current.GetService<ITenantSQLiteDatabaseOperationService>();
+                if (operationService == null) return;
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                var backupTask = operationService.CreateBackupAsync(
+                    databaseName, Domain.Enum.DatabaseEnum.DatabaseBackupType.Automatic);
+                var completed = await Task.WhenAny(backupTask, Task.Delay(Timeout.Infinite, cts.Token));
+
+                if (completed == backupTask && backupTask.Result?.Success == true)
+                    System.Diagnostics.Debug.WriteLine("[KapanışYedeği] Yedek alındı: " + databaseName);
+                else
+                    System.Diagnostics.Debug.WriteLine("[KapanışYedeği] Zaman aşımı veya hata: " + databaseName);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[KapanışYedeği] Best-effort hata: {ex.Message}");
             }
         }
 

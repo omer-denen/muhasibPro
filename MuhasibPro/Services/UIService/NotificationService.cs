@@ -36,20 +36,34 @@ public class NotificationService : INotificationService
     }
 
     public void Show(string title, string message, NotificationType type = NotificationType.Info)
+        => ShowTagged(title, message, type, string.Empty, string.Empty);
+
+    public void ShowTagged(string title, string message, NotificationType type, string tag, string group)
     {
         try
         {
-            var content = new ToastContentBuilder()
+            var builder = new ToastContentBuilder()
                 .AddText(title)
-                .AddText(message)
-                .GetToastContent();
+                .AddText(message);
+
+            if (type != NotificationType.Info)
+                builder.AddAttributionText(NotificationGroups.Etiket(type));
+
+            if (!string.IsNullOrEmpty(group))
+                builder.AddHeader(group, $"MuhasibPro • {NotificationGroups.Baslik(group)}", string.Empty);
+
+            var content = builder.GetToastContent();
 
             var toast = new ToastNotification(content.GetXml());
+            if (!string.IsNullOrEmpty(tag))
+                toast.Tag = tag;
+            if (!string.IsNullOrEmpty(group))
+                toast.Group = group;
             ToastNotificationManager.CreateToastNotifier(Aumid).Show(toast);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"NotificationService.Show hatası: {ex.Message}");
+            Debug.WriteLine($"NotificationService.ShowTagged hatası: {ex.Message}");
         }
     }
 

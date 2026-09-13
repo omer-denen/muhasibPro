@@ -1,6 +1,7 @@
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices.Common;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
+using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
@@ -19,21 +20,6 @@ public class MaliDonemYonetimArgs
     public string KisaUnvani { get; set; }
 }
 
-/// <summary>Yönetim sayfası sekmeleri (Global DB sekmesi yok).</summary>
-public enum YonetimSekmesi
-{
-    Tenant = 0,
-    Arsiv = 1
-}
-
-/// <summary>Tenant sekmesi içi görünüm (3'lü segmented).</summary>
-public enum YonetimSegmenti
-{
-    Tumu = 0,
-    Donem = 1,
-    Analiz = 2
-}
-
 /// <summary>
 /// Mali Dönem yönetim penceresi orkestratörü: firma bağlamı + dönem seçimi + bölüm geçişi.
 /// Ağır işler alt VM'lerdedir (Yedekler/Arsiv/Bilinmeyen); kendisi seçim ve tazeleme dışında iş yapmaz.
@@ -47,25 +33,55 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
         ITenantSQLiteDatabaseOperationService operationService,
         ITenantBackupService backupService,
         ILocalSettingsService localSettingsService = null,
-        IEventBus eventBus = null) : base(commonServices)
+        IEventBus eventBus = null,
+        ITenantSettingsProvider tenantAyarlari = null,
+        IEntityRegistrySettingsProvider entityAyarlari = null,
+        IAuthenticationService auth = null,
+        IFirmaService firmaService = null,
+        IKullaniciService kullaniciService = null) : base(commonServices)
     {
         LocalSettingsService = localSettingsService;
+        TenantAyarlari = tenantAyarlari;
+        EntityAyarlari = entityAyarlari;
         MaliDonemList = new MaliDonemListViewModel(commonServices, maliDonemService, tenantDatabaseService);
-        YedeklerVM = new DonemYedeklerViewModel(commonServices, operationService, backupService, maliDonemService, localSettingsService, eventBus);
-        ArsivVM = new ArsivDonemlerViewModel(commonServices, maliDonemService, localSettingsService);
-        BilinmeyenVM = new BilinmeyenYedekViewModel(commonServices, operationService, backupService, maliDonemService, localSettingsService, eventBus);
+        YedeklerVM = new DonemYedeklerViewModel(commonServices, operationService, backupService, maliDonemService, localSettingsService, eventBus, tenantAyarlari);
+        ArsivVM = new ArsivDonemlerViewModel(commonServices, maliDonemService, localSettingsService, entityAyarlari);
+        BilinmeyenVM = new BilinmeyenYedekViewModel(commonServices, operationService, backupService, maliDonemService, localSettingsService, eventBus, tenantAyarlari);
         GenelBakisVM = new DonemGenelBakisViewModel(commonServices, MaliDonemList, operationService);
+        AyarlarVM = new YonetimAyarlarViewModel(commonServices, localSettingsService, tenantAyarlari, entityAyarlari, auth, eventBus, firmaService, kullaniciService);
+        MaliDonemList.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(MaliDonemListViewModel.IsListeYukleniyor))
+                NotifyPropertyChanged(nameof(IsDonemListesiBos));
+        };
+        // Toplu analiz bittiğinde KPI'ı tazele (analiz bitmeden %0 Sağlıklı yalanını önler).
+        MaliDonemList.TopluAnalizTamamlandi += () =>
+        {
+            try { GenelBakisVM.YenileAsync().ConfigureAwait(false); }
+            catch { /* KPI tazeleme görevsel, listeyi kırmaz */ }
+        };
     }
 
     public ILocalSettingsService LocalSettingsService { get; }
+    public ITenantSettingsProvider TenantAyarlari { get; }
+    public IEntityRegistrySettingsProvider EntityAyarlari { get; }
 
     public MaliDonemListViewModel MaliDonemList { get; }
     public DonemYedeklerViewModel YedeklerVM { get; }
     public ArsivDonemlerViewModel ArsivVM { get; }
     public BilinmeyenYedekViewModel BilinmeyenVM { get; }
     public DonemGenelBakisViewModel GenelBakisVM { get; }
+    public YonetimAyarlarViewModel AyarlarVM { get; }
 
     public FirmaModel SelectedFirma { get; private set; }
+
+    private bool _isSayfaYukleniyor;
+    /// <summary>Sayfa ilk veriyi çekerken üst şerit ring gösterir (Kural 11).</summary>
+    public bool IsSayfaYukleniyor
+    {
+        get => _isSayfaYukleniyor;
+        private set => Set(ref _isSayfaYukleniyor, value);
+    }
 
     public string FirmaBaslik => SelectedFirma == null
         ? "Mali Dönem Yönetimi"
@@ -151,11 +167,17 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
     {
         try
         {
-            if (LocalSettingsService == null)
-                return;
-            var ayar = await LocalSettingsService.ReadSettingAsync<EntityRegistrySettings>(EntityRegistrySettings.SettingsKey);
-            if (ayar != null)
+            if (EntityAyarlari != null)
+            {
+                var ayar = await EntityAyarlari.GetAsync(SelectedFirma?.Id ?? 0);
                 AcikPageSize = ayar.GetAcikPageSize();
+            }
+            else if (LocalSettingsService != null)
+            {
+                var ayar = await LocalSettingsService.ReadSettingAsync<EntityRegistrySettings>(EntityRegistrySettings.SettingsKey);
+                if (ayar != null)
+                    AcikPageSize = ayar.GetAcikPageSize();
+            }
         }
         catch { /* model varsayılanı korunur */ }
     }
@@ -190,75 +212,45 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
     public System.Windows.Input.ICommand AcikNextCommand => new RelayCommand(() => AcikCurrentPage++, () => AcikCanNext);
     private void UpdatePagedAcik()
     {
+        // Liste kısalınca sayfa taşmasın (öz. son sayfada silme/arşivleme sonrası boş liste bug'ı).
+        var total = AcikTotalPages;
+        if (_acikCurrentPage > total)
+            _acikCurrentPage = total;
+        if (_acikCurrentPage < 1)
+            _acikCurrentPage = 1;
         var src = AcikDonemler ?? new List<MaliDonemModel>();
         PagedAcikDonemler = src.Skip((AcikCurrentPage - 1) * AcikPageSize).Take(AcikPageSize).ToList();
+        NotifyPropertyChanged(nameof(AcikCurrentPage));
         NotifyPropertyChanged(nameof(AcikTotalPages));
         NotifyPropertyChanged(nameof(AcikHasPagination));
         NotifyPropertyChanged(nameof(AcikPageInfo));
+        NotifyPropertyChanged(nameof(AcikCanPrev));
+        NotifyPropertyChanged(nameof(AcikCanNext));
     }
 
     /// <summary>Sol listede ARŞİVLİ grubu görünsün mü?</summary>
     public bool ArsivGrubuVarMi => (ArsivVM.ArsivliDonemler?.Count ?? 0) > 0;
 
+    /// <summary>Sol liste boş-durumu: yükleme bitti + 0 açık dönem (Kural 11: ring ile aynı anda görünmez).</summary>
+    public bool IsDonemListesiBos => !MaliDonemList.IsListeYukleniyor && (AcikDonemler?.Count ?? 0) == 0;
+
     /// <summary>Null-güvenlik: seçim yoksa detay içerik yerine uyarı barı gösterilir.</summary>
     public bool IsDonemSeciliDegil => SelectedDonem == null;
 
-    /// <summary>Seçim gerektiren işlemler için guard: yoksa uyar + Tümü'ne yönlendir.</summary>
+    /// <summary>Seçim gerektiren işlemler için guard: yoksa uyarır.</summary>
     public bool DonemSeciliMi(string islemAdi)
     {
         if (SelectedDonem != null)
             return true;
         NotificationService.Show("Dönem Seçilmedi",
-            $"{islemAdi} için önce Tümü sayfasından bir dönem seçin.",
+            $"{islemAdi} için önce listeden bir dönem seçin.",
             NotificationType.Warning);
-        AktifSegment = YonetimSegmenti.Tumu;
         return false;
     }
 
     public string DonemBaslik => SelectedDonem == null
         ? "Dönem seçilmedi"
         : $"{SelectedDonem.MaliYil} — {SelectedDonem.DatabaseName}";
-
-    private YonetimSekmesi _aktifSekme = YonetimSekmesi.Tenant;
-    public YonetimSekmesi AktifSekme
-    {
-        get => _aktifSekme;
-        set
-        {
-            if (Set(ref _aktifSekme, value))
-            {
-                NotifyPropertyChanged(nameof(IsTenantSekmesi));
-                NotifyPropertyChanged(nameof(IsArsivSekmesi));
-                NotifyPropertyChanged(nameof(IsTumuSegmenti));
-                NotifyPropertyChanged(nameof(IsDonemSegmenti));
-                NotifyPropertyChanged(nameof(IsAnalizSegmenti));
-                if (value == YonetimSekmesi.Arsiv)
-                    _ = ArsivSekmeAcildiAsync();
-            }
-        }
-    }
-
-    private YonetimSegmenti _aktifSegment = YonetimSegmenti.Tumu;
-    public YonetimSegmenti AktifSegment
-    {
-        get => _aktifSegment;
-        set
-        {
-            if (Set(ref _aktifSegment, value))
-            {
-                NotifyPropertyChanged(nameof(IsTumuSegmenti));
-                NotifyPropertyChanged(nameof(IsDonemSegmenti));
-                NotifyPropertyChanged(nameof(IsAnalizSegmenti));
-            }
-        }
-    }
-
-    public bool IsTenantSekmesi => AktifSekme == YonetimSekmesi.Tenant;
-    public bool IsArsivSekmesi => AktifSekme == YonetimSekmesi.Arsiv;
-    /// <summary>Segment panelleri yalnızca Tenant sekmesinde görünür.</summary>
-    public bool IsTumuSegmenti => IsTenantSekmesi && AktifSegment == YonetimSegmenti.Tumu;
-    public bool IsDonemSegmenti => IsTenantSekmesi && AktifSegment == YonetimSegmenti.Donem;
-    public bool IsAnalizSegmenti => IsTenantSekmesi && AktifSegment == YonetimSegmenti.Analiz;
 
     private int _tenantDbSayisi;
     public int TenantDbSayisi
@@ -325,10 +317,16 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
         {
             var response = await YedeklerVM.OperationService.GetDerinAnalizAsync(donem.DatabaseName);
             DerinAnaliz = response?.Data;
+            NotificationService.ShowTagged("Derin Analiz Tamamlandı",
+                $"{donem.MaliYil} dönemi analiz edildi.",
+                NotificationType.Info,
+                "DerinAnaliz", NotificationGroups.Analiz);
         }
-        catch
+        catch (Exception ex)
         {
             DerinAnaliz = null;
+            NotificationService.ShowTagged("Derin Analiz Hatası", ex.Message, NotificationType.Danger,
+                "DerinAnaliz", NotificationGroups.Analiz);
         }
         finally
         {
@@ -369,15 +367,17 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
             }
             bool tumOk = ok == komutlar.Length;
             SonBakimMesaji = tumOk ? $"{komut} tamamlandı." : sonMesaj;
-            NotificationService.Show(tumOk ? "Bakım Tamamlandı" : "Bakım Eksik",
+            NotificationService.ShowTagged(tumOk ? "Bakım Tamamlandı" : "Bakım Eksik",
                 tumOk ? $"{donem.MaliYil} dönemi: {komut} tamamlandı." : sonMesaj,
-                tumOk ? NotificationType.Success : NotificationType.Warning);
+                tumOk ? NotificationType.Success : NotificationType.Warning,
+                "BakimCalistir", NotificationGroups.Bakim);
             return tumOk;
         }
         catch (Exception ex)
         {
             SonBakimMesaji = ex.Message;
-            NotificationService.Show("Bakım Hatası", ex.Message, NotificationType.Danger);
+            NotificationService.ShowTagged("Bakım Hatası", ex.Message, NotificationType.Danger,
+                "BakimCalistir", NotificationGroups.Bakim);
             return false;
         }
         finally
@@ -386,43 +386,86 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
         }
     }
 
+    /// <summary>Sayfa yükleme tavanı: bu sürede bitmezse son-snapshot'ta kalınır (Kural 11).</summary>
+    private static readonly TimeSpan YuklemeTimeout = TimeSpan.FromSeconds(30);
+
     public async Task LoadAsync(MaliDonemYonetimArgs args)
     {
         _secimKoruma = true;
+        IsSayfaYukleniyor = true;
         try
         {
-            await AcikSayfaBoyutunuYukleAsync();
-            if (args != null && args.FirmaId > 0)
-            {
-                SelectedFirma = new FirmaModel
-                {
-                    Id = args.FirmaId,
-                    FirmaKodu = args.FirmaKodu,
-                    KisaUnvani = args.KisaUnvani
-                };
-            }
-            NotifyPropertyChanged(nameof(SelectedFirma));
-            NotifyPropertyChanged(nameof(FirmaBaslik));
-            NotifyPropertyChanged(nameof(FirmaOzet));
-            NotifyPropertyChanged(nameof(IsFirmaSelected));
-
-            if (SelectedFirma != null)
-                await MaliDonemList.LoadAsync(new MaliDonemListArgs { FirmaId = SelectedFirma.Id }, silent: true);
-            else
-                await MaliDonemList.LoadAsync(MaliDonemListArgs.CreateEmpty(), silent: true);
-
-            await ArsivVM.RefreshAsync(MaliDonemList.ItemsSource);
-            await BilinmeyenVM.TaraAsync();
-            SelectedDonem = MaliDonemList.ItemsSource?.FirstOrDefault(m => m != null && !m.KapaliMi)
-                ?? MaliDonemList.ItemsSource?.FirstOrDefault();
-            await GenelBakisVM.YenileAsync();
-            TazeleSayaclar();
-            EsitleListeSecimi();
+            var cts = new CancellationTokenSource(YuklemeTimeout);
+            await YukleCoreAsync(args, cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            NotificationService.ShowTagged("Yükleme Zaman Aşımı",
+                "Dönem listesi zamanında yüklenemedi; mevcut veriler gösterilmektedir.",
+                NotificationType.Warning,
+                "Yukleme", NotificationGroups.Yonetim);
         }
         finally
         {
             _secimKoruma = false;
+            IsSayfaYukleniyor = false;
         }
+    }
+
+    private async Task YukleCoreAsync(MaliDonemYonetimArgs args, CancellationToken ct)
+    {
+        await AcikSayfaBoyutunuYukleAsync();
+        ct.ThrowIfCancellationRequested();
+
+        if (args != null && args.FirmaId > 0)
+        {
+            SelectedFirma = new FirmaModel
+            {
+                Id = args.FirmaId,
+                FirmaKodu = args.FirmaKodu,
+                KisaUnvani = args.KisaUnvani
+            };
+        }
+        NotifyPropertyChanged(nameof(SelectedFirma));
+        NotifyPropertyChanged(nameof(FirmaBaslik));
+        NotifyPropertyChanged(nameof(FirmaOzet));
+        NotifyPropertyChanged(nameof(IsFirmaSelected));
+
+        // Firma bağlamı alt VM'lere iner (sayfa boyutu + saklama firma anahtarından okunur).
+        long firmaId = SelectedFirma?.Id ?? 0;
+        ArsivVM.FirmaId = firmaId;
+        BilinmeyenVM.FirmaId = firmaId;
+        AyarlarVM.FirmaId = firmaId;
+        AyarlarVM.FirmaBasligi = SelectedFirma == null
+            ? string.Empty
+            : $"{SelectedFirma.KisaUnvani} ({SelectedFirma.FirmaKodu})";
+        // İlk çağrı firmasızdı (global); firma belli olunca firma anahtarıyla tekrar oku.
+        await AcikSayfaBoyutunuYukleAsync();
+        ct.ThrowIfCancellationRequested();
+
+        if (SelectedFirma != null)
+            await MaliDonemList.LoadAsync(new MaliDonemListArgs { FirmaId = SelectedFirma.Id }, silent: true);
+        else
+            await MaliDonemList.LoadAsync(MaliDonemListArgs.CreateEmpty(), silent: true);
+        AyarlarVM.Genel.DonemSayisi = MaliDonemList.ItemsSource?.Count ?? 0;
+        ct.ThrowIfCancellationRequested();
+
+        await ArsivVM.RefreshAsync(MaliDonemList.ItemsSource);
+        SelectedDonem = MaliDonemList.ItemsSource?.FirstOrDefault(m => m != null && !m.KapaliMi)
+            ?? MaliDonemList.ItemsSource?.FirstOrDefault();
+        await GenelBakisVM.YenileAsync();
+        TazeleSayaclar();
+        EsitleListeSecimi();
+        // Yetim taraması açılışı bloklamaz: kart kendi ringini gösterir, bitince sayaçlar tazelenir.
+        // Not: ConfigureAwait yok — TazeleSayaclar UI thread'inde koşmalı (RPC_E_WRONG_THREAD).
+        _ = YetimTaramayiBitirAsync();
+    }
+
+    /// <summary>Açılışı bloklamayan yetim taraması: bitince sayaçlar tazelenir.</summary>
+    private async Task YetimTaramayiBitirAsync()
+    {
+        await BilinmeyenVM.TaraAsync();
+        TazeleSayaclar();
     }
 
     /// <summary>Silme/kurtarma/arşiv sonrası tüm panelleri tazele.</summary>
@@ -432,30 +475,15 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
         _secimKoruma = true;
         try
         {
-            await AcikSayfaBoyutunuYukleAsync();
-            await MaliDonemList.RefreshAsync();
-            await ArsivVM.RefreshAsync(MaliDonemList.ItemsSource);
-            await GenelBakisVM.YenileAsync();
-            if (SelectedDonem != null)
-            {
-                var guncel = MaliDonemList.ItemsSource?.FirstOrDefault(m => m != null && m.Id == SelectedDonem.Id);
-                if (guncel == null)
-                {
-                    SelectedDonem = MaliDonemList.ItemsSource?.FirstOrDefault();
-                }
-                else if (!ReferenceEquals(guncel, SelectedDonem))
-                {
-                    SelectedDonem = guncel;
-                }
-                else
-                {
-                    await DonemDegistiAsync();
-                }
-            }
-            // Bilinmeyen paneli kalıcı görünür (sekmeler Oturum 106'da kalktı) — her tazede tara.
-            await BilinmeyenVM.TaraAsync();
-            TazeleSayaclar();
-            EsitleListeSecimi();
+            var cts = new CancellationTokenSource(YuklemeTimeout);
+            await RefreshCoreAsync(cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            NotificationService.ShowTagged("Tazeleme Zaman Aşımı",
+                "Dönem listesi zamanında tazelenemedi; mevcut veriler gösterilmektedir.",
+                NotificationType.Warning,
+                "Tazeleme", NotificationGroups.Yonetim);
         }
         finally
         {
@@ -467,6 +495,52 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
             SelectedDonem = MaliDonemList.ItemsSource?.FirstOrDefault(m => m != null && m.Id == korunanId)
                 ?? MaliDonemList.ItemsSource?.FirstOrDefault();
         }
+    }
+
+    private async Task RefreshCoreAsync(CancellationToken ct)
+    {
+        await AcikSayfaBoyutunuYukleAsync();
+        await MaliDonemList.RefreshAsync();
+        AyarlarVM.Genel.DonemSayisi = MaliDonemList.ItemsSource?.Count ?? 0;
+        ct.ThrowIfCancellationRequested();
+
+        await ArsivVM.RefreshAsync(MaliDonemList.ItemsSource);
+        await GenelBakisVM.YenileAsync();
+        ct.ThrowIfCancellationRequested();
+
+        if (SelectedDonem != null)
+        {
+            var guncel = MaliDonemList.ItemsSource?.FirstOrDefault(m => m != null && m.Id == SelectedDonem.Id);
+            if (guncel == null)
+            {
+                SelectedDonem = MaliDonemList.ItemsSource?.FirstOrDefault();
+            }
+            else if (!ReferenceEquals(guncel, SelectedDonem))
+            {
+                SelectedDonem = guncel;
+            }
+            else
+            {
+                await DonemDegistiAsync();
+            }
+        }
+        // Bilinmeyen paneli kalıcı görünür (sekmeler Oturum 106'da kalktı) — her tazede tara.
+        await BilinmeyenVM.TaraAsync();
+        TazeleSayaclar();
+        EsitleListeSecimi();
+    }
+
+    /// <summary>Ayar dialogu kapandıktan sonra hafif tazeleme: sayfa boyutları
+    /// sağlayıcılardan yeniden okunur (RefreshAll + seçili dönem yedek listesi).</summary>
+    public async Task AyarSonrasiTazeleAsync()
+    {
+        await RefreshAllAsync();
+        if (SelectedDonem != null)
+        {
+            YedeklerVM.BagliDonem = SelectedDonem;
+            await YedeklerVM.YukleAsync(SelectedDonem.DatabaseName);
+        }
+        TazeleSayaclar();
     }
 
     /// <summary>
@@ -490,6 +564,7 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
         AcikDonemler = MaliDonemList.ItemsSource?.Where(m => m != null && !m.ArsivliMi).OrderByDescending(m => m.MaliYil).ToList()
             ?? new List<MaliDonemModel>();
         NotifyPropertyChanged(nameof(ArsivGrubuVarMi));
+        NotifyPropertyChanged(nameof(IsDonemListesiBos));
         NotifyPropertyChanged(nameof(FirmaOzet));
         SecimiListeyeYenidenDuyur();
     }
@@ -509,12 +584,6 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
             SelectedDonem = pick;
         else
             NotifyPropertyChanged(nameof(SelectedDonem));
-    }
-
-    private async Task ArsivSekmeAcildiAsync()
-    {
-        await BilinmeyenVM.TaraAsync();
-        TazeleSayaclar();
     }
 
     public void Subscribe()

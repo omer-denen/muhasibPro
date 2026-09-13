@@ -15,6 +15,9 @@ namespace MuhasibPro.Data.Contracts.Database.TenantDatabase
         Task<(bool isValid, string Message)> ValidateTenantDatabaseAsync(
             string databaseName);
         Task<TenantDerinAnaliz> GetDerinAnalizAsync(string databaseName);
+        /// <summary>Tenant geçişi/kopuşu öncesi: WAL içeriğini ana dosyaya işler (checkpoint)
+        /// ve havuz bağlantılarını bırakır. Dönen bilgi loglanır (doğrulama kanıtı).</summary>
+        Task<(bool ok, string message)> CheckpointAndReleaseAsync(string databaseName);
         /// <param name="komut">"VACUUM" / "REINDEX" / "WAL"</param>
         /// <param name="timeoutSec">Bakım komut zaman aşımı sn 30-600 (null → 120).
         /// TenantSettings'ten gelir (Oturum 127).</param>

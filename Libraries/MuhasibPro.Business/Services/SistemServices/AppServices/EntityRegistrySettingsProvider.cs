@@ -11,17 +11,43 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
     {
         private readonly ILocalSettingsService _localSettings;
         private readonly IAuthenticationService _auth;
+        private readonly IFirmaKullaniciCozucu _cozucu;
 
-        public EntityRegistrySettingsProvider(ILocalSettingsService localSettings, IAuthenticationService auth = null!)
+        public EntityRegistrySettingsProvider(
+            ILocalSettingsService localSettings,
+            IAuthenticationService auth = null!,
+            IFirmaKullaniciCozucu cozucu = null!)
         {
             _localSettings = localSettings;
             _auth = auth;
+            _cozucu = cozucu;
         }
 
-        public async Task<EntityRegistrySettings> GetAsync()
+        public async Task<EntityRegistrySettings> GetAsync(long firmaId = 0)
         {
             try
             {
+                long kullaniciId = await KullaniciIdAsync(firmaId);
+                if (kullaniciId > 0)
+                {
+                    var ozel = await _localSettings.ReadSettingAsync<EntityRegistrySettings>(
+                        KullaniciAyarAnahtari.KeyFor(EntityRegistrySettings.SettingsKey, kullaniciId));
+                    if (ozel != null)
+                        return Clamp(ozel);
+                    if (firmaId > 0 && _cozucu != null)
+                    {
+                        var tasinan = await TasiAsync(firmaId, kullaniciId);
+                        if (tasinan != null)
+                            return Clamp(tasinan);
+                    }
+                }
+                else if (firmaId > 0)
+                {
+                    var eski = await _localSettings.ReadSettingAsync<EntityRegistrySettings>(
+                        FirmaAyarAnahtari.KeyFor(EntityRegistrySettings.SettingsKey, firmaId));
+                    if (eski != null)
+                        return Clamp(eski);
+                }
                 var stored = await _localSettings.ReadSettingAsync<EntityRegistrySettings>(EntityRegistrySettings.SettingsKey);
                 return Clamp(stored ?? new EntityRegistrySettings());
             }
@@ -31,12 +57,49 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
             }
         }
 
-        public async Task SaveAsync(EntityRegistrySettings settings)
+        public async Task SaveAsync(EntityRegistrySettings settings, long firmaId = 0)
         {
             var clamped = Clamp(settings ?? new EntityRegistrySettings());
-            var kayitli = await GetAsync();
+            var kayitli = await GetAsync(firmaId);
             AyarYetkiDenetimi.KritikDegisiklikleriDogrula(clamped, kayitli, _auth);
-            await _localSettings.SaveSettingAsync(EntityRegistrySettings.SettingsKey, clamped);
+            long giris = _cozucu != null ? _cozucu.GirisYapanId() : 0;
+            await _localSettings.SaveSettingAsync(
+                KullaniciAyarAnahtari.KeyFor(EntityRegistrySettings.SettingsKey, giris), clamped);
+        }
+
+        /// <summary>Eski firma anahtarındaki kaydı kullanıcının anahtarına taşır (tek seferlik, best-effort).</summary>
+        private async Task<EntityRegistrySettings> TasiAsync(long firmaId, long kullaniciId)
+        {
+            try
+            {
+                var eski = await _localSettings.ReadSettingAsync<EntityRegistrySettings>(
+                    FirmaAyarAnahtari.KeyFor(EntityRegistrySettings.SettingsKey, firmaId));
+                if (eski == null)
+                    return null;
+                await _localSettings.SaveSettingAsync(
+                    KullaniciAyarAnahtari.KeyFor(EntityRegistrySettings.SettingsKey, kullaniciId), eski);
+                return eski;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task<long> KullaniciIdAsync(long firmaId)
+        {
+            try
+            {
+                if (_cozucu == null)
+                    return 0;
+                if (firmaId > 0)
+                    return await _cozucu.CozAsync(firmaId);
+                return _cozucu.GirisYapanId();
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         internal static EntityRegistrySettings Clamp(EntityRegistrySettings s)

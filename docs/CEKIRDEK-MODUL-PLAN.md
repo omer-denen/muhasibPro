@@ -17,6 +17,8 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme/te
 8. **XAML ortak Controls kuralı** — tasarım kolaylığı ve tutarlılığı için aynı işlemi yapan tüm XAML işlevleri ortak `/Controls` altında tek sınıfta toplanır; sayfa başına kopya işlev yazılmaz. Nerde neyin kullanıldığı aşağıdaki **Ortak Controls Kaydı** tablosuna işlenir (kayıtsız ortak control kullanılmaz).
 9. **Hardcoded limitler modül ayarından yönetilir** — ilgili sınıfın modeli tarafından talep edilen her değer, o modülün ayar sınıfına eklenir; kullanıcı müdahalesine açılır. Kritik işlemler (silme/güvenlik/performans/yol) `[YoneticiAyari]` işaretli — yalnızca yönetici değiştirir; normal işlemler tüm kullanıcılara açık. Yetki denetimi `AyarYetkiDenetimi` tek kaynağından (`UnauthorizedAccessException`). Protokol sabitleri (buffer/kilit döngüsü/UID bitleri) bu kuralın dışındadır.
 10. **Tenant ↔ Sistem.db ortak altyapı kuralı** — iki modül birbirine doğrudan dokunmaz (somut DbContext/satır/servis yok); ortak sözleşmeler üzerinden konuşur (`IMaliDonemService`, `IApplicationPaths`, `IDatabaseBackupManager`, `ITenantVersionReader`). Yeni fonksiyon/ek işlem aynı ortak altyapıya bağlanır. Bekçi: `ArchitectureTests.Tenant_Ile_SistemDb_Modulleri_OrtakAltyapi_Disinda_Konusmaz`.
+11. **Canlı testi agent yapar, kanıt sunulur (AGENTS Kural 18)** — view/özellik bitince agent uygulamayı açıp akışı kendisi test eder, ekran görüntüsü + UIA + referans açıklaması kanıtını `LOG`'a işler ve kullanıcı onayına sunar. "Canlı test kullanıcıda" denerek faz kapatılamaz; kanıt/onay yoksa build 0/0 olsa bile kapanmaz.
+12. **Referans defteri (AGENTS Kural 19)** — internetten/sektörden alınan her tasarım/akış referansı, uygulanmadan önce `docs/REFERANSLAR.md`'ye (kaynak + uygulandığı view/özellik) yazılır; uygulama bitince `Durum` güncellenir. Kayıtsız referansla tasarım uygulanmaz; aynı yer için tekrar araştırma yapılmaz; çelişkide kullanıcıya sorulur.
 
 ---
 
@@ -214,7 +216,7 @@ L0 M1 AppPlatform (yaprak — kimseye yaslanmaz)
 
 | Control (ortak yol) | İşlev (tek cümle) | Kullanıldığı yerler | Tarih |
 |---|---|---|---|
-| (kayıt yok — ilk ortak control eklendiğinde işlenir) | | | |
+| `MuhasibPro/Views/Components/YardimDialog` | Kural 13 yardım dialogu: başlık + madde listesi, sayfa ? butonundan açılır | `SistemDbYonetimView` (Oturum 236) | 2026-09-13 |
 
 Kural: yeni ortak control eklenirken bu tabloya satır eklenir; sayfa-yereli kopya işlev bulunursa silinip ortak olana yönlendirilir.
 

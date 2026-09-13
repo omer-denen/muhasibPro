@@ -25,14 +25,16 @@ public class SplashRoutingTests
         IEventBus bus)
         => new(sistem, kurulum, makine, tenant, reader, bus);
 
-    private static ApiDataResponse<DatabaseConnectionAnalysis> DbState(bool exists, bool connect, bool hasError, bool valid)
+    private static ApiDataResponse<DatabaseConnectionAnalysis> DbState(
+        bool exists, bool connect, bool hasError, bool valid, List<string>? pending = null)
         => new SuccessApiDataResponse<DatabaseConnectionAnalysis>(
             new DatabaseConnectionAnalysis
             {
                 IsDatabaseExists = exists,
                 CanConnect = connect,
                 HasError = hasError,
-                DatabaseValid = valid
+                DatabaseValid = valid,
+                PendingMigrations = pending ?? new List<string>()
             }, "durum");
 
     private static SplashRoutingService BuildDefault(
@@ -53,30 +55,26 @@ public class SplashRoutingTests
         return BuildService(sistem.Object, kurulum.Object, makine.Object, tenant.Object, reader.Object, bus.Object);
     }
 
+    // === 3 yollu karar testleri ===
+
     [Fact]
-    public async Task DecideRoute_StartupFalse_KurulumaYonlendirir()
+    public async Task DecideRoute_DbYok_FirstSetup()
     {
-        var svc = BuildDefault(out _, out _, out _);
+        var sistem = new Mock<ISistemDatabaseService>();
+        sistem.Setup(s => s.GetSistemDatabaseStateAsync())
+            .ReturnsAsync(DbState(exists: false, connect: false, hasError: false, valid: false));
+        var svc = BuildService(sistem.Object,
+            Mock.Of<IKurulumKayitService>(), Mock.Of<IMakineKimligiProvider>(),
+            Mock.Of<ITenantSQLiteDatabaseService>(), Mock.Of<ITenantVersionReader>(), Mock.Of<IEventBus>());
 
-        var karar = await svc.DecideRouteAsync(false);
+        var karar = await svc.DecideRouteAsync(null);
 
-        karar.IsDatabaseReady.Should().BeFalse();
-        karar.Target.Should().Be(SplashTarget.SetupRequired);
+        karar.IsDatabaseExists.Should().BeFalse();
+        karar.Target.Should().Be(SplashTarget.FirstSetup);
     }
 
     [Fact]
-    public async Task DecideRoute_StartupTrue_LogineYonlendirir()
-    {
-        var svc = BuildDefault(out _, out _, out _);
-
-        var karar = await svc.DecideRouteAsync(true);
-
-        karar.IsDatabaseReady.Should().BeTrue();
-        karar.Target.Should().Be(SplashTarget.Login);
-    }
-
-    [Fact]
-    public async Task DecideRoute_StartupNull_GecerliDbde_LogineYonlendirir()
+    public async Task DecideRoute_DbVar_GecerliMigrationYok_Login()
     {
         var sistem = new Mock<ISistemDatabaseService>();
         sistem.Setup(s => s.GetSistemDatabaseStateAsync())
@@ -88,10 +86,31 @@ public class SplashRoutingTests
         var karar = await svc.DecideRouteAsync(null);
 
         karar.IsDatabaseReady.Should().BeTrue();
+        karar.IsDatabaseExists.Should().BeTrue();
+        karar.HasPendingMigrations.Should().BeFalse();
+        karar.Target.Should().Be(SplashTarget.Login);
     }
 
     [Fact]
-    public async Task DecideRoute_StartupNull_BozukDbde_KurulumaYonlendirir()
+    public async Task DecideRoute_DbVar_MigrationGerekiyor_MigrationRequired()
+    {
+        var sistem = new Mock<ISistemDatabaseService>();
+        sistem.Setup(s => s.GetSistemDatabaseStateAsync())
+            .ReturnsAsync(DbState(true, true, false, true, new List<string> { "20260908_AddIdentity" }));
+        var svc = BuildService(sistem.Object,
+            Mock.Of<IKurulumKayitService>(), Mock.Of<IMakineKimligiProvider>(),
+            Mock.Of<ITenantSQLiteDatabaseService>(), Mock.Of<ITenantVersionReader>(), Mock.Of<IEventBus>());
+
+        var karar = await svc.DecideRouteAsync(null);
+
+        karar.IsDatabaseExists.Should().BeTrue();
+        karar.HasPendingMigrations.Should().BeTrue();
+        karar.PendingMigrationCount.Should().Be(1);
+        karar.Target.Should().Be(SplashTarget.MigrationRequired);
+    }
+
+    [Fact]
+    public async Task DecideRoute_DbVar_BozukSema_MigrationRequired()
     {
         var sistem = new Mock<ISistemDatabaseService>();
         sistem.Setup(s => s.GetSistemDatabaseStateAsync())
@@ -102,12 +121,13 @@ public class SplashRoutingTests
 
         var karar = await svc.DecideRouteAsync(null);
 
+        karar.IsDatabaseExists.Should().BeTrue();
         karar.IsDatabaseReady.Should().BeFalse();
-        karar.Target.Should().Be(SplashTarget.SetupRequired);
+        karar.Target.Should().Be(SplashTarget.MigrationRequired);
     }
 
     [Fact]
-    public async Task DecideRoute_ServisPatlarsa_GuvenliVarsayilanLogin()
+    public async Task DecideRoute_ServisPatlarsa_FailClosed_FirstSetup()
     {
         var sistem = new Mock<ISistemDatabaseService>();
         sistem.Setup(s => s.GetSistemDatabaseStateAsync()).ThrowsAsync(new InvalidOperationException("db yok"));
@@ -117,8 +137,31 @@ public class SplashRoutingTests
 
         var karar = await svc.DecideRouteAsync(null);
 
-        karar.IsDatabaseReady.Should().BeTrue();
+        karar.IsDatabaseReady.Should().BeFalse();
+        karar.IsDatabaseExists.Should().BeFalse();
+        karar.Target.Should().Be(SplashTarget.FirstSetup);
     }
+
+    [Fact]
+    public async Task DecideRoute_StartupOverride_ReadyKorunur_ExistsPendingDbden()
+    {
+        var sistem = new Mock<ISistemDatabaseService>();
+        sistem.Setup(s => s.GetSistemDatabaseStateAsync())
+            .ReturnsAsync(DbState(true, true, false, true, new List<string> { "M1" }));
+        var svc = BuildService(sistem.Object,
+            Mock.Of<IKurulumKayitService>(), Mock.Of<IMakineKimligiProvider>(),
+            Mock.Of<ITenantSQLiteDatabaseService>(), Mock.Of<ITenantVersionReader>(), Mock.Of<IEventBus>());
+
+        // startupDbReady=false override: ready=false, ama exists ve pending DB'den gelir
+        var karar = await svc.DecideRouteAsync(false);
+
+        karar.IsDatabaseReady.Should().BeFalse();
+        karar.IsDatabaseExists.Should().BeTrue();
+        karar.HasPendingMigrations.Should().BeTrue();
+        karar.Target.Should().Be(SplashTarget.MigrationRequired);
+    }
+
+    // === Transfer testleri (degismedi) ===
 
     [Fact]
     public async Task CheckTransfer_UyumsuzlukYoksa_BosDoner_OlayYayinlamaz()
@@ -163,5 +206,40 @@ public class SplashRoutingTests
             "K123456789");
 
         satir.Should().Be("db-A_2026 • Kurulum:ABC → K1234567 • Makine:aynı");
+    }
+
+    // === Adım 0: karar izi ===
+
+    [Fact]
+    public async Task DecideRoute_KararOzeti_HedefiVeSayilariTasir()
+    {
+        var sistem = new Mock<ISistemDatabaseService>();
+        sistem.Setup(s => s.GetSistemDatabaseStateAsync())
+            .ReturnsAsync(DbState(true, true, false, true, new List<string> { "M1", "M2" }));
+        var svc = BuildService(sistem.Object,
+            Mock.Of<IKurulumKayitService>(), Mock.Of<IMakineKimligiProvider>(),
+            Mock.Of<ITenantSQLiteDatabaseService>(), Mock.Of<ITenantVersionReader>(), Mock.Of<IEventBus>());
+
+        var karar = await svc.DecideRouteAsync(null);
+
+        karar.KararOzeti.Should().Contain("exists=True");
+        karar.KararOzeti.Should().Contain("pending=2");
+        karar.KararOzeti.Should().Contain("target=MigrationRequired");
+    }
+
+    [Fact]
+    public async Task DecideRoute_KararOzeti_LoginYolunuTasir()
+    {
+        var sistem = new Mock<ISistemDatabaseService>();
+        sistem.Setup(s => s.GetSistemDatabaseStateAsync())
+            .ReturnsAsync(DbState(true, true, false, true));
+        var svc = BuildService(sistem.Object,
+            Mock.Of<IKurulumKayitService>(), Mock.Of<IMakineKimligiProvider>(),
+            Mock.Of<ITenantSQLiteDatabaseService>(), Mock.Of<ITenantVersionReader>(), Mock.Of<IEventBus>());
+
+        var karar = await svc.DecideRouteAsync(null);
+
+        karar.KararOzeti.Should().Contain("ready=True");
+        karar.KararOzeti.Should().Contain("target=Login");
     }
 }

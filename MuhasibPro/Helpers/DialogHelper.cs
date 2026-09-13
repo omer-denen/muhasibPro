@@ -5,7 +5,8 @@ namespace MuhasibPro.Helpers;
 /// <summary>
 /// ContentDialog için generik, pencereden boyut almadan ortalı helper.
 /// Sabit MinWidth/MaxWidth yok — içerik kendi genişliğini belirler, XamlRoot pencere boyutuna göre ortalanır.
-/// AGENTS tema kuralı: XAML'de RequestedTheme yasak; dialog Light garantisi bu metotta (tek kaynak).
+/// AGENTS tema kuralı: XAML'de RequestedTheme yasak; dialog tema garantisi bu metotta (tek kaynak).
+/// Ayarlanabilir tema: dialog uygulama temasını miras alır (zorlama yok).
 /// </summary>
 public static class DialogHelper
 {
@@ -16,8 +17,7 @@ public static class DialogHelper
         var xamlRoot = WindowHelper.CurrentXamlRoot;
         dialog.XamlRoot = xamlRoot;
 
-        // Sistem Dark olsa bile OOBE dialog Light açılır — servis temasına bakılmaz.
-        dialog.RequestedTheme = ElementTheme.Light;
+        // Ayarlanabilir tema: dialog ana temayı miras alır — açık/koyu zorlanmaz.
 
         // Sabit boyut yok — Content kendi ölçüsünde, dialog pencere ortasında
         return await dialog.ShowAsync();

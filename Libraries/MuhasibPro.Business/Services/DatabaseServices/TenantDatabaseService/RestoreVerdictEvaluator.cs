@@ -1,7 +1,6 @@
-using MuhasibPro.Domain.Entities.SistemEntity;
 using MuhasibPro.Domain.Models.DatabaseResultModel;
-using MuhasibPro.Domain.Utilities;
 using MuhasibPro.Business.DTOModel.SistemModel;
+using MuhasibPro.Business.Services.DatabaseServices.Common;
 
 namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService;
 
@@ -26,6 +25,11 @@ public class RestoreVerdict
 
 public static class RestoreVerdictEvaluator
 {
+    /// <summary>
+    /// Faz 6.78 Adım 2: tenant hattı ortak restore çekirdeğine bağlandı.
+    /// Tenant'a özgü kimlik kıyası (firma/dönem/ad) burada hesaplanır; hüküm ortak çekirdekte verilir.
+    /// Davranış korunur: kimliksiz → Warning, kimlik uyuşmazlığı → RequireCode, sürüm/dosya/kurulum ortak.
+    /// </summary>
     public static RestoreVerdict Evaluate(
         DatabaseBackupResult yedek,
         MaliDonemModel hedefDonem,
@@ -36,100 +40,49 @@ public static class RestoreVerdictEvaluator
         if (yedek == null)
             return new RestoreVerdict { Kind = RestoreVerdictKind.Block, Baslik = "Yedek yok", Aciklama = "Geçersiz yedek.", KodBlokeNedeni = "Yedek bulunamadı" };
 
-        if (!yedek.IsKimlikli)
+        var girdi = new RestoreAnalizGirdisi
         {
-            return new RestoreVerdict
+            Dosya = new RestoreDosyaAnalizi
             {
-                Kind = RestoreVerdictKind.Warning,
-                IsKimliksiz = true,
-                Baslik = "Kimliksiz (eski) yedek",
-                Aciklama = "Bu yedek kimlik damgası içermiyor (eski format). Ad eşleşmesi ile devam edilecek. Geri yükleme sonrası durum kontrolü önerilir."
-            };
-        }
-
-        // Firma / Dönem uyuşmazlığı → kırmızı kilit (kod)
-        if (yedek.KimlikFirmaId != null && hedefDonem.FirmaId != 0 && yedek.KimlikFirmaId != hedefDonem.FirmaId)
-        {
-            return new RestoreVerdict
-            {
-                Kind = RestoreVerdictKind.RequireCode,
-                Baslik = "Firma uyuşmazlığı",
-                Aciklama = $"Yedek farklı firmaya ait (FirmaId {yedek.KimlikFirmaId} → hedef {hedefDonem.FirmaId}). Devam etmek için tek-seferlik kod gerekli."
-            };
-        }
-        if (yedek.KimlikMaliDonemId != null && hedefDonem.Id != 0 && yedek.KimlikMaliDonemId != hedefDonem.Id)
-        {
-            return new RestoreVerdict
-            {
-                Kind = RestoreVerdictKind.RequireCode,
-                Baslik = "Mali dönem uyuşmazlığı",
-                Aciklama = $"Yedek farklı döneme ait (Id {yedek.KimlikMaliDonemId} → hedef {hedefDonem.Id}). Devam etmek için tek-seferlik kod gerekli."
-            };
-        }
-        if (!string.Equals(yedek.DatabaseName, hedefDonem.DatabaseName, StringComparison.OrdinalIgnoreCase))
-        {
-            // Ad zaten firma/dönem ile örtüşür ama yine de kırmızı
-            return new RestoreVerdict
-            {
-                Kind = RestoreVerdictKind.RequireCode,
-                Baslik = "Veritabanı adı uyuşmazlığı",
-                Aciklama = $"Yedek '{yedek.DatabaseName}' hedef '{hedefDonem.DatabaseName}' ile eşleşmiyor. Kod gerekli."
-            };
-        }
-
-        // Versiyon karşılaştırması → standart: eski → Warning+auto-migrate, yeni → Block
-        if (!string.IsNullOrWhiteSpace(yedek.KimlikVersion) && !string.IsNullOrWhiteSpace(hedefVersion))
-        {
-            if (IsVersionGreater(yedek.KimlikVersion!, hedefVersion!))
-            {
-                return new RestoreVerdict
-                {
-                    Kind = RestoreVerdictKind.Block,
-                    Baslik = "Sürüm uyumsuz — güncelleme gerekli",
-                    Aciklama = $"Yedek sürümü ({yedek.KimlikVersion}) hedeften ({hedefVersion}) daha yeni. Geri yükleme engellendi — önce uygulamayı güncelleyin.",
-                    KodBlokeNedeni = "Yedek daha yeni sürümden"
-                };
-            }
-            if (IsVersionLess(yedek.KimlikVersion!, hedefVersion!))
-            {
-                return new RestoreVerdict
-                {
-                    Kind = RestoreVerdictKind.Warning,
-                    Baslik = "Eski sürüm yedek",
-                    Aciklama = $"Yedek sürümü ({yedek.KimlikVersion}) hedeften ({hedefVersion}) daha eski. Geri yüklendikten sonra otomatik güncellenecek — onay ile devam edebilirsiniz."
-                };
-            }
-        }
-
-        // Kurulum / makine farkı → amber onay (kod değil, sadece onay)
-        bool kurulumFarkli = !string.IsNullOrWhiteSpace(yedek.KimlikKurulumId) && !string.IsNullOrWhiteSpace(currentKurulumId) && !string.Equals(yedek.KimlikKurulumId, currentKurulumId, StringComparison.OrdinalIgnoreCase);
-        bool makineFarkli = !string.IsNullOrWhiteSpace(yedek.KimlikMakineId) && !string.IsNullOrWhiteSpace(currentMachineId) && !string.Equals(yedek.KimlikMakineId, currentMachineId, StringComparison.OrdinalIgnoreCase);
-
-        if (kurulumFarkli || makineFarkli)
-        {
-            string detay = kurulumFarkli && makineFarkli ? "farklı kurulum ve makineden"
-                : kurulumFarkli ? "farklı kurulumdan"
-                : "farklı makineden";
-            return new RestoreVerdict
-            {
-                Kind = RestoreVerdictKind.Warning,
-                Baslik = "Taşınmış yedek",
-                Aciklama = $"Yedek {detay} geliyor. Kurulum/Makine uyuşmazlığı — onay ile devam edebilirsiniz."
-            };
-        }
-
-        // Rol kontrolü — artık enum admin sabit, blok yok; sadece bilgi
-        // KimlikRol her zaman Yönetici, farklı admin bile aynı rol olduğu için engel yok.
-
-        return new RestoreVerdict
-        {
-            Kind = RestoreVerdictKind.Allow,
-            Baslik = "Geri yüklenebilir",
-            Aciklama = "Yedek kimliği hedef ile uyumlu. Doğrudan geri yüklenebilir."
+                DosyaAdi = yedek.BackupFileName ?? yedek.DatabaseName,
+                DosyaVarMi = true,
+                IntegrityTamamMi = true,
+                IntegrityMesaji = "ok"
+            },
+            Fark = new RestoreFarkOzeti(),
+            KimlikliMi = yedek.IsKimlikli,
+            YedekVersion = yedek.KimlikVersion,
+            MevcutVersion = hedefVersion,
+            KurulumFarkli = IdFarkli(yedek.KimlikKurulumId, currentKurulumId),
+            MakineFarkli = IdFarkli(yedek.KimlikMakineId, currentMachineId)
         };
+
+        var uyusmazlik = KimlikUyusmazligi(yedek, hedefDonem);
+        if (uyusmazlik != null)
+        {
+            girdi.KimlikUyusmazlikBaslik = uyusmazlik.Value.Baslik;
+            girdi.KimlikUyusmazlikAciklama = uyusmazlik.Value.Aciklama;
+        }
+
+        return RestoreAnalizDegerlendirici.Degerlendir(girdi);
     }
 
-    private static bool IsVersionGreater(string a, string b) => SemanticVersion.IsGreater(a, b);
+    private static bool IdFarkli(string? yedekId, string? currentId)
+        => !string.IsNullOrWhiteSpace(yedekId) && !string.IsNullOrWhiteSpace(currentId)
+           && !string.Equals(yedekId, currentId, StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsVersionLess(string a, string b) => SemanticVersion.IsLess(a, b);
+    // Firma / Dönem / ad uyuşmazlığı → RequireCode (kırmızı kilit, kod)
+    private static (string Baslik, string Aciklama)? KimlikUyusmazligi(DatabaseBackupResult yedek, MaliDonemModel hedefDonem)
+    {
+        if (yedek.KimlikFirmaId != null && hedefDonem.FirmaId != 0 && yedek.KimlikFirmaId != hedefDonem.FirmaId)
+            return ("Firma uyuşmazlığı", $"Yedek farklı firmaya ait (FirmaId {yedek.KimlikFirmaId} → hedef {hedefDonem.FirmaId}). Devam etmek için tek-seferlik kod gerekli.");
+
+        if (yedek.KimlikMaliDonemId != null && hedefDonem.Id != 0 && yedek.KimlikMaliDonemId != hedefDonem.Id)
+            return ("Mali dönem uyuşmazlığı", $"Yedek farklı döneme ait (Id {yedek.KimlikMaliDonemId} → hedef {hedefDonem.Id}). Devam etmek için tek-seferlik kod gerekli.");
+
+        if (!string.Equals(yedek.DatabaseName, hedefDonem.DatabaseName, StringComparison.OrdinalIgnoreCase))
+            return ("Veritabanı adı uyuşmazlığı", $"Yedek '{yedek.DatabaseName}' hedef '{hedefDonem.DatabaseName}' ile eşleşmiyor. Kod gerekli.");
+
+        return null;
+    }
 }

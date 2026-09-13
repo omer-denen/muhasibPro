@@ -10,10 +10,10 @@
     PrimaryButtonStyle="{StaticResource InventDialogDangerStyle}"
     CloseButtonText="Vazgeç"
     DefaultButton="Close"
-    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
     BorderThickness="1"
-    CornerRadius="{StaticResource CardCornerRadius}">
+    CornerRadius="{StaticResource ControlCornerRadius}">
 
     <ContentDialog.Title>
         <Grid ColumnSpacing="12">
@@ -21,12 +21,12 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Border Width="36" Height="36" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource MuhasibDangerBgBrush}" VerticalAlignment="Center">
-                <FontIcon Glyph="{StaticResource IconAlertTriangle}" FontSize="18" Foreground="{ThemeResource MuhasibDangerBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Border Width="36" Height="36" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" VerticalAlignment="Center">
+                <FontIcon Glyph="{StaticResource IconAlertTriangle}" FontSize="18" Foreground="{ThemeResource SystemFillColorCriticalBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
-                <TextBlock Text="Guard Kontrolü" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
-                <TextBlock Text="Mali Dönem Silme" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}"/>
+                <TextBlock Text="Guard Kontrolü" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" CharacterSpacing="60"/>
+                <TextBlock Text="Mali Dönem Silme" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
             </StackPanel>
         </Grid>
     </ContentDialog.Title>
@@ -37,8 +37,8 @@
         <Border
             Padding="12"
             CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
-            Background="{ThemeResource MuhasibInfoBgBrush}"
-            BorderBrush="{ThemeResource MuhasibInfoBrush}"
+            Background="{ThemeResource SystemFillColorAttentionBackgroundBrush}"
+            BorderBrush="{ThemeResource SystemFillColorAttentionBrush}"
             BorderThickness="1">
             <StackPanel Orientation="Horizontal" Spacing="12">
                 <FontIcon
@@ -51,10 +51,10 @@
                         x:Name="DbDosyaAdiText"
                         FontSize="14"
                         FontWeight="Bold"
-                        Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
+                        Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                     <TextBlock
                         FontSize="12"
-                        Foreground="{ThemeResource MuhasibSageSecondaryBrush}">
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}">
                         <Run Text="Dönem: " />
                         <Run x:Name="DonemYiliText" Text="" />
                     </TextBlock>
@@ -67,14 +67,14 @@
             x:Name="ErrorBorder"
             Padding="10"
             CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
-            Background="{ThemeResource MuhasibDangerBgBrush}"
-            BorderBrush="{ThemeResource MuhasibDangerBrush}"
+            Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+            BorderBrush="{ThemeResource SystemFillColorCriticalBrush}"
             BorderThickness="1"
             Visibility="Collapsed">
             <TextBlock
                 x:Name="ErrorText"
                 FontSize="12"
-                Foreground="{ThemeResource MuhasibDangerBrush}"
+                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                 TextWrapping="Wrap" />
         </Border>
 
@@ -82,45 +82,45 @@
         <Border
             Padding="12"
             CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
-            Background="{ThemeResource MuhasibInventPaleBrush}"
-            BorderBrush="{ThemeResource MuhasibSoftBorderBrush}"
+            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1">
             <StackPanel Spacing="8">
                 <Grid>
                     <TextBlock
                         Text="1. Aktif dönem kilit kontrolü:"
                         FontSize="12"
-                        Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <TextBlock
                         HorizontalAlignment="Right"
                         FontSize="12"
                         FontWeight="SemiBold"
-                        Foreground="{ThemeResource MuhasibSuccessBrush}"
+                        Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                         Text="✅ Güvenli" />
                 </Grid>
                 <Grid>
                     <TextBlock
                         Text="2. Oturum/Heartbeat kontrolü:"
                         FontSize="12"
-                        Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <TextBlock
                         Text="✅ Başka kullanıcı bağlı değil"
                         HorizontalAlignment="Right"
                         FontSize="12"
                         FontWeight="SemiBold"
-                        Foreground="{ThemeResource MuhasibSuccessBrush}" />
+                        Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                 </Grid>
                 <Grid>
                     <TextBlock
                         Text="3. Yetki kontrolü:"
                         FontSize="12"
-                        Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <TextBlock
                         Text="✅ Veritabani_Sil İzni Var"
                         HorizontalAlignment="Right"
                         FontSize="12"
                         FontWeight="SemiBold"
-                        Foreground="{ThemeResource MuhasibSuccessBrush}" />
+                        Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                 </Grid>
             </StackPanel>
         </Border>
@@ -130,7 +130,7 @@
             <TextBlock
                 FontSize="12"
                 FontWeight="SemiBold"
-                Foreground="{ThemeResource MuhasibTextPrimaryBrush}">
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}">
                 <Run Text="Onay Kodu: Silme işlemini onaylamak için lütfen dönemin yılını (" />
                 <Run x:Name="ConfirmCodeHintText" Text="" FontWeight="Bold" />
                 <Run Text=") yazınız:" />
@@ -142,9 +142,21 @@
                 FontFamily="{ThemeResource MuhasibMonospaceFontFamily}"
                 Padding="12,10"
                 CornerRadius="{StaticResource MuhasibPillCornerRadius}"
-                Background="{ThemeResource MuhasibInventPaleBrush}"
-                Foreground="{ThemeResource MuhasibTextPrimaryBrush}"
-                BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" />
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" />
         </StackPanel>
+
+        <!-- Yedek tercihi -->
+        <CheckBox
+            x:Name="YedekleriDeSilCheckBox"
+            IsChecked="True"
+            FontSize="12"
+            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+            ToolTipService.ToolTip="İşaret kalkarsa yedekler diskte korunur ve 'Silinen Dönem Yedekleri' listesinde gösterilir">
+            <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}">
+                <Run Text="Dönemin yedeklerini de sil" FontWeight="SemiBold" /><Run Text=" (işaretsizse yedekler korunur)" />
+            </TextBlock>
+        </CheckBox>
     </StackPanel>
 </ContentDialog>

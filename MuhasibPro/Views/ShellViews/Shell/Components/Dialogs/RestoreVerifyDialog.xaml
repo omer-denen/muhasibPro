@@ -10,10 +10,10 @@
     PrimaryButtonStyle="{StaticResource InventDialogPrimaryStyle}"
     CloseButtonText="Vazgeç"
     DefaultButton="Close"
-    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
     BorderThickness="1"
-    CornerRadius="{StaticResource CardCornerRadius}">
+    CornerRadius="{StaticResource ControlCornerRadius}">
 
     <ContentDialog.Title>
         <Grid ColumnSpacing="12">
@@ -25,24 +25,24 @@
                 <FontIcon Glyph="{StaticResource IconUpload}" FontSize="18" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
-                <TextBlock Text="Doğrulama" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
-                <TextBlock Text="Yedekten Geri Yükle" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}"/>
+                <TextBlock Text="Doğrulama" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" CharacterSpacing="60"/>
+                <TextBlock Text="Yedekten Geri Yükle" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
             </StackPanel>
         </Grid>
     </ContentDialog.Title>
 
     <StackPanel Spacing="14" MinWidth="440">
         <!-- Yedek kimlik kartı -->
-        <Border Padding="12" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource MuhasibInventPaleBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1">
+        <Border Padding="12" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
             <StackPanel Spacing="6">
-                <TextBlock x:Name="BackupFileText" FontSize="12" FontWeight="SemiBold" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" TextWrapping="Wrap"/>
+                <TextBlock x:Name="BackupFileText" FontSize="12" FontWeight="SemiBold" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap"/>
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <Border x:Name="KimlikRozetBorder" Padding="6,2" CornerRadius="{StaticResource MuhasibPillCornerRadius}" BorderThickness="1">
                         <TextBlock x:Name="KimlikRozetText" FontSize="10" FontWeight="SemiBold"/>
                     </Border>
-                    <TextBlock x:Name="BackupSizeText" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="BackupSizeText" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
                 </StackPanel>
-                <TextBlock x:Name="KimlikDetayText" FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" TextWrapping="Wrap"/>
+                <TextBlock x:Name="KimlikDetayText" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap"/>
             </StackPanel>
         </Border>
 
@@ -59,15 +59,15 @@
 
         <!-- Kod bloğu (RequireCode durumunda görünür) -->
         <StackPanel x:Name="CodePanel" Spacing="8" Visibility="Collapsed">
-            <Border Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource MuhasibWarningBgBrush}" BorderBrush="{ThemeResource MuhasibWarningBrush}" BorderThickness="1">
+            <Border Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorCautionBrush}" BorderThickness="1">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Tek-seferlik onay kodu" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibWarningBrush}"/>
+                    <TextBlock Text="Tek-seferlik onay kodu" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource SystemFillColorCautionBrush}"/>
                     <StackPanel Orientation="Horizontal" Spacing="10">
-                        <TextBlock Text="Kod:" FontSize="12" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center"/>
-                        <Border Padding="10,6" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1">
-                            <TextBlock x:Name="GeneratedCodeText" FontSize="16" FontWeight="Bold" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" CharacterSpacing="60"/>
+                        <TextBlock Text="Kod:" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center"/>
+                        <Border Padding="10,6" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                            <TextBlock x:Name="GeneratedCodeText" FontSize="16" FontWeight="Bold" FontFamily="{ThemeResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" CharacterSpacing="60"/>
                         </Border>
-                        <TextBlock Text="— kodu yazın" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="— kodu yazın" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -75,8 +75,8 @@
         </StackPanel>
 
         <!-- Hata -->
-        <Border x:Name="ErrorBorder" Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource MuhasibDangerBgBrush}" BorderBrush="{ThemeResource MuhasibDangerBrush}" BorderThickness="1" Visibility="Collapsed">
-            <TextBlock x:Name="ErrorText" FontSize="12" Foreground="{ThemeResource MuhasibDangerBrush}" TextWrapping="Wrap"/>
+        <Border x:Name="ErrorBorder" Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1" Visibility="Collapsed">
+            <TextBlock x:Name="ErrorText" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap"/>
         </Border>
     </StackPanel>
 </ContentDialog>

@@ -39,19 +39,34 @@ namespace MuhasibPro.Business.Services.UIService
 
         public async Task<SplashRouteDecision> DecideRouteAsync(bool? startupDbReady)
         {
-            if (startupDbReady.HasValue)
-                return new SplashRouteDecision { IsDatabaseReady = startupDbReady.Value };
-
             try
             {
                 var resp = await _sistemDatabaseService.GetSistemDatabaseStateAsync();
                 var state = resp.Data;
-                bool ready = state != null && state.IsDatabaseExists && state.CanConnect && !state.HasError && state.DatabaseValid;
-                return new SplashRouteDecision { IsDatabaseReady = ready };
+
+                if (state == null)
+                    return new SplashRouteDecision { IsDatabaseExists = false, IsDatabaseReady = false };
+
+                bool exists = state.IsDatabaseExists;
+                bool ready = exists && state.CanConnect && !state.HasError && state.DatabaseValid;
+                bool hasPending = state.PendingMigrations?.Count > 0;
+
+                // startupDbReady override'ı sadece ready durumunu ezer, exists ve pending korunur
+                if (startupDbReady.HasValue)
+                    ready = startupDbReady.Value;
+
+                return new SplashRouteDecision
+                {
+                    IsDatabaseExists = exists,
+                    IsDatabaseReady = ready,
+                    HasPendingMigrations = hasPending,
+                    PendingMigrationCount = state.PendingMigrations?.Count ?? 0
+                };
             }
             catch
             {
-                return new SplashRouteDecision { IsDatabaseReady = true };
+                // Fail-closed: DB sorgusu başarısızsa ilk kuruluma yönlendir (en güvenli yol).
+                return new SplashRouteDecision { IsDatabaseExists = false, IsDatabaseReady = false };
             }
         }
 

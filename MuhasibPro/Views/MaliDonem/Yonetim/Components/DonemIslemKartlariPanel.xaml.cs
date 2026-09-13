@@ -18,8 +18,6 @@ public sealed partial class DonemIslemKartlariPanel : UserControl
         ServiceLocator.Current.GetService<INotificationService>()?.Show(
             $"{islem} Hatası", $"{ex.Message} Yeniden dönem seçin.",
             NotificationType.Danger);
-        if (Vm != null)
-            Vm.AktifSegment = YonetimSegmenti.Tumu;
     }
 
     private async void OnBakimClick(object sender, RoutedEventArgs e)

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using MuhasibPro.Data.DataContext.Configurations;
 using MuhasibPro.Data.DataContext.SeedDataSistem;
 using MuhasibPro.Domain.Entities;
@@ -23,6 +24,9 @@ public class SistemDbContext : DbContext
     public DbSet<GlobalAyarlar> GlobalAyarlar { get; set; } = null!;
     public DbSet<OturumKaydi> OturumKayitlari { get; set; } = null!;
 
+    /// <summary>Bağlantı ilk açıldığında WAL + busy_timeout PRAGMA'larını çalıştırır.</summary>
+    private bool _pragmaApplied;
+
     protected SistemDbContext()
     {
     }
@@ -30,6 +34,17 @@ public class SistemDbContext : DbContext
     public SistemDbContext(DbContextOptions<SistemDbContext> options)
         : base(options)
     {
+        // EF Core bağlantı açılış kancası: PRAGMA'lar ilk erişimde uygulanır.
+        Database.GetDbConnection().StateChange += (_, e) =>
+        {
+            if (e.CurrentState == System.Data.ConnectionState.Open && !_pragmaApplied)
+            {
+                _pragmaApplied = true;
+                using var cmd = Database.GetDbConnection().CreateCommand();
+                cmd.CommandText = "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL;";
+                cmd.ExecuteNonQuery();
+            }
+        };
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -69,7 +84,7 @@ public class SistemDbContext : DbContext
             KaydedenId = KullaniciSabitleri.SeedYoneticiId,
             KayitTarihi = new DateTime(2025, 3, 12),
             KullaniciAdi = "korkutomer",
-            ParolaHash = "AQAAAAIAAYagAAAAECnYdlrjFiWFJc+FGeGDmvR87uz20oU/Z0K4JE9ddoF2VUnmHw0idEFX8UPOb4cpzQ==",
+            ParolaHash = "AQAAAAIAAYagAAAAEPm/gfxm9YLZq6cmA6QUFfQZfChx8epMnb8PmvRVXPH/Eq3aYjvyXNvclwOM2HHmdg==",
             Soyadi = "Korkut",
             Telefon = "0 (541) 330 0800",
             ArananTerim = "korkutomer, Ömer Korkut, Yönetici"

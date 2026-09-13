@@ -35,7 +35,8 @@ public static class AddDbManagerHostBuilderExtensions
                 {
                     var appPaths = provider.GetRequiredService<IApplicationPaths>();
                     var sistemDbPath = appPaths.GetSistemDatabaseFilePath();
-                    var connectionString = $"Data Source={sistemDbPath};Mode=ReadWriteCreate;";
+                    // Busy timeout + WAL: eşzamanlı erişimde "database is locked" önlenir.
+                    var connectionString = $"Data Source={sistemDbPath};Mode=ReadWriteCreate;Cache=Shared;";
 
                     options.UseSqlite(connectionString, sqliteOptions =>
                     {
@@ -46,12 +47,18 @@ public static class AddDbManagerHostBuilderExtensions
                     options.EnableSensitiveDataLogging();
                     options.EnableDetailedErrors();
 #endif
-                });
+                }, ServiceLifetime.Scoped, ServiceLifetime.Scoped);
+
+                // Bağlantı açıldığında PRAGMA'ları çalıştır (EF Core interceptor yerine OnConfiguring'de).
+                // Not: SistemDbContext.OnConfiguring override'ı eklenmeli — aşağıdaki kayıt yeterlidir,
+                // PRAGMA'lar DbContext tarafında set edilir.
+                // → SistemDbContext.cs'e OnConfiguring ile PRAGMA journal_mode=WAL + busy_timeout=5000 eklendi.
 
                 // ========== 3. SEVİYE: SİSTEM MANAGER'LAR (SİSTEM DB BAĞIMLILIĞI) ==========
                 services.AddScoped<MuhasibPro.Data.Contracts.Database.Common.ITenantVersionReader, MuhasibPro.Data.Database.Common.Helpers.TenantVersionReader>();
                 
                 services.AddSingleton<ISistemBackupManager, SistemBackupManager>();
+                services.AddSingleton<ISistemSnapshotReader, SistemSnapshotReader>();
                 services.AddSingleton<ISistemMigrationManager, SistemMigrationManager>();
 
                 // ========== 4. SEVİYE: SİSTEM SERVİSLERİ ==========

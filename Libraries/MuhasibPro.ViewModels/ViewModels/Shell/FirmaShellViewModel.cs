@@ -80,6 +80,24 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
 
         public ICommand DevamEtCommand { get; }
 
+        private ICommand _yardimCommand;
+
+        /// <summary>Kural 13: sayfa yardımı (içerik ViewModel'de, dialog chrome'u App'te).</summary>
+        public ICommand YardimCommand => _yardimCommand ??= new AsyncRelayCommand(YardimGoster);
+
+        private async Task YardimGoster()
+        {
+            await DialogService.ShowYardimAsync("Firma & Mali Dönem Seçimi — Yardım", new List<YardimMaddesiDto>
+            {
+                new() { Baslik = "Firma nasıl seçerim?", Aciklama = "Sol listeden bir firma seçin; sağda o firmanın mali dönemleri listelenir." },
+                new() { Baslik = "Mali dönem nasıl seçerim?", Aciklama = "Sağdaki dönem kartlarından birini seçin; 'Çalışma Alanına Geç' butonu etkinleşir." },
+                new() { Baslik = "Yeni firma eklemek", Aciklama = "'Yeni Firma' butonu firma tanımlama penceresini açar; kayıt sonrası liste tazelenir." },
+                new() { Baslik = "Yeni mali dönem açmak", Aciklama = "Seçili firmanın dönem listesinden yeni dönem açılabilir; işlem adım adım ilerler." },
+                new() { Baslik = "Çalışma alanına geçiş", Aciklama = "Firma ve dönem seçiliyken 'Çalışma Alanına Geç' ile ana panele geçilir. Veritabanı güncellemesi gerekiyorsa önce onay istenir." },
+                new() { Baslik = "Denetim Masası", Aciklama = "Üstteki 'Denetim Masası' butonu tüm ayarları ayrı bir pencerede açar." },
+            });
+        }
+
         private bool CanExecuteDevamEt()
         {
             var donem = Selection.SelectedMaliDonem;
@@ -182,11 +200,24 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
 
         private async void OnTenantUpdated(TenantDatabaseUpdateViewModel viewModel, string message, object args)
         {
-            if (message == TenantEvents.Updated && args is string databaseName
-                && Selection.SelectedMaliDonem != null && Selection.SelectedMaliDonem.DatabaseName == databaseName)
+            if (message != TenantEvents.Updated || args is not string databaseName)
+                return;
+            // Birincil: yerel seçim. Yedek: Continue'un yazdığı paylaşılan ayna —
+            // yönetim sayfasından girilen akışta (OnGuncelleClick) yerel seçim eşleşmeyebilir;
+            // aynadaki seçim Continue tarafından garanti yazılır. Eşleşme harf-duyarsız (B1 deseni).
+            var yerel = Selection.SelectedMaliDonem;
+            if (yerel == null || !string.Equals(yerel.DatabaseName, databaseName, StringComparison.OrdinalIgnoreCase))
             {
-                await ContextService.RunAsync(async () => await ExecuteDevamEt());
+                var aynadakiDonem = _selectedService.SelectedMaliDonem;
+                if (aynadakiDonem == null || !string.Equals(aynadakiDonem.DatabaseName, databaseName, StringComparison.OrdinalIgnoreCase))
+                    return;
+                await ContextService.RunAsync(() =>
+                {
+                    Selection.SelectFirma(_selectedService.SelectedFirma);
+                    Selection.SelectMaliDonem(aynadakiDonem);
+                });
             }
+            await ContextService.RunAsync(async () => await ExecuteDevamEt());
         }
 
         private async Task ExecuteDevamEt()

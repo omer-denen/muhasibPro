@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="MuhasibPro.Views.DenetimMasasi.Sayfalar.GirisDashboardSayfasi"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:dev="using:DevWinUI"
+    xmlns:shell="using:MuhasibPro.ViewModels.ViewModels.Shell"
+    xmlns:converters="using:MuhasibPro.Converters"
+    mc:Ignorable="d"
+    Background="Transparent">
+
+    <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
+        <converters:BoolToVisibilityConverter x:Key="FalseToVis" TrueValue="Collapsed" FalseValue="Visible" />
+    </Page.Resources>
+
+    <!-- Windows 11 Ayarlar "Giriş" deseni: üstte RichButton durum satırı, altında firmalar bölümü. -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,4,0">
+        <StackPanel Spacing="16">
+
+            <!-- Üst satır: Uygulama bilgileri | Sistem Veritabanı | Uygulama Güncelleme (kart kabı yok — Win11 dili) -->
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <dev:RichButton Grid.Column="0" x:Name="UygulamaRichButton"
+                                Title="MuhasibPro" DisplayMode="ReadOnly"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                ToolTipService.ToolTip="Uygulama sürümü ve dağıtım bilgisi">
+                    <dev:RichButton.Icon>
+                        <ImageIcon Width="28" Height="28" Source="ms-appx:///Assets/AppIcon.png" />
+                    </dev:RichButton.Icon>
+                </dev:RichButton>
+
+                <Grid Grid.Column="1">
+                    <dev:RichButton Title="Sistem Veritabanı" SubTitle="{Binding SistemDbAltMetni}"
+                                    DisplayMode="Normal" Click="OnVeritabaniClick"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                    ToolTipService.ToolTip="{Binding SistemDbDetayMetni}">
+                        <dev:RichButton.Icon>
+                            <FontIcon Glyph="{StaticResource IconDatabase}" />
+                        </dev:RichButton.Icon>
+                        <dev:RichButton.ActionIcon>
+                            <FontIcon Glyph="{StaticResource IconChevronRight}" FontSize="12" />
+                        </dev:RichButton.ActionIcon>
+                    </dev:RichButton>
+                    <ProgressRing Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                  Margin="0,12,14,0"
+                                  IsActive="{Binding IsSistemDbYukleniyor, Mode=OneWay}"
+                                  Visibility="{Binding IsSistemDbYukleniyor, Converter={StaticResource TrueToVis}}" />
+                </Grid>
+
+                <Grid Grid.Column="2">
+                    <dev:RichButton SubTitle="{Binding GuncellemeAltMetni}"
+                                    DisplayMode="Normal" Click="OnGuncellemeClick"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                    ToolTipService.ToolTip="Güncelleme bölümünü aç">
+                        <dev:RichButton.Title>
+                            <TextBlock Text="Güncelleme" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                        </dev:RichButton.Title>
+                        <dev:RichButton.Icon>
+                            <FontIcon Glyph="{StaticResource IconDownload}" />
+                        </dev:RichButton.Icon>
+                        <dev:RichButton.ActionIcon>
+                            <FontIcon Glyph="{StaticResource IconChevronRight}" FontSize="12" />
+                        </dev:RichButton.ActionIcon>
+                    </dev:RichButton>
+                    <ProgressRing Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                  Margin="0,12,14,0"
+                                  IsActive="{Binding IsGuncellemeDenetleniyor, Mode=OneWay}"
+                                  Visibility="{Binding IsGuncellemeDenetleniyor, Converter={StaticResource TrueToVis}}" />
+                </Grid>
+            </Grid>
+
+            <!-- Kullanıcıya Ait Firmalar: her firma expander, altında mali dönem listesi -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                    CornerRadius="{StaticResource ControlCornerRadius}" Padding="16">
+                <Grid RowSpacing="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Kullanıcıya Ait Firmalar"
+                                   Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,0"
+                                   VerticalAlignment="Center" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                        <Button Grid.Column="1" Click="OnYeniFirmaClick" Style="{StaticResource AccentButtonStyle}"
+                                ToolTipService.ToolTip="Yeni firma tanımla">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <FontIcon Glyph="{StaticResource IconAdd}" FontSize="12" />
+                                <TextBlock Text="Yeni Firma" FontSize="12" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <ProgressRing Grid.Row="1" Width="20" Height="20" HorizontalAlignment="Left"
+                                  IsActive="{Binding IsFirmalarYukleniyor, Mode=OneWay}"
+                                  Visibility="{Binding IsFirmalarYukleniyor, Converter={StaticResource TrueToVis}}" />
+
+                    <ItemsControl Grid.Row="2" ItemsSource="{Binding Kartlar}"
+                                  Visibility="{Binding HasFirma, Converter={StaticResource TrueToVis}}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="shell:FirmaDashboardKarti">
+                                <controls:SettingsExpander Header="{x:Bind Unvan}" Description="{x:Bind DonemOzeti}"
+                                                           ItemsSource="{x:Bind Donemler, Mode=OneTime}" Margin="0,0,0,4"
+                                                           ToolTipService.ToolTip="Mali dönemleri görmek için genişletin">
+                                    <controls:SettingsExpander.HeaderIcon>
+                                        <FontIcon Glyph="{StaticResource IconBuilding}" />
+                                    </controls:SettingsExpander.HeaderIcon>
+                                    <controls:SettingsExpander.ItemsHeader>
+                                        <Grid Padding="0,2,0,6">
+                                            <Button Content="Gelişmiş Yönetim" Click="OnYonetimClick" Tag="{x:Bind}"
+                                                    Style="{StaticResource GhostPillButtonStyle}" HorizontalAlignment="Right"
+                                                    ToolTipService.ToolTip="Mali Dönem Yönetimi penceresini aç" />
+                                        </Grid>
+                                    </controls:SettingsExpander.ItemsHeader>
+                                    <controls:SettingsExpander.ItemTemplate>
+                                        <DataTemplate x:DataType="shell:DonemKarti">
+                                            <controls:SettingsCard Header="{x:Bind MaliYil, Mode=OneTime}"
+                                                                   Description="{x:Bind AltMetin, Mode=OneTime}">
+                                                <Border Padding="8,2" CornerRadius="{StaticResource MuhasibPillCornerRadius}"
+                                                        Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                                                        BorderBrush="{ThemeResource SystemFillColorSuccessBrush}" BorderThickness="1">
+                                                    <TextBlock Text="Açık" FontSize="11" FontWeight="SemiBold"
+                                                               Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                </Border>
+                                            </controls:SettingsCard>
+                                        </DataTemplate>
+                                    </controls:SettingsExpander.ItemTemplate>
+                                </controls:SettingsExpander>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Firma yok (yalnız yükleme bitince görünür — Kural 11) -->
+                    <StackPanel Grid.Row="2" Spacing="8" Visibility="{Binding BosDurumGoster, Converter={StaticResource TrueToVis}}">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <FontIcon Glyph="{StaticResource IconInfo}" FontSize="16"
+                                      Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Firma bulunamadı" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Başlamak için önce bir firma oluşturun." FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        <Button Content="Yeni Firma Oluştur" Click="OnYeniFirmaClick"
+                                Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

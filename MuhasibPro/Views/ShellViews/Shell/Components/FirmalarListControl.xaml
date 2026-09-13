@@ -27,8 +27,8 @@
                 <Border Width="28" Height="28" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Background="{StaticResource MuhasibPetrolTintBrush}" BorderBrush="{StaticResource MuhasibPetrolBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
                     <FontIcon Glyph="{StaticResource IconBuilding}" FontSize="13" Foreground="{StaticResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
-                <TextBlock Text="KAYITLI FİRMALAR" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource MuhasibTextPrimaryBrush}" VerticalAlignment="Center" />
-                <Border Background="{StaticResource MuhasibOliveTintBrush}" BorderBrush="{StaticResource MuhasibOliveBorderBrush}" BorderThickness="1" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Padding="7,2">
+                <TextBlock Text="KAYITLI FİRMALAR" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                <Border Background="{StaticResource MuhasibOliveTintBrush}" BorderBrush="{StaticResource MuhasibOliveBorderBrush}" BorderThickness="1" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Padding="7,2">
                     <TextBlock Text="{Binding FirmaList.ItemsSource.Count, FallbackValue='0'}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" FontWeight="SemiBold" Foreground="{StaticResource MuhasibOliveDeepBrush}" VerticalAlignment="Center" />
                 </Border>
                 <ProgressRing Width="12" Height="12" IsActive="True" Foreground="{StaticResource MuhasibPetrolBrush}" Visibility="{Binding IsBusy, Converter={StaticResource TrueToVis}, FallbackValue=Collapsed}" Margin="2,0,0,0" VerticalAlignment="Center" />
@@ -41,9 +41,9 @@
                  PlaceholderText="Firma kodu, ünvanı veya şehir ara..."
                  FontSize="12"
                  Padding="12,9"
-                 Background="{StaticResource MuhasibInventCardBrush}"
-                 BorderBrush="{StaticResource MuhasibSoftBorderBrush}"
-                 Foreground="{StaticResource MuhasibTextPrimaryBrush}"
+                 Background="{StaticResource CardBackgroundFillColorDefaultBrush}"
+                 BorderBrush="{StaticResource CardStrokeColorDefaultBrush}"
+                 Foreground="{StaticResource TextFillColorPrimaryBrush}"
                  CornerRadius="{StaticResource MuhasibPillCornerRadius}"
                  TextChanged="OnSearchTextChanged" />
 
@@ -80,15 +80,15 @@
                                         </StackPanel>
                                     </Border>
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-                                        <TextBlock Text="{Binding KisaUnvani}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource MuhasibTextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding KisaUnvani}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
                                         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Il, FallbackValue=''}" FontSize="11" Foreground="{StaticResource MuhasibSageTertiaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="90" Visibility="{Binding Il, Converter={StaticResource StringToVis}}" />
-                                            <TextBlock Text="•" FontSize="11" Foreground="{StaticResource MuhasibSageTertiaryBrush}" Visibility="{Binding Il, Converter={StaticResource StringToVis}}" />
-                                            <TextBlock Text="{Binding Ilce, FallbackValue=''}" FontSize="11" Foreground="{StaticResource MuhasibSageTertiaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="90" Visibility="{Binding Ilce, Converter={StaticResource StringToVis}}" />
+                                            <TextBlock Text="{Binding Il, FallbackValue=''}" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="90" Visibility="{Binding Il, Converter={StaticResource StringToVis}}" />
+                                            <TextBlock Text="•" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" Visibility="{Binding Il, Converter={StaticResource StringToVis}}" />
+                                            <TextBlock Text="{Binding Ilce, FallbackValue=''}" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="90" Visibility="{Binding Ilce, Converter={StaticResource StringToVis}}" />
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Visibility="{Binding VergiNo, Converter={StaticResource StringToVis}}">
-                                            <TextBlock Text="VKN:" FontSize="11" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
-                                            <TextBlock Text="{Binding VergiNo}" FontSize="11" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
+                                            <TextBlock Text="VKN:" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
+                                            <TextBlock Text="{Binding VergiNo}" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
                                         </StackPanel>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
@@ -113,10 +113,10 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                                <FontIcon Glyph="{StaticResource IconUser}" FontSize="10" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
-                                                <TextBlock Text="Yetkili:" FontSize="10" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
+                                                <FontIcon Glyph="{StaticResource IconUser}" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="Yetkili:" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
                                             </StackPanel>
-                                            <TextBlock Grid.Column="1" Text="{Binding YetkiliKisi}" FontSize="10" Foreground="{StaticResource MuhasibSageSecondaryBrush}" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1" Text="{Binding YetkiliKisi}" FontSize="10" Foreground="{StaticResource TextFillColorSecondaryBrush}" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
                                         </Grid>
                                         <Grid ColumnSpacing="6">
                                             <Grid.ColumnDefinitions>
@@ -124,13 +124,13 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                                <FontIcon Glyph="{StaticResource IconInfo}" FontSize="10" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
-                                                <TextBlock Text="İletişim:" FontSize="10" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
+                                                <FontIcon Glyph="{StaticResource IconInfo}" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="İletişim:" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
-                                                <TextBlock Text="{Binding Telefon1, FallbackValue='-'}" FontSize="10" Foreground="{StaticResource MuhasibSageSecondaryBrush}" Visibility="{Binding Telefon1, Converter={StaticResource StringToVis}}" />
-                                                <TextBlock Text="•" FontSize="10" Foreground="{StaticResource MuhasibSageTertiaryBrush}" Visibility="{Binding Telefon1, Converter={StaticResource StringToVis}}" />
-                                                <TextBlock Text="{Binding Eposta, FallbackValue='-'}" FontSize="10" Foreground="{StaticResource MuhasibSageSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="160" Visibility="{Binding Eposta, Converter={StaticResource StringToVis}}" />
+                                                <TextBlock Text="{Binding Telefon1, FallbackValue='-'}" FontSize="10" Foreground="{StaticResource TextFillColorSecondaryBrush}" Visibility="{Binding Telefon1, Converter={StaticResource StringToVis}}" />
+                                                <TextBlock Text="•" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" Visibility="{Binding Telefon1, Converter={StaticResource StringToVis}}" />
+                                                <TextBlock Text="{Binding Eposta, FallbackValue='-'}" FontSize="10" Foreground="{StaticResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="160" Visibility="{Binding Eposta, Converter={StaticResource StringToVis}}" />
                                             </StackPanel>
                                         </Grid>
                                         <Grid ColumnSpacing="6" Visibility="{Binding VergiDairesi, Converter={StaticResource StringToVis}}">
@@ -139,10 +139,10 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                                <FontIcon Glyph="{StaticResource IconShield}" FontSize="10" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
-                                                <TextBlock Text="Vergi:" FontSize="10" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
+                                                <FontIcon Glyph="{StaticResource IconShield}" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="Vergi:" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
                                             </StackPanel>
-                                            <TextBlock Grid.Column="1" HorizontalAlignment="Right" FontSize="10" Foreground="{StaticResource MuhasibSageSecondaryBrush}" TextTrimming="CharacterEllipsis">
+                                            <TextBlock Grid.Column="1" HorizontalAlignment="Right" FontSize="10" Foreground="{StaticResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis">
                                                 <Run Text="{Binding VergiDairesi}" /><Run Text=" — " /><Run Text="{Binding VergiNo}" />
                                             </TextBlock>
                                         </Grid>
@@ -152,13 +152,13 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Top">
-                                                <FontIcon Glyph="{StaticResource IconInfo}" FontSize="10" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
-                                                <TextBlock Text="Adres:" FontSize="10" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
+                                                <FontIcon Glyph="{StaticResource IconInfo}" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
+                                                <TextBlock Text="Adres:" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
                                             </StackPanel>
-                                            <TextBlock Grid.Column="1" Text="{Binding Adres}" FontSize="10" Foreground="{StaticResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" TextAlignment="Right" HorizontalAlignment="Right" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Adres}" FontSize="10" Foreground="{StaticResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" TextAlignment="Right" HorizontalAlignment="Right" />
                                         </Grid>
                                     </StackPanel>
-                                    <Rectangle Height="1" Fill="{StaticResource MuhasibSoftBorderBrush}" Opacity="0.6" Margin="0,2,0,0" />
+                                    <Rectangle Height="1" Fill="{StaticResource CardStrokeColorDefaultBrush}" Opacity="0.6" Margin="0,2,0,0" />
                                     <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
                                         <Button Tag="{Binding}" Click="OnMaliDonemYonetimClick" Style="{StaticResource PetrolButtonStyle}" ToolTipService.ToolTip="Mali Dönem İşlemleri (yönetim penceresi)">
                                             <StackPanel Orientation="Horizontal" Spacing="5">

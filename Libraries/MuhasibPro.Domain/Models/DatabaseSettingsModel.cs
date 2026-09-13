@@ -45,6 +45,12 @@ namespace MuhasibPro.Domain.Models
         [YoneticiAyari]
         public bool VacuumOnBackup { get; set; } = true;
 
+        /// <summary>Son değiştiren (görünen ad). Denetim satırı için; yetki denetimine girmez.</summary>
+        public string SonDegistiren { get; set; } = string.Empty;
+
+        /// <summary>Son değişiklik tarihi (yerel saat). Hiç kaydedilmediyse default.</summary>
+        public DateTime SonDegisiklikTarihi { get; set; }
+
         /// <summary>Manuel keep, 1-20 aralığına sabitlenmiş.</summary>
         public int GetManuelKeep() => Math.Clamp(MaxManuelYedekSayisi, 1, 20);
 

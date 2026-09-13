@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="MuhasibPro.Views.MaliDonem.Yonetim.Components.Dialogs.YetimYedeklerDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:components="using:MuhasibPro.Views.MaliDonem.Yonetim.Components"
+    mc:Ignorable="d"
+    CloseButtonText="Kapat"
+    DefaultButton="Close"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+    BorderThickness="1"
+    CornerRadius="{StaticResource ControlCornerRadius}">
+
+    <ContentDialog.Title>
+        <StackPanel Spacing="1">
+            <TextBlock Text="Kayıt Dışı Yedekler" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+            <TextBlock Text="Dönem kaydı olmayan yedekler — en fazla silinebilir." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+    </ContentDialog.Title>
+
+    <StackPanel Spacing="12" MinWidth="480">
+        <!-- Sekme başlığı -->
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="SekmeSilinenButton" Click="OnSekmeSilinenClick" HorizontalAlignment="Stretch" ToolTipService.ToolTip="Dönemi silinmiş ama yedeği korunmuş dosyalar">
+                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                    <TextBlock Text="Silinen Dönem" FontSize="12" FontWeight="SemiBold" />
+                    <Border Padding="6,1" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}">
+                        <TextBlock Text="{Binding SilinenSayisi, FallbackValue='0'}" FontSize="11" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
+                    </Border>
+                </StackPanel>
+            </Button>
+            <Button x:Name="SekmeBilinmeyenButton" Grid.Column="1" Click="OnSekmeBilinmeyenClick" HorizontalAlignment="Stretch" ToolTipService.ToolTip="Hiçbir dönem kaydıyla eşleşmeyen dosyalar">
+                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                    <TextBlock Text="Bilinmeyen" FontSize="12" FontWeight="SemiBold" />
+                    <Border Padding="6,1" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}">
+                        <TextBlock Text="{Binding BilinmeyenSayisi, FallbackValue='0'}" FontSize="11" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
+                    </Border>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Sekme içerikleri -->
+        <ScrollViewer x:Name="SilinenKaydirici" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="420">
+            <components:SilinenDonemYedekleriPanel x:Name="SilinenPanel" />
+        </ScrollViewer>
+        <ScrollViewer x:Name="BilinmeyenKaydirici" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="420" Visibility="Collapsed">
+            <components:BilinmeyenPanel x:Name="BilinmeyenPanel" />
+        </ScrollViewer>
+    </StackPanel>
+</ContentDialog>

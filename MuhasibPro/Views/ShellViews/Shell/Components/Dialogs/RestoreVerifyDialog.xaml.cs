@@ -46,9 +46,9 @@ public sealed partial class RestoreVerifyDialog : ContentDialog
 
         bool kimlikli = Backup.IsKimlikli;
         KimlikRozetText.Text = Backup.KimlikRozeti;
-        KimlikRozetBorder.Background = (Brush)Application.Current.Resources[kimlikli ? "MuhasibSuccessBgBrush" : "MuhasibWarningBgBrush"];
-        KimlikRozetBorder.BorderBrush = (Brush)Application.Current.Resources[kimlikli ? "MuhasibSuccessBrush" : "MuhasibWarningBrush"];
-        KimlikRozetText.Foreground = (Brush)Application.Current.Resources[kimlikli ? "MuhasibSuccessBrush" : "MuhasibWarningBrush"];
+        KimlikRozetBorder.Background = (Brush)Application.Current.Resources[kimlikli ? "SystemFillColorSuccessBackgroundBrush" : "SystemFillColorCautionBackgroundBrush"];
+        KimlikRozetBorder.BorderBrush = (Brush)Application.Current.Resources[kimlikli ? "SystemFillColorSuccessBrush" : "SystemFillColorCautionBrush"];
+        KimlikRozetText.Foreground = (Brush)Application.Current.Resources[kimlikli ? "SystemFillColorSuccessBrush" : "SystemFillColorCautionBrush"];
 
         // Hedef versiyonu al (tenant DB'den)
         string? hedefVersion = null;
@@ -93,43 +93,43 @@ public sealed partial class RestoreVerifyDialog : ContentDialog
         switch (v.Kind)
         {
             case RestoreVerdictKind.Allow:
-                VerdictBorder.Background = (Brush)res["MuhasibSuccessBgBrush"];
-                VerdictBorder.BorderBrush = (Brush)res["MuhasibSuccessBrush"];
-                VerdictTitle.Foreground = (Brush)res["MuhasibSuccessBrush"];
-                VerdictDesc.Foreground = (Brush)res["MuhasibSuccessBrush"];
+                VerdictBorder.Background = (Brush)res["SystemFillColorSuccessBackgroundBrush"];
+                VerdictBorder.BorderBrush = (Brush)res["SystemFillColorSuccessBrush"];
+                VerdictTitle.Foreground = (Brush)res["SystemFillColorSuccessBrush"];
+                VerdictDesc.Foreground = (Brush)res["SystemFillColorSuccessBrush"];
                 VerdictIcon.Glyph = "\uE73E"; // check
-                VerdictIcon.Foreground = (Brush)res["MuhasibSuccessBrush"];
+                VerdictIcon.Foreground = (Brush)res["SystemFillColorSuccessBrush"];
                 IsPrimaryButtonEnabled = true;
                 CodePanel.Visibility = Visibility.Collapsed;
                 break;
             case RestoreVerdictKind.Warning:
-                VerdictBorder.Background = (Brush)res["MuhasibWarningBgBrush"];
-                VerdictBorder.BorderBrush = (Brush)res["MuhasibWarningBrush"];
-                VerdictTitle.Foreground = (Brush)res["MuhasibWarningBrush"];
-                VerdictDesc.Foreground = (Brush)res["MuhasibWarningBrush"];
+                VerdictBorder.Background = (Brush)res["SystemFillColorCautionBackgroundBrush"];
+                VerdictBorder.BorderBrush = (Brush)res["SystemFillColorCautionBrush"];
+                VerdictTitle.Foreground = (Brush)res["SystemFillColorCautionBrush"];
+                VerdictDesc.Foreground = (Brush)res["SystemFillColorCautionBrush"];
                 VerdictIcon.Glyph = "\uE7BA";
-                VerdictIcon.Foreground = (Brush)res["MuhasibWarningBrush"];
+                VerdictIcon.Foreground = (Brush)res["SystemFillColorCautionBrush"];
                 IsPrimaryButtonEnabled = true;
                 CodePanel.Visibility = Visibility.Collapsed;
                 break;
             case RestoreVerdictKind.RequireCode:
-                VerdictBorder.Background = (Brush)res["MuhasibDangerBgBrush"];
-                VerdictBorder.BorderBrush = (Brush)res["MuhasibDangerBrush"];
-                VerdictTitle.Foreground = (Brush)res["MuhasibDangerBrush"];
-                VerdictDesc.Foreground = (Brush)res["MuhasibDangerBrush"];
+                VerdictBorder.Background = (Brush)res["SystemFillColorCriticalBackgroundBrush"];
+                VerdictBorder.BorderBrush = (Brush)res["SystemFillColorCriticalBrush"];
+                VerdictTitle.Foreground = (Brush)res["SystemFillColorCriticalBrush"];
+                VerdictDesc.Foreground = (Brush)res["SystemFillColorCriticalBrush"];
                 VerdictIcon.Glyph = "\uE783";
-                VerdictIcon.Foreground = (Brush)res["MuhasibDangerBrush"];
+                VerdictIcon.Foreground = (Brush)res["SystemFillColorCriticalBrush"];
                 IsPrimaryButtonEnabled = true;
                 GenerateCode();
                 CodePanel.Visibility = Visibility.Visible;
                 break;
             case RestoreVerdictKind.Block:
-                VerdictBorder.Background = (Brush)res["MuhasibInventPaleBrush"];
-                VerdictBorder.BorderBrush = (Brush)res["MuhasibSoftBorderBrush"];
-                VerdictTitle.Foreground = (Brush)res["MuhasibSageSecondaryBrush"];
-                VerdictDesc.Foreground = (Brush)res["MuhasibSageSecondaryBrush"];
+                VerdictBorder.Background = (Brush)res["CardBackgroundFillColorSecondaryBrush"];
+                VerdictBorder.BorderBrush = (Brush)res["CardStrokeColorDefaultBrush"];
+                VerdictTitle.Foreground = (Brush)res["TextFillColorSecondaryBrush"];
+                VerdictDesc.Foreground = (Brush)res["TextFillColorSecondaryBrush"];
                 VerdictIcon.Glyph = "\uE711";
-                VerdictIcon.Foreground = (Brush)res["MuhasibSageSecondaryBrush"];
+                VerdictIcon.Foreground = (Brush)res["TextFillColorSecondaryBrush"];
                 IsPrimaryButtonEnabled = false;
                 CodePanel.Visibility = Visibility.Collapsed;
                 break;

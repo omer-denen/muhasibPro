@@ -7,9 +7,15 @@
     xmlns:components="using:MuhasibPro.Views.MainShell.Components"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource InventEaseBackgroundBrush}">
+    Background="Transparent">
 
-    <Grid Background="{ThemeResource InventEaseBackgroundBrush}">
+    <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + ~%87 opak tint). Statik; icerik degisince yeniden olusmaz. -->
+    <Border x:Name="KokZemin" CornerRadius="0">
+        <Grid>
+            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+
+    <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -65,8 +71,8 @@
                                 <TextBlock Text="Tenant bağlantısı başarılı — Çok kiracılı SQLite aktif" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <Border Background="{StaticResource MuhasibSuccessBgBrush}" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="8,4">
-                                    <TextBlock Text="WAL Aktif" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource MuhasibSuccessBrush}" />
+                                <Border Background="{StaticResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="8,4">
+                                    <TextBlock Text="WAL Aktif" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SystemFillColorSuccessBrush}" />
                                 </Border>
                             </StackPanel>
                         </Grid>
@@ -76,7 +82,7 @@
                     <Frame x:Name="ContentFrame" Grid.Row="1" Padding="0,16,0,0">
                         <Grid>
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                                <FontIcon Glyph="{StaticResource IconCheckMark}" FontSize="48" Foreground="{StaticResource MuhasibSuccessBrush}" HorizontalAlignment="Center" />
+                                <FontIcon Glyph="{StaticResource IconCheckMark}" FontSize="48" Foreground="{StaticResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                                 <TextBlock Text="Hazır — Tenant seçimi başarılı" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
                                 <TextBlock Text="FirmaShell → MainShell geçişi doğrulandı. Faz B modülleri (Cari/Stok/Fatura) bu iskelet üzerine eklenecek." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="520" HorizontalAlignment="Center" />
                                 <Border Background="{StaticResource MuhasibPetrolTintBrush}" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Padding="12,8" Margin="0,8,0,0" HorizontalAlignment="Center">
@@ -89,4 +95,6 @@
             </Border>
         </Grid>
     </Grid>
+        </Grid>
+    </Border>
 </Page>

@@ -29,6 +29,9 @@ namespace MuhasibPro.Domain.Models.DatabaseResultModel
         public string BackupFileSizeDisplay => FormatFileSize(BackupFileSizeBytes);
         public string BackupDisplayName => GetBackupTypeDisplay(BackupType); // ⭐ Display property
 
+        /// <summary>Kullanıcı-dili tarih-saat (yerel saat; UTC değil — Oturum 236 kuralı).</summary>
+        public string YedekTarihMetni => LastBackupDate.ToString("dd.MM.yyyy HH:mm");
+
 
 
         public string GetStatusMessage()

@@ -21,7 +21,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border
-                            Style="{StaticResource CustomModernCard}">
+                            Style="{StaticResource ModernCard}">
                             <Grid ColumnSpacing="4">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -39,15 +39,15 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Width="32" Height="32" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{StaticResource MuhasibPetrolTintBrush}" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Initial}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Border Grid.Column="0" Width="32" Height="32" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource SystemFillColorAttentionBackgroundBrush}" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Initial}" FontSize="13" FontWeight="Bold" Foreground="{ThemeResource SystemFillColorAttentionBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="2">
-                                            <TextBlock Text="{Binding DisplayName}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource MuhasibTextPrimaryBrush}" />
-                                            <TextBlock Text="{Binding RoleName}" FontSize="11" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
+                                            <TextBlock Text="{Binding DisplayName}" FontSize="13" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{Binding RoleName}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                         </StackPanel>
-                                        <Border Grid.Column="2" Margin="10,0,0,0" Background="{StaticResource MuhasibInventPaleBrush}" BorderBrush="{StaticResource MuhasibSoftBorderBrush}" BorderThickness="1" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="7,3,7,3" VerticalAlignment="Center">
-                                            <TextBlock FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{StaticResource MuhasibSageTertiaryBrush}">
+                                        <Border Grid.Column="2" Margin="10,0,0,0" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="7,3,7,3" VerticalAlignment="Center">
+                                            <TextBlock FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorTertiaryBrush}">
                                                 <Run Text="@" />
                                                 <Run Text="{Binding Username}" />
                                             </TextBlock>
@@ -64,7 +64,7 @@
                                     Click="OnRemoveClick"
                                     ToolTipService.ToolTip="Bu hesabı hızlı giriş listesinden kaldır"
                                     Tag="{Binding}">
-                                    <FontIcon Glyph="&#xE711;" FontSize="9" Foreground="{StaticResource MuhasibSageTertiaryBrush}" />
+                                    <FontIcon Glyph="&#xE711;" FontSize="9" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                 </Button>
                             </Grid>
                         </Border>
@@ -75,7 +75,7 @@
             <TextBlock
                 x:Name="emptyText"
                 FontSize="9"
-                Foreground="{StaticResource MuhasibSageTertiaryBrush}"
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                 Text="Henüz hatırlanan hesap yok. 'Beni hatırla' ile ekleyin."
                 TextWrapping="Wrap"
                 Visibility="Collapsed" />

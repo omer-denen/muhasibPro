@@ -107,7 +107,14 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
                 if (currentUserId > 0 && currentUserId != userId)
                     return new ErrorApiDataResponse<IList<FirmaModel>>(data: models, message: "❌ Başka bir kullanıcının firmalarına erişim izniniz yok.");
                 foreach (var item in firmaList)
-                    models.Add(await FirmaServiceExtensions.CreateFirmaModelAsync(item, true, _bitmapTools));
+                {
+                    var model = await FirmaServiceExtensions.CreateFirmaModelAsync(item, true, _bitmapTools);
+                    if (model != null)
+                    {
+                        model.MaliDonemler = FirmaServiceExtensions.ToHafifDonemListesi(item.MaliDonemler);
+                        models.Add(model);
+                    }
+                }
                 return new SuccessApiDataResponse<IList<FirmaModel>>(data: models, message: "✅ İşlem başarılı");
             }
             catch (Exception ex)

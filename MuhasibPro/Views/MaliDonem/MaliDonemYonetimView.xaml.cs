@@ -6,6 +6,7 @@ using MuhasibPro.Helpers;
 using MuhasibPro.HostBuilders;
 using MuhasibPro.ViewModels.ViewModels.Shell.Tenant;
 using MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler;
+using MuhasibPro.Views.MaliDonem.Yonetim.Components.Dialogs;
 using MuhasibPro.Views.ShellViews.Shell.Components.Dialogs;
 
 namespace MuhasibPro.Views.MaliDonem;
@@ -24,15 +25,14 @@ public sealed partial class MaliDonemYonetimView : Page
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
+        DonemOzet.DataContext = ViewModel;
+        DonemOzet.Root = ViewModel;
+        TopluIslemler.DataContext = ViewModel;
         DonemKartlar.DataContext = ViewModel;
         DonemYedekler.DataContext = ViewModel.YedeklerVM;
         DonemYedekler.Root = ViewModel;
         DonemParametreler.DataContext = ViewModel;
         DerinAnalizPanel.DataContext = ViewModel;
-        ArsivPanel.DataContext = ViewModel.ArsivVM;
-        ArsivPanel.Root = ViewModel;
-        BilinmeyenPanel.DataContext = ViewModel.BilinmeyenVM;
-        BilinmeyenPanel.Root = ViewModel;
         ViewModel.Subscribe();
         await ViewModel.LoadAsync(e.Parameter as MaliDonemYonetimArgs);
     }
@@ -83,14 +83,16 @@ public sealed partial class MaliDonemYonetimView : Page
         await ViewModel.RefreshAllAsync();
     }
 
-    private int _bilgiToken;
+    private async Task BilgiGosterAsync(string metin)
+    {
+        await DonemOzet.BilgiGosterAsync(metin);
+    }
 
     private void HataBildir(Exception ex, string islem)
     {
         ServiceLocator.Current.GetService<INotificationService>()?.Show(
             $"{islem} Hatası", $"{ex.Message} Yeniden dönem seçin.",
             NotificationType.Danger);
-        ViewModel.AktifSegment = YonetimSegmenti.Tumu;
     }
 
     private async void OnDonemSilClick(object sender, RoutedEventArgs e)
@@ -158,19 +160,21 @@ public sealed partial class MaliDonemYonetimView : Page
         MainSplitView.IsPaneOpen = !MainSplitView.IsPaneOpen;
     }
 
-    private async Task BilgiGosterAsync(string metin)
+    private async void OnAyarlarClick(object sender, RoutedEventArgs e)
     {
-        int token = ++_bilgiToken;
-        ArsivBilgiMetni.Text = metin;
-        ArsivBilgiBar.Opacity = 1;
-        ArsivBilgiBar.Visibility = Visibility.Visible;
-        await Task.Delay(3500);
-        if (token != _bilgiToken)
+        var vm = ViewModel?.AyarlarVM;
+        if (vm == null || ViewModel?.SelectedFirma == null)
             return;
-        ArsivBilgiKaybol.Begin();
-        await Task.Delay(650);
-        if (token != _bilgiToken)
-            return;
-        ArsivBilgiBar.Visibility = Visibility.Collapsed;
+        try
+        {
+            var dialog = new YonetimAyarlarDialog { ViewModel = vm };
+            await DialogHelper.ShowCenteredAsync(dialog);
+            if (vm.SayfaBoyutuDegisti)
+                await ViewModel.AyarSonrasiTazeleAsync();
+        }
+        catch (Exception ex)
+        {
+            HataBildir(ex, "Ayarlar");
+        }
     }
 }

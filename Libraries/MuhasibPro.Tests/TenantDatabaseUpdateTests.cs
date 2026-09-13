@@ -366,7 +366,8 @@ public class TenantDatabaseUpdateTests
 
         await coordinator.EnsureSwitchedAsync("db-TEST_2027", new FirmaModel(), new MaliDonemModel());
 
-        dialogs.Verify(d => d.ShowAsync("Güncelleme Hatası", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        // C3 fix: "Geri Al" seçeneği kaldırıldı; artık tek butonlu bilgi dialogu (Tamam).
+        dialogs.Verify(d => d.ShowAsync("Geçiş Hatası", It.IsAny<string>(), "Tamam", null), Times.Once);
     }
 
     #endregion

@@ -123,7 +123,7 @@ public class TenantDerinBaglantiTests
         logSvc.SetupGet(l => l.SistemLogService).Returns(sistemLog.Object);
 
         var ayar = new Mock<ITenantSettingsProvider>();
-        ayar.Setup(a => a.GetAsync()).ReturnsAsync(new TenantSettings
+        ayar.Setup(a => a.GetAsync(It.IsAny<long>())).ReturnsAsync(new TenantSettings
         {
             BusyTimeoutMs = 10000,
             Pooling = false,

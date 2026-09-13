@@ -396,7 +396,7 @@ public class FormAutoSuggestBox : Control, IFormControl
             if (HasError && !string.IsNullOrEmpty(ErrorMessage))
             {
                 // Koyu temaya uygun kırmızı border
-                _borderElement.BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Microsoft.UI.Xaml.Application.Current.Resources["MuhasibDangerBrush"];
+                _borderElement.BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Microsoft.UI.Xaml.Application.Current.Resources["SystemFillColorCriticalBrush"];
                 _borderElement.BorderThickness = new Thickness(2);
 
                 // Hata mesajını göster

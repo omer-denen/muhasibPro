@@ -1,15 +1,18 @@
 ﻿using MuhasibPro.Business.Contracts.UIServices.CommonServices;
+using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.ResultModels.TenantResultModels;
 using MuhasibPro.Controls;
 using MuhasibPro.Domain.Common;
 using MuhasibPro.Helpers;
 using MuhasibPro.Helpers.WindowHelpers;
 using MuhasibPro.Views.ShellViews.Shell.Components.Dialogs;
+using MuhasibPro.Views.SistemDbYonetim.Components.Dialogs;
 
 namespace MuhasibPro.Services.CommonServices
 {
     public class DialogService : IDialogService
     {
+        // AGENTS tema kuralı: XAML'de RequestedTheme yasak; dialog uygulama temasını miras alır.
         private CustomContentDialog CreateDialog(string title, object content, CustomContentDialog.DialogIcon icon)
         {
             var xamlRoot = WindowHelper.CurrentXamlRoot;
@@ -19,8 +22,6 @@ namespace MuhasibPro.Services.CommonServices
             var dialog = new CustomContentDialog
             {
                 XamlRoot = xamlRoot,
-                // AGENTS tema kuralı: XAML'de RequestedTheme yasak; dialog Light garantisi burada (tek kaynak).
-                RequestedTheme = ElementTheme.Light,
                 Content = content,
                 Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style
             };
@@ -141,6 +142,36 @@ namespace MuhasibPro.Services.CommonServices
                 ContentDialogResult.Secondary => TenantUpdateDecision.DahaSonra,
                 _ => TenantUpdateDecision.Vazgec
             };
+        }
+
+        public async Task<bool> ShowBackupDeleteGuardAsync(string backupFileName, int kalanSayi, int altSinir)
+        {
+            var dialog = new Views.MaliDonem.Yonetim.Components.Dialogs.YedekSilOnayDialog
+            {
+                YedekDosyaAdi = backupFileName ?? string.Empty,
+                KalanSayi = kalanSayi,
+                AltSinir = altSinir
+            };
+            await Helpers.DialogHelper.ShowCenteredAsync(dialog);
+            return dialog.SilmeOnaylandi;
+        }
+
+        public async Task<bool> ShowSistemRestoreVerifyAsync(SistemRestoreAnalizSonuc analiz)
+        {
+            var dialog = new SistemRestoreVerifyDialog();
+            dialog.SetSonuc(analiz);
+            await DialogHelper.ShowCenteredAsync(dialog);
+            return dialog.GeriYukleOnaylandi;
+        }
+
+        public async Task ShowYardimAsync(string baslik, IReadOnlyList<YardimMaddesiDto> maddeler)
+        {
+            var dialog = new Views.Components.YardimDialog();
+            var icerik = new List<Views.Components.YardimMaddesi>();
+            foreach (var m in maddeler)
+                icerik.Add(new Views.Components.YardimMaddesi { Baslik = m.Baslik, Aciklama = m.Aciklama });
+            dialog.IcerikAta(baslik, icerik);
+            await DialogHelper.ShowCenteredAsync(dialog);
         }
     }
 }

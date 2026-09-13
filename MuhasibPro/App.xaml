@@ -9,6 +9,8 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <!--  DevWinUI kontrol kaynakları (RichButton vb.) — paket kurulum kuralı  -->
+                <ResourceDictionary Source="ms-appx:///DevWinUI/Themes/Generic.xaml" />
                 <!--  DesignTokens — tek kaynak (değişken Light/Dark OOBE)  -->
                 <ResourceDictionary Source="/Styles/DesignTokens.xaml" />
                 <ResourceDictionary Source="/Styles/Icons.xaml" />
@@ -49,10 +51,6 @@
             <converters:StringToBrushConverter x:Key="StringToBrush" />
             <converters:DatabaseStatusToBrushConverter x:Key="DatabaseStatusToBrush" />
             <converters:SagaStepStatusToBrushConverter x:Key="SagaStepStatusToBrush" />
-
-            <SolidColorBrush x:Key="Information" Color="{ThemeResource MuhasibInfoColor}" />
-            <SolidColorBrush x:Key="Warning" Color="{ThemeResource MuhasibWarningColor}" />
-            <SolidColorBrush x:Key="Error" Color="{ThemeResource MuhasibDangerColor}" />
 
 
 

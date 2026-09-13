@@ -19,7 +19,7 @@ public class PolitikaTests
         var dir = AppContext.BaseDirectory;
         for (int i = 0; i < 10; i++)
         {
-            if (File.Exists(Path.Combine(dir, "MuhasibPro.slnx"))) return dir;
+            if (File.Exists(Path.Combine(dir, "MuhasibPro.slnx")) || File.Exists(Path.Combine(dir, "MuhasibPro.sln"))) return dir;
             dir = Path.GetDirectoryName(dir)!;
         }
         return AppContext.BaseDirectory;

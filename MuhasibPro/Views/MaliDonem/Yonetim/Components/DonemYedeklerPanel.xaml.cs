@@ -27,7 +27,7 @@ public sealed partial class DonemYedeklerPanel : UserControl
     {
         if (Vm == null) return;
         await Vm.YedekAlAsync();
-        if (Root != null) await Root.RefreshAllAsync();
+        Root?.TazeleSayaclar();
     }
 
     private async void OnGeriYukleClick(object sender, RoutedEventArgs e)
@@ -67,7 +67,7 @@ public sealed partial class DonemYedeklerPanel : UserControl
         if (Vm == null || sender is not Button { Tag: DatabaseBackupResult yedek }) return;
         Vm.SelectedYedek = yedek;
         await Vm.YedekSilAsync();
-        if (Root != null) await Root.RefreshAllAsync();
+        Root?.TazeleSayaclar();
     }
 
     private void OnYedekPrevClick(object sender, RoutedEventArgs e)

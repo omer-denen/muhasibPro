@@ -16,7 +16,9 @@ using MuhasibPro.Views.MainShell;
 using MuhasibPro.Views.MaliDonem;
 using MuhasibPro.Views.Settings;
 using MuhasibPro.Views.ShellViews.Shell;
-using MuhasibPro.Views.SistemKurulum;
+using MuhasibPro.Views.DenetimMasasi;
+using MuhasibPro.Views.DenetimMasasi.Sayfalar;
+using MuhasibPro.Views.SistemDbYonetim;
 
 namespace MuhasibPro.Configurations
 {
@@ -34,17 +36,19 @@ namespace MuhasibPro.Configurations
         public Task ConfigureAsync()
         {
             ConfigureNavigation();
-            // InitializeSistemDatabase otomatik çağrılmıyor — Splash dbReady kontrolü ve SistemKurulumView Kurulumu Başlat manuel akışı kullanılacak
+            // InitializeSistemDatabase otomatik çağrılmıyor — Splash dbReady kontrolü ve SistemDbYonetimView Kurulumu Başlat manuel akışı kullanılacak
             return Task.CompletedTask;
         }
 
         public void ConfigureNavigation()
         {
-            NavigationService.Register<SistemKurulumViewModel, SistemKurulumView>();
+            NavigationService.Register<SistemDbYonetimViewModel, SistemDbYonetimView>();
+            NavigationService.Register<KurulumSplashViewModel, Views.ShellViews.Splash.KurulumSplashView>();
             NavigationService.Register<LoginViewModel, LoginView>();
             NavigationService.Register<ShellViewModel, ShellView>();
             NavigationService.Register<MainShellViewModel, MainShellView>();
             NavigationService.Register<FirmaShellViewModel,FirmaShellView>();
+            NavigationService.Register<DenetimMasasiViewModel, DenetimMasasiView>();
             NavigationService.Register<TenantDatabaseUpdateViewModel,TenantDatabaseUpdateView>();
             
             
@@ -60,6 +64,12 @@ namespace MuhasibPro.Configurations
 
             NavigationService.Register<MaliDonemDetailsViewModel, MaliDonemView>();
             NavigationService.Register<MaliDonemYonetimViewModel, MaliDonemYonetimView>();
+
+            NavigationService.Register<AppPlatformAyarlarViewModel, GorunumAyarSayfasi>();
+            NavigationService.Register<IdentityAyarlarViewModel, GirisAyarSayfasi>();
+            NavigationService.Register<FirmaKayitAyarlarViewModel, FirmaKayitAyarSayfasi>();
+            NavigationService.Register<DonemAyarlarViewModel, DonemAyarSayfasi>();
+            NavigationService.Register<GirisDashboardViewModel, GirisDashboardSayfasi>();
         }
         
         public async Task<(bool isValid, string message)> InitializeSistemDatabase()

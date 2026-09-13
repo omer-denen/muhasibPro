@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="MuhasibPro.Views.DenetimMasasi.DenetimMasasiView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:shell="using:MuhasibPro.ViewModels.ViewModels.Shell"
+    mc:Ignorable="d"
+    Background="Transparent"
+    Loaded="OnLoaded">
+
+    <!-- Kural 17 Mica istisnası (Oturum 249 kararı): Windows Ayarlar görünümü opak zemin kabul etmez;
+         resim+tint zemin KALDIRILDI, DetailsWindow'ın MicaBackdrop'u görünür. Kök yine Border (kök Grid+Background yasak). -->
+    <Border x:Name="KokZemin" CornerRadius="0" Background="Transparent">
+
+        <!-- Windows 11 25H2 Ayarlar kabuğu (Oturum 251): pane üstü hesap kartı + pane içi arama +
+             büyük sayfa başlığı + sınırlı genişlikte içerik; zemin Mica. -->
+        <NavigationView x:Name="NavKok"
+                        PaneDisplayMode="Left"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        IsPaneToggleButtonVisible="False"
+                        OpenPaneLength="286"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        MenuItemsSource="{x:Bind ViewModel.GorunurMenuler, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.SeciliMenu, Mode=TwoWay}"
+                        SelectionChanged="OnNavSelectionChanged">
+
+            <!-- Pane üstü hesap kartı (Windows Ayarlar: büyük avatar + ad + hesap türü) -->
+            <NavigationView.PaneHeader>
+                <Grid Padding="4,12,8,12" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <PersonPicture Grid.Column="0" Width="48" Height="48" VerticalAlignment="Center"
+                                   Initials="{x:Bind ViewModel.KullaniciInitials, Mode=OneWay}"
+                                   ProfilePicture="{x:Bind ViewModel.ProfilResmi, Mode=OneWay, Converter={StaticResource ObjectToImageConverter}}" />
+                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind ViewModel.KullaniciAdi, Mode=OneWay}"
+                                   FontSize="14" FontWeight="SemiBold"
+                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{x:Bind ViewModel.KullaniciRolMetni, Mode=OneWay}"
+                                   FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Grid>
+            </NavigationView.PaneHeader>
+
+            <!-- Pane içi arama (Windows Ayarlar "Bir ayar bulun"; kullanıcı kararı: pane'de kalır) -->
+            <NavigationView.AutoSuggestBox>
+                <AutoSuggestBox PlaceholderText="Bir ayar bulun"
+                                QueryIcon="Find"
+                                Text="{x:Bind ViewModel.AramaMetni, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ToolTipService.ToolTip="Menüde ara" />
+            </NavigationView.AutoSuggestBox>
+
+            <NavigationView.MenuItemTemplate>
+                <DataTemplate x:DataType="shell:AyarlarNavigationMenu">
+                    <NavigationViewItem Content="{x:Bind Baslik, Mode=OneTime}"
+                                        MenuItemsSource="{x:Bind AltMenuler, Mode=OneTime}">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="{x:Bind Simge, Mode=OneTime}" FontSize="16" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </DataTemplate>
+            </NavigationView.MenuItemTemplate>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Sayfa başlığı (büyük) + yardım — Windows Ayarlar dili -->
+                <Grid Grid.Row="0" Padding="36,24,36,12" ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="{x:Bind ViewModel.SeciliMenuBaslik, Mode=OneWay}"
+                               FontSize="28" FontWeight="SemiBold"
+                               Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                    <Button Grid.Column="1" Width="32" Height="32" Padding="0"
+                            Style="{StaticResource CircleIconButtonStyle}" VerticalAlignment="Center" Click="OnYardimClick"
+                            ToolTipService.ToolTip="Denetim Masası hakkında yardım">
+                        <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="14" />
+                    </Button>
+                </Grid>
+
+                <!-- İçerik: kenardan kenara değil, Windows Ayarlar gibi sınırlı genişlikte (max ~1000) -->
+                <Grid Grid.Row="1" Padding="36,0,36,28">
+                    <Grid MaxWidth="1000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Frame x:Name="IcerikFrame" Background="Transparent" />
+                    </Grid>
+                </Grid>
+            </Grid>
+        </NavigationView>
+    </Border>
+</Page>

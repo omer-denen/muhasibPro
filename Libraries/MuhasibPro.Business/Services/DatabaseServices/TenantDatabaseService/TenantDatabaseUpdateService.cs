@@ -76,9 +76,10 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
                         result.TargetVersion ?? "-"));
                 return result;
             }
-            catch
+            catch (Exception ex)
             {
-                // Durum alınamazsa doğrudan bağlanmayı dene (CheckSucceeded=false).
+                // C4 fix: hata yutmak yerine result'a yaz (caller görebilsin).
+                result.StatusMessage = $"Durum kontrol hatası: {ex.Message}";
                 return result;
             }
         }
@@ -105,8 +106,9 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
                 var state = resp?.Data;
                 return state != null && state.CanConnect && state.DatabaseValid && !state.IsUpdateRequired;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[TenantUpdate] ValidateAsync hatası: {ex.Message}");
                 return false;
             }
         }

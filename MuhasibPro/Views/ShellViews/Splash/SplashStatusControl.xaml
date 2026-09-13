@@ -53,7 +53,7 @@
             VerticalAlignment="Center"
             FontSize="12"
             FontWeight="Medium"
-            Foreground="{StaticResource MuhasibSageSecondaryBrush}"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
             Opacity="0"
             Text="Başlatılıyor…"
             TextWrapping="Wrap"

@@ -26,7 +26,10 @@ namespace MuhasibPro.Business.Services.UIService
         {
             try
             {
-                var stored = await _localSettings.ReadSettingAsync<AppPlatformSettings>(AppPlatformSettings.SettingsKey);
+                var anahtar = Anahtar();
+                var stored = await _localSettings.ReadSettingAsync<AppPlatformSettings>(anahtar);
+                if (stored == null && anahtar != AppPlatformSettings.SettingsKey)
+                    stored = await _localSettings.ReadSettingAsync<AppPlatformSettings>(AppPlatformSettings.SettingsKey);
                 return Clamp(stored ?? new AppPlatformSettings());
             }
             catch
@@ -40,16 +43,34 @@ namespace MuhasibPro.Business.Services.UIService
             var clamped = Clamp(settings ?? new AppPlatformSettings());
             var kayitli = await GetAsync();
             AyarYetkiDenetimi.KritikDegisiklikleriDogrula(clamped, kayitli, _auth);
-            await _localSettings.SaveSettingAsync(AppPlatformSettings.SettingsKey, clamped);
+            await _localSettings.SaveSettingAsync(Anahtar(), clamped);
             _eventBus.Publish(this, new AppSettingsChangedEvent(AppPlatformSettings.SettingsKey));
+        }
+
+        /// <summary>Kullanıcı bazlı anahtar (Denetim Masası kararı): giriş yapmışken
+        /// `Anahtar:U{id}`, değilse global anahtar. Olay yine baz anahtarla yayınlanır.</summary>
+        internal string Anahtar()
+        {
+            try
+            {
+                if (_auth != null && _auth.IsAuthenticated)
+                {
+                    long id = _auth.CurrentAccount?.KullaniciId ?? 0;
+                    if (id > 0)
+                        return $"{AppPlatformSettings.SettingsKey}:U{id}";
+                }
+            }
+            catch { /* modelsiz moda düş */ }
+            return AppPlatformSettings.SettingsKey;
         }
 
         internal static AppPlatformSettings Clamp(AppPlatformSettings s)
         {
             if (string.IsNullOrWhiteSpace(s.ThemeDefault)
                 || (!s.ThemeDefault.Equals("Light", StringComparison.OrdinalIgnoreCase)
-                    && !s.ThemeDefault.Equals("Dark", StringComparison.OrdinalIgnoreCase)))
-                s.ThemeDefault = "Light";
+                    && !s.ThemeDefault.Equals("Dark", StringComparison.OrdinalIgnoreCase)
+                    && !s.ThemeDefault.Equals("Default", StringComparison.OrdinalIgnoreCase)))
+                s.ThemeDefault = "Default";
             if (s.SplashStepDelayMs < 0 || s.SplashStepDelayMs > 5000)
                 s.SplashStepDelayMs = 150;
             if (s.StatusAutoHideMs < 1000 || s.StatusAutoHideMs > 30000)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
 using MuhasibPro.Business.Contracts.Installation;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
@@ -7,6 +8,7 @@ using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.DTOModel;
+using MuhasibPro.Business.Services.DatabaseServices.SistemDatabaseService;
 using MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService;
 using MuhasibPro.Business.Services.Installation;
 using MuhasibPro.Business.Services.SistemServices.AppServices;
@@ -27,6 +29,8 @@ namespace MuhasibPro.Business.HostBuilder
                 services.AddSingleton<ILicenseSettingsProvider, LicenseSettingsProvider>();
                 services.AddSingleton<IEntityRegistrySettingsProvider, EntityRegistrySettingsProvider>();
                 services.AddSingleton<ITenantSettingsProvider, TenantSettingsProvider>();
+                services.AddSingleton<IDatabaseSettingsProvider, DatabaseSettingsProvider>();
+                services.AddSingleton<IFirmaKullaniciCozucu, FirmaKullaniciCozucu>();
                 services.AddSingleton<IAuthenticationService, AuthenticationService>();
                 services.AddSingleton<IFirmaListelemeService, FirmaListelemeService>();
                 services.AddSingleton<IFirmaKayitService, FirmaKayitService>();
@@ -48,6 +52,10 @@ namespace MuhasibPro.Business.HostBuilder
                 services.AddScoped<ILisansService, LisansService>();
                 // Singleton bağımlılarına (ThemeSelector) sızmasın diye Singleton: sadece Singleton'lara yaslanır.
                 services.AddSingleton<IAppPlatformSettingsProvider, AppPlatformSettingsProvider>();
+                // Faz 6.79: yaşam-döngüsü servisi Singleton — yalnız Singleton'lara yaslanır (manager/operasyon/ayarlar/log).
+                services.AddSingleton<ISistemYasamDongusuService, SistemYasamDongusuService>();
+                // Faz 6.78 Adım 3: sistem restore tek-kapı analizi (Singleton — manager/snapshot/yol Singleton'larına yaslanır).
+                services.AddSingleton<ISistemRestoreAnalizService, SistemRestoreAnalizService>();
                 services.AddScoped<ITenantDatabaseUpdateService, TenantDatabaseUpdateService>();
                 services.AddScoped<IGlobalAyarlarService, GlobalAyarlarService>();
                 services.AddScoped<IKurulumKayitService, KurulumKayitService>();

@@ -54,13 +54,14 @@ public sealed partial class DeleteGuardDialog : ContentDialog
             return;
         }
 
+        var yedekleriDeSil = YedekleriDeSilCheckBox.IsChecked != false;
         var request = new TenantDeletingRequest
         {
             MaliDonemId = _donem.Id,
             DatabaseName = _donem.DatabaseName,
             IsDeleteMaliDonem = true,
             IsDeleteDatabase = true,
-            DeleteAllTenantBackup = true,
+            DeleteAllTenantBackup = yedekleriDeSil,
             IsCurrentTenantDeletingBeforeBackup = false
         };
 
@@ -69,7 +70,10 @@ public sealed partial class DeleteGuardDialog : ContentDialog
             var response = await _tenantService.DeleteTenantDatabaseAsync(request);
             if (response.Success && response.Data.DeleteCompleted)
             {
-                ServiceLocator.Current.GetService<INotificationService>()?.Show("Mali Dönem Silindi", $"{_donem.MaliYil} dönemi ve veritabanı kaldırıldı.", NotificationType.Success);
+                var bilgi = yedekleriDeSil
+                    ? $"{_donem.MaliYil} dönemi ve veritabanı kaldırıldı."
+                    : $"{_donem.MaliYil} dönemi kaldırıldı. Yedekler korundu (Silinen Dönem Yedekleri'nde).";
+                ServiceLocator.Current.GetService<INotificationService>()?.Show("Mali Dönem Silindi", bilgi, NotificationType.Success);
                 Hide();
             }
             else

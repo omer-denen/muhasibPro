@@ -213,9 +213,6 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
             }
         }
 
-        public Task<DatabaseDeletingExecutionResult> DeleteBackupDatabaseAsync(string databaseName)
-        => _backupManager.DeleteBackupDatabaseAsync(databaseName);
-
         public async Task<ApiDataResponse<List<DatabaseBackupResult>>> GetBackupHistoryAsync(string databaseName)
         {
             try

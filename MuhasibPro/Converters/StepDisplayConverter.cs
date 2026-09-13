@@ -14,22 +14,22 @@ namespace MuhasibPro.Converters
                 var st = cStep.Status;
                 string key = (st, brushKind) switch
                 {
-                    (CreationStepStatus.Bekliyor, "Background") => "MuhasibCardBackgroundSubtleBrush",
-                    (CreationStepStatus.Bekliyor, "Border") => "MuhasibBorderBrush",
-                    (CreationStepStatus.Bekliyor, "IconBg") => "MuhasibTextTertiaryBrush",
-                    (CreationStepStatus.Calisiyor, "Background") => "MuhasibInfoBgBrush",
+                    (CreationStepStatus.Bekliyor, "Background") => "CardBackgroundFillColorSecondaryBrush",
+                    (CreationStepStatus.Bekliyor, "Border") => "CardStrokeColorDefaultBrush",
+                    (CreationStepStatus.Bekliyor, "IconBg") => "TextFillColorTertiaryBrush",
+                    (CreationStepStatus.Calisiyor, "Background") => "SystemFillColorAttentionBackgroundBrush",
                     (CreationStepStatus.Calisiyor, "Border") => "MuhasibPrimaryBorderBrush",
                     (CreationStepStatus.Calisiyor, "IconBg") => "MuhasibPrimaryBrush",
-                    (CreationStepStatus.Tamamlandi, "Background") => "MuhasibSuccessBgBrush",
-                    (CreationStepStatus.Tamamlandi, "Border") => "MuhasibSuccessBrush",
-                    (CreationStepStatus.Tamamlandi, "IconBg") => "MuhasibSuccessBrush",
-                    (CreationStepStatus.Hata, "Background") => "MuhasibDangerBgBrush",
-                    (CreationStepStatus.Hata, "Border") => "MuhasibDangerBrush",
-                    (CreationStepStatus.Hata, "IconBg") => "MuhasibDangerBrush",
-                    (CreationStepStatus.Uyari, "Background") => "MuhasibWarningBgBrush",
-                    (CreationStepStatus.Uyari, "Border") => "MuhasibWarningBrush",
-                    (CreationStepStatus.Uyari, "IconBg") => "MuhasibWarningBrush",
-                    _ => "MuhasibCardBackgroundSubtleBrush"
+                    (CreationStepStatus.Tamamlandi, "Background") => "SystemFillColorSuccessBackgroundBrush",
+                    (CreationStepStatus.Tamamlandi, "Border") => "SystemFillColorSuccessBrush",
+                    (CreationStepStatus.Tamamlandi, "IconBg") => "SystemFillColorSuccessBrush",
+                    (CreationStepStatus.Hata, "Background") => "SystemFillColorCriticalBackgroundBrush",
+                    (CreationStepStatus.Hata, "Border") => "SystemFillColorCriticalBrush",
+                    (CreationStepStatus.Hata, "IconBg") => "SystemFillColorCriticalBrush",
+                    (CreationStepStatus.Uyari, "Background") => "SystemFillColorCautionBackgroundBrush",
+                    (CreationStepStatus.Uyari, "Border") => "SystemFillColorCautionBrush",
+                    (CreationStepStatus.Uyari, "IconBg") => "SystemFillColorCautionBrush",
+                    _ => "CardBackgroundFillColorSecondaryBrush"
                 };
                 var res = Microsoft.UI.Xaml.Application.Current?.Resources;
                 if (res != null && res.TryGetValue(key, out var b) && b is Brush brush) return brush;

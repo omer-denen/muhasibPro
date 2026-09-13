@@ -15,14 +15,28 @@ public class ArsivDonemlerViewModel : ViewModelBase
     public ArsivDonemlerViewModel(
         ICommonServices commonServices,
         IMaliDonemService maliDonemService,
-        ILocalSettingsService localSettingsService = null) : base(commonServices)
+        ILocalSettingsService localSettingsService = null,
+        IEntityRegistrySettingsProvider entityAyarlari = null) : base(commonServices)
     {
         MaliDonemService = maliDonemService;
         LocalSettingsService = localSettingsService;
+        EntityAyarlari = entityAyarlari;
     }
 
     public IMaliDonemService MaliDonemService { get; }
     public ILocalSettingsService LocalSettingsService { get; }
+    public IEntityRegistrySettingsProvider EntityAyarlari { get; }
+
+    /// <summary>Sayfa VM'inin açtığı firma (sayfa boyutu firma anahtarından okunur).</summary>
+    public long FirmaId { get; set; }
+
+    private bool _isArsivYukleniyor;
+    /// <summary>Arşiv süzülürken panel ring gösterir (Kural 11: bellek-içi hızlı işlem).</summary>
+    public bool IsArsivYukleniyor
+    {
+        get => _isArsivYukleniyor;
+        private set => Set(ref _isArsivYukleniyor, value);
+    }
 
     private List<MaliDonemModel> _arsivliDonemler = new();
     /// <summary>Yönetim VM'inin listesinden süzülür (Refresh ile tazelenir).</summary>
@@ -85,11 +99,20 @@ public class ArsivDonemlerViewModel : ViewModelBase
     public System.Windows.Input.ICommand ArsivNextCommand => new RelayCommand(() => ArsivCurrentPage++, () => ArsivCanNext);
     private void UpdatePagedArsiv()
     {
+        // Liste kısalınca sayfa taşmasın (öz. son sayfada arşivden çıkarma sonrası boş liste bug'ı).
+        var total = ArsivTotalPages;
+        if (_arsivCurrentPage > total)
+            _arsivCurrentPage = total;
+        if (_arsivCurrentPage < 1)
+            _arsivCurrentPage = 1;
         var src = ArsivliDonemler ?? new List<MaliDonemModel>();
         PagedArsivliDonemler = src.Skip((ArsivCurrentPage - 1) * ArsivPageSize).Take(ArsivPageSize).ToList();
+        NotifyPropertyChanged(nameof(ArsivCurrentPage));
         NotifyPropertyChanged(nameof(ArsivTotalPages));
         NotifyPropertyChanged(nameof(ArsivHasPagination));
         NotifyPropertyChanged(nameof(ArsivPageInfo));
+        NotifyPropertyChanged(nameof(ArsivCanPrev));
+        NotifyPropertyChanged(nameof(ArsivCanNext));
     }
 
     public void Refresh(IEnumerable<MaliDonemModel> tumDonemler)
@@ -100,17 +123,30 @@ public class ArsivDonemlerViewModel : ViewModelBase
 
     public async Task RefreshAsync(IEnumerable<MaliDonemModel> tumDonemler)
     {
+        IsArsivYukleniyor = true;
         try
         {
-            if (LocalSettingsService != null)
+            try
             {
-                var ayar = await LocalSettingsService.ReadSettingAsync<EntityRegistrySettings>(EntityRegistrySettings.SettingsKey);
-                if (ayar != null)
+                if (EntityAyarlari != null)
+                {
+                    var ayar = await EntityAyarlari.GetAsync(FirmaId);
                     ArsivPageSize = ayar.GetArsivPageSize();
+                }
+                else if (LocalSettingsService != null)
+                {
+                    var ayar = await LocalSettingsService.ReadSettingAsync<EntityRegistrySettings>(EntityRegistrySettings.SettingsKey);
+                    if (ayar != null)
+                        ArsivPageSize = ayar.GetArsivPageSize();
+                }
             }
+            catch { /* model varsayılanı korunur */ }
+            Refresh(tumDonemler);
         }
-        catch { /* model varsayılanı korunur */ }
-        Refresh(tumDonemler);
+        finally
+        {
+            IsArsivYukleniyor = false;
+        }
     }
 
     public async Task<bool> ArsivleAsync(MaliDonemModel model)
@@ -149,15 +185,18 @@ public class ArsivDonemlerViewModel : ViewModelBase
             var response = await MaliDonemService.UpdateMaliDonemAsync(model);
             if (response.Success)
             {
-                NotificationService.Show("Arşiv", $"{model.MaliYil} dönemi {eylem}.", NotificationType.Success);
+                NotificationService.ShowTagged("Arşiv", $"{model.MaliYil} dönemi {eylem}.", NotificationType.Success,
+                    "ArsivDurum", NotificationGroups.DonemIslemleri);
                 return true;
             }
-            NotificationService.Show("Arşiv", response.Message ?? "İşlem başarısız.", NotificationType.Warning);
+            NotificationService.ShowTagged("Arşiv", response.Message ?? "İşlem başarısız.", NotificationType.Warning,
+                "ArsivDurum", NotificationGroups.DonemIslemleri);
             return false;
         }
         catch (Exception ex)
         {
-            NotificationService.Show("Arşiv Hatası", ex.Message, NotificationType.Danger);
+            NotificationService.ShowTagged("Arşiv Hatası", ex.Message, NotificationType.Danger,
+                "ArsivDurum", NotificationGroups.DonemIslemleri);
             return false;
         }
     }

@@ -10,10 +10,10 @@
     PrimaryButtonStyle="{StaticResource InventDialogPrimaryStyle}"
     CloseButtonText="İptal"
     DefaultButton="None"
-    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
     BorderThickness="1"
-    CornerRadius="{StaticResource CardCornerRadius}">
+    CornerRadius="{StaticResource ControlCornerRadius}">
 
     <ContentDialog.Title>
         <Grid ColumnSpacing="12">
@@ -25,8 +25,8 @@
                 <FontIcon Glyph="{StaticResource IconAdd}" FontSize="18" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
-                <TextBlock Text="Saga Engine" FontSize="10" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" CharacterSpacing="60"/>
-                <TextBlock Text="Yeni Mali Dönem" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}"/>
+                <TextBlock Text="Saga Engine" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" CharacterSpacing="60"/>
+                <TextBlock Text="Yeni Mali Dönem" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
             </StackPanel>
         </Grid>
     </ContentDialog.Title>
@@ -37,21 +37,21 @@
         <Border
             Padding="12"
             CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
-            Background="{ThemeResource MuhasibInfoBgBrush}"
-            BorderBrush="{ThemeResource MuhasibInfoBrush}"
+            Background="{ThemeResource SystemFillColorAttentionBackgroundBrush}"
+            BorderBrush="{ThemeResource SystemFillColorAttentionBrush}"
             BorderThickness="1">
             <StackPanel Spacing="4">
                 <TextBlock
                     FontSize="12"
                     FontWeight="SemiBold"
-                    Foreground="{ThemeResource MuhasibTextPrimaryBrush}">
+                    Foreground="{ThemeResource TextFillColorPrimaryBrush}">
                     <Run Text="Firma: " />
                     <Run x:Name="FirmaUnvanText" Text="" />
                 </TextBlock>
                 <TextBlock
                     Text="Bu işlem atomik bir Saga Pipeline başlatacak, yeni bir SQLite veritabanı tahsis edecek ve 69 muhasebe şemasını migrate edecektir."
                     FontSize="11"
-                    Foreground="{ThemeResource MuhasibSageSecondaryBrush}"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     TextWrapping="Wrap" />
             </StackPanel>
         </Border>
@@ -62,7 +62,7 @@
                 Text="Mali Dönem Yılı"
                 FontSize="12"
                 FontWeight="SemiBold"
-                Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             <NumberBox
                 x:Name="DonemYiliBox"
                 Value="2027"
@@ -72,8 +72,8 @@
                 FontFamily="{ThemeResource MuhasibMonospaceFontFamily}"
                 SpinButtonPlacementMode="Compact"
                 CornerRadius="{StaticResource MuhasibPillCornerRadius}"
-                Background="{ThemeResource MuhasibInventPaleBrush}"
-                Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
         </StackPanel>
 
         <!-- Aciklama -->
@@ -82,16 +82,16 @@
                 Text="Dönem Açıklaması"
                 FontSize="12"
                 FontWeight="SemiBold"
-                Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             <TextBox
                 x:Name="AciklamaBox"
                 PlaceholderText="Örn: 2027 Faaliyet &amp; Çalışma Yılı"
                 FontSize="14"
                 Padding="12,10"
                 CornerRadius="{StaticResource MuhasibPillCornerRadius}"
-                Background="{ThemeResource MuhasibInventPaleBrush}"
-                Foreground="{ThemeResource MuhasibTextPrimaryBrush}"
-                BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" />
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" />
         </StackPanel>
 
         <!-- Error Message -->
@@ -99,14 +99,14 @@
             x:Name="ErrorBorder"
             Padding="10"
             CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}"
-            Background="{ThemeResource MuhasibDangerBgBrush}"
-            BorderBrush="{ThemeResource MuhasibDangerBrush}"
+            Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+            BorderBrush="{ThemeResource SystemFillColorCriticalBrush}"
             BorderThickness="1"
             Visibility="Collapsed">
             <TextBlock
                 x:Name="ErrorText"
                 FontSize="12"
-                Foreground="{ThemeResource MuhasibDangerBrush}"
+                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                 TextWrapping="Wrap" />
         </Border>
     </StackPanel>

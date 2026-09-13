@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="MuhasibPro.Views.MaliDonem.Yonetim.Components.TopluIslemlerPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Border Style="{StaticResource CustomModernCard}" Padding="14,12">
+        <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Border Width="24" Height="24" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}">
+                    <FontIcon Glyph="{StaticResource IconZap}" FontSize="11" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Text="Toplu İşlemler" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Text="Tüm dönemlere tek seferde uygula." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+            <Button ToolTipService.ToolTip="Tüm dönemlerin yedeğini al (VACUUM INTO)" Click="OnTopluYedekle" Style="{StaticResource PrimaryCompactButtonStyle}" HorizontalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                    <FontIcon Glyph="{StaticResource IconDownload}" FontSize="12" Foreground="{ThemeResource MuhasibOnInkBrush}" />
+                    <TextBlock Text="Tümünü Yedekle" FontSize="12" Foreground="{ThemeResource MuhasibOnInkBrush}" />
+                </StackPanel>
+            </Button>
+            <Button ToolTipService.ToolTip="Tüm dönemlerde bütünlük testi çalıştır (PRAGMA integrity_check)" Click="OnTopluTest" Style="{StaticResource GhostLargeButtonStyle}" HorizontalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                    <FontIcon Glyph="{StaticResource IconShield}" FontSize="12" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                    <TextBlock Text="Bütünlük Kontrolü" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                </StackPanel>
+            </Button>
+            <Button ToolTipService.ToolTip="Tüm dönemlerde disk temizliği + indeks yenileme (VACUUM + REINDEX)" Click="OnTopluBakim" Style="{StaticResource GhostLargeButtonStyle}" HorizontalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
+                    <FontIcon Glyph="{StaticResource IconRefresh}" FontSize="12" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                    <TextBlock Text="Toplu Bakım" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Border>
+</UserControl>

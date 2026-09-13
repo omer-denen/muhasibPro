@@ -24,8 +24,11 @@
                 </Grid.ColumnDefinitions>
                 
                 <StackPanel Spacing="1" VerticalAlignment="Center">
-                    <TextBlock Text="Dönem Yedekleri" FontSize="14" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
-                    <TextBlock FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="Dönem Yedekleri" FontSize="14" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <ProgressRing Width="12" Height="12" IsActive="{Binding IsYedeklerYukleniyor}" Foreground="{ThemeResource MuhasibPetrolBrush}" Visibility="{Binding IsYedeklerYukleniyor, Converter={StaticResource TrueToVis}}" />
+                    </StackPanel>
+                    <TextBlock FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}">
                         <Run Text="{Binding ElementName=DonemYedeklerKok, Path=Root.SelectedDonem.DatabaseName, FallbackValue='—'}" /><Run Text=" • " /><Run Text="{Binding Yedekler.Count, FallbackValue='0'}" /><Run Text=" yedek" />
                     </TextBlock>
                 </StackPanel>
@@ -48,22 +51,22 @@
                                 </Grid.ColumnDefinitions>
                                
                                 <StackPanel Spacing="2" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding BackupFileName}" FontSize="12" FontWeight="SemiBold" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding BackupFileName}" FontSize="12" FontWeight="SemiBold" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="{Binding BackupDisplayName}" FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
-                                        <TextBlock Text="{Binding LastBackupDate}" FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" />
-                                        <TextBlock Text="{Binding BackupFileSizeDisplay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" />
+                                        <TextBlock Text="{Binding BackupDisplayName}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{Binding LastBackupDate}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{Binding BackupFileSizeDisplay}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                     <Button Tag="{Binding}" Click="OnGeriYukleClick" Style="{StaticResource GhostPillButtonStyle}" ToolTipService.ToolTip="Bu yedeği döneme geri yükle">
                                         <StackPanel Orientation="Horizontal" Spacing="5">
-                                            <FontIcon Glyph="{StaticResource IconUpload}" FontSize="11" Foreground="{ThemeResource MuhasibSuccessBrush}" />
-                                            <TextBlock Text="Geri Yükle" FontSize="11" Foreground="{ThemeResource MuhasibSuccessBrush}" />
+                                            <FontIcon Glyph="{StaticResource IconUpload}" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                            <TextBlock Text="Geri Yükle" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                         </StackPanel>
                                     </Button>
                                     <Button Tag="{Binding}" Click="OnYedekSilClick" Style="{StaticResource GhostPillButtonStyle}" ToolTipService.ToolTip="Yedeği kalıcı olarak sil" VerticalAlignment="Center">
-                                        <FontIcon Glyph="{StaticResource IconTrash}" FontSize="12" Foreground="{ThemeResource MuhasibDangerBrush}" />
+                                        <FontIcon Glyph="{StaticResource IconTrash}" FontSize="12" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                                     </Button>
                                 </StackPanel>
                             </Grid>
@@ -75,15 +78,19 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Button Content="‹" Style="{StaticResource GhostPillButtonStyle}" Click="OnYedekPrevClick" IsEnabled="{Binding YedekCanPrev}" />
-                <TextBlock Grid.Column="1" Text="{Binding YedekPageInfo}" FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <Button Grid.Column="2" Content="›" Style="{StaticResource GhostPillButtonStyle}" Click="OnYedekNextClick" IsEnabled="{Binding YedekCanNext}" />
+                <Button Style="{StaticResource GhostPillButtonStyle}" Click="OnYedekPrevClick" IsEnabled="{Binding YedekCanPrev}" Width="32" Height="32" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ToolTipService.ToolTip="Önceki sayfa">
+                    <FontIcon Glyph="{StaticResource IconChevronLeft}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Button>
+                <TextBlock Grid.Column="1" Text="{Binding YedekPageInfo}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Button Grid.Column="2" Style="{StaticResource GhostPillButtonStyle}" Click="OnYedekNextClick" IsEnabled="{Binding YedekCanNext}" Width="32" Height="32" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" ToolTipService.ToolTip="Sonraki sayfa">
+                    <FontIcon Glyph="{StaticResource IconChevronRight}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Button>
             </Grid>
-            <Border Padding="16,14" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource MuhasibInventPaleBrush}" BorderBrush="{ThemeResource MuhasibSoftBorderBrush}" BorderThickness="1" Visibility="{Binding HasYedek, Converter={StaticResource FalseToVis}}">
+            <Border Padding="16,14" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Visibility="{Binding IsYedekListesiBos, Converter={StaticResource TrueToVis}}">
                 <StackPanel Spacing="4" HorizontalAlignment="Center">
-                    <FontIcon Glyph="{StaticResource IconDatabase}" FontSize="20" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Center" />
-                    <TextBlock Text="Henüz yedek yok" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" HorizontalAlignment="Center" />
-                    <TextBlock Text="İlk yedeğinizi almak için “Şimdi Yedekle”ye basın." FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" HorizontalAlignment="Center" />
+                    <FontIcon Glyph="{StaticResource IconDatabase}" FontSize="20" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="Henüz yedek yok" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="İlk yedeğinizi almak için “Şimdi Yedekle”ye basın." FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" />
                 </StackPanel>
             </Border>
         </StackPanel>

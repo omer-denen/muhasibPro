@@ -6,33 +6,39 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource AppBackgroundBrush}">
+    Background="Transparent">
+
+    <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + ~%87 opak tint). Statik; icerik degisince yeniden olusmaz. -->
+    <Border x:Name="KokZemin" CornerRadius="0">
+        <Grid>
+            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="16" Padding="24,18,24,24" MaxWidth="720" HorizontalAlignment="Center">
 
             <StackPanel Spacing="4">
-                <TextBlock Text="Veritabanı Ayarları" FontSize="20" FontWeight="Bold" Foreground="{StaticResource MuhasibTextPrimaryBrush}" />
-                <TextBlock Text="Yedek saklama ve otomatik temizleme" FontSize="13" Foreground="{StaticResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" />
+                <TextBlock Text="Veritabanı Ayarları" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextFillColorPrimaryBrush}" />
+                <TextBlock Text="Yedek saklama ve otomatik temizleme" FontSize="13" Foreground="{StaticResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
             </StackPanel>
 
             <Border Style="{StaticResource CustomModernCard}" Padding="16">
                 <StackPanel Spacing="12">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Manuel yedek saklama limiti" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
-                        <TextBlock Text="Her dönem için saklanacak maksimum manuel yedek sayısı. Limit aşılınca en eski yedek otomatik silinir (eskiden yeniye FIFO)." FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="Manuel yedek saklama limiti" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Her dönem için saklanacak maksimum manuel yedek sayısı. Limit aşılınca en eski yedek otomatik silinir (eskiden yeniye FIFO)." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <NumberBox Value="{x:Bind ViewModel.MaxManuelYedekSayisi, Mode=TwoWay}" Minimum="1" Maximum="20" SpinButtonPlacementMode="Inline" Width="140" IsEnabled="{x:Bind ViewModel.OtomatikTemizlemeAcik, Mode=OneWay}" />
-                        <TextBlock Text="adet" FontSize="12" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="adet" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
                         <Border Padding="8,4" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Background="{ThemeResource MuhasibPetrolTintBrush}" BorderBrush="{ThemeResource MuhasibPetrolBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
                             <TextBlock Text="Varsayılan: 5" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
                         </Border>
                     </StackPanel>
                     <ToggleSwitch Header="Limit aşılınca en eski yedek otomatik silinsin" IsOn="{x:Bind ViewModel.OtomatikTemizlemeAcik, Mode=TwoWay}" />
 
-                    <TextBlock FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" TextWrapping="Wrap">
+                    <TextBlock FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap">
                         <Run Text="Örnek: 5 seçiliyse 6. yedek alındığında 1. (en eski) yedek silinir." />
                     </TextBlock>
                 </StackPanel>
@@ -40,26 +46,26 @@
 
             <Border Style="{StaticResource CustomModernCard}" Padding="16">
                 <StackPanel Spacing="12">
-                    <TextBlock Text="Otomatik işlemler" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
-                    <ToggleSwitch Header="Kapanışta açık dönemin yedeğini otomatik al" IsOn="{x:Bind ViewModel.KapanistaOtomatikYedek, Mode=TwoWay}" />
-                    <TextBlock Text="Uygulama kapatılırken aktif dönemin son hali yedeklenir." FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="Otomatik işlemler" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    <ToggleSwitch Header="Kapanışta açık dönem + sistem yedeğini otomatik al" IsOn="{x:Bind ViewModel.KapanistaOtomatikYedek, Mode=TwoWay}" />
+                    <TextBlock Text="Uygulama kapatılırken aktif dönem ve Sistem.db yedeklenir." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                     <ToggleSwitch Header="Haftalık bütünlük kontrol hatırlatması" IsOn="{x:Bind ViewModel.HaftalikButunlukKontrolu, Mode=TwoWay}" />
-                    <TextBlock Text="PRAGMA integrity_check 7 günden eski ise uyarı gösterilir." FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="PRAGMA integrity_check 7 günden eski ise uyarı gösterilir." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
 
             <Border Style="{StaticResource CustomModernCard}" Padding="16">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="Yedek klasörü" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
-                    <TextBlock Text="{x:Bind ViewModel.YedekKlasoruYolu, Mode=OneWay}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap" />
-                    <TextBlock Text="Tüm manuel yedekler bu klasörde saklanır. Dosyaları elle silmeyin — uygulama üzerinden yönetin." FontSize="11" Foreground="{ThemeResource MuhasibSageTertiaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="Yedek klasörü" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    <TextBlock Text="{x:Bind ViewModel.YedekKlasoruYolu, Mode=OneWay}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="Tüm manuel yedekler bu klasörde saklanır. Dosyaları elle silmeyin — uygulama üzerinden yönetin." FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
 
             <Border Style="{StaticResource CustomModernCard}" Padding="16">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="Bilgi" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibTextPrimaryBrush}" />
-                    <TextBlock FontSize="11" Foreground="{ThemeResource MuhasibSageSecondaryBrush}" TextWrapping="Wrap">
+                    <TextBlock Text="Bilgi" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    <TextBlock FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap">
                         <Run Text="• Otomatik temizleme sadece manuel yedeklerde uygulanır." /><LineBreak/>
                         <Run Text="• Arşivden çıkarma veya geri yükleme sırasında oluşan geçici yedekler etkilenmez." /><LineBreak/>
                         <Run Text="• Limit 1-20 arası ayarlanabilir." />
@@ -69,4 +75,6 @@
 
         </StackPanel>
     </ScrollViewer>
+        </Grid>
+    </Border>
 </Page>

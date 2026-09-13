@@ -24,7 +24,7 @@
         Opacity="0"
         Padding="10,8"
         CornerRadius="{StaticResource MuhasibControlCornerRadius}"
-        Background="{StaticResource MuhasibInfoBgBrush}"
+        Background="{StaticResource SystemFillColorAttentionBackgroundBrush}"
         BorderBrush="{StaticResource MuhasibPrimaryBorderBrush}"
         BorderThickness="1">
         <Border.RenderTransform>
@@ -35,12 +35,12 @@
                 x:Name="InfoIcon"
                 Glyph="{StaticResource IconInfo}"
                 FontSize="13"
-                Foreground="{StaticResource MuhasibInfoBrush}"
+                Foreground="{StaticResource SystemFillColorAttentionBrush}"
                 VerticalAlignment="Center" />
             <TextBlock
                 x:Name="InfoText"
                 FontSize="11"
-                Foreground="{StaticResource MuhasibTextPrimaryBrush}"
+                Foreground="{StaticResource TextFillColorPrimaryBrush}"
                 TextWrapping="Wrap"
                 VerticalAlignment="Center" />
         </StackPanel>

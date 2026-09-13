@@ -2,6 +2,7 @@
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
+using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.Services.SistemServices.LogServices;
 using MuhasibPro.Domain.Common;
 using MuhasibPro.Domain.Exceptions;
@@ -271,6 +272,35 @@ public class LoginViewModel : ViewModelBase
             await DialogService.ShowAsync(result.Message, result.Description);
     }
 
+
+    private ICommand _teshisCommand;
+
+    /// <summary>Teşhis: Sistem.db teşhis/onarım sayfasını açar (MVVM command — code-behind yok).</summary>
+    public ICommand TeshisCommand => _teshisCommand ??= new RelayCommand(TeshiseGit);
+
+    private void TeshiseGit()
+    {
+        var vmTip = typeof(MuhasibPro.ViewModels.ViewModels.Sistem.SistemDbYonetimViewModel);
+        NavigationService.Navigate<MuhasibPro.ViewModels.ViewModels.Sistem.SistemDbYonetimViewModel>(
+            new ShellArgs { ViewModel = vmTip });
+    }
+
+    private ICommand _yardimCommand;
+
+    /// <summary>Kural 13: sayfa yardımı (içerik ViewModel'de, dialog chrome'u App'te).</summary>
+    public ICommand YardimCommand => _yardimCommand ??= new AsyncRelayCommand(YardimGoster);
+
+    private async Task YardimGoster()
+    {
+        await DialogService.ShowYardimAsync("Giriş — Yardım", new List<YardimMaddesiDto>
+        {
+            new() { Baslik = "Nasıl giriş yaparım?", Aciklama = "Kullanıcı adı ve şifrenizi girip 'Sisteme Giriş Yap' butonuna basın (Enter da çalışır). Bilgiler doğruysa firma seçim ekranına geçilir." },
+            new() { Baslik = "Sistem Durumu", Aciklama = "Kart, Sistem.db'nin hazır olup olmadığını gösterir. 'Hazır' değilse giriş kapalıdır. 'Teşhis' bağlantısı veritabanı teşhis ve onarım sayfasını açar." },
+            new() { Baslik = "Hızlı Giriş", Aciklama = "'Beni hatırla' işaretli başarılı girişlerde hesap bu listeye eklenir. Bir satıra tıklamak kullanıcı adı/şifreyi doldurur; satırdaki × hesabı listeden kaldırır." },
+            new() { Baslik = "İlk kez mi kullanıyorum?", Aciklama = "Sistem veritabanı henüz kurulmadıysa girişten önce Kurulum ekranı görünür; kurulum tamamlanınca bu ekrana dönülür." },
+            new() { Baslik = "Giriş yapamıyorum", Aciklama = "Hatalı kullanıcı adı/şifrede satır içi kırmızı uyarı çıkar. Şifrenizi bilmiyorsanız yöneticinizden sıfırlamasını isteyin." },
+        });
+    }
 
     private async Task EnterApplication()
     {

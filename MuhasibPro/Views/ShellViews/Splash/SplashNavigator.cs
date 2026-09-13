@@ -12,7 +12,7 @@ using System.Diagnostics;
 namespace MuhasibPro.Views.ShellViews.Splash;
 
 /// <summary>
-/// Splash sonrası hedef: DB hazırsa Login, değilse SistemKurulum (frame + tema).
+/// Splash sonrası hedef: 3 yol — FirstSetup → KurulumSplash, MigrationRequired → SistemDbYonetim, Login → LoginView.
 /// İnce yönlendirici — karar + veri Business'ta (ISplashRoutingService), EF/DbContext bilmez.
 /// </summary>
 public static class SplashNavigator
@@ -31,10 +31,18 @@ public static class SplashNavigator
 
             Type targetView;
             ShellArgs targetArgs;
-            if (!decision.IsDatabaseReady)
+            if (decision.Target == SplashTarget.FirstSetup)
             {
-                targetView = typeof(Views.SistemKurulum.SistemKurulumView);
-                targetArgs = new ShellArgs { ViewModel = typeof(ViewModels.ViewModels.Sistem.SistemKurulumViewModel), Parameter = true };
+                // DB yok — otomatik kurulum splash'i
+                targetView = typeof(Views.ShellViews.Splash.KurulumSplashView);
+                targetArgs = new ShellArgs { ViewModel = typeof(ViewModels.ViewModels.Sistem.KurulumSplashViewModel) };
+            }
+            else if (decision.Target == SplashTarget.MigrationRequired)
+            {
+                // DB var ama migration/onarim gerekiyor — karar izi sayfa günlüğüne düşer (Adım 0 tanısı)
+                Debug.WriteLine($"Splash karar: {decision.KararOzeti}");
+                targetView = typeof(Views.SistemDbYonetim.SistemDbYonetimView);
+                targetArgs = new ShellArgs { ViewModel = typeof(ViewModels.ViewModels.Sistem.SistemDbYonetimViewModel), Parameter = decision.KararOzeti };
             }
             else
             {

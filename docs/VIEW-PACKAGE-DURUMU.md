@@ -14,6 +14,7 @@ Temel ilke **fonksiyon ↔ stil ayrımı**: mevcut fonksiyonellik (binding/komut
 | 04-FirmaShell | ✅ Eklendi 🧪 | `FirmaShellView` OOBE (`docs/OOBE-TASARIM-SABLONU.md` TEK kaynak — WebToXaml'a bakılmaz). Oturum 69: seçim `SelectionMode="Single"`+VSM (tek-seçim garantisi), `FirmalarListControl` (`KAYITLI FİRMALAR` + `FirmaNo` gradyan tile + arama + düzenle), `MaliDonemlerListControl` (seçili firma şeridi + `ItemsWrapGrid` 2-kol dönem kartı: Veritabanı+boyut/Tablo-Kayıt/Son Yedek + Yedek/Arşivle/Sil + durum pill `Aktif Seçim/AÇIK/KAPALI`), `0 Dönem` fix (`GetFirmalarAsync` projeksiyon `MaliDonemler`) — build 0 hata, görsel resimle uyumlu |
 | 05-MainShell | ⬜ Bekliyor | `WebToXaml/MainShell/` NavSidebarControl 240 + TitleBarControl + ShellStatusBar ile yenilenecek |
 | 06-AccountingModules | ⬜ Bekliyor | Referans şablonlar dışarıda tutuldu — Aşama B'de modül modül eklenecek |
+| 07-DenetimMasasi | 🔨 Aktif (Oturum 187-191) | **Win11 Ayarlar dili MÜHÜR (tüm ayar sayfası):** `DenetimMasasiView` (sol arama süzgeci + kullanıcı kartı + firmasız `NavigationView` + sağ 28px başlık + hero firma/durum + iç `Frame`) + 3 `Sayfa` (Görünüm/Giriş/Yakında, iç `NavigationService`, panel başlıksız satır-kartlar); ref `EkranKaydi/Ekran görüntüsü 2026-09-10 220837.png`; build 0/0, test 285/285 |
 
 ## Kurallar
 - XAML'de `RequestedTheme` zorlanmaz; tema tek kanal `IThemeSelectorService` (varsayılan fallback Light)

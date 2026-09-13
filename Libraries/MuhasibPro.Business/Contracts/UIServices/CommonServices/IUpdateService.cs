@@ -13,7 +13,8 @@ namespace MuhasibPro.Business.Contracts.UIServices.CommonServices
         Task<bool> DownloadUpdatesAsync(IProgress<int>? progress = null);
         void ApplyUpdatesAndRestart(params string[] restartArgs);
         void ApplyUpdatesAndRestartWithDatabaseSync(params string[] restartArgs);
-        bool IsUpdatePendingRestart { get; }
+        /// <summary>UI thread'den await ile çağrılır (sync sürüm deadlock yapar — kaldırıldı).</summary>
+        Task<bool> IsUpdatePendingRestartAsync();
 
         // Veritabanı güncelleme işlemleri
 
