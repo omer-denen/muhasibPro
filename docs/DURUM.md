@@ -11,6 +11,7 @@
 - **Faz 6.86 — Durum çubuğu + `StatusMessageService` + `NotificationService` redesign/refactor** (Hibrit: footer + InfoBar + In-App message; OS toast terk).
   - **Chunk-1 ✅ kod + ✅🧪** (Oturum 271): servis refactor (A1-A3) + `ShellStatusBar` sıfırdan + temizlik. **Kullanıcı onayı bekliyor.**
   - **Chunk-2 (sıradaki):** C In-App message/InfoBar hattı + A4 `NotificationService` rewrite (OS toast + `CommunityToolkit.WinUI.Notifications` + AUMID/StartMenu hack'i kaldırılır, `NotificationEnabled` bağlanır) + D progress (5 sabit `IsActive="True"` ring).
+  - **Chunk-2 başlangıç dosyaları:** `MuhasibPro/Services/UIService/NotificationService.cs` · `Libraries/MuhasibPro.Business/Contracts/UIServices/CommonServices/{INotificationService,NotificationGroups}.cs` · `MuhasibPro/Views/ShellViews/Shell/ShellView.xaml` (mesaj host'u) · `MuhasibPro/App.xaml.cs` (bildirim kaydı kaldırma) · `MuhasibPro/MuhasibPro.csproj` (paket kaldırma) · `MuhasibPro/Views/DenetimMasasi/Bolumler/AppPlatformAyarlarPaneli.xaml` (`NotificationEnabled`). D: 5 sabit ring → `NamePasswordControl`, `SistemYedekPanel`, `SistemGuncellemePanel`, `DatabaseInfoPanel`, `DonemIslemKartlariPanel`.
 - **Sıra:** **6.86 (aktif) → 6.87** (Veritabanı Güncelleme sayfası komple redesign).
 - **Rafta:** 6.72 Dalga 1-3, 6.73, 6.74, 6.75 kalan, 6.76, 6.78 Adım 4, 6.85 (Kullanıcı Yönetimi modal).
 
@@ -18,7 +19,8 @@
 1. **Durum çubuğu ana pencere:** Yeni footer yalnız `ShellView`'de; ana pencere akışı `ShellView` kullanmıyor (`LoginViewModel.EnterApplication` → doğrudan `FirmaShellView`). "Ana pencereye de bağla (ShellView)" mi, "DetailsWindow-only kalsın" mı? (Oturum 271: "şimdilik not düş, sonra karar".)
 2. **6.86 Chunk-2 kapsam onayı** (In-App message + OS toast/CommunityToolkit kaldırma + progress).
 3. **6.87 sınıf planı onayı** (güncelleme sayfası redesign; Kural 14 araştırması `REFERANSLAR` Oturum 269 satırlarında hazır).
-4. **Commit:** `docs` yapılandırması + Oturum 271 kod değişiklikleri henüz commitlenmedi.
+4. **Küçük doküman maddeleri:** (a) `docs/VIEW-BAGIMLILIK.md` dursun/arşive? (b) `KONTROL-LISTESI` kapanan yakın fazlar (6.69/6.70/6.79–6.84) arşive alınıp yalnız açık maddeler mi kalsın?
+5. **Commit durumu:** Oturum 271 işleri commitlendi (`403bf20`); ağaç temiz.
 
 ## Son oturum (271, 2026-09-15)
 Faz 6.86 Chunk-1 tamamlandı: `IStatusMessageService`/`IStatusBarService` ölü üye temizliği; `StatusMessageService` 440→4 dosya (`StatusMesajDurumu`/`MesajOtoGizleme`/`MesajYurutucu`/facade; yetim `StatusAutoHideMs` bağlandı); DB bool bug'ı düzeldi (`ShellViewModel` gerçek durum); `ShellStatusBar` sıfırdan Fluent footer; ölü converter temizliği. **Build 0 hata + test 498/498 + canlı Dark/Light** (`Temp/opencode/ot290b_*`, dialog `ot290e_*`). Doküman yapısı arşivlendi/sadeleştirildi. Detay: `docs/LOG/LOG-261-280.md` Oturum 271.
