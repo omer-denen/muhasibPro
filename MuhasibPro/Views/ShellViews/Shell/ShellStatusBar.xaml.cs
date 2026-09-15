@@ -1,8 +1,7 @@
 ﻿using Microsoft.UI.Dispatching;
 using MuhasibPro.Business.Contracts.UIServices;
-using MuhasibPro.Converters;
+using MuhasibPro.Domain.Enum;
 using MuhasibPro.HostBuilders;
-
 
 namespace MuhasibPro.Views.ShellViews.Shell
 {
@@ -12,37 +11,40 @@ namespace MuhasibPro.Views.ShellViews.Shell
         private readonly IStatusBarService _statusBarService;
         private DispatcherTimer _timer;
 
-        // WRAPPER PROPERTIES - XAML'in anlayacağı dil
-        public string StatusMessage => _messageService.StatusMessage;
-        public string StatusIconGlyph => _messageService.StatusIconGlyph;
-        public string StatusColorHex => _messageService.StatusColorHex;
-        public bool ShowStatusIcon => _messageService.ShowStatusIcon;
-        public bool IsProgressVisible => _messageService.IsProgressVisible;
-        public bool IsProgressIndeterminate => _messageService.IsProgressIndeterminate;
-        public double ProgressValue => _messageService.ProgressValue;
-        public string ProgressText => _messageService.ProgressText;
-        public bool ShowProgressBar => _messageService.ShowProgressBar;
-
-        // StatusBarService properties - direkt
-        public string UserName => _statusBarService.UserName;
-        public string DatabaseConnectionMessage => _statusBarService.DatabaseConnectionMessage;
-        
-        public bool IsDatabaseConnection => _statusBarService.IsSistemDatabaseConnection;
-
         public ShellStatusBar()
         {
             InitializeComponent();
 
             _messageService = ServiceLocator.Current.GetService<IStatusMessageService>();
             _statusBarService = ServiceLocator.Current.GetService<IStatusBarService>();
-            // PropertyChanged event'lerini dinle
+
             _statusBarService.PropertyChanged += OnServicePropertyChanged;
             _messageService.PropertyChanged += OnServicePropertyChanged;
 
-            this.DataContext = this; // KENDİMİZ!
-
+            DataContext = this;
             InitializeTimer();
+            Unloaded += (_, _) => Dispose();
         }
+
+        #region Status message projections
+        public string StatusMessage => _messageService.StatusMessage;
+        public bool IsProgressVisible => _messageService.IsProgressVisible;
+        public bool IsProgressIndeterminate => _messageService.IsProgressIndeterminate;
+        public double ProgressValue => _messageService.ProgressValue;
+        public bool ShowProgressBar => _messageService.ShowProgressBar;
+        public string ProgressText => _messageService.ProgressText;
+
+        public bool IsInfo => _messageService.MessageType == StatusMessageType.Info;
+        public bool IsSuccess => _messageService.MessageType == StatusMessageType.Success;
+        public bool IsWarning => _messageService.MessageType is StatusMessageType.Warning or StatusMessageType.Deleting;
+        public bool IsError => _messageService.MessageType == StatusMessageType.Error;
+        #endregion
+
+        #region Status bar service projections
+        public string UserName => _statusBarService.UserName;
+        public string DatabaseConnectionMessage => _statusBarService.DatabaseConnectionMessage;
+        public bool IsDatabaseConnection => _statusBarService.IsSistemDatabaseConnection;
+        #endregion
 
         private void OnServicePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -50,38 +52,35 @@ namespace MuhasibPro.Views.ShellViews.Shell
             {
                 NotifyPropertyChanged(e.PropertyName);
 
-                // Computed property'ler için daha spesifik
                 switch (e.PropertyName)
                 {
-                    case nameof(IStatusMessageService.StatusColorHex):
-                        NotifyPropertyChanged(nameof(StatusBrush));
+                    case nameof(IStatusMessageService.MessageType):
+                        NotifyPropertyChanged(nameof(IsInfo));
+                        NotifyPropertyChanged(nameof(IsSuccess));
+                        NotifyPropertyChanged(nameof(IsWarning));
+                        NotifyPropertyChanged(nameof(IsError));
                         break;
-                    case nameof(IStatusMessageService.StatusIconGlyph):
-                        NotifyPropertyChanged(nameof(StatusGlyph));
-                        break;
+
                     case nameof(IStatusMessageService.IsProgressVisible):
                     case nameof(IStatusMessageService.IsProgressIndeterminate):
-                        NotifyPropertyChanged(nameof(ShowProgressBarVisibility));
+                    case nameof(IStatusMessageService.ProgressValue):
+                        NotifyPropertyChanged(nameof(ShowProgressBar));
+                        NotifyPropertyChanged(nameof(ProgressText));
+                        break;
+
+                    case nameof(IStatusBarService.IsSistemDatabaseConnection):
+                        NotifyPropertyChanged(nameof(IsDatabaseConnection));
                         break;
                 }
             });
         }
 
-        // Computed properties (XAML için)
-        public SolidColorBrush StatusBrush => new SolidColorBrush(ColorConverter.Parse(StatusColorHex));
-        public string StatusGlyph => StatusIconGlyph;
-        public Visibility ShowProgressBarVisibility => ShowProgressBar ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility ShowUserInfoVisibility => !string.IsNullOrEmpty(UserName) ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility ShowDatabaseInfoVisibility => !string.IsNullOrEmpty(DatabaseConnectionMessage) ? Visibility.Visible : Visibility.Collapsed;
-        public SolidColorBrush DatabaseIconBrush => IsDatabaseConnection ?
-            new SolidColorBrush(Colors.LimeGreen) : new SolidColorBrush(Colors.OrangeRed);
-
         private void InitializeTimer()
         {
-          
             _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            _timer.Tick += (s, e) => TimeDisplay.Text = DateTime.Now.ToString("HH:mm:ss");
+            _timer.Tick += (_, _) => TimeDisplay.Text = DateTime.Now.ToString("HH:mm:ss");
             _timer.Start();
+            TimeDisplay.Text = DateTime.Now.ToString("HH:mm:ss");
         }
 
         public void Dispose()
@@ -92,6 +91,7 @@ namespace MuhasibPro.Views.ShellViews.Shell
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         private void NotifyPropertyChanged(string propertyName)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

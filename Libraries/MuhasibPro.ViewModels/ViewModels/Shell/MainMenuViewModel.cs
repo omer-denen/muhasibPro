@@ -1,4 +1,5 @@
-﻿using MuhasibPro.Business.Contracts.SistemServices.Authentication;
+﻿using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
+using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.ViewModels.ViewModels.Settings;
 using MuhasibPro.ViewModels.ViewModels.Sistem.Firmalar;
@@ -8,8 +9,12 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
 {
     public class MainMenuViewModel : ShellViewModel
     {
-        public MainMenuViewModel(IAuthenticationService authenticationService, ICommonServices commonServices) : base(
+        public MainMenuViewModel(
+            IAuthenticationService authenticationService,
+            ISistemDatabaseService sistemDatabaseService,
+            ICommonServices commonServices) : base(
             authenticationService,
+            sistemDatabaseService,
             commonServices)
         {
         }

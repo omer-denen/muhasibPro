@@ -2,31 +2,33 @@
 
 Bu projede çalışmaya başlamadan ÖNCE şu dosyaları oku:
 
-- `docs/ROADMAP.md` — fazlar, mimari kararlar, nerede kaldığımız
-- `docs/KONTROL-LISTESI.md` — işaretli/bekleyen maddeler
-- `docs/HATALAR.md` — tekrar edilmemesi gereken hatalar
+- **`docs/DURUM.md` — İLK OKU:** "nerede kaldık" tek yüzey (aktif faz + açık kararlar + sonraki adım + kapılar/komutlar). Uzun log okuması gerekmez.
+- `docs/ROADMAP.md` — fazlar + güncel kararlar (geçmiş kararlar `docs/Arsiv/KARAR-LOGU-ARSIV.md`)
+- `docs/KONTROL-LISTESI.md` — açık maddeler (kapanan fazlar `docs/Arsiv/KONTROL-ARSIV.md`)
+- `docs/HATALAR.md` — son 25 hata dersi (eskiler `docs/Arsiv/HATALAR-ARSIV.md`)
 - `docs/AKIS-PLANI.md` — uygulama akışı ve veritabanı yönetimi
 - `docs/WINUI-MIMARISI.md` — pencere yönetimi
-- `docs/VIEW-PACKAGE-DURUMU.md` — görsel stil paketi entegrasyon durumu (sadece View/XAML işi varsa)
-- `docs/OOBE-TASARIM-SABLONU.md` — Login/Splash/SistemKurulum görsel dili, TEK kaynak (sadece View/XAML işi varsa; WebToXaml'a BAKILMAZ)
 - `docs/TASARIM-KURALLARI.md` — katmanlı sayfa yapısı (zemin → ana border → kartlar), Kural 17'nin ayrıntısı (her View/XAML işinde okunur)
 - `docs/CEKIRDEK-MODUL-PLAN.md` — çekirdek faz planı ve Kesin Kurallar (Kural 7: modelden gelen gerçek veri, örn. yedek saklama `GetManuelKeep()` → `CleanOldBackupsAsync` request model ayardan okur)
 - `docs/AYARLAR-PANEL-PLAN.md` — per-view ayar panelleri haritası (varsa; her view kendi ayarını yapar)
 - `docs/REFERANSLAR.md` — referans defteri: alınan kaynak + hangi view/özelliğe uygulandığı (Kural 19; yeni view/özellikten önce oku, aynı işi tekrar yapma)
 
+> **Arşiv:** `docs/Arsiv/` + `docs/LOG/Arsiv/` okuma yolunda DEĞİL — yalnız grep/arama gerekirse açılır. **Bu proje ana projedir;** eski referans dönemler (AI-Studio/WebToXaml/OOBE-şablonu vb.) yürürlükten kalktı ve arşivdedir.
+
 ## Her oturumun başında
-1. `docs/LOG.md` **indeksini** oku (kitap kapağı — sadece tablo, ~4 KB). Son 2-3 oturumun hangi `docs/LOG/LOG-XX-YY.md` cildinde olduğunu bul, sonra ilgili cildi `Read` ile aç (sadece ilgili oturum başlıkları). `LOG.md`'nin tamamını veya tüm ciltleri okuma — token tasarrufu.
-2. **Planı oku:** `docs/CEKIRDEK-MODUL-PLAN.md` (Kesin Kurallar + faz tablosu) ve varsa `docs/AYARLAR-PANEL-PLAN.md` (per-view ayar haritası). Eksik okuma = plan hatası hükmündedir. Token tasarrufu, plan eksik okumayı mazur göstermez — ilgili fazın **Kural 7 örneği** (`yedek saklama` → `GetManuelKeep()` → `CleanOldBackupsAsync` request model ayardan okur) gibi kritik satırları `Read` ile doğrula, ezberden yazma.
-3. Yeni oturum için son cilde bak: dolmadıysa (20'den az) oraya ekle, dolduysa yeni `LOG-XX-YY.md` cilt oluştur ve `LOG.md` indekse satır ekle.
-4. `docs/KONTROL-LISTESI.md`'deki açık maddelere göre devam et
-5. İlgili katmanın mevcut kodunu oku (`Libraries/MuhasibPro.Domain|Data|Business|ViewModels`, `MuhasibPro` [UI])
+1. **`docs/DURUM.md`'yi oku** — "nerede kaldık" tek yüzey. Ardından yalnız göreve gereken dosyayı oku (grep/ilgili bölüm); tüm log/cilt/KONTROL'ü baştan okuma (token tasarrufu).
+2. **Planı oku:** `docs/CEKIRDEK-MODUL-PLAN.md` (Kesin Kurallar + ilgili faz) ve varsa `docs/AYARLAR-PANEL-PLAN.md`. Eksik okuma = plan hatası hükmündedir. İlgili fazın **Kural 7 örneği** (`yedek saklama` → `GetManuelKeep()` → `CleanOldBackupsAsync` request model ayardan okur) gibi kritik satırları `Read` ile doğrula, ezberden yazma.
+3. **Geçmiş gerekirse:** `docs/LOG.md` kompakt indeksinden ilgili oturumu bul; güncel cilt `docs/LOG/LOG-261-280.md`, eski ciltler `docs/LOG/Arsiv/`. Yalnız ilgili oturum başlığını oku.
+4. Yeni oturum kaydı: güncel cilt 20'yi doldurmadıysa oraya ekle, dolduysa yeni `LOG-XX-YY.md` cilt oluştur + `LOG.md` indekse satır ekle; kapanan ciltleri `docs/LOG/Arsiv/`'e taşı.
+5. `docs/KONTROL-LISTESI.md`'deki açık maddelere göre devam et
+6. İlgili katmanın mevcut kodunu oku (`Libraries/MuhasibPro.Domain|Data|Business|ViewModels`, `MuhasibPro` [UI])
 
 ## Her oturumun sonunda
 1. `docs/LOG/LOG-XX-YY.md` son cilde yapılanlar/kararlar/engeller/sonraki adım yaz ve `docs/LOG.md` indekse satır ekle
 2. `docs/KONTROL-LISTESI.md`'yi güncelle
 3. `docs/ROADMAP.md` faz tablosunu güncelle
 4. Çözülen bug varsa `docs/HATALAR.md`'ye ekle
-5. View/stil paketi ile ilgili çalışıldıysa `docs/VIEW-PACKAGE-DURUMU.md`'yi güncelle
+5. **`docs/DURUM.md`'yi güncelle** — aktif faz + açık kararlar + sonraki adım + bilinen açık uçlar
 6. Plan değiştiyse: **işlem öncesi plan → plan durumu → değişiklik sebebi → uygulanan plan sonucu** dörtlüsünü `LOG` cildine ve ilgili plan dosyasına (`CEKIRDEK-MODUL-PLAN.md` / `AYARLAR-PANEL-PLAN.md`) işle — “nerede yanlış yaptım” şüphesi log eksik okumadan kaynaklanmasın
 7. Son cilt 20'yi doldurunca yeni `LOG-XX-YY.md` cilt oluştur (eski ciltler arşivdir; `LOG-ARSIV.md`'ye taşıma gerek yok, kalıcı kararlar `ROADMAP.md`'de)
 8. **Canlı test + onay (Kural 18):** biten view/özelliğin canlı testini agent yapar, kanıtı (ekran görüntüsü + UIA + referans açıklaması) `LOG`'a işler ve kullanıcı onayına sunar; kanıt/onay olmadan iş kapanmaz
@@ -43,7 +45,7 @@ Bu projede çalışmaya başlamadan ÖNCE şu dosyaları oku:
 | `❌` | Hata |
 
 ## Genel kurallar
-- **Görsel dil TEK kaynak: Windows 11 Fluent.** Tüm ekranlar Fluent tasarım diline geçirilir (Faz 6.75); pencereler Mica-uyumlu olur (Mica backdrop + Fluent malzeme/kontrast). Yeni işler sistem stilleri (`TableView`, `NavigationView`, standart dialog/button stilleri) ile yazılır; özel token/stil yalnız Fluent'te karşılığı yoksa `DesignTokens`/`Styles` altına eklenir. `docs/OOBE-TASARIM-SABLONU.md` ve InventEase kararları yürürlükten kalktı. `muhasibpro-WebToXaml` referans DEĞİL.
+- **Görsel dil TEK kaynak: Windows 11 Fluent.** Tüm ekranlar Fluent tasarım diline geçirilir (Faz 6.75); pencereler Mica-uyumlu olur (Mica backdrop + Fluent malzeme/kontrast). Yeni işler sistem stilleri (`TableView`, `NavigationView`, standart dialog/button stilleri) ile yazılır; özel token/stil yalnız Fluent'te karşılığı yoksa `DesignTokens`/`Styles` altına eklenir. Eski OOBE/InventEase dönemi yürürlükten kalktı (arşivde); tek kaynak bu kurallar.
 - **Tema ayarlanabilir (varsayılan: sistemi takip et):** `ThemeSelectorService` kayıt yoksa `Default` ile başlatılır (OS Light/Dark izlenir); kullanıcı Denetim Masası → Görünüm'den `Default/Light/Dark` seçer (`AppPlatformSettings.ThemeDefault` modelden). **XAML içinde tema zorlanamaz (`RequestedTheme` hardcode yasak — dialog dahil);** dialog'lar uygulama temasını miras alır. **Tema-bağımlı fırça kullanım yerinde `ThemeResource` olur (`StaticResource` load-time kilitlenir, beyaz-beyaz metin yapar — Oturum 230);** `ThemeDictionaries` içinde `StaticResource` kullanılır (MS kuralı).
 - Her faz sonu `dotnet build` / `MSBuild` ile 0 uyarı / 0 hata.
 - Modüler geliştirme: önce App ayağa kalksın (Aşama A), sonra muhasebe modülleri (Aşama B) tek tek.

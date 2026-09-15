@@ -26,10 +26,10 @@
 - **Generic kural:** Yeni liste/sonuç tipi yok — `GenericListViewModel<T>`, `ApiDataResponse<T>`, `IEventBus.Publish<TEvent>` genişletilir (`CEKIRDEK-MODUL-PLAN.md:12` Kural 3). Aynı işi yapan iki sınıf olmayacak — `grep 0 caller` silinir (Kural 4).
 - **Ortak Controls kaydı:** Her yeni ayar paneli `MaliDonem/Yonetim/Components/` veya `Views/Components/` altında tek `UserControl` olur; sayfa başına kopya yazılmaz. Eklendiğinde `CEKIRDEK-MODUL-PLAN.md:213` **Ortak Controls Kaydı** tablosuna satır eklenir (Kural 8).
 
-## 3. AI Studio / Biz İş Bölümü
+## 3. İş Bölümü (View ↔ kod)
 
 - **Biz (kod):** Provider + Clamp + Yetki + ViewModel property + `SaveAsync` + `LoadAsync` + `ArchitectureTests` bekçisi + `dotnet test` (her ayar için 3-7 test: clamp/yetki/fallback). Hardcoded fallback (`?? 5`, `= 8`, `CleanOldBackupsAsync(3)`) silinir, model `Get*()` kullanılır. **Kural (`LOG-121-140.md:87` / `CEKIRDEK-MODUL-PLAN.md:16` Kural 7):** View’in işlemi `Request` modeliyle çağrılırken değer **ayar modelinden** okunur — ör. `DonemYedeklerViewModel.YedekAlAsync:171` `dbSettings.GetManuelKeep()` → `OperationService.CleanOldBackupsAsync(_databaseName, keep)` (eski `keepLast = 10` / `CleanOldBackupsAsync(3)` kalkar), `TenantSettings` için `BusyTimeoutMsToSeconds:72` aynı şekilde.
-- **AI Studio (XAML):** Mevcut View’ların üzerine **yalnız** ilgili `Expander`/`Flyout` panelini `CustomModernCard` diliyle ekler, `x:Bind` sözleşmesini korur, yeni `Style` yaratmaz (varsa `RAPOR.md`’ye eksik token yazar, biz `DesignTokens.xaml`’a ekleriz). Çıktı `viewpackage/Views/...` aynı yollara — biz seçerek alırız (`AI-STUDIO-VIEW-BRIEF.md:7` dar brief).
+- **View (XAML):** Panelleri agent yazar (harici tasarım üretimi yok). Mevcut View'ların üzerine **yalnız** ilgili `Expander`/`Flyout` paneli eklenir, `x:Bind` sözleşmesi korunur, yeni `Style` yaratılmaz (eksik token `DesignTokens.xaml`'a eklenir). Sınıf bazlı onay zorunlu (Kural 8).
 
 ## 4. Sıra ve Bağımlılık
 

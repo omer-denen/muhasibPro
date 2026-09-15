@@ -221,7 +221,7 @@ public class GelistiriciAraclariViewModel : ViewModelBase
         SonucMesaji = mesaj ?? string.Empty;
         SonucBasarili = tip != StatusMessageType.Error;
         if (!string.IsNullOrWhiteSpace(mesaj))
-            StatusActionMessage(mesaj, tip, 4000);
+            StatusActionMessage(mesaj, tip);
     }
 
     private async Task YardimGosterAsync()

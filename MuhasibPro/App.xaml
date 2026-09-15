@@ -48,8 +48,6 @@
             <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
 
             <!--  statusBar için  -->
-            <converters:StringToBrushConverter x:Key="StringToBrush" />
-            <converters:DatabaseStatusToBrushConverter x:Key="DatabaseStatusToBrush" />
             <converters:SagaStepStatusToBrushConverter x:Key="SagaStepStatusToBrush" />
 
 

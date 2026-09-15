@@ -4,7 +4,8 @@ using System.ComponentModel;
 namespace MuhasibPro.Business.Contracts.UIServices
 {
     /// <summary>
-    /// StatusBar mesaj yönetimi için servis
+    /// StatusBar mesaj yönetimi için servis.
+    /// Renk/ikon eşlemesi View katmanındadır (tema kaynakları); burada yalnız mesaj + tür + progress tutulur.
     /// </summary>
     public interface IStatusMessageService : INotifyPropertyChanged
     {
@@ -14,83 +15,49 @@ namespace MuhasibPro.Business.Contracts.UIServices
         bool IsProgressVisible { get; }
         bool IsProgressIndeterminate { get; }
         double ProgressValue { get; }
-        DateTime LastUpdateTime { get; }
         bool ShowProgressBar { get; }
-
-        // Computed Properties
-        string StatusIconGlyph { get; }
-        string StatusColorHex { get; }
         string ProgressText { get; }
-        string LastUpdateTimeText { get; }
-        bool ShowStatusIcon { get; }
         #endregion
 
         #region Basic Methods
         /// <summary>
-        /// Dispatcher'ı başlat (UI thread için)
+        /// Mesaj göster. <paramref name="autoHideSeconds"/> null ise otomatik gizleme süresi
+        /// AppPlatform ayarından (`StatusAutoHideMs`) okunur; &lt;= 0 ise gizlenmez.
         /// </summary>
-        void Initialize(object dispatcher);
+        void ShowMessage(string message, StatusMessageType type, int? autoHideSeconds = null);
 
-        /// <summary>
-        /// Mesaj göster
-        /// </summary>
-        void ShowMessage(string message, StatusMessageType type, int autoHideSeconds);
-
-
-        /// <summary>
-        /// Mesajları temizle
-        /// </summary>
+        /// <summary>Mesajı temizle.</summary>
         void Clear();
         #endregion
 
         #region Progress Methods
-        /// <summary>
-        /// Belirsiz progress göster (spinning)
-        /// </summary>
+        /// <summary>Progress göster (yüzde verilmezse belirsiz).</summary>
+        void ShowProgress(string message, double progressPercent = -1);
 
-
-        /// <summary>
-        /// Yüzdelik progress göster
-        /// </summary>
-        void ShowProgress(string message, double progressPercent);
-
-        /// <summary>
-        /// Progress değerini güncelle
-        /// </summary>
+        /// <summary>Progress değerini güncelle.</summary>
         void UpdateProgress(double progressPercent);
 
-        /// <summary>
-        /// Progress'i gizle
-        /// </summary>
+        /// <summary>Progress'i gizle.</summary>
         void HideProgress();
         #endregion
 
         #region Advanced Async Methods
-        /// <summary>
-        /// Belirsiz progress ile async işlem yürüt
-        /// </summary>
         Task ExecuteWithProgressAsync(
             Func<Task> action,
             string progressMessage,
             string successMessage = null,
             string errorMessage = null,
             bool measureTime = true,
-            int successAutoHideSeconds = 3);
+            int? successAutoHideSeconds = null);
 
-        /// <summary>
-        /// Yüzdelik progress ile async işlem yürüt
-        /// </summary>
         Task ExecuteWithProgressAsync(
             Func<IProgress<double>, Task> action,
             string progressMessage,
             string successMessage = null,
             string errorMessage = null,
             bool measureTime = true,
-            int successAutoHideSeconds = 3);
+            int? successAutoHideSeconds = null);
 
-        /// <summary>
-        /// Async işlem yürüt (progress olmadan)
-        /// </summary>
         Task ExecuteActionAsync(
             Func<Task> action,
             string startMessage = null,
@@ -98,7 +65,7 @@ namespace MuhasibPro.Business.Contracts.UIServices
             string successMessage = null,
             string errorMessage = null,
             bool measureTime = true,
-            int successAutoHideSeconds = 3);
+            int? successAutoHideSeconds = null);
         #endregion
     }
 }

@@ -141,7 +141,7 @@ namespace MuhasibPro.ViewModels.Infrastructure.ViewModels
         #region Simple Status Message Wrappers
         public void StatusReady() => StatusMessageService.Clear();
 
-        public void StatusActionMessage(string message, StatusMessageType type, int autoHide) => StatusMessageService.ShowMessage(
+        public void StatusActionMessage(string message, StatusMessageType type, int? autoHide = null) => StatusMessageService.ShowMessage(
             message,
             type,
             autoHide);
@@ -170,7 +170,7 @@ namespace MuhasibPro.ViewModels.Infrastructure.ViewModels
             string successMessage = null,
             string errorMessage = null,
             bool measureTime = true,
-            int successAutoHideSeconds = 3)
+            int? successAutoHideSeconds = null)
         {
             await StatusMessageService.ExecuteWithProgressAsync(
                 action,
@@ -187,7 +187,7 @@ namespace MuhasibPro.ViewModels.Infrastructure.ViewModels
             string successMessage = null,
             string errorMessage = null,
             bool measureTime = true,
-            int successAutoHideSeconds = 3)
+            int? successAutoHideSeconds = null)
         {
             await StatusMessageService.ExecuteWithProgressAsync(
                 action,
@@ -205,7 +205,7 @@ namespace MuhasibPro.ViewModels.Infrastructure.ViewModels
             string successMessage = null,
             string errorMessage = null,
             bool measureTime = true,
-            int successAutoHideSeconds = 3)
+            int? successAutoHideSeconds = null)
         {
             await StatusMessageService.ExecuteActionAsync(
                 action,

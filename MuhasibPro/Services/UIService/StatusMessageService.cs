@@ -1,440 +1,122 @@
-﻿using Microsoft.UI.Dispatching;
-using MuhasibPro.Business.Contracts.UIServices;
-using MuhasibPro.Contracts.UIService;
+﻿using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Domain.Enum;
-using System.Diagnostics;
 
 namespace MuhasibPro.Services.UIService
 {
+    /// <summary>
+    /// Status çubuğu mesaj servisi — ince facade.
+    /// Sorumlulukları: durum (<see cref="StatusMesajDurumu"/>), otomatik gizleme
+    /// (<see cref="MesajOtoGizleme"/>) ve async yürütme (<see cref="MesajYurutucu"/>).
+    /// Renk/ikon eşlemesi View katmanındadır (tema kaynakları).
+    /// </summary>
     public class StatusMessageService : IStatusMessageService
     {
-        private readonly IThemeSelectorService _themeSelectorService;
-        private DispatcherQueue _dispatcherQueue;
-        private CancellationTokenSource _autoHideCts;
+        private readonly StatusMesajDurumu _durum = new();
+        private readonly MesajOtoGizleme _otoGizleme;
+        private readonly MesajYurutucu _yurutucu;
 
-        private string _statusMessage = "Hazır";
-        private StatusMessageType _messageType = StatusMessageType.Info;
-        private bool _isProgressVisible;
-        private bool _isProgressIndeterminate = true;
-        private double _progressValue;
-        private DateTime _lastUpdateTime = DateTime.Now;
-
-        public StatusMessageService(IThemeSelectorService themeSelectorService)
+        public StatusMessageService(IAppPlatformSettingsProvider ayarSaglayici)
         {
-            _themeSelectorService = themeSelectorService;
-            _themeSelectorService.ThemeChanged += OnThemeChanged;
-        }
-        private void OnThemeChanged(object sender, ElementTheme theme)
-        {
-            // Tema değiştiğinde property'yi yenile
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StatusColorHex)));
+            _otoGizleme = new MesajOtoGizleme(ayarSaglayici, () => Dispatch(Clear));
+            _yurutucu = new MesajYurutucu(GosterMesaj, GosterProgress, GuncelleProgress, GizleProgress);
+            _durum.PropertyChanged += (_, e) => Dispatch(() => PropertyChanged?.Invoke(this, e));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         #region Properties
-        public string StatusMessage
-        {
-            get => _statusMessage;
-            private set
-            {
-                if(_statusMessage != value)
-                {
-                    _statusMessage = value;
-                    _lastUpdateTime = DateTime.Now;
-                    NotifyPropertyChanged(nameof(StatusMessage));
-                    NotifyPropertyChanged(nameof(LastUpdateTime));
-                    NotifyPropertyChanged(nameof(LastUpdateTimeText));
-                }
-            }
-        }
-
-        public bool ShowProgressBar => IsProgressVisible && !IsProgressIndeterminate;
-
-        public StatusMessageType MessageType
-        {
-            get => _messageType;
-            private set
-            {
-                if(_messageType != value)
-                {
-                    _messageType = value;
-                    NotifyPropertyChanged(nameof(MessageType));
-                    NotifyPropertyChanged(nameof(StatusIconGlyph));
-                    NotifyPropertyChanged(nameof(StatusColorHex));
-                    NotifyPropertyChanged(nameof(ShowStatusIcon));
-                }
-            }
-        }
-
-        private void OnProgressPropertiesChanged()
-        {
-            NotifyPropertyChanged(nameof(ShowProgressBar));
-            NotifyPropertyChanged(nameof(ProgressText));
-        }
-
-        public bool IsProgressVisible
-        {
-            get => _isProgressVisible;
-            private set
-            {
-                if(_isProgressVisible != value)
-                {
-                    _isProgressVisible = value;
-                    NotifyPropertyChanged(nameof(IsProgressVisible));
-                }
-            }
-        }
-
-        public bool IsProgressIndeterminate
-        {
-            get => _isProgressIndeterminate;
-            private set
-            {
-                if(_isProgressIndeterminate != value)
-                {
-                    _isProgressIndeterminate = value;
-                    NotifyPropertyChanged(nameof(IsProgressIndeterminate));
-                }
-            }
-        }
-
-        public double ProgressValue
-        {
-            get => _progressValue;
-            private set
-            {
-                if(Math.Abs(_progressValue - value) > 0.01)
-                {
-                    _progressValue = Math.Clamp(value, 0, 100);
-                    NotifyPropertyChanged(nameof(ProgressValue));
-                    NotifyPropertyChanged(nameof(ProgressText));
-                }
-            }
-        }
-
-        public DateTime LastUpdateTime
-        {
-            get => _lastUpdateTime;
-            private set
-            {
-                _lastUpdateTime = value;
-                NotifyPropertyChanged(nameof(LastUpdateTime));
-                NotifyPropertyChanged(nameof(LastUpdateTimeText));
-            }
-        }
-
-        public string StatusIconGlyph => MessageType switch
-        {
-            StatusMessageType.Success => "\uE930",
-            StatusMessageType.Warning => "\uE7BA",
-            StatusMessageType.Error => "\uE783",
-            StatusMessageType.Edit => "\uE70F",          // ✏ - Edit
-            StatusMessageType.Saving => "\uE74E",        // 💾 - Save  
-            StatusMessageType.Deleting => "\uE74D",      // 🗑 - Delete
-            StatusMessageType.MultipleSelect => "\uE762",// ☑ - Checkbox
-            StatusMessageType.Refreshing => "\uE72C",    // 🔄 - Refresh - YENİ
-            _ => "\xE9CE"
-        };
-
-        public string StatusColorHex
-        {
-            get
-            {
-                var isLightTheme = _themeSelectorService.Theme == ElementTheme.Light;
-
-                return MessageType switch
-                {
-                    StatusMessageType.Success => isLightTheme ? "#FF107C10" : "#FF6CCB5F",
-                    StatusMessageType.Warning => "#FFFFA500", // Turuncu her temada iyi
-                    StatusMessageType.Error => isLightTheme ? "#FFD13438" : "#FFFF7A7A",
-                    StatusMessageType.Deleting => "#FFFFA500", // Turuncu her temada iyi
-                    _ => isLightTheme ? "#FF0078D7" : "#FF00BFFF" // Default
-                };
-            }
-        }
-
-        public string ProgressText => IsProgressIndeterminate ? string.Empty : $"{ProgressValue:F0}%";
-
-        public string LastUpdateTimeText => $"Son güncelleme: {LastUpdateTime:HH:mm:ss}";
-
-        public bool ShowStatusIcon => MessageType != StatusMessageType.Info;
-        #endregion
-
-        #region Initialization
-        public void Initialize(object dispatcher) { _dispatcherQueue = dispatcher as DispatcherQueue; }
+        public string StatusMessage => _durum.StatusMessage;
+        public StatusMessageType MessageType => _durum.MessageType;
+        public bool IsProgressVisible => _durum.IsProgressVisible;
+        public bool IsProgressIndeterminate => _durum.IsProgressIndeterminate;
+        public double ProgressValue => _durum.ProgressValue;
+        public bool ShowProgressBar => _durum.ShowProgressBar;
+        public string ProgressText => _durum.ProgressText;
         #endregion
 
         #region Basic Methods
-        public void ShowMessage(string message, StatusMessageType type, int autoHideSeconds)
-        {
-            ExecuteOnUIThread(() =>
+        public void ShowMessage(string message, StatusMessageType type, int? autoHideSeconds = null)
+            => Dispatch(() =>
             {
-                CancelAutoHide();
-                StatusMessage = SanitizeMessage(message);
-                MessageType = type;
-                IsProgressVisible = false;
-
-                // ✅ SADECE autoHideSeconds > 0 ise setup et
-                if (autoHideSeconds > 0)
-                {
-                    SetupAutoHide(autoHideSeconds);
-                }
+                _otoGizleme.Iptal();
+                _durum.MesajiAyarla(message, type);
+                _otoGizleme.Baslat(autoHideSeconds);
             });
-        }
 
         public void Clear()
-        {
-            ExecuteOnUIThread(
-                () =>
-                {
-                    CancelAutoHide();
-                    StatusMessage = "Hazır";
-                    MessageType = StatusMessageType.Info;
-                    IsProgressVisible = false;
-                    IsProgressIndeterminate = true;
-                    ProgressValue = 0;
-                });
-        }
+            => Dispatch(() =>
+            {
+                _otoGizleme.Iptal();
+                _durum.Temizle();
+            });
         #endregion
 
         #region Progress Methods
-        
-
         public void ShowProgress(string message, double progressPercent = -1)
-        {
-            ExecuteOnUIThread(() =>
+            => Dispatch(() =>
             {
-                CancelAutoHide();
-                if (!string.IsNullOrEmpty(message))
-                    StatusMessage = SanitizeMessage(message);
-                MessageType = StatusMessageType.Info;
-                IsProgressVisible = true;
-
-                // ✅ AKILLI PROGRESS DETECTION
-                if (progressPercent < 0)
-                {
-                    IsProgressIndeterminate = true;  // Belirsiz progress
-                    ProgressValue = 0;
-                }
-                else
-                {
-                    IsProgressIndeterminate = false; // Belirli progress
-                    ProgressValue = Math.Clamp(progressPercent, 0, 100);
-                }
-
-                OnProgressPropertiesChanged();
+                _otoGizleme.Iptal();
+                _durum.ProgressGoster(message, progressPercent);
             });
-        }
 
         public void UpdateProgress(double progressPercent)
-        {
-            ExecuteOnUIThread(() => ProgressValue = progressPercent);
-            OnProgressPropertiesChanged();
-        }
+            => Dispatch(() => _durum.ProgressGuncelle(progressPercent));
 
         public void HideProgress()
-        {
-            ExecuteOnUIThread(
-                () =>
-                {
-                    IsProgressVisible = false;
-                    IsProgressIndeterminate = true;
-                    ProgressValue = 0;
-                    OnProgressPropertiesChanged();
-                });
-        }
+            => Dispatch(() => _durum.ProgressGizle());
         #endregion
 
         #region Advanced Async Methods
-        public async Task ExecuteWithProgressAsync(
+        public Task ExecuteWithProgressAsync(
             Func<Task> action,
             string progressMessage,
             string successMessage = null,
             string errorMessage = null,
             bool measureTime = true,
-            int successAutoHideSeconds = 3)
-        {
-            var stopwatch = measureTime ? Stopwatch.StartNew() : null;
+            int? successAutoHideSeconds = null)
+            => _yurutucu.ExecuteWithProgressAsync(action, progressMessage, successMessage, errorMessage, measureTime, successAutoHideSeconds);
 
-            ShowProgress(progressMessage);
-
-            try
-            {
-                await action();
-
-                stopwatch?.Stop();
-
-                if(!string.IsNullOrEmpty(successMessage))
-                {
-                    var message = measureTime && stopwatch != null
-                        ? $"{successMessage} ({stopwatch.Elapsed.TotalSeconds:F3} saniye)"
-                        : successMessage;
-
-                    ExecuteOnUIThread(() => ShowMessage(message, StatusMessageType.Success, successAutoHideSeconds));
-                    await Task.Delay(300);
-                } else
-                {
-                    HideProgress();
-                }
-            } catch(Exception ex)
-            {
-                stopwatch?.Stop();
-
-                var message = !string.IsNullOrEmpty(errorMessage) ? errorMessage : $"Hata: {ex.Message}";
-
-                ExecuteOnUIThread(() => ShowMessage(message, StatusMessageType.Error,autoHideSeconds:-1));
-                throw;
-            }
-        }
-
-        public async Task ExecuteWithProgressAsync(
+        public Task ExecuteWithProgressAsync(
             Func<IProgress<double>, Task> action,
             string progressMessage,
             string successMessage = null,
             string errorMessage = null,
             bool measureTime = true,
-            int successAutoHideSeconds = 3)
-        {
-            var stopwatch = measureTime ? Stopwatch.StartNew() : null;
+            int? successAutoHideSeconds = null)
+            => _yurutucu.ExecuteWithProgressAsync(action, progressMessage, successMessage, errorMessage, measureTime, successAutoHideSeconds);
 
-            ShowProgress(progressMessage, 0);
-
-            var progress = new Progress<double>(percent => UpdateProgress(percent));
-
-            try
-            {
-                await action(progress);
-
-                stopwatch?.Stop();
-
-                if(!string.IsNullOrEmpty(successMessage))
-                {
-                    var message = measureTime && stopwatch != null
-                        ? $"{successMessage} ({stopwatch.Elapsed.TotalSeconds:F3} saniye)"
-                        : successMessage;
-                    ExecuteOnUIThread(() => ShowMessage(message, StatusMessageType.Success, successAutoHideSeconds));
-                    await Task.Delay(300);
-                } else
-                {
-                    HideProgress();
-                }
-            } catch(Exception ex)
-            {
-                stopwatch?.Stop();
-
-                var message = !string.IsNullOrEmpty(errorMessage) ? errorMessage : $"Hata: {ex.Message}";
-
-                ExecuteOnUIThread(() => ShowMessage(message, StatusMessageType.Error, autoHideSeconds: -1));
-                throw;
-            }
-        }
-
-        public async Task ExecuteActionAsync(
+        public Task ExecuteActionAsync(
             Func<Task> action,
             string startMessage = null,
             StatusMessageType startMessageType = StatusMessageType.Info,
             string successMessage = null,
             string errorMessage = null,
             bool measureTime = true,
-            int successAutoHideSeconds = 3)
-        {
-            var stopwatch = measureTime ? Stopwatch.StartNew() : null;
-
-            // Start message göster (progress'i temizle)
-            if(!string.IsNullOrEmpty(startMessage))
-            {
-                ExecuteOnUIThread(
-                    () =>
-                    {
-                        CancelAutoHide();
-                        StatusMessage = SanitizeMessage(startMessage);
-                        MessageType = startMessageType;
-                        IsProgressVisible = false; // ✅ Progress'i temizle
-                    });
-            }
-            await Task.Delay(300); // UI thread'in güncelleme yapması için kısa bir gecikme
-            try
-            {
-                await action();
-
-                stopwatch?.Stop();
-
-                if(!string.IsNullOrEmpty(successMessage))
-                {
-                    var message = measureTime && stopwatch != null
-                        ? $"{successMessage} ({stopwatch.Elapsed.TotalSeconds:F1}s)"
-                        : successMessage;
-
-                    ExecuteOnUIThread(() => ShowMessage(message, StatusMessageType.Success, successAutoHideSeconds));
-                }
-            } catch(Exception ex)
-            {
-                stopwatch?.Stop();
-
-                var message = !string.IsNullOrEmpty(errorMessage) ? errorMessage : $"İşlem başarısız: {ex.Message}";
-
-                ExecuteOnUIThread(() => ShowMessage(message, StatusMessageType.Error, autoHideSeconds: -1));
-                throw;
-            }
-        }
+            int? successAutoHideSeconds = null)
+            => _yurutucu.ExecuteActionAsync(action, startMessage, startMessageType, successMessage, errorMessage, measureTime, successAutoHideSeconds);
         #endregion
 
-        #region Private Methods
-        private void ExecuteOnUIThread(Action action)
+        #region Delegates for MesajYurutucu
+        private void GosterMesaj(string message, StatusMessageType type, int? autoHideSeconds)
+            => ShowMessage(message, type, autoHideSeconds);
+
+        private void GosterProgress(string message, double percent)
+            => ShowProgress(message, percent);
+
+        private void GuncelleProgress(double percent)
+            => UpdateProgress(percent);
+
+        private void GizleProgress()
+            => HideProgress();
+        #endregion
+
+        private static void Dispatch(Action action)
         {
-            if(_dispatcherQueue != null)
-                _dispatcherQueue.TryEnqueue(() => action());
-            else
+            var queue = App._dispatcherQueue;
+            if (queue == null || queue.HasThreadAccess)
                 action();
+            else
+                queue.TryEnqueue(() => action());
         }
-
-        private void CancelAutoHide()
-        {
-            _autoHideCts?.Cancel();
-            _autoHideCts?.Dispose();
-            _autoHideCts = null;
-        }
-
-        private void SetupAutoHide(int seconds)
-        {
-            if(seconds > 0)
-            {
-                _autoHideCts = new CancellationTokenSource();
-                _ = AutoHideAfterDelay(TimeSpan.FromSeconds(seconds), _autoHideCts.Token);
-            }
-        }
-
-        private async Task AutoHideAfterDelay(TimeSpan delay, CancellationToken ct)
-        {
-            try
-            {
-                await Task.Delay(delay, ct);
-                if(!ct.IsCancellationRequested)
-                    Clear();
-            } catch(TaskCanceledException)
-            {
-            } finally
-            {
-                _autoHideCts?.Dispose();
-                _autoHideCts = null;
-            }
-        }
-
-        private string SanitizeMessage(string message)
-        {
-            if(string.IsNullOrEmpty(message))
-                return string.Empty;
-
-            return message
-                .Replace("\r\n", " ")
-                .Replace("\r", " ")
-                .Replace("\n", " ")
-                .Trim();
-        }
-
-        private void NotifyPropertyChanged(string propertyName)
-        { PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName)); }
-        #endregion
     }
 }

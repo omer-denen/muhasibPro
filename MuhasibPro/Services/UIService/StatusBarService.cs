@@ -1,27 +1,12 @@
-﻿using Microsoft.UI.Dispatching;
-using MuhasibPro.Business.Contracts.UIServices;
+﻿using MuhasibPro.Business.Contracts.UIServices;
 
 namespace MuhasibPro.Services.UIService
 {
     public class StatusBarService : INotifyPropertyChanged, IStatusBarService
     {
-        private DispatcherQueue _dispatcherQueue = null;
-
         private string _userName;
-        private string _kullaniciAdiSoyadi;
         private string _databaseConnectionMessage;
         private bool _isSistemDatabaseConnection;
-        private bool _isTenantDatabaseConnection;
-        private int _maliDonem;
-        public StatusBarService()
-        {
-
-        }
-
-        public void Initialize(object dispatcher)
-        {
-            _dispatcherQueue = dispatcher as DispatcherQueue;
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -31,35 +16,9 @@ namespace MuhasibPro.Services.UIService
             get => _userName;
             set
             {
-                if (_userName != value)
-                {
-                    _userName = value;
-                    NotifyPropertyChanged(nameof(UserName));
-                }
-            }
-        }
-        public string KullaniciAdiSoyadi
-        {
-            get => _kullaniciAdiSoyadi;
-            set
-            {
-                if (_kullaniciAdiSoyadi != value)
-                {
-                    _kullaniciAdiSoyadi = value;
-                    NotifyPropertyChanged(nameof(KullaniciAdiSoyadi));
-                }
-            }
-        }
-        public int MaliDonem
-        {
-            get => _maliDonem;
-            set
-            {
-                if (_maliDonem != value)
-                {
-                    _maliDonem = value;
-                    NotifyPropertyChanged(nameof(MaliDonem));
-                }
+                if (_userName == value) return;
+                _userName = value;
+                NotifyPropertyChanged(nameof(UserName));
             }
         }
 
@@ -68,11 +27,9 @@ namespace MuhasibPro.Services.UIService
             get => _databaseConnectionMessage;
             set
             {
-                if (_databaseConnectionMessage != value)
-                {
-                    _databaseConnectionMessage = value;
-                    NotifyPropertyChanged(nameof(DatabaseConnectionMessage));
-                }
+                if (_databaseConnectionMessage == value) return;
+                _databaseConnectionMessage = value;
+                NotifyPropertyChanged(nameof(DatabaseConnectionMessage));
             }
         }
 
@@ -81,59 +38,33 @@ namespace MuhasibPro.Services.UIService
             get => _isSistemDatabaseConnection;
             set
             {
-                if (_isSistemDatabaseConnection != value)
-                {
-                    _isSistemDatabaseConnection = value;
-                    NotifyPropertyChanged(nameof(IsSistemDatabaseConnection));
-                }
+                if (_isSistemDatabaseConnection == value) return;
+                _isSistemDatabaseConnection = value;
+                NotifyPropertyChanged(nameof(IsSistemDatabaseConnection));
             }
         }
-        public bool IsTenantDatabaseConnection
-        {
-            get => _isTenantDatabaseConnection;
-            set
-            {
-                if (_isTenantDatabaseConnection != value)
-                {
-                    _isTenantDatabaseConnection = value;
-                    NotifyPropertyChanged(nameof(IsTenantDatabaseConnection));
-                }
-            }
-        }
+        #endregion
 
         public void SetSistemDatabaseStatus(bool isConnected, string message = null)
         {
-            ExecuteOnUIThread(
-                () =>
-                {
-                    IsSistemDatabaseConnection = isConnected;
-                    if (!string.IsNullOrEmpty(message))
-                        DatabaseConnectionMessage = message;
-                });
+            ExecuteOnUIThread(() =>
+            {
+                IsSistemDatabaseConnection = isConnected;
+                if (!string.IsNullOrEmpty(message))
+                    DatabaseConnectionMessage = message;
+            });
         }
-        public void SetTenantDatabaseStatus(bool isConnected, string message = null)
-        {
-            ExecuteOnUIThread(
-                () =>
-                {
-                    IsTenantDatabaseConnection = isConnected;
-                    if (!string.IsNullOrEmpty(message))
-                        DatabaseConnectionMessage = message;
-                });
-        }
-        #endregion
 
-        #region Private Methods
-        private void ExecuteOnUIThread(Action action)
+        private static void ExecuteOnUIThread(Action action)
         {
-            if (_dispatcherQueue != null)
-                _dispatcherQueue.TryEnqueue(() => action());
-            else
+            var queue = App._dispatcherQueue;
+            if (queue == null || queue.HasThreadAccess)
                 action();
+            else
+                queue.TryEnqueue(() => action());
         }
 
-        public void NotifyPropertyChanged(string propertyName)
-        { PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName)); }
-        #endregion
+        private void NotifyPropertyChanged(string propertyName)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

@@ -1,4 +1,5 @@
-﻿using MuhasibPro.Business.Contracts.SistemServices.Authentication;
+﻿using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
+using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.Services.SistemServices.LogServices;
@@ -12,7 +13,10 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
 {
     public class MainShellViewModel : MainMenuViewModel
     {
-        public MainShellViewModel(IAuthenticationService authenticationService, ICommonServices commonServices) : base(authenticationService, commonServices)
+        public MainShellViewModel(
+            IAuthenticationService authenticationService,
+            ISistemDatabaseService sistemDatabaseService,
+            ICommonServices commonServices) : base(authenticationService, sistemDatabaseService, commonServices)
         {
         }
 

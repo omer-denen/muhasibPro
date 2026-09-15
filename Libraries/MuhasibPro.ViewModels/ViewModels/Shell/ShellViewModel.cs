@@ -1,4 +1,5 @@
-﻿using MuhasibPro.Business.Contracts.SistemServices.Authentication;
+﻿using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
+using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.ViewModels.Infrastructure.ViewModels;
@@ -14,13 +15,19 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
     public class ShellViewModel : ViewModelBase
     {
         private readonly IAuthenticationService _authenticationService;
-        public ShellViewModel(IAuthenticationService authenticationService, ICommonServices commonServices) : base(
-            commonServices)
+        private readonly ISistemDatabaseService _sistemDatabaseService;
+
+        public ShellViewModel(
+            IAuthenticationService authenticationService,
+            ISistemDatabaseService sistemDatabaseService,
+            ICommonServices commonServices) : base(commonServices)
         {
             _authenticationService = authenticationService;
+            _sistemDatabaseService = sistemDatabaseService;
             UpdateLockedStatus();
             _authenticationService.StateChanged += OnAuthenticationStateChanged;
         }
+
         private void OnAuthenticationStateChanged()
         {
             ContextService.RunAsync(() =>
@@ -34,16 +41,12 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
                 }
                 else
                 {
-                    // Eğer gerekliyse, CurrentAccount'dan UserInfo'yu güncelle
                     UserInfo = _authenticationService.CurrentAccount;
-                    if (UserInfo != null)
-                    {
-                        StatusBarService.UserName = $"{UserInfo.KullaniciModel.KullaniciAdi} ";
-                        StatusBarService.UserName = $"{UserInfo.KullaniciModel.AdiSoyadi} ";
-                    }
+                    UserInfoyuStatusBaraYaz();
                 }
             });
         }
+
         private bool _isLocked = false;
 
         public bool IsLocked { get => _isLocked; set => Set(ref _isLocked, value); }
@@ -53,7 +56,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         public bool IsEnabled { get => _isEnabled; set => Set(ref _isEnabled, value); }
 
         public HesapModel UserInfo { get; protected set; }
-     
+
 
         public ShellArgs ViewModelArgs { get; protected set; }
 
@@ -63,17 +66,15 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
             if (ViewModelArgs != null)
             {
                 UserInfo = ViewModelArgs.UserInfo;
-                
-
-                // Kullanıcı bilgisini StatusBar'a aktar
-                if (UserInfo != null)
-                {
-                    StatusBarService.UserName = $"{UserInfo.KullaniciModel.KullaniciAdi}";
-                    StatusBarService.KullaniciAdiSoyadi = $"{UserInfo.KullaniciModel.AdiSoyadi}";
-                    UpdateLockedStatus();
-                }
+                UserInfoyuStatusBaraYaz();
+                UpdateLockedStatus();
             }
-            NavigationService.Navigate(ViewModelArgs.ViewModel, ViewModelArgs.Parameter);
+
+            if (ViewModelArgs?.ViewModel != null)
+                NavigationService.Navigate(ViewModelArgs.ViewModel, ViewModelArgs.Parameter);
+
+            // Navigasyonu geciktirmeden durumu arka planda besle
+            _ = SistemVeritabaniDurumunuYazAsync();
             return Task.CompletedTask;
         }
 
@@ -100,6 +101,30 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         }
         public virtual void Unsubscribe() { MessageService.Unsubscribe(this); }
 
+        private void UserInfoyuStatusBaraYaz()
+        {
+            if (UserInfo?.KullaniciModel != null)
+                StatusBarService.UserName = UserInfo.KullaniciModel.AdiSoyadi;
+        }
+
+        /// <summary>Sistem veritabanı göstergesini gerçek durumdan besler (Kural 7).</summary>
+        private async Task SistemVeritabaniDurumunuYazAsync()
+        {
+            try
+            {
+                var resp = await _sistemDatabaseService.GetSistemDatabaseStateAsync();
+                var state = resp?.Data;
+                bool bagli = state != null && state.IsDatabaseExists && state.CanConnect && !state.HasError && state.DatabaseValid;
+                var mesaj = state?.Message ?? resp?.Message
+                    ?? (bagli ? "Sistem veritabanı bağlı" : "Sistem veritabanı bağlı değil");
+                StatusBarService.SetSistemDatabaseStatus(bagli, mesaj);
+            }
+            catch
+            {
+                StatusBarService.SetSistemDatabaseStatus(false, "Sistem veritabanı durumu alınamadı");
+            }
+        }
+
         private async void OnLoginMessage(IAuthenticationService loginService, string message, bool isAuthenticated)
         {
             if (message == "AuthenticationChanged")
@@ -116,8 +141,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
                     else if (UserInfo == null && _authenticationService.CurrentAccount != null)
                     {
                         UserInfo = _authenticationService.CurrentAccount;
-                        StatusBarService.UserName = $"{UserInfo.KullaniciModel.KullaniciAdi}";
-                        StatusBarService.UserName = $"{UserInfo.KullaniciModel.AdiSoyadi}";
+                        UserInfoyuStatusBaraYaz();
                     }
                 });
             }
@@ -127,14 +151,11 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         {
             switch (message)
             {
-                // ✅ SADECE VIEW ENABLE/DISABLE İŞLEMLERİ KALDI
-
                 case "EnableThisView":
                 case "DisableThisView":
                     if (viewModel.ContextService.ContextId == ContextService.ContextId)
                     {
                         IsEnabled = message == "EnableThisView";
-                        // Status mesajı artık gönderilmiyor - ViewModelBase'ten direkt call
                     }
                     break;
 
@@ -142,25 +163,14 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
                 case "DisableOtherViews":
                     if (viewModel.ContextService.ContextId != ContextService.ContextId)
                     {
-                        await ContextService.RunAsync(
-                            () =>
-                            {
-                                IsEnabled = message == "EnableOtherViews";
-                                // Status mesajı artık gönderilmiyor
-                            });
+                        await ContextService.RunAsync(() => IsEnabled = message == "EnableOtherViews");
                     }
                     break;
 
                 case "EnableAllViews":
                 case "DisableAllViews":
-                    await ContextService.RunAsync(
-                        () =>
-                        {
-                            IsEnabled = message == "EnableAllViews";
-                            // Status mesajı artık gönderilmiyor
-                        });
+                    await ContextService.RunAsync(() => IsEnabled = message == "EnableAllViews");
                     break;
-
             }
         }
     }

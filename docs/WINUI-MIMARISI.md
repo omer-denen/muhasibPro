@@ -1,6 +1,6 @@
 # MuhasibPro — WinUI3 Pencere Mimarisi
 
-> Kaynak: `muhasibpro-WebToXaml` + mevcut `MuhasibPro` üst katmanı. `MuhasibPro-master` 2026-08-28’de silindi; mimari korunuyor.
+> Kaynak: bu proje (ana proje). Katmanlı mimari ve pencere yönetimi aşağıdadır.
 
 ## 1. Katman
 ```
