@@ -2,6 +2,24 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
+## Opak pencere-tabanı dolgusu dark'ta "siyah nokta" yapar (ÇÖZÜLDÜ — 2026-09-15 — Oturum 270)
+- **Belirti:** `CircleIconButtonStyle` (tüm `?` butonları) Dark'ta ana border üstünde neredeyse siyah bir daire gibi görünüyordu; kullanıcı: "çok siyah oldu, tema rengiyle uyumlu olsun, göze batmasın".
+- **Sebep:** 269'da yarı saydamlık sorununa çözüm olarak seçilen opak `SolidBackgroundFillColorBaseBrush` **Dark'ta `#202020`** (pencere tabanı) değerini verir; ana border yüzeyi ise görsel-tintli `CardBackgroundFillColorSecondary` (Dark'ta ≈`#333A3E`) olduğundan buton zeminden belirgin koyu kalıyordu. Opaklık gerekliydi (arkadaki 1.5px çizgi görünmesin) ama taban rengi yanlıştı.
+- **Çözüm:** Butona özel **tema-farkında opak** token (`DesignTokens.xaml`: `MuhasibCircleIconArkaplanColor` Light `#F3F3F3` / Dark `#333A3E`; hover `#3F464B`, pressed `#2A3033`) — Dark değeri ana border yüzeyiyle hizalı. Kural: üstüne binen opak kontrol, altındaki yüzeyin tema rengiyle eşleşmeli (kör sistem tabanı seçilmez). Canlı kanıt: `ot289e_firmashell_dark.png` + `ot289f_btn_dark.png` (buton `#333A3E` ≈ çevre `#383F43`).
+- Tarih: 2026-09-15
+
+## Yarı saydam sistem dolgusu üst üste binen kontrolde arkadaki border'ı gösterir (ÇÖZÜLDÜ — 2026-09-15 — Oturum 269)
+- **Belirti:** `?` yardım butonu ana border köşesine bindiğinde (Login/FirmaShell/Güncelleme) ana border'ın 1.5px çizgisi butonun arkasından net görünüyordu.
+- **Sebep:** `CircleIconButtonStyle` dolgusu `ControlFillColorDefaultBrush` — WinUI sistem kontrol dolgusu **yarı saydamdır** (`#B3FFFFFF` gibi ~%70). Üstüne bindiği XAML içeriği (ana border çizgisi) dolgudan geçip görünür. `CardBackgroundFillColorDefaultBrush` de yarı saydamdır; `Transparent` ise hiç kapatmaz.
+- **Çözüm:** Üstüne binen kontrolde **tam opak** sistem dolgusu kullan: `SolidBackgroundFillColorBaseBrush` (normal) / `SolidBackgroundFillColorTertiaryBrush` (hover) / `SolidBackgroundFillColorSecondaryBrush` (pressed). Kural: bir kontrol başka bir yüzeyin (border/çizgi) üstüne biniyorsa `Card*`/`ControlFillColor*` yerine `SolidBackgroundFillColor*` kullan. Canlı kanıt: `ot288_yardim.png` + `ot288_login.png`.
+- Tarih: 2026-09-15
+
+## Dev araçları Installation modülüne konulamaz — mimari bekçi kırmızısı (ÇÖZÜLDÜ — 2026-09-15 — Oturum 269)
+- **Belirti:** `dotnet test` → `ArchitectureTests.Kurulum_Ile_SistemDb_Yonetimi_Ayrik` kırmızı; `Services/Installation` taraması "DatabaseServices" metnini yasaklıyor, yeni `DevAraclariService.cs` ihlal olarak bulundu.
+- **Sebep:** Kurulum modülü (kimlik + global ayar) tenant/sistem servislerine yaslanamaz (Kural 10 + bekçi). Geliştirici araçları kimlik/transfer **teşhis** işi yaptığı için `ITenantSQLiteDatabaseService` gerektiriyor; sınıf yanlış klasöre konunca bekçi yakaladı.
+- **Çözüm:** `IDevAraclariService` + `DevAraclariService`, `Contracts/SistemServices/DevServices` + `Services/SistemServices/DevServices` altına taşındı (bekçi kapsamı dışı, yaslanma yönü doğru). Ders: yeni sınıf `Installation`/`SistemDatabaseService`/`TenantDatabaseService` klasörlerine konmadan önce hangi modüllere yaslandığı kontrol edilir (bekçi kırmızısı derleme hatası hükmündedir).
+- Tarih: 2026-09-15
+
 ## StaticResource tema fırçası — çalışma-zamanı tema geçişinde beyaz-beyaz (ÇÖZÜLDÜ — 2026-09-14 — Oturum 253)
 - **Belirti:** Uygulama Dark açılıp Denetim Masası'ndan Light'a geçilince `FirmaShell` sol firma kartı beyaz-beyaz oldu ("KAYITLI FİRMALAR", "Korkut Mermer", "Yetkili/İletişim" okunmaz); açılıştan Light başlatınca sorun yoktu.
 - **Sebep:** `FirmalarListControl` (22 nokta) + `UserInfoControl` + `NavSidebarControl` + `AnimatedInfoBorder` tema fırçalarını `{StaticResource TextFillColor*/SystemFillColor*}` ile alıyordu; `StaticResource` **load-time** çözülür ve Dark değerine kilitlenir — canlı tema değişiminde güncellenmez (Oturum 230 dersinin FirmaShell çocuklarındaki tekrarı).

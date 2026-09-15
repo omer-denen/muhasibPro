@@ -953,23 +953,27 @@ Sıra: Splash → paylaşılan stiller → SistemKurulum → FirmaShell → Mali
 - [x] **Çift açılma:** yeni `SingleInstanceGuard` (named Mutex + 3 sn tolerans + "zaten açık" `#32770` uyarısı + pencereyi öne getirme) + `App` ctor kapısı ✅ Eklendi 🧪 Test edildi
 - [x] **Test:** `SplashRoutingTests` +2 — build 0 hata + **483/483** ✅🧪
 - [x] **Canlı kanıt (Kural 18):** `ot252_login_light.png` (DEV + onarım sonrası dialog yok), DB `KurulumId=9e67…`, `ot252_transfer_dialog.png` (açık tema + tek buton), `ot252_ikinci_ornek_uyari.png`, `ot252_final_clean.png` ✅
-- [ ] **Kullanıcı onayı:** canlı kanıtlar sunuldu — onay bekliyor ⬜
+- [x] **Kullanıcı onayı:** canlı kanıtlar sunuldu — **ALINDI** (Oturum 270, commit onayı ile) ✅
 
-## Faz 6.82 — Dev-mode (yalnız DEBUG): kimlik/transfer + teşhis araçları (Oturum 252 kullanıcı kararı — **sıra: Katman 2 sonrası**, 📋 plan)
-- [ ] `IDevModeProvider` (Business contracts; DEBUG'da `true`, Release'de NullProvider `false`) + `AddDevMode` DI kaydı — sürüm/derleme kapısı, kullanıcı ayarı DEĞİL ✅ karar
-- [ ] Denetim Masası'nda yalnız DEBUG'da görünen **Geliştirici Araçları** alanı + yardım sayfası (Kural 13) + her aksiyonda onay ve `SistemLogService`'e `DEV` damgası
-- [ ] İlk yetenekler (onaylı): kurulum kimliği onarımı/sıfırlama + damga, transfer taramasını elle tetikleme, ayrıntılı log seviyesi, log klasörü/DB yollarını açma, şema sürümü damgası
-- [ ] Kapsam dışı (kullanıcı kararı): restore hüküm Block/RequireCode bypass + zorla göç + silme/saklama kilidi bypass
-- [ ] Kapı: Kural 14 araştırması + Kural 8 sınıf onayları + build 0/0 + test + canlı kanıt
+## Faz 6.82 — Dev-mode (yalnız DEBUG): kimlik/transfer + teşhis araçları (Oturum 252 kullanıcı kararı — ✅ TAMAMLANDI + kullanıcı onaylı, Oturum 269/270)
 
-## Faz 6.83 — TenantDatabaseUpdateView canlı doğrulama turu (Oturum 254 kullanıcı kararı — 📋 plan)
+- [x] `IDevModeProvider` (Business `Contracts/UIServices`; DEBUG'da `true`, Release'de `false`) + `DevModeProvider` — sürüm/derleme kapısı, kullanıcı ayarı DEĞİL. **Sapma (Kural 4):** ayrı `NullProvider` sınıfı yerine tek sınıf + derleme sabiti. DI: `AddBusinessServices` Singleton. ✅ Eklendi 🧪 Test edildi
+- [x] Denetim Masası'nda yalnız DEBUG'da görünen **Geliştirici Araçları** bölümü (`AyarBolumu.GelistiriciAraclari` + `AyarlarNavigationMenu` 8. satır + `MenuGorunurMu` DEBUG kapısı) + `?` yardım dialogu (Kural 13) + her aksiyonda onay; işlemler `ISistemLogService`'e `DEV` kaynak damgasıyla yazılır (`DevAraclariService`). ✅ Eklendi 🧪 Test edildi
+- [x] Yetenekler: kurulum kimliği **onarım** (`ReAlignTenantKurulumIdsAsync`, yalnız makine-aynı) / **sıfırlama + damga** (yeni kimlik + makine-aynı dönemleri yeniden damgalama), **transfer taramasını elle tetikleme** (`ISplashRoutingService.CheckTransferAsync`), **dönem şema damgaları** görünümü (`ITenantVersionReader.GetStampsAsync`), **ayrıntılı log seviyesi** (`ILogSeviyesiYoneticisi` + `FileLoggerProvider.IsEnabled` eşik), **log/veri klasörü açma** (`IYolAciciService` → App `YolAciciService`). ✅ Eklendi 🧪 Test edildi
+- [x] Kapsam dışı korundu (kullanıcı kararı): restore hüküm Block/RequireCode bypass + zorla göç + silme/saklama kilidi bypass — uygulanmadı. ✅
+- [x] Kapı: Kural 14 araştırması (MS "Settings for developers" + Dialog controls → `REFERANSLAR` ✅) + Kural 8 sınıf onayı (kullanıcı "tamamını onayla") + build 0 hata + `dotnet test` **498/498** (6 yeni test) + Kural 18 canlı kanıt (`Temp/opencode/ot269_s1..s7`, DEV SistemLog kaydı) + kullanıcı onayı. ✅🧪
+- **Not (mimari bekçi):** `DevAraclariService` ilk denemede `Services/Installation`'a konuldu → `ArchitectureTests.Kurulum_Ile_SistemDb_Yonetimi_Ayrik` kırmızı; tenant servisine yaslandığı için `Services|Contracts/SistemServices/DevServices` altına taşındı. Ders `HATALAR.md`'de.
+
+## Faz 6.83 — TenantDatabaseUpdateView canlı doğrulama turu (Oturum 254 kullanıcı kararı — 🔨 KISMİ; Oturum 269'da ekran doğrulandı, tasarım istenince 6.87'ye devredildi)
 > **Neden ayrı faz:** Oturum 253'te Katman-2 dönüşümü yapıldı (AnaBorder + `?` + gömülü değil, tenant `Güncelle` akışı) ancak **göç bekleyen dönem olmadığı için ekran canlı açılamadı**; Kural 18 canlı kanıtı eksik — kullanıcı "ayrı faz aç, unutmayalım" dedi.
 - [ ] **(a) Kontrollü test ortamı:** bir tenant DB'nin şema sürüm damgasını geriye çek (yedek al → `TenantDBVersiyon`/history damgası eski sürüme) → kart "Güncelleme Gerekli" rozeti → `Güncelle` butonu ile ekranı aç; test sonrası damga/yedeği geri al (veri kaybı yok)
 - [ ] **(b) Canlı akış (Kural 18):** panel + `?` yardım dialogu (Light/Dark), `Geri` (firma seçimine dönüş), "Yedekle ve Güncelle" (Yedek→Göç→Doğrulama adımları), hata dalı + otomatik geri alma (adım 4), "Çalışma Alanına Geç" + seçim kaydı
 - [ ] **(c) Kanıt + kayıt:** `ot6_83_*` ekran görüntüleri + UIA dökümü; LOG/KONTROL/ROADMAP güncelleme; kullanıcı onayı
 - [ ] **Kapı:** Kural 8 sınıf onayı (gerekirse görünüm düzeltmesi) + build 0/0 + test + canlı kanıt + onay
 
-## Faz 6.84 — FirmaShellView seçim deneyimi yeniden tasarımı (Oturum 255 kullanıcı talebi — 🔨 uygulama başladı, yarım/kirli ağaçta; Oturum 257'de loglandı, commit yok)
+## Faz 6.84 — FirmaShellView seçim deneyimi yeniden tasarımı (Oturum 255 kullanıcı talebi — ✅ TAMAMLANDI + kullanıcı onaylı "gayet başarılı", Oturum 268; commit atıldı)
+
+> **Kapanış (Oturum 268):** Seçili dönem/firma satırı ana kart rengini alır (içeride/çukur), seçimsiz saydam, seçim sol accent hub; hover tema-farkında token `MuhasibHoverOverlayBrush`; ana border 1→1.5 (mühür revizyonu); animasyon sınıfları tümüyle silindi. x64 0 hata + 492/492 + canlı Dark/Light kanıt (`ot275_*`/`ot276_*`). **Kullanıcı onayı alındı, faz kapandı.**
 
 **Araştırma (Kural 14/19 → REFERANSLAR):** Sage 50 Company Selection (tam liste + ad/versiyon/VKN/mali yıl/veri yolu kolonları + satır aksiyonları + Add Company) · Tally Gateway (F3 → şirket listesi; yüklü şirket bilgisi ekranda görünür kalır) · Oracle Retail Select Company (liste üstü arama; filtre tüm sonuçlarda) · Deltek Select a Company (arama + sonuç sayısı) · MS Radio Buttons ("seçenekler bağlama göre değişiyorsa liste kontrolü kullan") · MS AutoSuggestBox (yazarken filtre + zengin ItemTemplate + SuggestionChosen) · MS ComboBox (çok satırlı/zengin içerik ComboBox'ta değil listede).
 
@@ -1017,3 +1021,38 @@ Sıra: Splash → paylaşılan stiller → SistemKurulum → FirmaShell → Mali
 - [ ] **UserInfoControl menüsü:** iki grup (Hesabım / Yönetim[admin]) + Oturumu Kapat; **sahte madde yok** (madde ancak yüzey hazır olunca eklenir).
 - [ ] **Rol atama notu:** roller KFR (firma-bağımlı) — bu fazda gösterim; atama iyileştirmesi ayrı iş.
 - [ ] **Kapı:** Kural 8 sınıf onayları + Kural 14 araştırma + build 0/0 + test + Kural 18 canlı + Kural 13 yardım + onay.
+
+---
+
+## Faz 6.86 — StatusBarService modernizasyonu (Oturum 269 kullanıcı kararı — 📋 plan; yön seçimi + Kural 8 onayı bekliyor)
+
+> **Kullanıcı isteği:** "StatusbarService incelenecek, geliştirilecek. Daha modern bir duruma getirilecek."
+
+**Envanter (mevcut durum):**
+- `IStatusBarService`/`StatusBarService` (App): `UserName`, `KullaniciAdiSoyadi`, `MaliDonem`, `DatabaseConnectionMessage`, `IsSistemDatabaseConnection`, `IsTenantDatabaseConnection`. **Ölü üyeler:** `MaliDonem` (0 caller), `IsTenantDatabaseConnection`/`SetTenantDatabaseStatus` (0 caller), `KullaniciAdiSoyadi` (set edilir, görünümde okunmaz). **Bug:** `IsSistemDatabaseConnection` hiç `true` yapılmıyor (Startup yalnız `DatabaseConnectionMessage` yazıyor) → DB durum ikonu her zaman "bağlı değil".
+- `IStatusMessageService`/`StatusMessageService` (App, **440 satır**): mesaj + `StatusMessageType` + ikon glyph + **`StatusColorHex` hardcode hex** + progress (ring/bar) + auto-hide + async wrapper'lar + sanitize. Kural-1 (150 satır) tetikleyicisi aşıldı. **Bug:** `Theme == ElementTheme.Light` karşılaştırması `Default` (sistemi takip) durumunu yok sayıyor → sistem temasıyla renk sapması.
+- `ShellStatusBar.xaml(.cs)`: 32px bar; sol durum+progress, orta kullanıcı+DB, sağ saat; code-behind wrapper prop'ları + `new SolidColorBrush(Colors.LimeGreen/OrangeRed)` hardcode; `DispatcherTimer` ile saat.
+- **Kural 14/19 araştırması (`REFERANSLAR`):** MS "modern Windows app" → durum mesajları için **InfoBar** (severity/tema/ekran okuyucu hazır); MS InfoBar kılavuzu (Error idareli, `InfoBar*Severity*Brush`); VS Code status bar UX (sol birincil / sağ ikincil, kısa etiket, arka-iş → yükleme ikonu).
+
+**Yön seçenekleri (kullanıcı seçecek):**
+- **A — InfoBar + slim bar (MS önerisi, en modern):** geçici mesaj+progress+severity → `InfoBar` (içerik üstü ortak host); alt bar kalıcı bağlam (kullanıcı/DB/dönem/saat) + token uyumlu.
+- **B — Mevcut barı modernize (yapı korunur, düşük risk):** hardcode hex → `ThemeResource` severity (`SystemFillColorSuccess/Caution/Critical/Attention`), `StatusMessageService` bölünür, `Default` tema bug'ı + ölü üyeler + erişilebilirlik (`LiveSetting`) düzeltilir.
+- **C — Hibrit:** hata/uyarı → InfoBar; bilgi/başarı + progress → alt bar.
+
+**Kapı:** yön kararı + Kural 8 sınıf onayları + build 0/0 + test + Kural 18 canlı (Light/Dark + uzun işlem + hata) + onay.
+
+---
+
+## Faz 6.87 — Veritabanı Güncelleme sayfası (`TenantDatabaseUpdateView`) komple yeniden tasarımı (Oturum 269 kullanıcı kararı — 📋 plan)
+
+> **Kullanıcı isteği:** 6.83 canlı turunda ekran görüldükten sonra — "güncelleme sayfası komple yeniden tasarlanacak".
+
+**Mevcut ekran (6.83 turunda doğrulandı):** `Sürüm` şeridi (mevcut → güncellenecek + `N göç` hapı), `Değişiklik` tablosu, `İşlem adımları` (Yedek→Göç→Doğrulama, durum metinli), sağ üst `?`, başlıkta `Geri` + `Yedekle ve Güncelle`. Canlı kanıt: `Temp/opencode/ot286_upd.png` (gerçek pending göç: 1.0.0→1.1.0, `TenantDatabaseVersiyonlar` tablosu).
+
+**Kapsam:** sayfa komple yeni tasarım — Fluent + **Kural 17** (zemin → ana border → kartlar; mühür), muhasebe/ERP sektör deseni (Kural 14: QuickBooks/Sage update/verify akışı), `?` yardım (Kural 13), Kural 11/12 (busy + sonuç + akış planı), Light/Dark; **davranış korunur** (Yedek→Göç→Doğrulama + hata/oto-geri-alma).
+
+**Ayrıca (aynı oturum — UI rötüş):** `CircleIconButtonStyle` (tüm `?` yardım butonları + ShellView BackButton): opak sistem dolguları — Normal `SolidBackgroundFillColorBaseBrush`, hover `SolidBackgroundFillColorTertiaryBrush`, pressed `SolidBackgroundFillColorSecondaryBrush` (**tam opak; üstüne bindiği ana border çizgisi görünmez**) + border accent'ten çıkarıldı (`ControlStrokeColorDefaultBrush`). Denemeler elendi: `CardBackgroundFillColorDefaultBrush`, `Transparent`, `ControlFillColor*` (yarı saydam → arkayı gösteriyor). Build 0/0; canlı kanıt `ot288_yardim.png` (FirmaShell) + `ot288_login.png` (LoginView).
+
+**Rötüş v2 (Oturum 270 — kullanıcı isteği):** 269'un opak `SolidBackgroundFillColorBaseBrush`'ı **Dark'ta `#202020`** olduğu için ana border yüzeyi üstünde "siyah nokta" gibi kalıyordu ("çok siyah, tema rengiyle uyumlu olsun, göze batmasın"). `DesignTokens.xaml`'e butona özel tema-farkında opak token eklendi: `MuhasibCircleIconArkaplanColor` (**Light aynen** `#F3F3F3` / **Dark** `#333A3E`) + hover `#3F464B` + pressed `#2A3033`; `Buttons.xaml` `CircleIconButtonStyle` bu token'lara bağlandı (opaklık korunur → arkadaki 1.5px ana border çizgisi yine görünmez). Build **0 hata / 0 uyarı**; canlı Dark kanıt: buton `#333A3E` ≈ çevre ana border `#383F43` (`ot289e`/`ot289f`/`ot289g`). **Kullanıcı onayı ALINDI** (Oturum 270 — "çok güzel oldu, onaylıyorum").
+
+**Kapı:** Kural 14 araştırması (REFERANSLAR) + Kural 8 sınıf onayları + build 0/0 + test + Kural 18 canlı (Light/Dark + başarı + hata/oto-geri-alma) + onay.

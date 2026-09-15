@@ -5,6 +5,7 @@ using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
 using MuhasibPro.Business.Contracts.Installation;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
+using MuhasibPro.Business.Contracts.SistemServices.DevServices;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.DTOModel;
@@ -13,6 +14,7 @@ using MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService;
 using MuhasibPro.Business.Services.Installation;
 using MuhasibPro.Business.Services.SistemServices.AppServices;
 using MuhasibPro.Business.Services.SistemServices.Authentication;
+using MuhasibPro.Business.Services.SistemServices.DevServices;
 using MuhasibPro.Business.Services.SistemServices.LogServices;
 using MuhasibPro.Business.Services.UIService;
 
@@ -59,7 +61,13 @@ namespace MuhasibPro.Business.HostBuilder
                 services.AddScoped<ITenantDatabaseUpdateService, TenantDatabaseUpdateService>();
                 services.AddScoped<IGlobalAyarlarService, GlobalAyarlarService>();
                 services.AddScoped<IKurulumKayitService, KurulumKayitService>();
-                
+
+                // Faz 6.82: geliştirme kipi kapısı (derleme sabiti) + çalışma-zamanı log eşiği (Singleton).
+                services.AddSingleton<IDevModeProvider, DevModeProvider>();
+                services.AddSingleton<ILogSeviyesiYoneticisi, LogSeviyesiYoneticisi>();
+                // Geliştirici araçları Scoped — Scoped tenant/kurulum servislerine yaslanır.
+                services.AddScoped<IDevAraclariService, DevAraclariService>();
+
             });
             return host;
         }

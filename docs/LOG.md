@@ -35,7 +35,7 @@
 
 ---
 
-## Oturum İndeksi (268 oturum, 14 cilt)
+## Oturum İndeksi (270 oturum, 14 cilt)
 
 | # | Tarih | Baslik | Durum | Cilt | Ozet |
 |---|-------|--------|-------|------|------|
@@ -309,6 +309,9 @@
 | 266 | 2026-09-14 | Tema kısayolu v2: kayar anahtar + ikonlar | ✅ kod 🧪❌ | C14 | Güneş + ToggleSwitch + yarım-daire (E706/E7A1 MS-teyitli); Sistem=efektif tema gösterimi, dönüş Görünüm'de; segment kodu silindi |
 | 267 | 2026-09-15 | Dönem seçim stili: mavi tam-çerçeve kalktı + sol hub + dönen kuyruk | ✅🧪 | C14 | Yeni `MuhasibDonemSelectionListItemStyle` (nötr hairline + 3px hub aynen) + `OrbitRingControl` (storyboard'lu kuyruk: hub'dan çıkıp dolanıp hub'da dinlenir, boyut-bazlı delta); canlıda 3 bug bulunup çözüldü (container binding → TemplatedParent; VSM takılması → model.Selected; WinUI dash desen toplamı > yol = çizmiyor → desen boyut-bazlı); x64 0 hata + 492/492 + piksel kanıtlı canlı; onay + Light turu + commit kaldı |
 | 268 | 2026-09-15 | Seçili kart = ana kart rengi (içeride) + hover token + ana border 1.5px; animasyon sınıfları silindi | ✅🧪 | C14 | Orbit kaldırıldı; nabız denendi, kullanıcı reddetti → **animasyon sınıfları tümüyle silindi** (`OrbitRingControl`/`SelectionWaveControl`/`MuhasibOverlayRadiusX`); NİHAİ: seçili dönem/firma satırı ana kart rengi (`CardBackgroundFillColorSecondaryBrush` → içeride/çukur), seçimsiz saydam, seçim sol hub; seçili firma kartı da aynı; hover tema-farkında token (`MuhasibHoverOverlayBrush`) → Light/Dark görünür; ana border 1→1.5 (10 Katman-2 view, mühür revizyonu); 0 hata + 492/492 + canlı (`ot275_*`/`ot276_*`); **kullanıcı onayı "gayet başarılı" + commit** |
+| 269 | 2026-09-15 | Faz 6.84 onayı + Faz 6.82 Dev-mode tamamlandı | ✅🧪 | C14 | `IDevModeProvider` + `IDevAraclariService` (kimlik onar/sıfırla + transfer tara + şema damgası) + `ILogSeviyesiYoneticisi` + `IYolAciciService` + Denetim Masası "Geliştirici Araçları" (yalnız DEBUG, onaylı, DEV damgalı log, ? yardım); mimari bekçi dersi (Installation→DevServices taşıma); 0 hata + 498/498 + canlı `ot269_*` + DEV log kanıtı; kullanıcı onayı **ALINDI** (Oturum 270); sırada **6.87 (Veritabanı Güncelleme sayfası komple redesign) → 6.86 (StatusBarService modernizasyonu)**; ayrıca 6.83 kısmi doğrulandı + 6.87'ye devredildi (test dönemi temizlendi), `?` yardım butonu stili fix (transparent bg + accent'siz border, build 0/0); 6.85 hariç diğer eski fazlar rafta; **ağaç kirli, commit yok** |
+| 270 | 2026-09-15 | CircleIconButtonStyle dark tonu: ana border yüzeyiyle uyum | ✅🧪 | C14 | Dark'ta opak `SolidBackgroundFillColorBase` (`#202020`) siyah nokta gibiydi → `DesignTokens` tema-farkında opak token (`MuhasibCircleIconArkaplan*`: Light aynen, Dark `#333A3E`/`#3F464B`/`#2A3033`); `Buttons.xaml` bağlandı; 0 hata/0 uyarı + canlı Dark kanıt (`ot289e`/`ot289f`/`ot289g`, buton `#333A3E` ≈ çevre `#383F43`); Light değişmedi; **kullanıcı onayı ALINDI** (Oturum 270 — "çok güzel oldu, onaylıyorum") |
+
 ---
 
 ## Son Oturum Özeti (hızlı context)

@@ -32,7 +32,8 @@ namespace MuhasibPro.Business.Services.SistemServices.LogServices
 
         public IDisposable BeginScope<TState>(TState state) => null;
 
-        public bool IsEnabled(LogLevel logLevel) => true;
+        /// <summary>Çalışma-zamanı eşiğe uyar (Faz 6.82 geliştirici aracı: ayrıntılı log).</summary>
+        public bool IsEnabled(LogLevel logLevel) => logLevel >= LogSeviyesiYoneticisi.GecerliEsik;
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
             Exception exception, Func<TState, Exception, string> formatter)

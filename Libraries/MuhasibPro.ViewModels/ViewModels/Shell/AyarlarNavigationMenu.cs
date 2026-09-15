@@ -27,8 +27,8 @@ public class AyarlarNavigationMenu
     /// <summary>Alt menüler (ebeveyn grup; yaprakta boş).</summary>
     public IReadOnlyList<AyarlarNavigationMenu> AltMenuler { get; }
 
-    /// <summary>Varsayılan katalog (7 bölüm; görünürlük kuralları VM'de uygulanır).
-    /// Simge kodları Icons.xaml'daki Icon* karşılıklarıdır (E80F/E713/E72E/E821/E8B7/EA35/E787/E896).</summary>
+    /// <summary>Varsayılan katalog (8 bölüm; görünürlük kuralları VM'de uygulanır — Geliştirici Araçları yalnız DEBUG).
+    /// Simge kodları Icons.xaml'daki Icon* karşılıklarıdır (E80F/E713/E72E/E821/E8B7/E787/E896/E756).</summary>
     public static IReadOnlyList<AyarlarNavigationMenu> VarsayilanMenuler() => new List<AyarlarNavigationMenu>
     {
         new(AyarBolumu.GirisPaneli, "Giriş", Simgeden(0xE80F), "Hesap, firma ve dönem özeti"),
@@ -38,6 +38,7 @@ public class AyarlarNavigationMenu
         new(AyarBolumu.Veritabani, "Veritabanı", Simgeden(0xE8B7), "Sistem ve dönem veritabanı, yedek saklama ayarları"),
         new(AyarBolumu.Donem, "Mali Dönem", Simgeden(0xE787), "Liste, güncelleme ve bağlantı ayarları"),
         new(AyarBolumu.Guncelleme, "Güncelleme", Simgeden(0xE896), "Uygulama sürümü ve güncelleme"),
+        new(AyarBolumu.GelistiriciAraclari, "Geliştirici Araçları", Simgeden(0xE756), "Kimlik, transfer ve teşhis araçları (yalnız geliştirme)"),
     };
 
     private static string Simgeden(int kod) => ((char)kod).ToString();

@@ -533,9 +533,9 @@
 
     <!--  Daire ikon (ShellView BackButton 32x32: soluk zemin + soft halka)  -->
     <Style x:Key="CircleIconButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorSecondaryBrush}" />
+        <Setter Property="Background" Value="{ThemeResource MuhasibCircleIconArkaplanBrush}" />
         <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
-        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{StaticResource MuhasibCircleCornerRadius}" />
         <Setter Property="Padding" Value="0" />
@@ -557,14 +557,14 @@
                                 <VisualState x:Name="Normal" />
                                 <VisualState x:Name="PointerOver">
                                     <VisualState.Setters>
-                                        <Setter Target="Root.Background" Value="{ThemeResource SystemFillColorAttentionBackgroundBrush}" />
-                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibCircleIconArkaplanHoverBrush}" />
+                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource ControlStrokeColorSecondaryBrush}" />
                                     </VisualState.Setters>
                                 </VisualState>
                                 <VisualState x:Name="Pressed">
                                     <VisualState.Setters>
-                                        <Setter Target="Root.Background" Value="{ThemeResource SystemFillColorAttentionBrush}" />
-                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource SystemFillColorAttentionBrush}" />
+                                        <Setter Target="Root.Background" Value="{ThemeResource MuhasibCircleIconArkaplanPressedBrush}" />
+                                        <Setter Target="Root.BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}" />
                                     </VisualState.Setters>
                                 </VisualState>
                                 <VisualState x:Name="Disabled">

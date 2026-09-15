@@ -114,6 +114,10 @@ namespace MuhasibPro.Views.DenetimMasasi
                     // Sayfa, çocuk VM'leri DenetimMasasiViewModel üzerinden alır.
                     IcerikFrame.Navigate(typeof(Sayfalar.VeritabaniAyarSayfasi), ViewModel);
                     break;
+                case AyarBolumu.GelistiriciAraclari:
+                    // Yalnız DEBUG: çocuk VM örneği parametreyle (tek örnek korunur).
+                    _icNav.Navigate<GelistiriciAraclariViewModel>(ViewModel.GelistiriciAraclari);
+                    break;
                 default:
                     _icNav.Navigate<AppPlatformAyarlarViewModel>(ViewModel.Gorunum);
                     break;
@@ -134,6 +138,7 @@ namespace MuhasibPro.Views.DenetimMasasi
                 new() { Baslik = "Kapsam: kullanıcı ve firma", Aciklama = "Görünüm, Yedekleme ve Saklama ayarları kullanıcı bazlıdır (her kullanıcı kendi ayarını görür). Firma ve Mali Dönem ayarları global şablondur. Güvenlik ayarları yöneticiye özeldir." },
                 new() { Baslik = "Kaydetme", Aciklama = "Ayar değişiklikleri seçildiği anda ilgili sağlayıcı üzerinden otomatik kaydedilir. Kritik ayarları yalnızca yönetici değiştirebilir; yetki yoksa değişiklik reddedilir ve uyarı gösterilir." },
                 new() { Baslik = "Arama", Aciklama = "'Bir ayar bulun' kutusu bölüm menüsünü başlığa göre süzer; aramanın temizlenmesiyle tüm bölümler geri gelir." },
+                new() { Baslik = "Geliştirici Araçları (yalnız geliştirme)", Aciklama = "Yalnız DEBUG derlemesinde görünen bölüm: kurulum kimliği onarım/sıfırlama, transfer taramasını elle tetikleme, dönem şema damgalarını görüntüleme, ayrıntılı log seviyesi ve log/veri klasörlerini açma. Üretim sürümünde bu bölüm yer almaz." },
             });
             await Helpers.DialogHelper.ShowCenteredAsync(dialog);
         }

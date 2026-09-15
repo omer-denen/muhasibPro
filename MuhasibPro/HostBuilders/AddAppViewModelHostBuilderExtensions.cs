@@ -21,6 +21,7 @@ public static class AddAppViewModelHostBuilderExtensions
             services.AddSingleton<QuickLoginAccountsViewModel>();
             services.AddTransient<FirmaShellViewModel>();
             services.AddTransient<DenetimMasasiViewModel>();
+            services.AddTransient<GelistiriciAraclariViewModel>();
             services.AddTransient<TenantDatabaseUpdateViewModel>();
             services.AddTransient<ShellViewModel>();
 

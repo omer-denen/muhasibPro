@@ -32,6 +32,8 @@ namespace MuhasibPro.HostBuilders
                 services.AddSingleton<IMessageService, MessageService>();
                 services.AddSingleton<MuhasibPro.Business.Contracts.UIServices.CommonServices.Events.IEventBus, MuhasibPro.Business.Services.CommonServices.EventBus>();
                 services.AddSingleton<INotificationService, NotificationService>();
+                // Faz 6.82: yol açıcı (OS kabuğu — App katmanı implementasyonu).
+                services.AddSingleton<IYolAciciService, YolAciciService>();
 
 
 

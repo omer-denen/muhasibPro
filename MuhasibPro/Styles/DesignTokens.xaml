@@ -49,6 +49,11 @@
             <!-- Liste satiri hover perdesi — Light: siyah (tema-farkinda; ControlFillColorSecondary Light'ta gorunmuyordu) -->
             <Color x:Key="MuhasibHoverOverlayColor">#14000000</Color>
 
+            <!-- ?/geri daire ikon butonu dolgusu — Light: mevcut SolidBackgroundFillColor* (tam opak) karsiligi -->
+            <Color x:Key="MuhasibCircleIconArkaplanColor">#F3F3F3</Color>
+            <Color x:Key="MuhasibCircleIconArkaplanHoverColor">#F9F9F9</Color>
+            <Color x:Key="MuhasibCircleIconArkaplanPressedColor">#EEEEEE</Color>
+
             <!-- Kural 17 zemin perdesi — Light: bugunku %35 tint'in birebir karsiligi (#59≈0.35 x #F3F3F3) -->
             <SolidColorBrush x:Key="MuhasibZeminPerdeBrush" Color="#59F3F3F3" />
 
@@ -84,6 +89,11 @@
 
             <!-- Liste satiri hover perdesi — Dark: beyaz (tema-farkinda) -->
             <Color x:Key="MuhasibHoverOverlayColor">#1AFFFFFF</Color>
+
+            <!-- ?/geri daire ikon butonu dolgusu — Dark: ana border yuzeyiyle uyumlu yumusak gri (SolidBackgroundFillColorBase #202020 cok siyahti) -->
+            <Color x:Key="MuhasibCircleIconArkaplanColor">#333A3E</Color>
+            <Color x:Key="MuhasibCircleIconArkaplanHoverColor">#3F464B</Color>
+            <Color x:Key="MuhasibCircleIconArkaplanPressedColor">#2A3033</Color>
 
             <!-- Kural 17 zemin perdesi — Dark: ayni light.jpg uzerine koyu perde (≈%85 x #202020) -->
             <SolidColorBrush x:Key="MuhasibZeminPerdeBrush" Color="#D9202020" />
@@ -134,6 +144,11 @@
 
     <!-- Liste satiri hover perdesi (tema-farkinda: Light siyah / Dark beyaz) -->
     <SolidColorBrush x:Key="MuhasibHoverOverlayBrush" Color="{ThemeResource MuhasibHoverOverlayColor}" />
+
+    <!-- ?/geri daire ikon butonu dolgusu (tam opak, tema-farkinda: arkadaki border cizgisi gorunmesin) -->
+    <SolidColorBrush x:Key="MuhasibCircleIconArkaplanBrush" Color="{ThemeResource MuhasibCircleIconArkaplanColor}" />
+    <SolidColorBrush x:Key="MuhasibCircleIconArkaplanHoverBrush" Color="{ThemeResource MuhasibCircleIconArkaplanHoverColor}" />
+    <SolidColorBrush x:Key="MuhasibCircleIconArkaplanPressedBrush" Color="{ThemeResource MuhasibCircleIconArkaplanPressedColor}" />
 
     <!-- Durum — Danger hover/pressed (Buttons.xaml DangerButtonStyle + DismissButtonStyle icin) -->
     <SolidColorBrush x:Key="MuhasibDangerHoverBrush" Color="#A32417" />

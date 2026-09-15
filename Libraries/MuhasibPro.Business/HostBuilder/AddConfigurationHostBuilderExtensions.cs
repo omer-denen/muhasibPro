@@ -20,12 +20,10 @@ namespace MuhasibPro.Business.HostBuilder
                 logging.AddConsole();
                 logging.AddDebug();
 
-                // Basit file logging
-                var logPath = Path.Combine(Directory.GetCurrentDirectory(), "logs");
-                Directory.CreateDirectory(logPath);
-                var logFile = Path.Combine(logPath, $"muhasib-{DateTime.Now:yyyyMMdd}.txt");
+                // Basit file logging (yol tek kaynak: LogDosyaYolu — geliştirici araçları da aynı yeri okur)
+                Directory.CreateDirectory(LogDosyaYolu.Klasor);
 
-                logging.AddProvider(new FileLoggerProvider(logFile));
+                logging.AddProvider(new FileLoggerProvider(LogDosyaYolu.BugununDosyasi));
             });
 
             return host;

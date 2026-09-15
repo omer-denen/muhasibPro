@@ -64,19 +64,33 @@ public class DenetimMasasiTests
     }
 
     [Fact]
-    public void Menuler_YediBolum_VarsayilanGirisSecili()
+    public void Menuler_SekizBolum_VarsayilanGirisSecili()
     {
         var vm = new DenetimMasasiViewModel(OrtakServisler().Object, FirmaServisi().Object);
 
-        vm.Menuler.Should().HaveCount(7);
+        vm.Menuler.Should().HaveCount(8);
         vm.Menuler.Select(m => m.Bolum).Should().ContainInOrder(
             AyarBolumu.GirisPaneli, AyarBolumu.Gorunum, AyarBolumu.Giris, AyarBolumu.Firma,
-            AyarBolumu.Veritabani, AyarBolumu.Donem, AyarBolumu.Guncelleme);
+            AyarBolumu.Veritabani, AyarBolumu.Donem, AyarBolumu.Guncelleme, AyarBolumu.GelistiriciAraclari);
         var veritabani = vm.Menuler.Single(m => m.Bolum == AyarBolumu.Veritabani);
         veritabani.AltMenuler.Should().BeEmpty("Veritabanı tek view: Sistem + Dönem grupları sayfa içindedir");
-        vm.GorunurMenuler.Should().HaveCount(7, "demo yönetici admin-dev: tümü görünür");
+        vm.GorunurMenuler.Should().HaveCount(7, "dev-mode sağlayıcısı yokken Geliştirici Araçları gizlidir");
+        vm.GorunurMenuler.Should().NotContain(m => m.Bolum == AyarBolumu.GelistiriciAraclari);
         vm.SeciliMenu.Should().NotBeNull();
         vm.SeciliMenu.Bolum.Should().Be(AyarBolumu.GirisPaneli);
+    }
+
+    [Fact]
+    public void GelistiriciAraclari_DevModeAcik_Gorunur()
+    {
+        var devMode = new Mock<MuhasibPro.Business.Contracts.UIServices.IDevModeProvider>();
+        devMode.SetupGet(d => d.IsEnabled).Returns(true);
+        devMode.SetupGet(d => d.Etiket).Returns("DEV");
+
+        var vm = new DenetimMasasiViewModel(OrtakServisler().Object, FirmaServisi().Object, devMode: devMode.Object);
+
+        vm.GorunurMenuler.Should().HaveCount(8);
+        vm.GorunurMenuler.Should().Contain(m => m.Bolum == AyarBolumu.GelistiriciAraclari);
     }
 
     [Fact]

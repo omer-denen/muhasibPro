@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="MuhasibPro.Views.DenetimMasasi.Bolumler.GelistiriciAraclariPaneli"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:converters="using:MuhasibPro.Converters"
+    xmlns:devmodel="using:MuhasibPro.Business.DTOModel.DevModel"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
+        <converters:BoolToVisibilityConverter x:Key="FalseToVis" TrueValue="Collapsed" FalseValue="Visible" />
+    </UserControl.Resources>
+
+    <!-- Geliştirici Araçları (yalnız DEBUG): Windows Ayarlar dili — bölüm başlıkları + SettingsCard.
+         DataContext = GelistiriciAraclariViewModel (sayfa verir). -->
+    <StackPanel Spacing="24">
+
+        <!-- Uyarı bandı: bu bölüm yalnız geliştirme derlemesinde görünür -->
+        <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                CornerRadius="{StaticResource ControlCornerRadius}" Padding="12">
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon Glyph="{StaticResource IconAlertTriangle}" FontSize="16"
+                          Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Top" />
+                <TextBlock Grid.Column="1" TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}"
+                           Text="Bu bölüm yalnızca geliştirme (DEBUG) derlemesinde görünür ve üretim sürümünde yer almaz. Her işlem onay ister ve Sistem günlüğüne DEV kaynağıyla yazılır." />
+                <Button Grid.Column="2" Command="{Binding YardimCommand}" AutomationProperties.AutomationId="GelistiriciAraclariYardim"
+                        Style="{StaticResource CircleIconButtonStyle}"
+                        ToolTipService.ToolTip="Geliştirici Araçları — Yardım">
+                    <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="14" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Kurulum Kimliği -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Kurulum Kimliği" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
+
+            <controls:SettingsCard Header="Kurulum kimliği" Description="Bu uygulama kurulumunu tanımlayan kimlik.">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconShield}" />
+                </controls:SettingsCard.HeaderIcon>
+                <TextBlock Text="{Binding KurulumIdKisa}" FontFamily="Consolas"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+            </controls:SettingsCard>
+
+            <controls:SettingsCard Header="Makine kimliği" Description="{Binding MachineGuid}">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconHardDrive}" />
+                </controls:SettingsCard.HeaderIcon>
+                <TextBlock Text="{Binding MakineIdKisa}" FontFamily="Consolas"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+            </controls:SettingsCard>
+
+            <controls:SettingsCard Header="Uygulama şema sürümü" Description="Bu derlemenin dağıttığı veritabanı şema sürümü (SemVer).">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconLayers}" />
+                </controls:SettingsCard.HeaderIcon>
+                <TextBlock Text="{Binding UygulamaSemVer}" FontFamily="Consolas"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+            </controls:SettingsCard>
+
+            <controls:SettingsCard Header="Kimliği onar" Description="Makinesi bu kurulumla aynı olan dönem damgalarını güncel kimliğe eşitler.">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconWrench}" />
+                </controls:SettingsCard.HeaderIcon>
+                <Button Content="Onar" Command="{Binding KimligiOnarCommand}"
+                        Style="{StaticResource MuhasibPrimaryButtonStyle}" MinWidth="120" />
+            </controls:SettingsCard>
+
+            <controls:SettingsCard Header="Transfer taraması" Description="Taşınmış-veri taramasını elle çalıştırır (açılışta otomatik çalışır).">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconSearch}" />
+                </controls:SettingsCard.HeaderIcon>
+                <Button Content="Tara" Command="{Binding TransferTaraCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" MinWidth="120" />
+            </controls:SettingsCard>
+
+            <controls:SettingsCard Header="Kimliği sıfırla" Description="Yeni kurulum kimliği üretir ve bu makinedeki tüm dönemleri yeniden damgalar. Yıkıcıdır.">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconAlertTriangle}" />
+                </controls:SettingsCard.HeaderIcon>
+                <Button Content="Sıfırla" Command="{Binding KimligiSifirlaCommand}"
+                        Style="{StaticResource DangerButtonStyle}" MinWidth="120" />
+            </controls:SettingsCard>
+        </StackPanel>
+
+        <!-- Dönem Şema Damgaları -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Dönem Şema Damgaları" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
+
+            <controls:SettingsCard Header="{Binding DamgaOzeti}" Description="Her dönem veritabanının şema sürümü ve güncel kimlikle eşleşme durumu.">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconDatabase}" />
+                </controls:SettingsCard.HeaderIcon>
+                <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MinWidth="420">
+                    <StackPanel>
+                        <Grid ColumnSpacing="16" Padding="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Veritabanı" Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="Şema" Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock Grid.Column="2" Text="Kimlik" Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding TenantDamgalari}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="devmodel:DevTenantDamgaModel">
+                                    <Grid ColumnSpacing="16" Padding="0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{x:Bind DatabaseName}" FontFamily="Consolas" FontSize="11"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind SemVer}" FontFamily="Consolas" FontSize="11"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock Grid.Column="2" Text="{x:Bind KimlikMetni}" FontSize="11"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </controls:SettingsCard>
+        </StackPanel>
+
+        <!-- Günlük ve Klasörler -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Günlük ve Klasörler" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
+
+            <controls:SettingsCard Header="Ayrıntılı log" Description="Dosya günlüğünü Debug seviyesine indirir; kapatınca Information'a döner.">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconTerminal}" />
+                </controls:SettingsCard.HeaderIcon>
+                <ToggleSwitch IsOn="{Binding AyrintiliLog, Mode=TwoWay}" />
+            </controls:SettingsCard>
+
+            <controls:SettingsCard Header="Log klasörünü aç" Description="{Binding LogKlasoru}">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconArchive}" />
+                </controls:SettingsCard.HeaderIcon>
+                <Button Content="Aç" Command="{Binding LogKlasoruAcCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" MinWidth="120" />
+            </controls:SettingsCard>
+
+            <controls:SettingsCard Header="Veri klasörünü aç" Description="{Binding VeriKlasoru}">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconDatabase}" />
+                </controls:SettingsCard.HeaderIcon>
+                <Button Content="Aç" Command="{Binding VeriKlasoruAcCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}" MinWidth="120" />
+            </controls:SettingsCard>
+        </StackPanel>
+
+        <!-- İşlem durumu (Kural 11: ring + sonuç) -->
+        <StackPanel Orientation="Horizontal" Spacing="10"
+                    Visibility="{Binding IsYukleniyor, Converter={StaticResource TrueToVis}}">
+            <ProgressRing IsActive="{Binding IsYukleniyor}" Width="18" Height="18" />
+            <TextBlock Text="İşlem sürüyor…" VerticalAlignment="Center"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <TextBlock Text="{Binding SonucMesaji}" TextWrapping="Wrap"
+                   Visibility="{Binding SonucVar, Converter={StaticResource TrueToVis}}"
+                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+    </StackPanel>
+</UserControl>

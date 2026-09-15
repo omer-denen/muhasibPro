@@ -72,5 +72,47 @@ namespace MuhasibPro.Data.Database.Common.Helpers
 
             return result;
         }
+
+        public async Task<IReadOnlyList<TenantDamgaInfo>> GetStampsAsync()
+        {
+            var result = new List<TenantDamgaInfo>();
+            try
+            {
+                var dbNames = await _sistemDb.MaliDonemler
+                    .AsNoTracking()
+                    .Select(md => md.DatabaseName)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                foreach (var dbName in dbNames)
+                {
+                    if (string.IsNullOrWhiteSpace(dbName) || !_appPaths.TenantDatabaseFileExists(dbName))
+                        continue;
+
+                    try
+                    {
+                        using var ctx = _dbFactory.CreateDbContext(dbName);
+                        var ver = await ctx.TenantDatabaseVersiyonlar
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(v => v.DatabaseName == dbName)
+                            .ConfigureAwait(false);
+                        if (ver == null)
+                            continue;
+
+                        result.Add(new TenantDamgaInfo
+                        {
+                            DatabaseName = ver.DatabaseName,
+                            KurulumId = ver.KurulumId,
+                            MakineId = ver.MakineId,
+                            SemVer = ver.CurrentTenantDbVersion
+                        });
+                    }
+                    catch { /* dosya başına best-effort */ }
+                }
+            }
+            catch { /* best-effort */ }
+
+            return result;
+        }
     }
 }

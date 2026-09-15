@@ -2,6 +2,7 @@ using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
+using MuhasibPro.Business.Contracts.SistemServices.DevServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Domain.Common;
@@ -21,7 +22,9 @@ public enum AyarBolumu
     Firma,
     Veritabani,
     Donem,
-    Guncelleme
+    Guncelleme,
+    /// <summary>Geliştirici Araçları (yalnız DEBUG; Faz 6.82).</summary>
+    GelistiriciAraclari
 }
 
 /// <summary>FirmaShell içi Ayarlar sekmesinin orkestratörü (Denetim Masası).
@@ -30,6 +33,7 @@ public class DenetimMasasiViewModel : ViewModelBase
 {
     private readonly IFirmaService _firmaService;
     private readonly IAuthenticationService _auth;
+    private readonly IDevModeProvider _devMode;
 
     /// <summary>Görünüm & Bildirim bölümü (AppPlatform, kullanıcı bazlı).</summary>
     public AppPlatformAyarlarViewModel Gorunum { get; }
@@ -52,6 +56,9 @@ public class DenetimMasasiViewModel : ViewModelBase
     /// <summary>Dönem bölümü (M5 Tenant, global şablon).</summary>
     public DonemAyarlarViewModel Donem { get; }
 
+    /// <summary>Geliştirici Araçları bölümü (yalnız DEBUG; Faz 6.82).</summary>
+    public GelistiriciAraclariViewModel GelistiriciAraclari { get; }
+
     public DenetimMasasiViewModel(
         ICommonServices commonServices,
         IFirmaService firmaService,
@@ -62,10 +69,14 @@ public class DenetimMasasiViewModel : ViewModelBase
         IEntityRegistrySettingsProvider kayitSaglayici = null,
         ITenantSettingsProvider donemSaglayici = null,
         ISistemDatabaseService sistemDb = null,
-        IUpdateService updateService = null) : base(commonServices)
+        IUpdateService updateService = null,
+        IDevModeProvider devMode = null,
+        IDevAraclariService devAraclari = null,
+        IYolAciciService yolAcici = null) : base(commonServices)
     {
         _firmaService = firmaService;
         _auth = auth;
+        _devMode = devMode;
         Gorunum = new AppPlatformAyarlarViewModel(commonServices, saglayici);
         Giris = new IdentityAyarlarViewModel(commonServices, kimlikSaglayici, auth);
         YedekSaklama = new YedekSaklamaAyarlarViewModel(commonServices, veritabaniSaglayici, auth);
@@ -73,6 +84,7 @@ public class DenetimMasasiViewModel : ViewModelBase
         FirmaKayit = new FirmaKayitAyarlarViewModel(commonServices, kayitSaglayici, auth);
         Donem = new DonemAyarlarViewModel(commonServices, donemSaglayici, auth);
         GirisPaneli = new GirisDashboardViewModel(commonServices, firmaService, auth, sistemDb, updateService);
+        GelistiriciAraclari = new GelistiriciAraclariViewModel(commonServices, devMode, devAraclari, yolAcici);
         GirisPaneli.BolumAcildi += b => SeciliBolum = b;
         Menuler = new ObservableCollection<AyarlarNavigationMenu>(AyarlarNavigationMenu.VarsayilanMenuler());
         GorunurMenuleriTazele();
@@ -185,8 +197,13 @@ public class DenetimMasasiViewModel : ViewModelBase
         return false;
     }
 
-    /// <summary>Bölümün bu kullanıcıya görünürlüğü (şu an tümü açık; ör. Giris/Guncelleme yöneticiye daraltılabilir).</summary>
-    private bool MenuGorunurMu(AyarBolumu bolum) => true;
+    /// <summary>Bölümün bu kullanıcıya görünürlüğü (Geliştirici Araçları yalnız DEBUG kapısında).</summary>
+    private bool MenuGorunurMu(AyarBolumu bolum)
+    {
+        if (bolum == AyarBolumu.GelistiriciAraclari)
+            return _devMode?.IsEnabled ?? false;
+        return true;
+    }
 
     /// <summary>Arama süzgeci (başlık veya açıklamada geçer; boş arama hepsini geçirir).</summary>
     private static bool AramaUyarMi(AyarlarNavigationMenu menu, string arama)
