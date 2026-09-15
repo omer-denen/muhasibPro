@@ -3,114 +3,26 @@ using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
-using MuhasibPro.Business.DTOModel;
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.ResultModels.TenantResultModels;
-using MuhasibPro.Domain.Enum.DatabaseEnum;
 using MuhasibPro.ViewModels.Infrastructure.Common;
 using MuhasibPro.ViewModels.Infrastructure.ViewModels;
 using MuhasibPro.ViewModels.ViewModels.Shell;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Input;
 
 namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
 {
-    public class TenantDatabaseUpdateArgs
-    {
-        public string DatabaseName { get; set; } = string.Empty;
-        public FirmaModel Firma { get; set; }
-        public MaliDonemModel MaliDonem { get; set; }
-    }
-
-    /// <summary>Tek güncelleme adımı (Yedek/Göç/Doğrulama/Geri alma) — saf durum taşıyıcı.</summary>
-    public class TenantUpdateStep : ObservableObject
-    {
-        public TenantUpdateStep(string number, string title)
-        {
-            Number = number;
-            Title = title;
-        }
-
-        public string Number { get; }
-        public string Title { get; }
-
-        private string _detail = "Bekliyor";
-        public string Detail { get => _detail; private set => Set(ref _detail, value); }
-
-        private bool _isRunning;
-        public bool IsRunning { get => _isRunning; private set => Set(ref _isRunning, value); }
-
-        private bool _isDone;
-        public bool IsDone { get => _isDone; private set => Set(ref _isDone, value); }
-
-        private bool _isFaulted;
-        public bool IsFaulted { get => _isFaulted; private set => Set(ref _isFaulted, value); }
-
-        public bool IsPending => !IsRunning && !IsDone && !IsFaulted;
-
-        public void MarkRunning(string detail)
-        {
-            Detail = detail;
-            IsFaulted = false;
-            IsDone = false;
-            IsRunning = true;
-            NotifyPropertyChanged(nameof(IsPending));
-        }
-
-        public void MarkDone(string detail)
-        {
-            Detail = detail;
-            IsRunning = false;
-            IsDone = true;
-            NotifyPropertyChanged(nameof(IsPending));
-        }
-
-        public void MarkFault(string detail)
-        {
-            Detail = detail;
-            IsRunning = false;
-            IsFaulted = true;
-            NotifyPropertyChanged(nameof(IsPending));
-        }
-    }
-
-    /// <summary>Tablo değişikliğinin ekrana hazır hali (Expander başlık + kolon grupları).</summary>
-    public class TenantTableDisplay : ObservableObject
-    {
-        public TenantTableDisplay(MuhasibPro.Data.Contracts.Database.Common.Helpers.TenantTableChange change)
-        {
-            Table = change.Table;
-            TitleLine = change.IsCreated ? $"'{change.Table}' tablosu oluşturuldu" : $"'{change.Table}' tablosu güncellemesi";
-            Added = new List<string>(change.AddedColumns);
-            Updated = new List<string>(change.AlteredColumns);
-            Removed = new List<string>(change.RemovedColumns);
-        }
-
-        public string Table { get; }
-        public string TitleLine { get; }
-        public List<string> Added { get; }
-        public List<string> Updated { get; }
-        public List<string> Removed { get; }
-        public bool HasAdded => Added.Count > 0;
-        public bool HasUpdated => Updated.Count > 0;
-        public bool HasRemoved => Removed.Count > 0;
-    }
-
     /// <summary>
-    /// Veritabanı güncelleme sayfası: bilgi + Yedek→Göç→Doğrulama (+otomatik geri alma) + sonuç.
-    /// Tüm iş Business servislerinde; burada yalnız akış + ekran durumu.
+    /// Veritabanı güncelleme sayfasının yüzü: bağlam/yükleme durumu, komutlar, navigasyon ve yardım.
+    /// Adım motoru <see cref="TenantUpdateAkisYoneticisi"/>'ndedir; bu sınıf yalnız ekranı yönetir.
     /// </summary>
     public class TenantDatabaseUpdateViewModel : ViewModelBase
     {
         private readonly ITenantDatabaseUpdateService _updateService;
-        private readonly ITenantSQLiteDatabaseOperationService _operations;
         private readonly ILocalSettingsService _settings;
         private readonly IFirmaWithMaliDonemSelectedService _selectedService;
-
-        private TenantUpdateStep _backupStep;
-        private TenantUpdateStep _migrateStep;
-        private TenantUpdateStep _validateStep;
-        private TenantUpdateStep _restoreStep;
 
         public TenantDatabaseUpdateViewModel(
             ICommonServices commonServices,
@@ -120,11 +32,11 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
             IFirmaWithMaliDonemSelectedService selectedService) : base(commonServices)
         {
             _updateService = updateService;
-            _operations = operations;
             _settings = settings;
             _selectedService = selectedService;
+            Akis = new TenantUpdateAkisYoneticisi(updateService, operations);
+            Akis.PropertyChanged += OnAkisPropertyChanged;
 
-            Steps = new ObservableCollection<TenantUpdateStep>();
             StartUpdateCommand = new AsyncRelayCommand(ExecuteStartAsync, () => CanStart);
             ContinueCommand = new AsyncRelayCommand(ExecuteContinueAsync, () => ShowContinue);
             GoBackCommand = new RelayCommand(ExecuteGoBack);
@@ -133,74 +45,73 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
         public TenantDatabaseUpdateArgs Args { get; private set; } = new();
         public TenantUpdateCheckResult Check { get; private set; } = new();
 
+        /// <summary>Adım motoru (Yedek→Göç→Doğrulama + oto geri alma + determinate ilerleme).</summary>
+        public TenantUpdateAkisYoneticisi Akis { get; }
+
         public string FirmaUnvani => Args.Firma?.KisaUnvani ?? "—";
         public string DonemYili => Args.MaliDonem != null ? Args.MaliDonem.MaliYil.ToString() : "—";
-
-        public ObservableCollection<TenantUpdateStep> Steps { get; }
 
         private List<TenantTableDisplay> _tableDisplays = new();
         public List<TenantTableDisplay> TableDisplays
         {
             get => _tableDisplays;
-            private set => Set(ref _tableDisplays, value);
+            private set
+            {
+                if (Set(ref _tableDisplays, value))
+                    NotifyPropertyChanged(nameof(HasTableDisplays));
+            }
         }
+
+        public bool HasTableDisplays => _tableDisplays.Count > 0;
 
         private string _headline = string.Empty;
         public string Headline { get => _headline; private set => Set(ref _headline, value); }
 
-        private bool _checkLoaded;
-        public bool CheckLoaded { get => _checkLoaded; private set => Set(ref _checkLoaded, value); }
+        private bool _isChecking;
+        public bool IsChecking { get => _isChecking; private set => Set(ref _isChecking, value); }
 
-        private bool _isRunning;
-        public bool IsRunning
+        private bool _checkYuklendi;
+        public bool CheckYuklendi
         {
-            get => _isRunning;
+            get => _checkYuklendi;
             private set
             {
-                if (Set(ref _isRunning, value))
-                    RefreshStartCommand();
-            }
-        }
-
-        private bool _isCompleted;
-        public bool IsCompleted
-        {
-            get => _isCompleted;
-            private set
-            {
-                if (Set(ref _isCompleted, value))
+                if (Set(ref _checkYuklendi, value))
                 {
-                    RefreshStartCommand();
-                    NotifyPropertyChanged(nameof(ShowContinue));
-                    (ContinueCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
+                    NotifyPropertyChanged(nameof(IsUpToDate));
+                    NotifyPropertyChanged(nameof(IsCheckFailed));
                 }
             }
         }
 
-        private bool _restoredFromBackup;
-        public bool RestoredFromBackup { get => _restoredFromBackup; private set => Set(ref _restoredFromBackup, value); }
-
-        private string _backupPath = string.Empty;
-        public string BackupPath { get => _backupPath; private set => Set(ref _backupPath, value); }
-
-        private string _errorMessage = string.Empty;
-        public string ErrorMessage
+        private bool _checkLoaded;
+        public bool CheckLoaded
         {
-            get => _errorMessage;
-            private set
-            {
-                if (Set(ref _errorMessage, value))
-                    NotifyPropertyChanged(nameof(HasError));
-            }
+            get => _checkLoaded;
+            private set { if (Set(ref _checkLoaded, value)) RefreshCommands(); }
         }
 
-        public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+        private string _checkMessage = string.Empty;
+        public string CheckMessage { get => _checkMessage; private set => Set(ref _checkMessage, value); }
 
-        private string _resultMessage = string.Empty;
-        public string ResultMessage { get => _resultMessage; private set => Set(ref _resultMessage, value); }
+        public bool IsUpToDate => CheckYuklendi && !IsChecking && Check.CheckSucceeded && !Check.NeedsUpdate;
+        public bool IsCheckFailed => CheckYuklendi && !IsChecking && !Check.CheckSucceeded;
 
-        public bool CanStart => CheckLoaded && !IsRunning && !IsCompleted;
-        public bool ShowContinue => IsCompleted && !HasError;
+        public bool CanStart => CheckLoaded && !Akis.IsRunning && !Akis.IsCompleted;
+        public bool ShowContinue => Akis.IsCompleted && !Akis.HasError;
+        public bool ShowSuccess => ShowContinue && !Akis.RestoredFromBackup;
+        public bool ShowRestored => ShowContinue && Akis.RestoredFromBackup;
+
+        // Adım motorunun ekrana yansıyan durumu (test/komut erişimi için delege).
+        public ObservableCollection<TenantUpdateStep> Steps => Akis.Steps;
+        public int ProgressYuzde => Akis.ProgressYuzde;
+        public string AktifAdim => Akis.AktifAdim;
+        public bool IsRunning => Akis.IsRunning;
+        public bool IsCompleted => Akis.IsCompleted;
+        public bool RestoredFromBackup => Akis.RestoredFromBackup;
+        public string ErrorMessage => Akis.ErrorMessage;
+        public bool HasError => Akis.HasError;
+        public string ResultMessage => Akis.ResultMessage;
 
         public ICommand StartUpdateCommand { get; }
         public ICommand ContinueCommand { get; }
@@ -212,32 +123,40 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
         public ICommand YardimCommand => _yardimCommand ??= new AsyncRelayCommand(YardimGoster);
 
         private async Task YardimGoster()
-        {
-            await DialogService.ShowYardimAsync("Veritabanı Güncelleme — Yardım", new List<YardimMaddesiDto>
-            {
-                new() { Baslik = "Bu sayfa ne yapar?", Aciklama = "Seçili mali dönemin veritabanı şemasını yeni sürüme günceller. Akış üç adımdır: önce güvenlik yedeği alınır, sonra bekleyen göçler uygulanır, en son bağlantı ve şema doğrulanır." },
-                new() { Baslik = "Sürüm şeridi", Aciklama = "Solda mevcut, sağda güncellenecek şema sürümü; yanındaki rozet bekleyen göç sayısını gösterir. Göç yoksa işlem gerekmez." },
-                new() { Baslik = "Değişiklik listesi", Aciklama = "Hangi tabloya hangi kolonların eklendiğini/güncellendiğini gösterir. 'Kaldırılanlar' satırları yalnızca bilgilendirir — veri silinmez." },
-                new() { Baslik = "İşlem adımları", Aciklama = "Yedek → Göç → Doğrulama sırayla işlenir; her adımın altında o anki durum yazar. Doğrulama geçilemezse dördüncü adım 'Geri alma' açılır ve yedekten otomatik dönülür." },
-                new() { Baslik = "'Yedekle ve Güncelle'", Aciklama = "İşlemi başlatır. Buton yalnız göç gerekiyorsa ve işlem çalışmıyorken aktiftir. Hata olursa kırmızı bantta neden yazar; geri alma da başarısızsa yedeğin yolu verilir (elle geri yükleme için)." },
-                new() { Baslik = "'Çalışma Alanına Geç'", Aciklama = "Doğrulama başarılı olduğunda görünür. Seçimi kaydeder, pencereyi kapatır ve ana ekrandaki 'Devam Et' ile çalışma alanına geçilir." },
-                new() { Baslik = "'Geri'", Aciklama = "Hiçbir değişiklik yapmadan firma seçim ekranına döner." },
-            });
-        }
+            => await DialogService.ShowYardimAsync("Veritabanı Güncelleme — Yardım", TenantDatabaseUpdateYardim.Maddeler());
 
         public async Task LoadAsync(TenantDatabaseUpdateArgs args)
         {
             Args = args ?? new TenantDatabaseUpdateArgs();
             NotifyPropertyChanged(nameof(FirmaUnvani));
             NotifyPropertyChanged(nameof(DonemYili));
-            ResetSteps();
+            CheckYuklendi = false;
+            CheckLoaded = false;
+            CheckMessage = string.Empty;
+            Akis.Reset();
 
-            Check = await _updateService.CheckUpdateRequiredAsync(Args.DatabaseName);
-            NotifyPropertyChanged(nameof(Check));
-            if (!Check.CheckSucceeded || !Check.NeedsUpdate)
+            IsChecking = true;
+            try
             {
-                ErrorMessage = "Bu dönem güncel — işlem gerekmiyor.";
-                RefreshStartCommand();
+                Check = await _updateService.CheckUpdateRequiredAsync(Args.DatabaseName);
+            }
+            finally
+            {
+                IsChecking = false;
+                CheckYuklendi = true;
+            }
+            NotifyPropertyChanged(nameof(Check));
+
+            if (!Check.CheckSucceeded)
+            {
+                CheckMessage = "Veritabanı durumu okunamadı — bağlantıyı kontrol edip tekrar deneyin.";
+                RefreshCommands();
+                return;
+            }
+            if (!Check.NeedsUpdate)
+            {
+                CheckMessage = "Bu dönem güncel — işlem gerekmiyor.";
+                RefreshCommands();
                 return;
             }
 
@@ -245,112 +164,30 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
             TableDisplays = Check.TableChanges.Select(t => new TenantTableDisplay(t)).ToList();
             NotifyPropertyChanged(nameof(TableDisplays));
             CheckLoaded = true;
-            RefreshStartCommand();
         }
 
-        private void RefreshStartCommand()
+        private void OnAkisPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(e.PropertyName))
+                NotifyPropertyChanged(e.PropertyName);
+            RefreshCommands();
+        }
+
+        private void RefreshCommands()
         {
             NotifyPropertyChanged(nameof(CanStart));
+            NotifyPropertyChanged(nameof(ShowContinue));
+            NotifyPropertyChanged(nameof(ShowSuccess));
+            NotifyPropertyChanged(nameof(ShowRestored));
             (StartUpdateCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
-        }
-
-        private void ResetSteps()
-        {
-            Steps.Clear();
-            _restoreStep = null;
-            _backupStep = new TenantUpdateStep("1", "Yedek");
-            _migrateStep = new TenantUpdateStep("2", "Göç");
-            _validateStep = new TenantUpdateStep("3", "Doğrulama");
-            Steps.Add(_backupStep);
-            Steps.Add(_migrateStep);
-            Steps.Add(_validateStep);
-            ErrorMessage = string.Empty;
-            ResultMessage = string.Empty;
-            RestoredFromBackup = false;
-            BackupPath = string.Empty;
-            IsCompleted = false;
+            (ContinueCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
         }
 
         private async Task ExecuteStartAsync()
         {
             if (!CanStart)
                 return;
-            IsRunning = true;
-            ErrorMessage = string.Empty;
-            ResultMessage = string.Empty;
-
-            // 1. Güncelleme öncesi yedek (bilinen geri dönüş noktası)
-            _backupStep.MarkRunning("VACUUM INTO ile güvenlik yedeği alınıyor...");
-            var backup = await _operations.CreateBackupAsync(Args.DatabaseName, DatabaseBackupType.Migration);
-            if (backup?.Success != true || backup.Data == null || !backup.Data.IsBackupComleted || string.IsNullOrEmpty(backup.Data.BackupFilePath))
-            {
-                Fail(_backupStep, "Yedek alınamadı: " + (backup?.Message ?? "bilinmeyen hata"));
-                return;
-            }
-            BackupPath = backup.Data.BackupFilePath;
-            _backupStep.MarkDone("Yedek hazır: " + backup.Data.BackupFileName);
-
-            // 2. Göç (yedek-önce-göç + durum yayını servis içinde)
-            _migrateStep.MarkRunning("Göçler uygulanıyor...");
-            var switched = await _updateService.SwitchAndPublishAsync(Args.DatabaseName, Args.Firma, Args.MaliDonem);
-            if (!switched.Success)
-            {
-                _migrateStep.MarkFault(switched.ErrorMessage);
-                await AutoRestoreAsync("Geçiş başarısız: " + switched.ErrorMessage);
-                return;
-            }
-            _migrateStep.MarkDone("Sürüm " + Check.TargetVersion + " uygulandı.");
-
-            // 3. Doğrulama
-            _validateStep.MarkRunning("Bağlantı + şema + bekleyen göç kontrolü...");
-            if (await _updateService.ValidateAsync(Args.DatabaseName))
-            {
-                _validateStep.MarkDone("Veritabanı sağlıklı ve güncel.");
-                FinishSuccess(Args.MaliDonem.MaliYil + " dönemi güncellendi ve doğrulandı.");
-                return;
-            }
-
-            _validateStep.MarkFault("Doğrulama geçilemedi.");
-            await AutoRestoreAsync("Doğrulama geçilemedi.");
-        }
-
-        private async Task AutoRestoreAsync(string reason)
-        {
-            if (_restoreStep == null)
-            {
-                _restoreStep = new TenantUpdateStep("4", "Geri alma");
-                Steps.Add(_restoreStep);
-            }
-            _restoreStep.MarkRunning("Güncelleme öncesi yedeğe dönülüyor...");
-
-            var restored = await _operations.RestoreBackupAsync(Args.DatabaseName, BackupPath);
-            if (restored?.Success == true && restored.Data != null && restored.Data.IsRestoreSuccess
-                && await _updateService.ValidateAsync(Args.DatabaseName))
-            {
-                _restoreStep.MarkDone("Yedekten geri alındı ve doğrulandı.");
-                RestoredFromBackup = true;
-                FinishSuccess(reason + " Güncelleme öncesi yedekten geri alındı — veriler korunuyor.");
-                return;
-            }
-
-            _restoreStep.MarkFault("Geri alma başarısız.");
-            Fail(_restoreStep, reason + " Otomatik geri alma da başarısız — Mali Dönem Yönetim → Dönem Yedekleri → Geri Yükle ile manuel alın: " + BackupPath);
-        }
-
-        private void FinishSuccess(string message)
-        {
-            ResultMessage = message;
-            IsRunning = false;
-            IsCompleted = true;
-        }
-
-        private void Fail(TenantUpdateStep step, string message)
-        {
-            if (step != null && !step.IsFaulted)
-                step.MarkFault(message);
-            ErrorMessage = message;
-            IsRunning = false;
-            NotifyPropertyChanged(nameof(CanStart));
+            await Akis.RunAsync(Args, Check);
         }
 
         private async Task ExecuteContinueAsync()
@@ -373,7 +210,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
             }
             catch (Exception ex)
             {
-                ErrorMessage = "İşlem sırasında hata: " + ex.Message;
                 await LogSistemExceptionAsync("FirmaDonemSelect", "UpdateContinue", ex);
             }
         }
