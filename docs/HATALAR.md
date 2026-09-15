@@ -2,6 +2,24 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
+## İleri-uyumluluk guard'ı özyineleme riski taşıyordu — sürüm okuması fallback'li metottan (ÇÖZÜLDÜ — 2026-09-16 — Oturum 274)
+- **Belirti:** 6.91-C guard'ı disk sürümünü `GetCurrentDatabaseVersionAsync()` ile okuyordu; bu metot kayıt yoksa `GetSistemDatabaseStateAsync()`'e düşüyor → guard tekrar çağrılıyor → **sonsuz özyineleme (yığın taşması)** riski. Canlıya çıkmadan, uygulama sırasında fark edildi.
+- **Sebep:** Ortak metot "kayıt yoksa state'e düş" fallback'i içeriyordu; guard bu metodu kullanınca çağrı yolunun içine geri döndü.
+- **Çözüm:** Guard ve `InternalInitializeAsync` sürümü **fallback'siz** `ReadStoredSistemVersionAsync()` ile doğrudan okur (`GetCurrentDatabaseVersionAsync` public kaldı). Ders: bir guard/kontrol, çağrılma yolunun içine dönen fallback'li metodu kullanmamalı.
+- Tarih: 2026-09-16
+
+## Muhasebe verisi Velopack app kökünde tutuluyordu — uninstall veriyi siliyordu (ÇÖZÜLDÜ — 2026-09-16 — Oturum 274)
+- **Belirti:** RELEASE veri yolu `%LocalAppData%\MuhasibPro\Databases`; Velopack `%LocalAppData%\{AppId}` (app kökü) **uninstall'da silinir** ve binary klasörü `current` her güncellemede değişir → kaldırma/servis müdahalesi muhasebe verisini götürür.
+- **Sebep:** `ApplicationPaths.GetAppDataFolderPath` `SpecialFolder.LocalApplicationData` kullanıyordu; Velopack app köküyle çakıştı.
+- **Çözüm:** Kök **`%AppData%\MuhasibPro`** (Roaming) yapıldı + tek seferlik taşıma (`IDataPathRelocationService`, açılışta, fail-closed) + eski yolu taşıyan ölü `Paths/*` provider'lar silindi. Canlı kanıt: sentetik eski kurulum taşındı, Login açıldı (`ot274_reloc_login.png`).
+- Tarih: 2026-09-16
+
+## Ön-yedek planı "göç gerektiren dönemler"i güncelleme ÖNCESİ belirleyemez (TASARIM DÜZELTMESİ — 2026-09-16 — Oturum 274)
+- **Belirti:** Plan, güncelleme öncesi yalnız "göç gerektiren dönem DB'leri"nin yedeklenmesini öngörüyordu.
+- **Sebep:** Hangi dönemin göç gerektireceği **yeni migration'lara** bağlı; yeni migration'lar yeni binary'de olduğundan güncelleme öncesi bilinemez.
+- **Çözüm:** Güncelleme öncesi yalnız Sistem.db yedeklenir; dönem yedekleri göç anında (mevcut Yedek→Göç saga'sı) + post-update taramada (6.91-D) alınır. Ders: güncelleme öncesi bilinemeyen bir kümeyi plan şartı yapma; bilgi ancak yeni sürüm çalışırken elde edilir.
+- Tarih: 2026-09-16
+
 ## Durum çubuğu yalnız `ShellView`'de — ana pencere akışında hiç görünmüyor (AÇIK — MİMARİ NOT — 2026-09-15 — Oturum 271)
 - **Belirti:** Yeni Fluent durum çubuğu (`ShellStatusBar`) DetailsWindow'larda görünüyor ama ana pencerede (FirmaShell/MainShell) hiç görünmüyor.
 - **Sebep:** `ShellStatusBar` yalnız `ShellView` içinde. Ana pencere akışı `ShellView`'i kullanmıyor: `SplashNavigator` → `MainFrame.Navigate(LoginView)`, `LoginViewModel.EnterApplication` → `NavigationService.Navigate<FirmaShellViewModel>(...)` yani **doğrudan `FirmaShellView`**. `ShellView` yalnız `NavigationHelper.SetupContentAsync` → `frame.Navigate(typeof(ShellView), args)` ile **DetailsWindow**'larda kullanılıyor. (Chunk-1'den önce de böyleydi.)

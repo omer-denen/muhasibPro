@@ -27,6 +27,7 @@ public static class AddDbManagerHostBuilderExtensions
                 // ========== 1. SEVİYE: TEMEL ALTYAPI (HİÇBİR BAĞIMLILIĞI YOK) ==========
                 services.AddSingleton<IEnvironmentDetector, EnvironmentDetector>();
                 services.AddSingleton<IApplicationPaths, ApplicationPaths>();
+                services.AddSingleton<IDataPathRelocationService, DataPathRelocationService>();
                 services.AddSingleton<ITenantMigrationDescriber, TenantMigrationDescriber>();
                 services.AddScoped<IMakineKimligiProvider, MakineKimligiProvider>();
 

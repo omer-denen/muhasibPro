@@ -37,10 +37,11 @@ public class UpdateCheckCoordinator
         return await _updateService.DownloadUpdatesAsync(progress);
     }
 
-    public void Apply()
+    /// <summary>Faz 6.91-B: ön-yedek alındıktan sonra uygulama + DB senkron yolu ile yeniden başlatır.</summary>
+    public void ApplyWithDatabaseSync()
     {
         if (_updateService == null || CurrentUpdateInfo == null)
             return;
-        _updateService.ApplyUpdatesAndRestart();
+        _updateService.ApplyUpdatesAndRestartWithDatabaseSync();
     }
 }

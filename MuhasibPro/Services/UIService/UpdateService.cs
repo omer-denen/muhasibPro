@@ -4,6 +4,7 @@ using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Contracts.UIService;
 using MuhasibPro.Domain.Models;
+using System.Reflection;
 using Velopack;
 
 namespace MuhasibPro.Services.UIService;
@@ -12,12 +13,18 @@ public class UpdateService : IUpdateService
 {
     private readonly ILocalSettingsService _localSettings;
     private readonly ISistemDatabaseService _sistemDatabaseService;
+    private readonly ISistemYasamDongusuService _yasamDongusu;
     private readonly ILogger<UpdateService> _logger;
 
-    public UpdateService(ILocalSettingsService localSettings, ISistemDatabaseService sistemDatabaseService, ILogger<UpdateService> logger)
+    public UpdateService(
+        ILocalSettingsService localSettings,
+        ISistemDatabaseService sistemDatabaseService,
+        ISistemYasamDongusuService yasamDongusu,
+        ILogger<UpdateService> logger)
     {
         _localSettings = localSettings;
         _sistemDatabaseService = sistemDatabaseService;
+        _yasamDongusu = yasamDongusu;
         _logger = logger;
     }
 
@@ -143,17 +150,29 @@ public class UpdateService : IUpdateService
     {
         try
         {
-            _logger.LogInformation("PrepareForUpdateAsync: backing up Global.db before update");
-            // Ensure DB is valid and take backup via SistemDatabaseService's backup manager indirectly
-            var state = await _sistemDatabaseService.GetSistemDatabaseStateAsync();
-            if (state?.Data == null || !state.Data.IsDatabaseExists || !state.Data.CanConnect)
+            var settings = await GetSettingsAsync();
+            var fromVersion = TryGetCurrentVersion();
+            var toVersion = _lastUpdate?.TargetFullRelease?.Version?.ToString();
+
+            settings.LastUpdateFromVersion = fromVersion;
+            settings.LastUpdateToVersion = toVersion;
+            settings.LastUpdateStartTime = DateTime.Now;
+            settings.LastUpdateBackupPath = null;
+
+            _logger.LogInformation("PrepareForUpdate: {From} -> {To} — güncelleme öncesi yedek alınıyor", fromVersion, toVersion);
+
+            // Faz 6.91-B: zorunlu, doğrulanmış Sistem.db yedeği (fail-closed — alınamazsa güncelleme başlamaz).
+            var (basarili, yedekYolu, mesaj) = await _yasamDongusu.EnsureUpdateSafetyAsync();
+            if (!basarili)
             {
-                _logger.LogWarning("PrepareForUpdate: DB not ready, skipping backup (state: {Msg})", state?.Message);
-                return true; // don't block update
+                _logger.LogError("PrepareForUpdate durduruldu: {Mesaj}", mesaj);
+                await SaveSettingsAsync(settings);
+                return false;
             }
-            // SistemMigrationManager's backup is internal to Initialize — here we just ensure DB file is WAL and not locked
-            // Try to ensure backup via direct check (best-effort)
-            _logger.LogInformation("PrepareForUpdateAsync completed (DB: {Version}, Tables: {Count})", state.Data.CurrentVersion, state.Data.TableCount);
+
+            settings.LastUpdateBackupPath = yedekYolu;
+            await SaveSettingsAsync(settings);
+            _logger.LogInformation("PrepareForUpdate tamam: {From} -> {To}, yedek={Yedek}", fromVersion, toVersion, yedekYolu ?? "(gerekmedi)");
             return true;
         }
         catch (Exception ex)
@@ -161,6 +180,25 @@ public class UpdateService : IUpdateService
             _logger.LogError(ex, "PrepareForUpdateAsync failed");
             return false;
         }
+    }
+
+    /// <summary>Çalışan sürüm: Velopack current → yoksa assembly sürümü.</summary>
+    private string? TryGetCurrentVersion()
+    {
+        try
+        {
+            var velo = _manager?.CurrentVersion?.ToString();
+            if (!string.IsNullOrWhiteSpace(velo))
+                return velo;
+        }
+        catch { /* Velopack durumu okunamadı — assembly'ye düş */ }
+
+        try
+        {
+            var asm = Assembly.GetEntryAssembly()?.GetName()?.Version;
+            return asm?.ToString(3);
+        }
+        catch { return null; }
     }
 
     public async Task<bool> PostUpdateDatabaseSyncAsync()

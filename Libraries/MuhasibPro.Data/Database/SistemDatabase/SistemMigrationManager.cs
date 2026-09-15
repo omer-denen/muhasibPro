@@ -92,6 +92,14 @@ namespace MuhasibPro.Data.Database.SistemDatabase
                         return (initializeState: false, message: analysis.Message);
                     }
 
+                    // Faz 6.91-C: ileri-uyumluluk — disk şema bu binary'den yeniyse göç/yazma YOK (fail-closed).
+                    if (DbSchemaVersions.IsNewerThanSupported(await ReadStoredSistemVersionAsync().ConfigureAwait(false)))
+                    {
+                        await FutureSchemaGuardAsync(analysis).ConfigureAwait(false);
+                        _logger.LogError("İleri-uyumluluk: Sistem.db daha yeni sürümle yazılmış — başlatma durduruldu.");
+                        return (initializeState: false, message: analysis.Message);
+                    }
+
                     // ✅ ANALİZ SONUCUNU LOGLA
                     _logger.LogInformation(
                         "Database analizi: {Database}, Tablo: {TableCount}, Pending: {PendingCount}, BackupGerekli: {BackupRequired}",
@@ -194,7 +202,49 @@ namespace MuhasibPro.Data.Database.SistemDatabase
             {
                 result.DatabaseFileSizeBytes = _applicationPaths.GetSistemDatabaseSize();
             }
+
+            await FutureSchemaGuardAsync(result).ConfigureAwait(false);
             return result;
+        }
+
+        /// <summary>
+        /// Faz 6.91-C: diskteki şema bu binary'den yeniyse veritabanını açmayı/analizi fail-closed işaretler.
+        /// Karşılaştırma migration türevi değil, saklanan SemVer (<c>AppDbVersiyonlar.CurrentDatabaseVersion</c>) üzerinden yapılır.
+        /// <b>Önemli:</b> <see cref="GetCurrentDatabaseVersionAsync"/> fallback'i bu metoda dönüp özyineleme yaratmasın diye
+        /// sürüm doğrudan okunur (fallback yok).
+        /// </summary>
+        private async Task FutureSchemaGuardAsync(DatabaseConnectionAnalysis analysis)
+        {
+            try
+            {
+                if (!analysis.IsDatabaseExists || !analysis.CanConnect) return;
+
+                var surum = await ReadStoredSistemVersionAsync().ConfigureAwait(false);
+                if (!DbSchemaVersions.IsNewerThanSupported(surum)) return;
+
+                analysis.CurrentVersion = surum!;
+                analysis.IsFutureSchema = true;
+                analysis.HasError = true;
+                analysis.DatabaseValid = false;
+                analysis.Message =
+                    $"Veritabanı daha yeni bir sürümle ({surum}) oluşturulmuş. Bu uygulama (şema {DbSchemaVersions.CurrentSchemaVersion}) bu veritabanını açamaz — lütfen uygulamayı güncelleyin.";
+                _logger.LogError("İleri-uyumluluk ihlali: disk şema {Surum} > desteklenen {Destek}", surum, DbSchemaVersions.CurrentSchemaVersion);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "İleri-uyumluluk guard uygulanamadı (yoksayıldı)");
+            }
+        }
+
+        /// <summary>Saklanan Sistem.db şema SemVer'i (<c>AppDbVersiyonlar</c>); kayıt yoksa null. Fallback YOK (özyineleme önlenir).</summary>
+        private async Task<string?> ReadStoredSistemVersionAsync()
+        {
+            var record = await _dbContext.AppDbVersiyonlar
+                .Where(v => v.DatabaseName == _databaseName)
+                .AsNoTracking()
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+            return record?.CurrentDatabaseVersion;
         }
 
         public async Task<List<string>> GetPendingMigrationsAsync()

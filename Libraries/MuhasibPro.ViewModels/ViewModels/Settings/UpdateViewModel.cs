@@ -15,6 +15,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
     {
         private readonly UpdateCheckCoordinator _koordinator;
         private readonly UpdateSettingsStore _magaza;
+        private readonly IUpdateService _updateService;
         private readonly IEventBus _eventBus;
         private UpdateSettingsModel _settings = new();
 
@@ -22,6 +23,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
 
         public UpdateViewModel(IUpdateService updateService, ICommonServices commonServices, IEventBus eventBus = null!) : base(commonServices)
         {
+            _updateService = updateService;
             _koordinator = new UpdateCheckCoordinator(updateService);
             _magaza = new UpdateSettingsStore(updateService, eventBus);
             _eventBus = eventBus;
@@ -348,7 +350,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
                         break;
 
                     case UpdateState.Downloaded:
-                        InstallUpdate();
+                        await InstallUpdateAsync();
                         break;
                 }
             }
@@ -392,16 +394,26 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
             }
         }
 
-        private void InstallUpdate()
+        private async Task InstallUpdateAsync()
         {
             try
             {
                 if (_koordinator.CurrentUpdateInfo == null) return;
 
                 CurrentState = UpdateState.Installing;
-                ProgressText = "Uygulama yeniden başlatılıyor...";
 
-                _koordinator.Apply();
+                // Faz 6.91-B: uygulanmadan ÖNCE doğrulanmış Sistem.db yedeği (fail-closed).
+                ProgressText = "Güncelleme öncesi yedek alınıyor...";
+                if (!await _updateService.PrepareForUpdateAsync())
+                {
+                    CurrentState = UpdateState.Error;
+                    ErrorMessage = "Güncelleme öncesi yedek alınamadı — güncelleme iptal edildi.";
+                    ProgressText = "Hazırlık başarısız";
+                    return;
+                }
+
+                ProgressText = "Uygulama yeniden başlatılıyor...";
+                _koordinator.ApplyWithDatabaseSync();
             }
             catch (Exception ex)
             {

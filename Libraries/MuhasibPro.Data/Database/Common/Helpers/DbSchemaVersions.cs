@@ -1,5 +1,7 @@
 namespace MuhasibPro.Data.Database.Common.Helpers;
 
+using MuhasibPro.Domain.Utilities;
+
 /// <summary>
 /// Şema sürümleri tek kaynağı — migration kimliği → SemVer eşlemesi.
 /// KURAL: yeni migration eklenirken buraya bir satır eklenir.
@@ -28,4 +30,11 @@ public static class DbSchemaVersions
             return version;
         return InitialSchemaVersion;
     }
+
+    /// <summary>
+    /// Diskteki şema sürümü bu binary'nin desteklediğinden yeni mi (ileri-uyumluluk ihlali).
+    /// True ise: DB'yi daha yeni bir sürüm yazmış → bu binary <b>açmamalı/yazmamalı</b> (fail-closed, Faz 6.91-C).
+    /// </summary>
+    public static bool IsNewerThanSupported(string? onDiskVersion)
+        => SemanticVersion.IsGreater(onDiskVersion, CurrentSchemaVersion);
 }

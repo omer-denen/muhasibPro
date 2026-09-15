@@ -1,5 +1,6 @@
 ﻿using MuhasibPro.Configurations;
 using MuhasibPro.Contracts.UIService;
+using MuhasibPro.Data.Contracts.Database.Common.Helpers;
 
 namespace MuhasibPro.Services.ServiceExtensions.StartupApplication
 {
@@ -14,6 +15,16 @@ namespace MuhasibPro.Services.ServiceExtensions.StartupApplication
                 "Veritabanı doğrulama",
                 async (service, ct) =>
                 {
+                    // Faz 6.91-A: veri yolu taşıma (eski %LocalAppData% → yeni %AppData%) — DB okunmadan ÖNCE.
+                    // Taşıma başarısızsa fail-closed: boş Sistem.db kurulumuna düşmek yerine başlatma durur.
+                    await service.ReportSubProgressAsync("Veri konumu kontrol ediliyor...", 5, ct);
+                    var relocation = MuhasibPro.HostBuilders.ServiceLocator.Current.GetService<IDataPathRelocationService>();
+                    var (relocOk, tasindi, relocMsg) = await relocation.EnsureRelocatedAsync(ct);
+                    if (!relocOk)
+                        throw new InvalidOperationException(relocMsg);
+                    if (tasindi)
+                        await service.ReportSubProgressAsync(relocMsg, 10, ct);
+
                     // 1. Başlangıç
                     await service.ReportSubProgressAsync("Veritabanı bağlantısı kontrol ediliyor...", 10, ct);
 

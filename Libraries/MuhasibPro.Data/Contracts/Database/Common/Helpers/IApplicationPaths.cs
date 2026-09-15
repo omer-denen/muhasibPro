@@ -10,9 +10,16 @@
         void CleanupSqliteWalFiles(string databaseName);
         bool IsSqliteDatabaseFileValid(string filePath);
         /// <summary>
-        /// Kullanıcının AppData\Local\{appName} yolunu döndürür Production ortamında kullanılır
+        /// Kullanıcının AppData\Roaming\{appName} (Roaming) yolunu döndürür — Production'da veri köküdür.
+        /// Velopack uninstall'da app kökünü (%LocalAppData%\{appName}) sildiği için veri Roaming'de tutulur (Faz 6.91-A).
         /// </summary>
         string GetAppDataFolderPath();
+
+        /// <summary>
+        /// Taşıma öncesi eski veri kökü (%LocalAppData%\{appName}); yeni kökle aynıysa <c>null</c>.
+        /// Yalnız tek seferlik veri taşıması (<c>IDataPathRelocationService</c>) kullanır.
+        /// </summary>
+        string? GetLegacyDataRootPath();
 
         /// <summary>
         /// [ROOT]/Databases/Backup/ klasör yolunu döndürür

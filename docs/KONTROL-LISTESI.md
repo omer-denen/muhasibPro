@@ -447,25 +447,100 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 
 ---
 
-## Faz 6.91 — Güncelleme sonrası doğrulama + kurtarma (uçtan uca) (Oturum 273 kullanıcı isteği — 📋 plan)
+## Faz 6.91 — Product-ready güncelleme hattı: ön-yedek → doğrulama → göç → verify → gerekirse restore (uçtan uca) (Oturum 273 istek + Oturum 274 derin araştırma — 📋 plan)
 
-> **Kullanıcı isteği:** "Güncelleme sonrası oluşabilecek uygulama dosyaları, veritabanları (sistem, malidönem) doğrulama, kurtarma/restore gibi işlemleri uçtan uca yapılandır."
+> **Kullanıcı isteği:** "Güncelleme alt yapısına başlamadan detaylı araştırma: nerede/nasıl uygulama güncellenecek, güncellenen uygulama doğrulanacak, veritabanı güncellemesi (hem sistem hem dönem) yeni güncellemeyle uyumlu mu kontrol edilip; doğrulama, restore, yedekleme product-ready yapılacak."
 
-**Araştırma (Kural 14/19 → REFERANSLAR):**
-- **Velopack hooks:** `OnRestarted`/`OnFirstRun` normal açılışta çalışır (UI'lı, uygulama devam eder) → post-update doğrulama **buraya**; `OnBefore/AfterUpdateFastCallback` headless + 15-30sn, süre aşılırsa kill → **DB işi konmaz**.
-- **Hoppscotch:** yeni sürüm ilk açılışında **sürüme-özel otomatik yedek**, en yeni 3'ü sakla, sorunda downgrade+restore.
-- **Octopus/Flyway/Redgate:** rollback scripti yedek/restore yerine geçmez; **deploy öncesi yedek şart**; yedek **kullanıcı veri değiştirene kadar** geçerli → kurtarma penceresi açılıştır; bütünlük doğrula.
+### İki katman model (Oturum 273'te netleşti)
+- **Katman A — App binary update (Velopack):** feed = GitHub Releases (HTTPS); `vpk pack` full+delta üretir (uygulama yalnız değişen dosyaları indirir, `MaximumDeltasBeforeFallback=10`); atomik sürüm klasörü + Setup.exe rollback. App update tenant DB'yi migrate **etmez**.
+- **Katman B — Şema (Sistem.db + dönem/tenant DB):** EF Core migration; yedek→göç→doğrula→oto-geri-al (mevcut tenant saga'sı) + post-update doğrulama.
 
-**Tasarım (mevcut koda dayalı):**
-1. **Pre-update (uygulanmadan önce):** `UpdateViewModel.InstallUpdate` → `ApplyUpdatesAndRestartWithDatabaseSync()` çağırsın. `UpdateService.PrepareForUpdateAsync` **gerçek Sistem.db yedeği** alsın (şu an yalnız kontrol) + `UpdateSettingsModel`'e `LastUpdateFromVersion`/`LastUpdateBackupPath` kaydetsin.
-2. **Hook (bayrak):** `App.VelopackInitialize()` (startup step; host/DI hazır) → `OnRestarted`/`OnFirstRun` yalnız **bayrak yazar** (localSettings `PostUpdatePending=true` + from/to); UI thread bloklanmaz, ağır iş sonra çalışır.
-3. **Post-update saga** (`IPostUpdateDogrulamaService`, Business.Scoped, DI) — aktivasyon sonrası **async**:
-   - (a) **Uygulama dosyaları:** çalışan sürüm == paket sürümü; kritik dosyalar mevcut; migration assembly yüklü.
-   - (b) **Sistem.db:** state oku (connect/valid/pending) → gerekirse `InitializeSistemDatabaseAsync` (migrate) + yeniden doğrula; **başarısızsa** pre-update yedekten restore (`ISistemDatabaseOperationService`/`ISistemBackupManager`).
-   - (c) **Tenant (mali dönem) DB'leri:** listeyi tara; her biri `GetTenantDatabaseStateAsync` (connect/valid/pending); **bozuk** olanı `ITenantSQLiteBackupManager` son yedekten restore; pending'leri raporla (**oto-migrate YOK** — erişimde zaten migrate).
-   - (d) **Sonuç:** adım rozetli `PostUpdateSonucu` → in-app InfoBar + `ISistemLogService`; bayrağı temizle (tekrar çalışmaz).
-4. Sonuç dev-mode **"Tanılama"** ile de görülebilir.
+### Araştırma bulguları (Kural 14/19 → `REFERANSLAR` Oturum 274)
+- **Paket doğrulama:** Velopack `VerifyPackageChecksumAsync` hash doğrular (`ChecksumFailedException`) — bu **bütünlük** kontrolüdür, **güven kökü değil**; güven kökü = **Authenticode kod imzası** (Velopack `vpk --signParams`/Azure Trusted Signing), dağıtımdan önce zorunlu.
+- **Veri yolu (⚠️ kritik tespit):** Velopack `%LocalAppData%\{AppId}\current` klasörünü her güncellemede **tümüyle değiştirir**; `%LocalAppData%\{AppId}` **uninstall'da silinir**. Uygulama şu an `%LocalAppData%\MuhasibPro\Databases` kullanıyor → **uninstall muhasebe verisini siler.** Veri app kökü dışına (ör. `%AppData%\MuhasibPro` — uninstall'dan sağ kalır) taşınmalı ya da uninstall koruması kurulmalı.
+- **Rollback:** `AllowVersionDowngrade` ile bozuk sürümden geri dönüş; auto-apply asla downgrade yapmaz, explicit apply şart; downgrade daha yeni yerel paketleri siler.
+- **Üretim güncelleme sırası (fail-closed):** metadata doğrula → **staging'e indir** → hash/size/imza doğrula → **eskiyi koruyarak aktive** → ilk açılışta **health-check** → yanlışsa **rollback**. Doğrulama düşerse **devam etme**.
+- **İleri-uyumluluk guard (yeni, zorunlu):** şema sürümü damgalanır; **disk sürümü > binary sürümü ise reddet**; damga **başarılı migration SONRASI** atılır (başarısız migration damgalamaz). Velopack Setup her seferinde "repair/reinstall" yaptığı için eski Setup, yeni DB'nin üstüne kurulabilir → guard bunu yakalar.
+- **SQLite disiplini:** canlı dosya kopyası **torn copy** üretir; güvenli yol `VACUUM INTO` (mevcut) ; restore öncesi bayat `-wal`/`-shm` temizliği (mevcut `CleanupSqliteWalFiles`) ; **her yedek doğrulanır**; bozuk dosya **karantinaya** alınır (silinmez).
+- **Sektör (QB/Sage 50/100):** doğrulanmış + **test edilmiş** yedek; önce **kopya üzerinde test**; yarıda kalırsa yarım dosya açılmaz → yedek **temiz klasöre** restore + tekrar dene; göç sonrası **mutabakat**; sürüm-etiketli yedek adı.
+- **EF Core çok-kiracılı:** her tenant DB ayrı migrate; erişimde runtime migrate kabul (tek örnek/EF9 lock).
 
-**Dokunulacak dosyalar:** `MuhasibPro/App.xaml.cs` (hook) · `MuhasibPro/Services/UIService/UpdateService.cs` (Prepare gerçek yedek + WithDatabaseSync) · `ViewModels/Settings/UpdateViewModel.InstallUpdate` · yeni `Business/Contracts|Services/.../PostUpdate*` + `AddServicesHostBuilderExtensions` · `IActivationService`/`ActivationService` (aktivasyon sonrası tetik) · sonuç gösterimi.
+### Product-ready hedef akış (mevcut koda eşleme)
+1. **Release hattı (kök güven):** `release.yml` → `vpk pack` + **Authenticode imza** (`--signParams`/Azure Trusted Signing); SemVer + `DbSchemaVersions.CurrentSchemaVersion` birlikte bump; `releasenotes.md` (`--releaseNotes`) → Velopack `ReleaseNotesHtml`.
+   - *Dosya:* `.github/workflows/release.yml`, `MuhasibPro.csproj`.
+2. **Kontrol + gösterim:** `UpdateViewModel.CheckForUpdatesAsync` → sürüm `eski→yeni` + changelog; `UpdateState` akışı korunur.
+3. **Ön-yedek (pre-update) — `PrepareForUpdateAsync` gerçek yedek alır:**
+   - WAL checkpoint (`TRUNCATE`) + Sistem.db **gerçek `VACUUM INTO` yedeği** (sürüm-etiketli: `pre-v{from}→v{to}`) + yedeği `integrity_check` ile doğrula.
+   - Şema değişimi **varsa** (`GetPendingMigrationsAsync` / tenant pending taraması) → etkilenen **dönem DB'lerinin** yedeği (yalnız göç gerektirenler; maliyet sınırlı) + doğrula.
+   - `UpdateSettingsModel`'e kaydet: `LastUpdateFromVersion`, `LastUpdateToVersion`, `LastUpdateBackupPath`, `LastUpdateStartTime` (yeni alanlar).
+   - Yedek alınamazsa **güncellemeyi başlatma** (fail-closed).
+4. **Hook (yalnız bayrak):** `App.VelopackInitialize()` → `OnRestarted`/`OnFirstRun` yalnız localSettings `PostUpdatePending=true` + from/to yazar; UI/ağır iş yok. (FastCallback'e **DB işi konmaz** — headless, 15-30sn, kill.)
+5. **Post-update saga — `IPostUpdateDogrulamaService` (Business.Scoped, DI), aktivasyon sonrası:**
+   - (a) **Uygulama dosyaları:** çalışan sürüm == paket sürümü; kritik dosyalar + migration assembly mevcut; hash/`application_id` tutarlı.
+   - (b) **İleri-uyumluluk guard:** Sistem.db **ve** her dönem DB'si için `stored SchemaVersion > CurrentSchemaVersion` ise **fail-closed** (kullanıcıya "daha yeni sürümle oluşturulmuş, uygulamayı güncelleyin"); yazma yok.
+   - (c) **Sistem.db:** state (connect/valid/pending) → gerekirse migrate + yeniden **verify** (`integrity_check` + tablo/satır mutabakatı); **başarısızsa** 3'teki pre-update yedekten restore + restore'u da verify et; restore de başarısızsa **blokla** + yönlendir.
+   - (d) **Dönem (tenant) DB'leri:** listeyi tara; her biri `GetTenantDatabaseStateAsync` (connect/valid/pending):
+     - **bozuk** → son **doğrulanmış** yedekten restore (+verify), yoksa karantina + rapor;
+     - **pending** → raporla (**oto-migrate YOK** — erişimde mevcut saga zaten yedek→göç→verify→oto-restore).
+   - (e) **Sonuç:** adım rozetli `PostUpdateSonucu` → in-app InfoBar + `ISistemLogService`; bayrağı temizle. Göç sonrası **taze yedek** + sürüm damgası.
+6. **UX (Kural 11/12/16/17):** ön-yedek/göç/verify için **determinate** ilerleme + adım rozeti, bitince **tek** özet; hata `ShowError` ile; `?` yardım sayfası maddeleri güncel (Kural 13).
+7. **Dev-mode:** sonuç **"Tanılama"** ile görünür (mevcut `ModulTestCalistirici`/`SistemDiagnosticsViewModel` hattı).
 
-**Kapı:** build 0/0 + test + **Kural 18 canlı** (kontrollü: bir sürüm `vpk pack` → kur → güncelle → `OnRestarted` doğrulama; Sistem.db yedeği + restore denenir) + onay.
+### Hata matrisi (fail-closed)
+| Durum | Davranış |
+|---|---|
+| Ön-yedek alınamadı/doğrulanamadı | Güncellemeyi başlatma, kullanıcıya bildir |
+| Uygulama kritik dosyası eksik | Block + yeniden kurulum yönlendirmesi (Velopack Setup) |
+| Sistem.db migrate hatası | Pre-update yedekten restore → tekrar verify; restore da düşerse blokla + yönlendir |
+| Disk şema sürümü > binary | **Reddet** (yazma yok) + "uygulamayı güncelle" |
+| Dönem DB bozuk, yedek var | Son doğrulanmış yedekten restore + verify |
+| Dönem DB bozuk, yedek yok | Karantina (silme) + rapor; o dönem açılmaz |
+| Dönem DB pending | Rapor; erişimde mevcut yedek→göç→verify akışı |
+
+### TenantDatabaseUpdateView kararı (Oturum 274 — kullanıcı isteği: "geçersizse sil, post-update kontrol için gerekliyse kullan")
+**Verdict: sayfa geçersiz — SİL; göç işi erişim anına (onay + inline ilerleme) taşınır.** Post-update kontrol için **gerekli değil** (onu yeni `IPostUpdateDogrulamaService` yapıyor).
+- **Neden geçersiz:** Sayfa, Katman B (tenant şema göçü) için ayrı bir "seçim→onay→sayfa→başlat→Devam" akışı kuruyor. Yeni modelde (a) app update = Velopack, (b) uyumluluk/doğrulama/bozuk-restore = post-update saga, (c) pending göç = **erişimde** zaten var olan yedek→göç→verify→oto-restore motoru. Sayfa bu motorun üstüne gereksiz bir ekran katmanı; bilgi rozeti zaten `MaliDonemListVM`'de (`TenantUpdateAvailableEvent`).
+- **SİLİNECEK (yalnız ekran katmanı):** `Views/ShellViews/Shell/TenantDatabaseUpdateView.xaml(.cs)` · `ViewModels/.../Shell/Tenant/TenantDatabaseUpdateViewModel.cs` · `TenantDatabaseUpdateYardim.cs` · `Startup.cs:52` nav kaydı · `AddAppViewModelHostBuilderExtensions.cs:25` (`AddTransient<TenantDatabaseUpdateViewModel>`) · nav çağrıları `MaliDonemYonetimView.xaml.cs:159`, `MaliDonemlerListControl.xaml.cs:189`, `TenantDatabaseUpdateCoordinator.cs:62` · `FirmaShellViewModel` `OnTenantUpdated` aboneliği (`:202`,`:242`) · ilgili testler (`TenantDatabaseUpdateTests` sayfa bölümü).
+- **KALACAK (göç motoru + girdi sözleşmeleri):** `ITenantDatabaseUpdateService`/`TenantDatabaseUpdateService` · `TenantUpdateAkisYoneticisi` (yedek→göç→verify→oto-restore + adım/determinate) · `TenantUpdateProgressViewModel` (inline ilerleme) · `TenantDatabaseUpdateDialog` (onay, `SetState(check)`) · `TenantDatabaseUpdateCoordinator` (yeniden amaç: onay → moturu **inline** çalıştır → başarıda seçim + `TenantEvents.Updated` → MainShell; sayfa yok) · `TenantDatabaseUpdateArgs` · `TenantUpdateCheckResult`.
+- **Erişim akışı (yeni):** dönem seç → `CheckUpdateRequiredAsync` → pending ise `TenantDatabaseUpdateDialog` (özet + "Şimdi Güncelle / Daha Sonra / Vazgeç") → onayda motur inline + determinate ilerleme → başarıda seçim + geçiş; hata/oto-restore sonucu tek bildirim.
+- **Post-update kontrol:** yeni saga tenant'ları tarar; **bozuk** → son doğrulanmış yedekten restore, **pending** → rozet/InfoBar raporu. Yani kontrol **yeni sagada**, sayfada değil.
+
+### Kararlar (Oturum 274 — kullanıcı onayladı ✅)
+1. **TenantDatabaseUpdateView:** **SİL** + göç erişimde onay/inline ilerleme (yukarıdaki karar bölümü).
+2. **Veri yolu:** `%AppData%\MuhasibPro`'ya **taşınacak** (uninstall veriyi silmesin; Velopack `%AppData%`'yı korur).
+3. **Dönem taraması zamanı:** **açılışta splash adımı (bloklayıcı)** — kurtarma penceresi açılıştır; adım rozeti + progress.
+4. **Ön-yedek kapsamı:** **Sistem.db + göç gerektiren dönem DB'leri** (hedefli).
+5. **Kod imzası:** **sertifika yok → bütünlük (Velopack checksum) + HTTPS/GitHub ile başla**, Authenticode imza sonraki tur.
+6. **Faz bölünmesi (uygulama sırası):**
+   - **6.91-A ✅ (Oturum 274):** Veri yolu taşıma (`%AppData%`) + release hattı (changelog/fetch-depth) — ayrıntı aşağıda.
+   - **6.91-B ✅ (Oturum 274):** Ön-yedek + `UpdateSettingsModel` alanları + `InstallUpdate` → WithDatabaseSync + hook bayrağı — ayrıntı aşağıda.
+   - **6.91-C ✅ (Oturum 274):** İleri-uyumluluk guard (Sistem + dönem; disk şema > binary → fail-closed) — ayrıntı aşağıda.
+   - **6.91-D:** `IPostUpdateDogrulamaService` saga (dosya + Sistem.db migrate/verify/restore + dönem tarama/rapor) — açılış splash adımı.
+   - **6.91-E:** TenantDatabaseUpdateView silme + erişimde onay/inline göç refactor (Kural 8 sınıf onayları).
+   - **6.91-F:** UX (determinate + adım rozeti + tek özet) + dev-mode Tanılama + yardım.
+
+### Uygulama durumu — 6.91-A ✅ (Oturum 274)
+- **Veri kökü:** `%LocalAppData%\MuhasibPro` → **`%AppData%\MuhasibPro`** (Roaming). `ApplicationPaths.GetAppDataFolderPath` + dev fallback güncellendi; uninstall artık veriyi silmez.
+- **Tek seferlik taşıma:** yeni `IDataPathRelocationService`/`DataPathRelocationService` (Data, Singleton) — eski `%LocalAppData%\MuhasibPro\Databases` varsa yeni köke `Directory.Move` (başarısızsa kopyala+doğrula), doğrulanınca eskiyi siler; **başarısızsa eski veri korunur + fail-closed** (boş kuruluma düşmez). Açılışta `DatabaseValidation` adımının başında çalışır. Geliştirme modunda atlanır (dev verisi proje klasöründe).
+- **Ölü kod (Kural 4):** `Paths/BasePathHelper·DatabaseStructureProvider·BackupPathProvider·DatabaseValidationProvider` (0 caller, eski yolu taşıyan artıklar) **silindi**.
+- **Release hattı:** `release.yml` → `fetch-depth: 0` + sürüm notları üretimi (`git describe/log`) + `vpk pack --releaseNotes` (feed'de changelog). Bütünlük Velopack checksum ile (karar: imza sonraki tur).
+- **Doğrulama:** build 0 hata · test **514/514** (`+5` `DataPathRelocationTests`). **Canlı (Kural 18):** RELEASE exe ile sentetik eski kurulum (`%LocalAppData%\...\Databases\Sistem.db`) → taşıma sonrası `legacyDb=False`, `newSistem=True`, uygulama **Login** ekranına ulaştı (v1.1.3, Sistem.db Hazır/WAL); kanıt `Temp/opencode/ot274_reloc_login.png`. Test verisi temizlendi.
+
+### Uygulama durumu — 6.91-B ✅ (Oturum 274)
+- **Ön-yedek (fail-closed):** `ISistemYasamDongusuService.EnsureUpdateSafetyAsync()` — WAL checkpoint + `DatabaseBackupType.Migration` Sistem.db yedeği (oluşturucu zaten `IsValidBackupFile` ile doğrular) + `GetSistemKeep()` ile eski yedek temizliği. Sistem.db yok/geçersizse yedek gerekmez (engellemez); yedek **alınamazsa `basarili=false`** ve güncelleme **başlatılmaz**. `SistemYasamDongusuService`'e `IApplicationPaths` eklendi.
+- **Servis:** `UpdateService.PrepareForUpdateAsync` artık gerçek yedeği alır (eski hâli yalnız durum okuyordu) + `LastUpdateFromVersion/ToVersion/BackupPath/StartTime` yazar (`UpdateSettingsModel` yeni alanlar); `TryGetCurrentVersion` = Velopack current → assembly fallback.
+- **Akış:** `UpdateViewModel.InstallUpdate` → `async InstallUpdateAsync`: `PrepareForUpdateAsync` **başarısızsa hata + iptal**; başarılıysa `UpdateCheckCoordinator.ApplyWithDatabaseSync()` (kullanılmayan `Apply()` silindi).
+- **Hook:** `App.VelopackInitialize` → `OnRestarted` yalnız `App.VelopackYenidenBaslatildi = true` (oturum-içi bayrak; ağır iş post-update sagasında — 6.91-D). `OnFirstRun` no-op.
+- **Not (dönem ön-yedeği):** Yeni şemanın hangi dönemleri etkileyeceği **uygulama güncellenmeden bilinemez** (yeni migration'lar yeni binary'de). Bu yüzden dönem yedekleri **erişimdeki göç anında** (mevcut Yedek→Göç saga'sı) + post-update taramada (6.91-D) alınır. Pre-update adımda yalnız Sistem.db yedeklenir.
+- **Doğrulama:** build 0 hata · test **518/518** (`+4` `SistemYasamDongusuTests`). **Canlı (Kural 18):** giriş → Denetim Masası → Geliştirici Araçları → modül testleri **41/41** (DI sağlam) + Güncelleme sayfası yüklendi; kanıt `Temp/opencode/ot274b_modul_test.png`, `ot274b_guncelleme.png`. (Uçtan uca yedek→uygula→hook→post-update **6.90/6.91 kapanışında** gerçek Setup ile.)
+
+### Uygulama durumu — 6.91-C ✅ (Oturum 274)
+- **Tek kaynak:** `DbSchemaVersions.IsNewerThanSupported(onDisk)` (`SemanticVersion` sayısal karşılaştırma) — disk şema SemVer'i `CurrentSchemaVersion`'dan büyükse fail-closed.
+- **Durum modeli:** `DatabaseAnalysisResult.IsFutureSchema` + `DatabaseStatusResult.FutureSchema` + `GetStatus/GetStatusMessage` (net mesaj: "daha yeni sürümle (X) oluşturulmuş — güncelleyin").
+- **Sistem.db (Data):** `SistemMigrationManager.GetSistemDatabaseStateAsync` (saklanan SemVer `AppDbVersiyonlar.CurrentDatabaseVersion` üzerinden guard) + `InternalInitializeAsync` (disk yeni ise **göç/yazma YOK**).
+- **Dönem DB (Data):** `TenantSQLiteMigrationManager.GetTenantDatabaseStateAsync` (saklanan `TenantDatabaseVersiyonlar.CurrentTenantDbVersion`) + `InitializeTenantDatabaseAsync` (yeni ise göç YOK). `TenantDatabaseUpdateService.CheckUpdateRequiredAsync` yeni şemada `CheckSucceeded=false` (güncelleme sunmaz).
+- **App fail-closed:** `LoginViewModel.DbIsReady = ... && !HasError && DatabaseValid` → guard sonrası **giriş kapalı**; Sistem.db sonsuz canlı (Kurulum'a düşmez, yazılmaz).
+- **Doğrulama:** build 0 hata · test **527/527** (`+9` `IleriUyumlulukGuardTests`). **Canlı (Kural 18):** sentetik gelecek damgalı Sistem.db (`9.9.0`) ile RELEASE exe → `Splash: exists=True ready=False pending=0 target=MigrationRequired`, **SÜRÜM=9.9.0**, göç/oluşturma yok; kanıt `Temp/opencode/ot274c2_guard.png`. Test verisi temizlendi.
+- **6.88'e devir (UI ince işi):** `SistemDbYonetimView` gelecek şemada "Geçerli/Güncel" gösteriyor ve "Giriş Ekranına Devam Et" butonu görünür kalıyor; giriş yine de `DbIsReady=false` ile kilitli. Bu yüzeyin (durum + buton koşulu) 6.88 yeniden tasarımında ele alınması gerekir.
+
+**Kapı:** Kural 8 sınıf onayları + build 0/0 + test + **Kural 18 canlı** (kontrollü: `vpk pack` → Setup ile kur → güncelle → `OnRestarted` doğrulama; Sistem.db ön-yedek + restore + ileri-uyumluluk guard denenir) + `REFERANSLAR` durum güncellemesi + onay.

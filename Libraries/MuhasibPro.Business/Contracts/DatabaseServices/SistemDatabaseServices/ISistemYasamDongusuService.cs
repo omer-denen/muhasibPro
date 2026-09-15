@@ -11,5 +11,8 @@ namespace MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices
         Task<(bool checkpoint, bool yedekAlindi, string mesaj)> EnsureStartupSafetyAsync();
         /// <summary>Kapanış paketi: WAL checkpoint (her zaman) + ayar açıksa otomatik yedek.</summary>
         Task<string> EnsureShutdownSafetyAsync(bool kapanisYedegiAcik);
+        /// <summary>Güncelleme öncesi paket: WAL checkpoint + <b>zorunlu</b> doğrulanmış Sistem.db yedeği (Faz 6.91-B).
+        /// Yedek alınamazsa <c>basarili=false</c> döner ve güncelleme <b>başlatılmaz</b> (fail-closed).</summary>
+        Task<(bool basarili, string? yedekYolu, string mesaj)> EnsureUpdateSafetyAsync();
     }
 }

@@ -3,6 +3,7 @@ using Moq;
 using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Services.DatabaseServices.SistemDatabaseService;
+using MuhasibPro.Data.Contracts.Database.Common.Helpers;
 using MuhasibPro.Data.Contracts.Database.SistemDatabase;
 using MuhasibPro.Domain.Enum.DatabaseEnum;
 using MuhasibPro.Domain.Models;
@@ -19,6 +20,7 @@ public class SistemYasamDongusuTests
     private readonly Mock<ISistemDatabaseOperationService> _operasyon;
     private readonly Mock<IDatabaseSettingsProvider> _ayarlar;
     private readonly Mock<ISistemLogService> _log;
+    private readonly Mock<IApplicationPaths> _yollar;
 
     public SistemYasamDongusuTests()
     {
@@ -31,10 +33,71 @@ public class SistemYasamDongusuTests
         _ayarlar.Setup(s => s.GetAsync(It.IsAny<long>())).ReturnsAsync(
             new DatabaseSettingsModel { WeeklyBackupDays = 7, SistemKeepLast = 3 });
         _log = new Mock<ISistemLogService>();
+        _yollar = new Mock<IApplicationPaths>();
+        _yollar.Setup(p => p.SistemDatabaseFileExists()).Returns(true);
+        _yollar.Setup(p => p.GetSistemDatabaseFilePath()).Returns("C:\\test\\Sistem.db");
+        _yollar.Setup(p => p.IsSqliteDatabaseFileValid(It.IsAny<string>())).Returns(true);
     }
 
     private SistemYasamDongusuService Servis() =>
-        new(_yedek.Object, _operasyon.Object, _ayarlar.Object, _log.Object);
+        new(_yedek.Object, _operasyon.Object, _ayarlar.Object, _log.Object, _yollar.Object);
+
+    // ---- Faz 6.91-B: güncelleme öncesi zorunlu yedek ----
+
+    [Fact]
+    public async Task Guncelleme_Oncesi_Yedek_Alir()
+    {
+        _operasyon.Setup(o => o.CreateBackupAsync(DatabaseBackupType.Migration)).ReturnsAsync(
+            new SuccessApiDataResponse<DatabaseBackupResult>(
+                new DatabaseBackupResult { BackupFilePath = "C:\\bk\\sistem_pre.backup", IsBackupComleted = true }, "ok"));
+        _operasyon.Setup(o => o.CleanOldBackupsAsync(3)).ReturnsAsync(
+            new SuccessApiDataResponse<int>(0, "temiz"));
+
+        var (basarili, yol, _) = await Servis().EnsureUpdateSafetyAsync();
+
+        basarili.Should().BeTrue();
+        yol.Should().Be("C:\\bk\\sistem_pre.backup");
+        _yedek.Verify(m => m.CheckpointWalAsync(), Times.Once);
+        _operasyon.Verify(o => o.CreateBackupAsync(DatabaseBackupType.Migration), Times.Once);
+        _operasyon.Verify(o => o.CleanOldBackupsAsync(3), Times.Once);
+    }
+
+    [Fact]
+    public async Task Guncelleme_Yedek_Alinamazsa_Durdurur()
+    {
+        _operasyon.Setup(o => o.CreateBackupAsync(DatabaseBackupType.Migration)).ReturnsAsync(
+            new ErrorApiDataResponse<DatabaseBackupResult>(null!, "disk hatası"));
+
+        var (basarili, yol, mesaj) = await Servis().EnsureUpdateSafetyAsync();
+
+        basarili.Should().BeFalse();
+        yol.Should().BeNull();
+        mesaj.Should().Contain("durduruldu");
+    }
+
+    [Fact]
+    public async Task Guncelleme_SistemDb_Yoksa_Engellemez()
+    {
+        _yollar.Setup(p => p.SistemDatabaseFileExists()).Returns(false);
+
+        var (basarili, yol, _) = await Servis().EnsureUpdateSafetyAsync();
+
+        basarili.Should().BeTrue();
+        yol.Should().BeNull();
+        _operasyon.Verify(o => o.CreateBackupAsync(It.IsAny<DatabaseBackupType>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Guncelleme_SistemDb_Gecersizse_Engellemez()
+    {
+        _yollar.Setup(p => p.IsSqliteDatabaseFileValid(It.IsAny<string>())).Returns(false);
+
+        var (basarili, yol, _) = await Servis().EnsureUpdateSafetyAsync();
+
+        basarili.Should().BeTrue();
+        yol.Should().BeNull();
+        _operasyon.Verify(o => o.CreateBackupAsync(It.IsAny<DatabaseBackupType>()), Times.Never);
+    }
 
     [Fact]
     public async Task Acilis_BayatYedekse_OtomatikAlir()

@@ -37,7 +37,7 @@
 
 ---
 
-## Oturum İndeksi (272 oturum, 14 cilt)
+## Oturum İndeksi (274 numaralı oturuma kadar, 14 cilt)
 
 | # | Tarih | Baslik | Durum | Cilt |
 |---|-------|--------|-------|------|
@@ -316,6 +316,7 @@
 | 271 | 2026-09-15 | Faz 6.86 Chunk-1: durum çubuğu + StatusMessage/StatusBar refactor | ✅🧪 | C14 |
 | 272 | 2026-09-15 | Faz 6.86: durum çubuğu ana pencereye (MainShellView) + aktif firma/mali dönem/tenant bağlamı | ✅🧪 | C14 |
 | 273 | 2026-09-15 | 6.87 v1 reddi + Faz 6.90: Velopack git güncelleme akışı (dinamik repo + gömülü varsayılan FeedUrl + admin/dev-mode) | ✅🧪 | C14 |
+| 274 | 2026-09-16 | Güncelleme altyapısı: derin sektörel araştırma + 6.91-A/B/C (veri yolu `%AppData%`, zorunlu ön-yedek, ileri-uyumluluk guard) | ✅🧪 | C14 |
 
 ---
 

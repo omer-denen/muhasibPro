@@ -23,6 +23,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # sürüm notları (git log/describe) için tam geçmiş şart
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -59,8 +61,18 @@ jobs:
         continue-on-error: true # ilk release'te önceki yoktur, sorun değil
         run: vpk download github -o Releases --repoUrl ${{ github.server_url }}/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Sürüm notları üret (V1.1.3'ten beri değişenler)
+        shell: pwsh
+        run: |
+          git fetch --tags --force 2>$null
+          $prev = (git describe --tags --abbrev=0 "HEAD^" 2>$null | Out-String).Trim()
+          $range = if ($LASTEXITCODE -eq 0 -and $prev) { "$prev..HEAD" } else { "HEAD" }
+          "## MuhasibPro ${{ steps.version.outputs.version }}" | Out-File -FilePath release-notes.md -Encoding utf8
+          git log $range --pretty=format:"- %s" | Out-File -FilePath release-notes.md -Append -Encoding utf8
+          Get-Content release-notes.md
+
       - name: Pack
-        run: vpk pack -u MuhasibPro -v ${{ steps.version.outputs.version }} -p publish -e MuhasibPro.exe -o Releases
+        run: vpk pack -u MuhasibPro -v ${{ steps.version.outputs.version }} -p publish -e MuhasibPro.exe -o Releases --releaseNotes release-notes.md
 
       - name: GitHub Release'e yükle
         run: vpk upload github -o Releases --repoUrl ${{ github.server_url }}/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --tag ${{ github.ref_name }}

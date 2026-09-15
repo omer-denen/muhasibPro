@@ -43,6 +43,16 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
                 result.CheckSucceeded = true;
                 result.CurrentVersion = state.CurrentVersion;
                 result.StatusMessage = state.Message;
+
+                // Faz 6.91-C: dönem daha yeni sürümle yazılmışsa güncelleme/göç sunulmaz — fail-closed bilgi.
+                if (state.IsFutureSchema)
+                {
+                    result.CheckSucceeded = false;
+                    result.NeedsUpdate = false;
+                    result.StatusMessage = state.Message;
+                    return result;
+                }
+
                 if (state.IsUpdateRequired || !state.DatabaseValid)
                 {
                     var pendingIds = state.PendingMigrations ?? new List<string>();

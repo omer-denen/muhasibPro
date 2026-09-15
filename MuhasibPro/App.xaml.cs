@@ -75,13 +75,20 @@ namespace MuhasibPro
                 .OnFirstRun(
                     v =>
                     {
+                        // İlk kurulum: güncelleme sonrası doğrulama yok.
                     })
                 .OnRestarted(
                     v =>
                     {
+                        // Faz 6.91-B: yalnız bayrak — ağır iş (post-update doğrulama) startup sonrası çalışır.
+                        VelopackYenidenBaslatildi = true;
                     })
                 .Run();
         }
+
+        /// <summary>Velopack uygulamayı bir güncellemeyi uyguladıktan sonra yeniden başlattı mı.
+        /// Faz 6.91: post-update doğrulama sagası bu bayrağı görürse çalışır (oturum içi, kalıcı değil).</summary>
+        public static bool VelopackYenidenBaslatildi { get; private set; }
 
         public static IHostBuilder CreateHostBuilder(string[] args = null)
         {

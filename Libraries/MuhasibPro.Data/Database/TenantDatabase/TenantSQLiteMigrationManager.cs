@@ -72,6 +72,15 @@ namespace MuhasibPro.Data.Database.TenantDatabase
                         result.Message = analysis.Message;
                         return result;
                     }
+
+                    // Faz 6.91-C: ileri-uyumluluk — dönem daha yeni sürümle yazılmışsa göç/yazma YOK (fail-closed).
+                    if (analysis.IsFutureSchema)
+                    {
+                        result.HasError = true;
+                        result.Message = analysis.Message;
+                        _logger.LogError("İleri-uyumluluk: tenant {Db} daha yeni sürümle yazılmış — göç durduruldu.", databaseName);
+                        return result;
+                    }
                     async Task<bool> RestoreWrapper()
                     {
                         return await _backupManager.RestoreFromLatestBackupAsync(
@@ -185,8 +194,42 @@ namespace MuhasibPro.Data.Database.TenantDatabase
                 result.DatabaseFileSizeBytes = _applicationPaths.GetTenantDatabaseSize(databaseName);
             }
 
+            // Faz 6.91-C: ileri-uyumluluk guard — saklanan SemVer bu binary'den yeniyse fail-closed.
+            if (result.IsDatabaseExists && result.CanConnect)
+            {
+                try
+                {
+                    var surum = await ReadStoredTenantVersionAsync(context, databaseName).ConfigureAwait(false);
+                    if (DbSchemaVersions.IsNewerThanSupported(surum))
+                    {
+                        result.CurrentVersion = surum!;
+                        result.IsFutureSchema = true;
+                        result.HasError = true;
+                        result.DatabaseValid = false;
+                        result.Message =
+                            $"Bu dönem veritabanı daha yeni bir sürümle ({surum}) oluşturulmuş. Bu uygulama (şema {DbSchemaVersions.CurrentSchemaVersion}) açamaz — lütfen uygulamayı güncelleyin.";
+                        _logger.LogError("İleri-uyumluluk ihlali (tenant {Db}): disk {Surum} > desteklenen {Destek}", databaseName, surum, DbSchemaVersions.CurrentSchemaVersion);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Tenant ileri-uyumluluk guard uygulanamadı (yoksayıldı): {Db}", databaseName);
+                }
+            }
+
             // Extension metod tamamlandı, şimdi context dispose edilebilir
             return result;
+        }
+
+        /// <summary>Dönem DB'sinin sakladığı şema SemVer'i (<c>TenantDatabaseVersiyonlar</c>); yoksa null.</summary>
+        private static async Task<string?> ReadStoredTenantVersionAsync(AppDbContext context, string databaseName)
+        {
+            var record = await context.TenantDatabaseVersiyonlar
+                .Where(v => v.DatabaseName == databaseName)
+                .AsNoTracking()
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+            return record?.CurrentTenantDbVersion;
         }
 
         public async Task<List<string>> GetTenantPendingMigrationsAsync(

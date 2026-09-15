@@ -39,7 +39,7 @@ namespace MuhasibPro.Data.Database.Common.Helpers
                 }
 
                 return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                     "MuhasibPro");
             });
 
@@ -109,13 +109,31 @@ namespace MuhasibPro.Data.Database.Common.Helpers
         #endregion
 
         #region Base Paths
+        /// <summary>
+        /// Production veri kökü: <c>%AppData%\MuhasibPro</c> (Roaming).
+        /// Velopack uninstall app kökünü (%LocalAppData%\MuhasibPro) sildiği için veri burada tutulur (Faz 6.91-A).
+        /// </summary>
         public string GetAppDataFolderPath()
         {
             var path = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 _applicationName);
 
             return SafeCreateDirectory(path);
+        }
+
+        /// <summary>
+        /// Eski veri kökü: <c>%LocalAppData%\MuhasibPro</c>; yeni kökle aynıysa (veya geliştirmede) <c>null</c>.
+        /// </summary>
+        public string? GetLegacyDataRootPath()
+        {
+            var legacy = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                _applicationName);
+
+            return string.Equals(legacy, GetAppDataFolderPath(), StringComparison.OrdinalIgnoreCase)
+                ? null
+                : legacy;
         }
 
         private string GetDevelopmentProjectFolderPath() => _cachedDevProjectPath.Value;

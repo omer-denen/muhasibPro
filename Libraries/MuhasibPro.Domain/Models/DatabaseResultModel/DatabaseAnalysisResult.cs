@@ -13,6 +13,9 @@ namespace MuhasibPro.Domain.Models.DatabaseResultModel
         public bool DatabaseValid { get; set; }
         public string CurrentVersion { get; set; }
 
+        /// <summary>Diskteki şema bu binary'den yeni (fail-closed — açılmaz/yazılmaz; Faz 6.91-C).</summary>
+        public bool IsFutureSchema { get; set; }
+
         public List<string> PendingMigrations { get; set; } = new();
         public int AppliedMigrationsCount { get; set; }
         public override bool IsUpdateRequired => PendingMigrations.Any();
@@ -28,6 +31,7 @@ namespace MuhasibPro.Domain.Models.DatabaseResultModel
         public override DatabaseStatusResult GetStatus()
         {
             if (!IsDatabaseExists) return DatabaseStatusResult.DatabaseNotFound;
+            if (IsFutureSchema) return DatabaseStatusResult.FutureSchema;
             if (HasError) return DatabaseStatusResult.UnknownError;
             if (!CanConnect) return DatabaseStatusResult.ConnectionFailed;
             if (!DatabaseValid) return DatabaseStatusResult.InvalidSchema;
@@ -48,6 +52,8 @@ namespace MuhasibPro.Domain.Models.DatabaseResultModel
                 DatabaseStatusResult.DatabaseNotFound => $"Veritabanı dosyası bulunamadı : {DatabaseName}",
                 DatabaseStatusResult.ConnectionFailed => "Dosyaya erişim sağlanıyor ancak bağlantı reddedildi.",
                 DatabaseStatusResult.InvalidSchema => "Veritabanı yapısı bozulmuş veya eksik tablolar var.",
+                DatabaseStatusResult.FutureSchema =>
+                    $"Bu veritabanı daha yeni bir MuhasibPro sürümüyle ({CurrentVersion}) oluşturulmuş/güncellenmiş. Lütfen uygulamayı en son sürüme güncelleyin.",
                 DatabaseStatusResult.RequiredUpdating => IsEmptyDatabase
                     ? "Veritabanı boş, ilk kurulum yapılması gerekiyor."
                     : $"Veritabanı güncel değil. {PendingMigrations.Count} adet güncelleme uygulanmalı.",
