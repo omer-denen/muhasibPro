@@ -1024,22 +1024,29 @@ Sıra: Splash → paylaşılan stiller → SistemKurulum → FirmaShell → Mali
 
 ---
 
-## Faz 6.86 — StatusBarService modernizasyonu (Oturum 269 kullanıcı kararı — 📋 plan; yön seçimi + Kural 8 onayı bekliyor)
+## Faz 6.86 (GENİŞLETİLMİŞ) — Durum çubuğu + StatusMessage + Notification: komple redesign + refactor (Oturum 270 kullanıcı kararı — 🔨 aktif; sınıf onayı + yeni context)
 
-> **Kullanıcı isteği:** "StatusbarService incelenecek, geliştirilecek. Daha modern bir duruma getirilecek."
+> **Kullanıcı kararı (Oturum 270):** (a) `StatusBarService` incelenip modernize edilecek; (b) status bar **kalır ama Fluent'e modernize** ("yakışıklı", sade) — **mevcut tasarım yokmuş gibi sıfırdan**; (c) **status bar + `StatusMessageService` + `NotificationService`** hepsi komple redesign + refactor; (d) `StatusMessageService` (uygulama-içi alt bar) ve `NotificationService` (OS toast) **ayrı sorumluluklarda ayrı kalır** — ikisi arasında bağımlılık kurulmaz. Bu faz; eski 6.86 + **6.71/m.4** (progress+bildirim) + **6.72 Dalga 3**'ü tek hatta toplar.
 
-**Envanter (mevcut durum):**
-- `IStatusBarService`/`StatusBarService` (App): `UserName`, `KullaniciAdiSoyadi`, `MaliDonem`, `DatabaseConnectionMessage`, `IsSistemDatabaseConnection`, `IsTenantDatabaseConnection`. **Ölü üyeler:** `MaliDonem` (0 caller), `IsTenantDatabaseConnection`/`SetTenantDatabaseStatus` (0 caller), `KullaniciAdiSoyadi` (set edilir, görünümde okunmaz). **Bug:** `IsSistemDatabaseConnection` hiç `true` yapılmıyor (Startup yalnız `DatabaseConnectionMessage` yazıyor) → DB durum ikonu her zaman "bağlı değil".
-- `IStatusMessageService`/`StatusMessageService` (App, **440 satır**): mesaj + `StatusMessageType` + ikon glyph + **`StatusColorHex` hardcode hex** + progress (ring/bar) + auto-hide + async wrapper'lar + sanitize. Kural-1 (150 satır) tetikleyicisi aşıldı. **Bug:** `Theme == ElementTheme.Light` karşılaştırması `Default` (sistemi takip) durumunu yok sayıyor → sistem temasıyla renk sapması.
-- `ShellStatusBar.xaml(.cs)`: 32px bar; sol durum+progress, orta kullanıcı+DB, sağ saat; code-behind wrapper prop'ları + `new SolidColorBrush(Colors.LimeGreen/OrangeRed)` hardcode; `DispatcherTimer` ile saat.
-- **Kural 14/19 araştırması (`REFERANSLAR`):** MS "modern Windows app" → durum mesajları için **InfoBar** (severity/tema/ekran okuyucu hazır); MS InfoBar kılavuzu (Error idareli, `InfoBar*Severity*Brush`); VS Code status bar UX (sol birincil / sağ ikincil, kısa etiket, arka-iş → yükleme ikonu).
+**Yön (onaylı — Hibrit):** status bar = kalıcı/ambiyans + sessiz arka plan ilerlemesi · **InfoBar** = olay/state mesajı (güncelleme var / göç gerekli / bağlantı koptu) · **OS toast** = arka plan iş bitti/başarısız · **ContentDialog** = bloklayan onay. Kaynak: MS "Structure a modern WinUI 3 app" + MS "WPF→WinUI3" (*StatusBar → InfoBar + dedicated footer*) + InfoBar/Progress/VS Code status bar kılavuzları (Kural 14/19; `REFERANSLAR` Oturum 270).
 
-**Yön seçenekleri (kullanıcı seçecek):**
-- **A — InfoBar + slim bar (MS önerisi, en modern):** geçici mesaj+progress+severity → `InfoBar` (içerik üstü ortak host); alt bar kalıcı bağlam (kullanıcı/DB/dönem/saat) + token uyumlu.
-- **B — Mevcut barı modernize (yapı korunur, düşük risk):** hardcode hex → `ThemeResource` severity (`SystemFillColorSuccess/Caution/Critical/Attention`), `StatusMessageService` bölünür, `Default` tema bug'ı + ölü üyeler + erişilebilirlik (`LiveSetting`) düzeltilir.
-- **C — Hibrit:** hata/uyarı → InfoBar; bilgi/başarı + progress → alt bar.
+**Envanter / borç (teşhis — Oturum 270):**
+- `IStatusBarService`/`StatusBarService` (139 satır): **ölü üyeler** `MaliDonem` (0 caller), `IsTenantDatabaseConnection`/`SetTenantDatabaseStatus` (0 caller), `Initialize` (0 caller), `KullaniciAdiSoyadi` (yalnız yazılır). **Bug:** `IsSistemDatabaseConnection` hiç `true` yapılmıyor (`Startup.cs:89` yalnız mesaj yazıyor) → DB göstergesi daima "bağlı değil".
+- `IStatusMessageService`/`StatusMessageService` (**440 satır, Kural-1 ihlali**): mesaj+tip+ikon+**hardcode `StatusColorHex` (5 hex)**+progress+auto-hide+3 async+dispatch+INPC. **Bug:** `StatusColorHex` `Theme == ElementTheme.Light` karşılaştırması `Default` (sistemi takip) durumunu yok sayıyor → renk sapması. **Ölü:** `LastUpdateTime`/`LastUpdateTimeText`, `Initialize`. **Yetim ayar:** `StatusAutoHideMs` bu servise bağlı değil.
+- `ShellStatusBar.xaml(.cs)` (160/98): code-behind'de `Colors.LimeGreen/OrangeRed` hardcode + ölü wrapper'lar (`StatusGlyph`, `ShowProgressBarVisibility`, `ShowUserInfoVisibility`, `ShowDatabaseInfoVisibility`, `DatabaseIconBrush`); `DatabaseStatusToBrushConverter` (`Colors.*`) + `StringToBrushConverter` kullanımı.
+- `NotificationService` (200): `ShowTagged`+`NotificationGroups` var; tip-ikon ayrımı/severity görseli yok.
+- **Kural-11 ihlali:** 5 yerde sabit `IsActive="True"` ProgressRing (`NamePasswordControl`, `SistemYedekPanel`, `SistemGuncellemePanel`, `DatabaseInfoPanel`, `DonemIslemKartlariPanel`).
 
-**Kapı:** yön kararı + Kural 8 sınıf onayları + build 0/0 + test + Kural 18 canlı (Light/Dark + uzun işlem + hata) + onay.
+**Sınıf/dosya planı (Kural 8 onayı):**
+- **A. Servis refactor:** (1) `IStatusMessageService` ölü üyeler silinir (`StatusColorHex`/`StatusIconGlyph`/`ShowStatusIcon`/`LastUpdateTime`/`LastUpdateTimeText`/`Initialize`); (2) `StatusMessageService` bölünür → `StatusMesajDurumu` (durum+INPC) · `MesajOtoGizleme` (auto-hide, `StatusAutoHideMs` bağlanır) · `MesajYurutucu` (async) · facade; renk View'a taşındığı için `Default` bug'ı kökten kalkar; dispatch `DispatcherQueue.GetForCurrentThread()`; (3) `IStatusBarService`/`StatusBarService` ölü üyeler silinir + **DB bool bug'ı** `Startup` ile düzeltilir; (4) `NotificationService` tip-ikon (Success/Warning/Danger) ayrımı.
+- **B. View redesign:** `ShellStatusBar.xaml(.cs)` **sıfırdan** Fluent footer (sol = durum+severity ikon+progress; sağ = kullanıcı · DB noktası · saat); **tüm renk `{ThemeResource}`** (`SystemFillColorSuccess/Caution/Critical`, `TextFillColor*`, `DividerStrokeColorDefaultBrush`); hardcode `Colors.*` + `StringToBrush`/`DatabaseStatusToBrush` kaldırılır; `IconCheckCircle/IconAlertTriangle/IconError`; `AutomationProperties.LiveSetting`; `IsActive` binding.
+- **C. InfoBar hattı:** `ShellView` içeriğinin üstüne ortak InfoBar host (severity+aksiyon, flaş önleme). **Uygulama öncesi netleştir:** ayrı `IInfoBarService` mi, yoksa `INotificationService` genişletmesi mi?
+- **D. Progress disiplini (Kural 12):** uzun işlemler determinate (`i/N`,`%`,`iş adı`) + bitince **tek** özet; göç adımlarına yüzde (~30/70/100); `IsBusy` (`ObservableObject.Set`) tek çatı; 5 sabit `IsActive="True"` düzeltilir.
+- **E. Kural-4 temizlik:** ölü converter'lar (`StringToBrushConverter`, `DatabaseStatusToBrushConverter`) + App.xaml kayıtları; ölü code-behind wrapper'ları.
+
+**Kapı:** Kural 8 sınıf onayları + build 0/0 + `dotnet test` yeşil + Kural 18 canlı (Light/Dark + uzun işlem + hata + toast) + Kural 13 yardım (gerekiyorsa) + onay.
+
+**Devir notu (yeni context):** Faz tek oturumda bitmez; **A → B → C → D** sırasıyla ilerle, her adımda build. Başlangıç okuması: `docs/REFERANSLAR.md` (Oturum 270 satırları) + bu bölüm + `LOG-261-280.md` (Oturum 270 envanteri). Dosyalar: `MuhasibPro/Services/UIService/{StatusMessageService,StatusBarService,NotificationService}.cs`, `Libraries/MuhasibPro.Business/Contracts/UIServices/{IStatusMessageService,IStatusBarService,INotificationService}.cs`, `MuhasibPro/Views/ShellViews/Shell/{ShellStatusBar.xaml,ShellStatusBar.xaml.cs,ShellView.xaml}`, `MuhasibPro/Configurations/Startup.cs`, `Libraries/MuhasibPro.ViewModels/ViewModels/Shell/ShellViewModel.cs`.
 
 ---
 
