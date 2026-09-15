@@ -46,6 +46,7 @@
             <converters:GlyphToIconConverter x:Key="GlyphToIconConverter" />
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+            <converters:NotificationTypeToInfoBarSeverityConverter x:Key="NotificationTypeToInfoBarSeverityConverter" />
 
             <!--  statusBar için  -->
             <converters:SagaStepStatusToBrushConverter x:Key="SagaStepStatusToBrush" />

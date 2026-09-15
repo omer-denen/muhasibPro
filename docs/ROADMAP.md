@@ -45,7 +45,7 @@ Her modül çekirdek üzerine bağımsız eklenir: **Cari (B1) → Stok (B2) →
 | 6.5–6.24 | İlk kurulum/Login, OOBE, DesignTokens Light+Dark, Splash, SistemKurulum, Business DB testleri | ✅🧪 (ayrıntı arşiv) |
 | B | Muhasebe modülleri (B1–B8) | ✅🧪 |
 | 6.25–6.70 | Tasarım/seçim onarımları, dijital log iskeletleri, kimlikli yedek, ayar panelleri, Denetim Masası | ✅🧪 (ayrıntı arşiv) |
-| 6.71 | Refactoring: testler → bug → yıkım → progress → RAF | 🔨 Aktif — madde 1 ✅🧪; madde 3 atlandı; 4/5 sürüyor |
+| 6.71 | Refactoring: testler → bug → yıkım → progress → RAF | ✅ Kapandı (Oturum 272) — m.1/m.2 ✅🧪; m.3 **iptal** (zaten yapıldı); m.4 bildirim→**6.86**, progress→**6.88**; m.5 (RAF panel)→**6.88** |
 | 6.72 | Çekirdek Stabilizasyon (saf Fluent + Faz B kilidi) | 🔨 Aktif — Dalga 0 ✅🧪; Dalga 1–3 ⬜ |
 | 6.73 | Tenant geçiş doğrulaması (WAL checkpoint + dispose + DB log) | 📋 Plan |
 | 6.74 | Büyük-iş akış detayı + DB log + log altyapısı | 📋 Plan |
@@ -60,8 +60,10 @@ Her modül çekirdek üzerine bağımsız eklenir: **Cari (B1) → Stok (B2) →
 | 6.83 | TenantDatabaseUpdateView canlı doğrulama turu | 🔨 Kısmi — ekran doğrulandı; **6.87'ye devredildi** |
 | 6.84 | FirmaShellView seçim deneyimi yeniden tasarımı | ✅🧪 (onaylı "gayet başarılı") |
 | 6.85 | Kullanıcı Yönetimi modülü (ayrı MODAL pencere) | 📋 Plan |
-| 6.86 | Durum çubuğu + StatusMessage + Notification: redesign + refactor | 🔨 Aktif — **Chunk-1 ✅🧪 onaylı** + **ana pencere çubuğu/aktif bağlam ✅🧪 onaylı (Oturum 272)**; Chunk-2 (In-App message + OS toast kaldırma + progress) sırada |
+| 6.86 | Durum çubuğu + StatusMessage + Notification: redesign + refactor | 🔨 Aktif — **Chunk-1 ✅🧪 onaylı** + **ana pencere çubuğu/aktif bağlam ✅🧪 onaylı** + **Chunk-2a ✅🧪** (in-app InfoBar + OS toast kaldırma; onay bekliyor) + **Chunk-2b 🔨 kısmi** (Login ring; kalan 4 ring **6.88'e devredildi** — view'lar refactoring bekliyor) |
 | 6.87 | Veritabanı Güncelleme sayfası komple yeniden tasarımı | 📋 Plan (Kural 14 araştırması hazır) |
+| 6.88 | MaliDonemYönetimView + SistemDbYonetimView yeniden tasarımı (+ RAF panel temizliği + 6.71 progress) | 📋 Plan (kullanıcı kararı — bu view'lara ara iş yapılmayacak; 6.71/m.3 envanteri + m.5 RAF panel + m.4 progress burada birleşti) |
+| 6.89 | LoginView — "Beni hatırla" + QuickLogin (hızlı giriş) incelenmesi | 📋 Plan (kullanıcı kararı — Oturum 272) |
 
 ## 4. Karar Logu (Yeni)
 
@@ -74,6 +76,10 @@ Her modül çekirdek üzerine bağımsız eklenir: **Cari (B1) → Stok (B2) →
 | 2026-09-15 | **Faz 6.86 Chunk-1:** durum çubuğu + StatusMessage/StatusBar servis refactor + `ShellStatusBar` sıfırdan Fluent footer | Kullanıcı onayı (Chunk-1 sınıf planı) |
 | 2026-09-15 | **Durum çubuğu ana pencere kararı (çözüldü):** ana pencereye `MainShellView` altına tam genişlik footer olarak eklendi; `FirmaShellView`'de yok; `ShellView` (detay) aynen; mesajlar pencere başına ayrı | Kullanıcı kararı (Oturum 272) |
 | 2026-09-15 | **Durum çubuğu bağlamı:** sağ blokta aktif firma + mali dönem + tenant bağlantı noktası birincil, Sistem.db ikincil | Kullanıcı kararı (Oturum 272) — SAP status bar bağlam deseni |
+| 2026-09-15 | **Faz 6.88 açıldı:** `MaliDonemYönetimView` + `SistemDbYonetimView` yeniden tasarlanacak; bu iki view'a **ara iş yapılmayacak** (Kural 11 sabit ring düzeltmeleri dahil ertelendi) | Kullanıcı kararı (Oturum 272) |
+| 2026-09-15 | **Faz 6.89 açıldı:** `LoginView` "Beni hatırla" + QuickLogin (hızlı giriş) incelenecek | Kullanıcı kararı (Oturum 272) |
+| 2026-09-15 | **6.71 kapandı + maddeleri birleştirildi:** m.3 (View yıkım/yeniden tasarım) **iptal** — zaten yapıldı; m.4 bildirim/InfoBar kısmı **6.86 Chunk-2a**'da tamamlandı, progress kısmı **6.88**'e; m.5 (RAF panel temizliği, 16 kart) **6.88**'e (aynı `MaliDonem/Yonetim/.../YonetimAyarlar*` ağacı) | Kullanıcı kararı (Oturum 272) |
+| 2026-09-15 | **Bildirim kanalı pencere-başına:** `IInAppMessageService` Scoped; in-app InfoBar yalnız tetikleyen/aktif pencerede görünür, diğer pencerelere yansımaz; `FirmaShellView`'de host **yok** (yönlendirme/listeleme paneli) | Kullanıcı kararı (Oturum 272) |
 | 2026-09-15 | **Notification → In-App message; OS toast terk edildi** (CommunityToolkit paketi + AUMID hack'i kaldırılacak); çökme bildirimi = dialog | Kullanıcı kararı — "kullanmayacaksan onu da sil" |
 | 2026-09-15 | **Güncel iş sırası:** 6.86 (aktif) → 6.87 | Kullanıcı kararı (Oturum 270/271) |
 

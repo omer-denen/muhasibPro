@@ -58,11 +58,11 @@
         <!-- Bildirimler -->
         <StackPanel Spacing="4">
             <TextBlock Text="Bildirimler" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
-            <controls:SettingsCard Header="Bildirimler" Description="İşlem sonuçlarını Windows bildirimi olarak göster.">
+            <controls:SettingsCard Header="Bildirimler" Description="İşlem sonuçlarını uygulama içi bildirim olarak göster.">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="{StaticResource IconInfo}" />
                 </controls:SettingsCard.HeaderIcon>
-                <ToggleSwitch IsOn="{Binding NotificationEnabled, Mode=TwoWay}" />
+                <ToggleSwitch AutomationProperties.AutomationId="NotificationEnabledToggle" IsOn="{Binding NotificationEnabled, Mode=TwoWay}" />
             </controls:SettingsCard>
         </StackPanel>
     </StackPanel>

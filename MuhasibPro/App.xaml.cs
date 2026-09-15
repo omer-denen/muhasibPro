@@ -103,8 +103,6 @@ namespace MuhasibPro
             {
                 WindowHelper.SetMainWindow(MainWindow);
                 _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
-                // Unpackaged OS toast bildirimleri için AUMID + shortcut kaydı (asla başlatmayı kırmaz)
-                MuhasibPro.Services.UIService.NotificationService.Initialize();
                 await ActiveteAsync(args);
             } catch(Exception ex)
             {

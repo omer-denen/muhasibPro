@@ -19,8 +19,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
     public class FirmaShellViewModel : ViewModelBase, IMaliDonemListHost
     {
         private readonly IFirmaWithMaliDonemSelectedService _selectedService;
-        private readonly ILocalSettingsService _localSettings;
-        private readonly IEventBus _eventBus;
 
         public FirmalarViewModel FirmalarVM { get; }
         public MaliDonemViewModel MaliDonemVM { get; }
@@ -44,8 +42,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
             IEventBus eventBus = null) : base(commonServices)
         {
             _selectedService = selectedService;
-            _localSettings = localSettingsService;
-            _eventBus = eventBus;
 
             // Önce MaliDonemList oluştur, sonra her iki VM'e paylaştır
             var sharedMaliDonemList = new MaliDonemListViewModel(commonServices, maliDonemService, tenantWorkflowService, eventBus);
@@ -204,7 +200,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
             MessageService.Subscribe<FirmaListViewModel>(this, OnMessage);
             MessageService.Subscribe<MaliDonemListViewModel>(this, OnMaliDonemMessage);
             MessageService.Subscribe<TenantDatabaseUpdateViewModel>(this, OnTenantUpdated);
-            _eventBus?.Subscribe<TenantUpdateAvailableEvent>(this, OnTenantUpdateAvailable);
             FirmalarVM.Subscribe();
             MaliDonemVM.Subscribe();
         }
@@ -212,31 +207,8 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         public void BaseUnsubscribe()
         {
             MessageService.Unsubscribe(this);
-            _eventBus?.Unsubscribe(this);
             FirmalarVM.Unsubscribe();
             MaliDonemVM.Unsubscribe();
-        }
-
-        /// <summary>E1 M1 bacağı: güncelleme saptanınca durum satırı + toast (ShowNotifications kapalıysa sessiz).</summary>
-        private async void OnTenantUpdateAvailable(object sender, TenantUpdateAvailableEvent e)
-        {
-            if (e == null || string.IsNullOrWhiteSpace(e.DatabaseName))
-                return;
-            bool goster = true;
-            try
-            {
-                if (_localSettings != null)
-                    goster = (await _localSettings.ReadSettingAsync<UpdateSettingsModel>(UpdateSettingsModel.SettingsKey))?.ShowNotifications ?? true;
-            }
-            catch { /* varsayılan açık korunur */ }
-            if (!goster)
-                return;
-            var mesaj = $"'{e.DatabaseName}' için şema güncellemesi hazır ({e.FromVersion} → {e.ToVersion}).";
-            await ContextService.RunAsync(() =>
-            {
-                StatusActionMessage(mesaj, StatusMessageType.Warning, autoHide: 8);
-                NotificationService.Show("Güncelleme Gerekli", mesaj, NotificationType.Warning);
-            });
         }
 
         private async void OnMessage(FirmaListViewModel viewModel, string message, object args)

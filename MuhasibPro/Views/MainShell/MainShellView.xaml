@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:components="using:MuhasibPro.Views.MainShell.Components"
+    xmlns:ortak="using:MuhasibPro.Views.Components"
     xmlns:shell="using:MuhasibPro.Views.ShellViews.Shell"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Loaded="OnPageLoaded"
@@ -123,6 +124,15 @@
 
         <!-- Kural 17/footer: ana pencere durum çubuğu (tam genişlik) -->
         <shell:ShellStatusBar x:Name="ShellStatusBarControl" Grid.Row="1" Grid.ColumnSpan="2" />
+
+        <!-- Faz 6.86: uygulama içi bildirim host'u (OS toast yerine) — içerik alanı üstünde -->
+        <ortak:InAppMessageHost
+            Grid.Row="0"
+            Grid.Column="1"
+            Margin="24,48,24,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            Canvas.ZIndex="50" />
     </Grid>
         </Grid>
     </Border>

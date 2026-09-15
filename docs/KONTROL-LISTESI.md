@@ -46,15 +46,16 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
   - [x] LoadAsync/RefreshAllAsync 30sn timeout + Warning toast "mevcut veriler gösterilmektedir"
   - [x] KPI hibrit-c: analizliDurum=0 → "Durum analizi bekleniyor" (%0 yalanı kapandı); TopluAnalizTamamlandi olayı + KPI tazeleme
   - [x] Bayat-exe derleme zamanı footer'a (AppSurumBilgisi.DerlemeZamani — exe GetLastWriteTime)
-- [ ] **3. View yıkım + yeniden tasarım (ATLANDI — kullanıcı kararı, Oturum 218):** ⏭️ MaliDonemView tasarımı atlandı, silme/yıkım yapılmadan hedefli onarım çizgisine geçildi (saf Fluent fırsatçı migrate ilkesiyle uyumlu); detay mesajı gelirse tekil Kural-8 onayıyla ele alınır
-  - [ ] Silinecek 16 XAML ünitesi (32 dosya): `MaliDonemYonetimView.xaml(+cs)` + 9 UserControl (`DonemSecimListesi`, `DonemOzetCard`, `TopluIslemlerPanel`, `DonemYedeklerPanel`, `DonemParametrePanel`, `DonemIslemKartlariPanel`, `DerinAnalizPanel`, `BilinmeyenPanel`, `SilinenDonemYedekleriPanel`) + 3 dialog (`YetimYedeklerDialog`, `YonetimAyarlarDialog`, `YedekSilOnayDialog`) + 3 ayar alt-paneli; `MaliDonemView/Details` + Shell dialogları (`DeleteGuard`, `RestoreVerify`) KAPSAM DIŞI
-  - [ ] Kayıtlar: `Startup.cs:63` Yonetim kaydı silinir; `FirmalarListControl:51` + `GirisDashboard:120` caller'ları yeni hedefe (sessiz `catch` teşhisli yapılır); `DialogService:148` `YedekSilOnayDialog` bağı taşınır/korunur; `AddAppViewModelHostBuilderExtensions:40-41` VM kayıtları kalır (VM'ler korunur)
-  - [ ] Yeni tasarım (detay mesajı gelince netleşir) + Kural-12 akış-planı/bekleme-animasyonu + Kural-8 sınıf-bazlı onaylar
-- [ ] **4. Progress/bildirim disiplini (Kural 12):** 🔨 (D1 ✅🧪 Oturum 218 + D2 ✅🧪 Oturum 220: 5 VM gruplandı + DerinAnaliz bildirimi, 435/435; D3-View **6.75 sonrası** — Oturum 221 kararı, çöp-iş engeli; D3-VM yüzdeleri önden yapılabilir)
-  - [ ] Uzun işlemler (`TopluYedekle/Test/Bakim`, `YedekAl`, `BakimCalistir`, derin analiz, göç): `Is*Calisiyor` + determinate (`i/N`, `%`, mevcut iş) + bitince TEK özet; ara-adım toast'u kaldırılır
-  - [ ] Silme `MaliDonemDeletionViewModel` yoluna bağlanır (`ProgressPercentage` reuse); `TenantDatabaseUpdateViewModel` adım rozetine yüzde (Yedek ~30, Göç ~70, Doğrulama ~100)
-  - [ ] `NotificationService`: `tag/group` replace + tip-ikon ayrımı (Success/Warning/Danger görsele yansır)
-- [ ] **5. RAF panel temizliği (16 kart — model+provider+test kalır, panel kalkar):** ⬜ AppPlatform 5 (Splash gecikmesi, status süresi, Notification ikizi, klasör ikilisi) · Identity 3 (Pbkdf2 **önce provider'a bağlanır** — güvenlik; SessionTimeout + SonGiris rafta) · Database 7 (kapanış-yedeği, haftalık-kontrol, aralık, VACUUM flag, M4 busy/journal/sync) · License CheckIntervalDays 1
+- [x] **3. View yıkım + yeniden tasarım — İPTAL (kullanıcı kararı, Oturum 272):** Zaten yaptık; silme/yıkım yerine hedefli onarım uygulandı ve **MaliDonemYönetimView redesign Faz 6.88**'e devredildi.
+  - [x] → **6.88 envanteri — 16 XAML ünitesi (32 dosya):** `MaliDonemYonetimView.xaml(+cs)` + 9 UserControl (`DonemSecimListesi`, `DonemOzetCard`, `TopluIslemlerPanel`, `DonemYedeklerPanel`, `DonemParametrePanel`, `DonemIslemKartlariPanel`, `DerinAnalizPanel`, `BilinmeyenPanel`, `SilinenDonemYedekleriPanel`) + 3 dialog (`YetimYedeklerDialog`, `YonetimAyarlarDialog`, `YedekSilOnayDialog`) + 3 ayar alt-paneli; `MaliDonemView/Details` + Shell dialogları (`DeleteGuard`, `RestoreVerify`) KAPSAM DIŞI
+  - [x] → **6.88:** Kayıtlar: `Startup.cs:63` Yonetim kaydı silinir; `FirmalarListControl:51` + `GirisDashboard:120` caller'ları yeni hedefe (sessiz `catch` teşhisli yapılır); `DialogService:148` `YedekSilOnayDialog` bağı taşınır/korunur; `AddAppViewModelHostBuilderExtensions:40-41` VM kayıtları kalır (VM'ler korunur)
+  - [x] → **6.88:** Yeni tasarım + Kural-12 akış-planı/bekleme-animasyonu + Kural-8 sınıf-bazlı onaylar
+- [x] **4. Progress/bildirim disiplini (Kural 12) — birleştirildi (Oturum 272):** D1 ✅🧪 (Oturum 218) + D2 ✅🧪 (Oturum 220); **bildirim/InfoBar kısmı Faz 6.86 Chunk-2a ile tamamlandı**; kalan **progress (D3-View + yüzdeler) Faz 6.88**'e devredildi.
+  - [ ] → **6.88:** Uzun işlemler (`TopluYedekle/Test/Bakim`, `YedekAl`, `BakimCalistir`, derin analiz, göç): `Is*Calisiyor` + determinate (`i/N`, `%`, mevcut iş) + bitince TEK özet; ara-adım toast'u kaldırılır
+  - [ ] → **6.88:** Silme `MaliDonemDeletionViewModel` yoluna bağlanır (`ProgressPercentage` reuse); `TenantDatabaseUpdateViewModel` adım rozetine yüzde (Yedek ~30, Göç ~70, Doğrulama ~100)
+  - [x] `NotificationService`: `tag/group` replace + tip-ikon/severity ayrımı → **6.86 Chunk-2a** (`IInAppMessageService` tag+grup ezme + `NotificationTypeToInfoBarSeverityConverter`)
+- [x] **5. RAF panel temizliği — Faz 6.88'e birleştirildi (Oturum 272; RAF panel = `MaliDonem/Yonetim/.../YonetimAyarlar*` aynı view ağacı):** AppPlatform 5 (Splash gecikmesi, status süresi, Notification ikizi, klasör ikilisi) · Identity 3 (Pbkdf2 **önce provider'a bağlanır** — güvenlik; SessionTimeout + SonGiris rafta) · Database 7 (kapanış-yedeği, haftalık-kontrol, aralık, VACUUM flag, M4 busy/journal/sync) · License CheckIntervalDays 1
+- [x] **Faz 6.71 KAPANDI (Oturum 272):** m.1 ✅🧪 · m.2 ✅🧪 · m.3 **İPTAL** · m.4 bildirim→**6.86 Chunk-2a**, progress→**6.88** · m.5→**6.88**.
 - [ ] **Kapılar (her faz):** build 0/0 + test yeşil + smoke + docs ⬜
 
 ## Faz 6.72 — Çekirdek Stabilizasyon (saf Fluent + Faz B kilidi — Oturum 206, 📋 plan)
@@ -394,3 +395,30 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 **Rötüş v2 (Oturum 270 — kullanıcı isteği):** 269'un opak `SolidBackgroundFillColorBaseBrush`'ı **Dark'ta `#202020`** olduğu için ana border yüzeyi üstünde "siyah nokta" gibi kalıyordu ("çok siyah, tema rengiyle uyumlu olsun, göze batmasın"). `DesignTokens.xaml`'e butona özel tema-farkında opak token eklendi: `MuhasibCircleIconArkaplanColor` (**Light aynen** `#F3F3F3` / **Dark** `#333A3E`) + hover `#3F464B` + pressed `#2A3033`; `Buttons.xaml` `CircleIconButtonStyle` bu token'lara bağlandı (opaklık korunur → arkadaki 1.5px ana border çizgisi yine görünmez). Build **0 hata / 0 uyarı**; canlı Dark kanıt: buton `#333A3E` ≈ çevre ana border `#383F43` (`ot289e`/`ot289f`/`ot289g`). **Kullanıcı onayı ALINDI** (Oturum 270 — "çok güzel oldu, onaylıyorum").
 
 **Kapı:** Kural 14 araştırması (REFERANSLAR) + Kural 8 sınıf onayları + build 0/0 + test + Kural 18 canlı (Light/Dark + başarı + hata/oto-geri-alma) + onay.
+
+---
+
+## Faz 6.88 — MaliDonemYönetimView + SistemDbYonetimView yeniden tasarımı (Oturum 272 kullanıcı kararı — 📋 plan)
+
+> **Kullanıcı kararı (Oturum 272):** Bu iki view yeniden tasarlanacak; **bu view'lara ara iş yapılmayacak** ("burada işlem yapma, sadece faz aç sonra hatırlar"). Kural 11 sabit ring düzeltmeleri de bu faza ertelendi.
+
+**Kapsam:** `MaliDonem/Yonetim/*` (MaliDonemYonetimView + alt paneller) ve `SistemDbYonetim/*` (SistemDbYonetimView + alt paneller) komple yeniden tasarım — Fluent + Kural 17 (zemin → ana border → kartlar), Kural 16 (birincil aksiyon kart başlığında sağda), Kural 11/12 (busy ring + sonuç + akış), Kural 13 (`?` yardım), Kural 14 araştırma (muhasebe/ERP dönem yönetimi + DB bakım desenleri), Light/Dark.
+
+**Devredilen / birleştirilen maddeler:**
+- **6.71/m.5 — RAF panel temizliği (16 kart):** RAF panel = `MaliDonem/Yonetim/.../YonetimAyarlar*` (aynı view ağacı) → bu fazda. Model+provider+test kalır, panel kalkar: AppPlatform 5 · Identity 3 (Pbkdf2 **önce provider'a bağlanır**) · Database 7 · License 1.
+- **6.71/m.3 — View yıkım/yeniden tasarım envanteri (16 XAML ünitesi, 32 dosya):** İPTAL edildi, hedefli onarım uygulandı; envanter bu fazın kapsamı.
+- **6.71/m.4 — progress kısmı:** uzun işlemler determinate + tek özet; silme yüzdesi; `TenantDatabaseUpdateViewModel` adım rozetine yüzde (bildirim/InfoBar kısmı **6.86 Chunk-2a**'da tamamlandı).
+- **Kural 11 sabit `IsActive="True"` ring:** `DonemIslemKartlariPanel.xaml:84`, `DatabaseInfoPanel.xaml:151`, `SistemGuncellemePanel.xaml:60`, `SistemYedekPanel.xaml:87` (bayrağa bağlanacak).
+- Not: `FirmaShellViewModel.OnTenantUpdateAvailable` 6.86'da kaldırıldı (tekrar yok).
+
+**Kapı:** Kural 14 araştırması + Kural 8 sınıf onayları + build 0/0 + test + Kural 18 canlı + onay.
+
+---
+
+## Faz 6.89 — LoginView: "Beni hatırla" + QuickLogin (hızlı giriş) incelenmesi (Oturum 272 kullanıcı kararı — 📋 plan)
+
+> **Kullanıcı kararı (Oturum 272):** `LoginView` içindeki **"Beni hatırla"** ve **QuickLogin (hızlı giriş)** incelenecek; davranış/güvenlik/tasarım gözden geçirilecek.
+
+**Kapsam (incelenecek):** `Views/Login/LoginView.xaml(.cs)`, `Views/Login/QuickLoginPanel.xaml(.cs)`, `Views/Login/NamePasswordControl.xaml`, `LoginViewModel`/`QuickLoginAccountsViewModel` + ilgili servisler — "Beni hatırla" bayrağının kalıcılığı/şifre saklama niyeti, QuickLogin hesap listesi davranışı, Kural 13 yardım metinlerinin güncelliği.
+
+**Kapı:** Kural 14 araştırması (Kural 19 defteri) + Kural 8 sınıf onayları + build 0/0 + test + Kural 18 canlı + onay.

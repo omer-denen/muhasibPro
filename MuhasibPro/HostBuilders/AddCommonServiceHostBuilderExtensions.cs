@@ -32,6 +32,9 @@ namespace MuhasibPro.HostBuilders
                 services.AddSingleton<IMessageService, MessageService>();
                 services.AddSingleton<MuhasibPro.Business.Contracts.UIServices.CommonServices.Events.IEventBus, MuhasibPro.Business.Services.CommonServices.EventBus>();
                 services.AddSingleton<INotificationService, NotificationService>();
+                // Faz 6.86: uygulama içi bildirim merkezi — SCOPED (pencere başına ayrı; bildirim yalnız
+                // tetikleyen/aktif pencerede görünür, diğer pencerelere yansımaz).
+                services.AddScoped<IInAppMessageService, InAppMessageService>();
                 // Faz 6.82: yol açıcı (OS kabuğu — App katmanı implementasyonu).
                 services.AddSingleton<IYolAciciService, YolAciciService>();
 
