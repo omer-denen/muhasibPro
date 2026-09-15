@@ -44,6 +44,27 @@ namespace MuhasibPro.Views.ShellViews.Shell
         public string UserName => _statusBarService.UserName;
         public string DatabaseConnectionMessage => _statusBarService.DatabaseConnectionMessage;
         public bool IsDatabaseConnection => _statusBarService.IsSistemDatabaseConnection;
+
+        // Bağlam (firma/dönem/tenant) yalnız workspace host'unda (MainShell) gösterilir;
+        // Ayarlar/Yeni Firma gibi yönetim pencereleri (ShellView) göstermez.
+        private bool _baglamGoster;
+        public bool BaglamGoster
+        {
+            get => _baglamGoster;
+            set
+            {
+                if (_baglamGoster == value) return;
+                _baglamGoster = value;
+                NotifyPropertyChanged(nameof(FirmaAdi));
+                NotifyPropertyChanged(nameof(MaliDonemAdi));
+                NotifyPropertyChanged(nameof(IsTenantDatabaseConnection));
+            }
+        }
+
+        public string FirmaAdi => BaglamGoster ? _statusBarService.FirmaAdi : string.Empty;
+        public string MaliDonemAdi => BaglamGoster ? _statusBarService.MaliDonemAdi : string.Empty;
+        public bool IsTenantDatabaseConnection => BaglamGoster && _statusBarService.IsTenantDatabaseConnection;
+        public string TenantDatabaseMessage => _statusBarService.TenantDatabaseMessage;
         #endregion
 
         private void OnServicePropertyChanged(object sender, PropertyChangedEventArgs e)

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:components="using:MuhasibPro.Views.MainShell.Components"
+    xmlns:shell="using:MuhasibPro.Views.ShellViews.Shell"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Loaded="OnPageLoaded"
     mc:Ignorable="d"
@@ -21,13 +22,17 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
         <!-- Sol: NavSidebar 240 -->
-        <components:NavSidebarControl Grid.Column="0" />
+        <components:NavSidebarControl Grid.Column="0" Grid.Row="0" />
 
         <!-- Kural 17 — Katman 2: sağ içerik ana border paneli (sidebar zemin üzerinde kalır);
              Kural 13 ? panelin sağ üst köşesinde. -->
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="1" Grid.Row="0">
             <Grid x:Name="PanelWrap" Margin="24,48,24,24">
                 <Border x:Name="AnaBorder"
                         Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
@@ -115,6 +120,9 @@
                 </Button>
             </Grid>
         </Grid>
+
+        <!-- Kural 17/footer: ana pencere durum çubuğu (tam genişlik) -->
+        <shell:ShellStatusBar x:Name="ShellStatusBarControl" Grid.Row="1" Grid.ColumnSpan="2" />
     </Grid>
         </Grid>
     </Border>

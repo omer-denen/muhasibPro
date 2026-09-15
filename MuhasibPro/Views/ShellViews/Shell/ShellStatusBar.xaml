@@ -91,13 +91,89 @@
             </StackPanel>
         </StackPanel>
 
-        <!--  Sağ — kullanıcı · sistem veritabanı · saat  -->
+        <!--  Sağ — sistem (ikincil) · aktif firma/dönem + tenant · kullanıcı · saat  -->
         <StackPanel
             Grid.Column="1"
             Margin="0,0,12,0"
             VerticalAlignment="Center"
             Orientation="Horizontal"
-            Spacing="12">
+            Spacing="10">
+
+            <!--  Sistem veritabanı (ikincil)  -->
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="6"
+                ToolTipService.ToolTip="{x:Bind DatabaseConnectionMessage, Mode=OneWay}"
+                Visibility="{x:Bind DatabaseConnectionMessage, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}">
+                <Grid
+                    Width="8"
+                    Height="8"
+                    VerticalAlignment="Center">
+                    <Ellipse
+                        Fill="{ThemeResource SystemFillColorSuccessBrush}"
+                        Visibility="{x:Bind IsDatabaseConnection, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <Ellipse
+                        Fill="{ThemeResource SystemFillColorCriticalBrush}"
+                        Visibility="{x:Bind IsDatabaseConnection, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                </Grid>
+                <TextBlock
+                    FontSize="11"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                    Text="Sistem" />
+            </StackPanel>
+
+            <Border
+                Width="1"
+                Height="14"
+                Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                Visibility="{x:Bind FirmaAdi, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}" />
+
+            <!--  Aktif firma + mali dönem + tenant bağlantısı (birincil bağlam)  -->
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="6"
+                Visibility="{x:Bind FirmaAdi, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}">
+                <FontIcon
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Glyph="{StaticResource IconBuilding}" />
+                <TextBlock
+                    MaxWidth="180"
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind FirmaAdi, Mode=OneWay}"
+                    TextTrimming="CharacterEllipsis" />
+                <TextBlock
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                    Text="·" />
+                <FontIcon
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Glyph="{StaticResource IconCalendar}" />
+                <TextBlock
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind MaliDonemAdi, Mode=OneWay}" />
+                <Grid
+                    Width="10"
+                    Height="10"
+                    VerticalAlignment="Center"
+                    ToolTipService.ToolTip="{x:Bind TenantDatabaseMessage, Mode=OneWay}">
+                    <Ellipse
+                        Fill="{ThemeResource SystemFillColorSuccessBrush}"
+                        Visibility="{x:Bind IsTenantDatabaseConnection, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <Ellipse
+                        Fill="{ThemeResource SystemFillColorCriticalBrush}"
+                        Visibility="{x:Bind IsTenantDatabaseConnection, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                </Grid>
+            </StackPanel>
+
+            <Border
+                Width="1"
+                Height="14"
+                Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                Visibility="{x:Bind UserName, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}" />
 
             <StackPanel
                 Orientation="Horizontal"
@@ -111,34 +187,6 @@
                     FontSize="12"
                     Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                     Text="{x:Bind UserName, Mode=OneWay}" />
-            </StackPanel>
-
-            <Border
-                Width="1"
-                Height="14"
-                Background="{ThemeResource DividerStrokeColorDefaultBrush}"
-                Visibility="{x:Bind DatabaseConnectionMessage, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}" />
-
-            <StackPanel
-                Orientation="Horizontal"
-                Spacing="6"
-                Visibility="{x:Bind DatabaseConnectionMessage, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}">
-                <Grid
-                    Width="10"
-                    Height="10"
-                    VerticalAlignment="Center">
-                    <Ellipse
-                        Fill="{ThemeResource SystemFillColorSuccessBrush}"
-                        Visibility="{x:Bind IsDatabaseConnection, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <Ellipse
-                        Fill="{ThemeResource SystemFillColorCriticalBrush}"
-                        Visibility="{x:Bind IsDatabaseConnection, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
-                </Grid>
-                <TextBlock
-                    FontSize="12"
-                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                    Text="{x:Bind DatabaseConnectionMessage, Mode=OneWay}"
-                    TextTrimming="CharacterEllipsis" />
             </StackPanel>
 
             <Border

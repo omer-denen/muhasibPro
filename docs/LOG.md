@@ -37,7 +37,7 @@
 
 ---
 
-## Oturum İndeksi (271 oturum, 14 cilt)
+## Oturum İndeksi (272 oturum, 14 cilt)
 
 | # | Tarih | Baslik | Durum | Cilt |
 |---|-------|--------|-------|------|
@@ -314,6 +314,7 @@
 | 269 | 2026-09-15 | Faz 6.84 onayı + Faz 6.82 Dev-mode tamamlandı | ✅🧪 | C14 |
 | 270 | 2026-09-15 | CircleIconButtonStyle dark tonu: ana border yüzeyiyle uyum | ✅🧪 | C14 |
 | 271 | 2026-09-15 | Faz 6.86 Chunk-1: durum çubuğu + StatusMessage/StatusBar refactor | ✅🧪 | C14 |
+| 272 | 2026-09-15 | Faz 6.86: durum çubuğu ana pencereye (MainShellView) + aktif firma/mali dönem/tenant bağlamı | ✅🧪 | C14 |
 
 ---
 

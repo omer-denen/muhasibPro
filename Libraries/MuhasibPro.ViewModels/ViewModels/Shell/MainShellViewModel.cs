@@ -48,14 +48,23 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
                 new() { Baslik = "Tenant kartı", Aciklama = "Bağlı olan firma ve mali dönem veritabanını, WAL (Write-Ahead Logging) durumunu gösterir. Bağlantı sorununda dönem seçimine dönüp yeniden bağlanın." },
                 new() { Baslik = "'Snapshot Yedek'", Aciklama = "Açık dönemin hızlı yedeğini alır. Bu buton Faz B ile etkinleşecek; şu an hazırlık yer tutucusudur." },
                 new() { Baslik = "Modül açılmıyorsa", Aciklama = "Henüz hazırlanmamış modüller bilgi mesajı gösterir; hazır olduklarında menüden açılır." },
+                new() { Baslik = "Durum çubuğu", Aciklama = "Pencerenin altındaki şerit solda anlık durumu ve süren işin ilerlemesini; sağda aktif firmayı ve mali dönemi, tenant (dönem) veritabanı bağlantısını, kullanıcı adını, sistem veritabanı göstergesini ve saati gösterir." },
             });
         }
 
         public override async Task LoadAsync(ShellArgs args)
         {
             InitializeNavigationItems();
-            //await UpdateAppLogBadge();
-            await base.LoadAsync(args);
+            // Ana pencere kabuğu: içerik VM'ye navigasyon yok; yalnız durum çubuğunu besle.
+            ViewModelArgs = args;
+            if (args?.UserInfo != null)
+            {
+                UserInfo = args.UserInfo;
+                UserInfoyuStatusBaraYaz();
+            }
+            // Aktif firma/dönem bağlamı gerçek yüklü tenant'tan alınır (workspace girişi).
+            StatusBarService.RefreshAktifBaglam();
+            await SistemVeritabaniDurumunuYazAsync();
         }
 
         public override void Subscribe()

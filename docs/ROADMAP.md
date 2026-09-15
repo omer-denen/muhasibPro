@@ -60,7 +60,7 @@ Her modül çekirdek üzerine bağımsız eklenir: **Cari (B1) → Stok (B2) →
 | 6.83 | TenantDatabaseUpdateView canlı doğrulama turu | 🔨 Kısmi — ekran doğrulandı; **6.87'ye devredildi** |
 | 6.84 | FirmaShellView seçim deneyimi yeniden tasarımı | ✅🧪 (onaylı "gayet başarılı") |
 | 6.85 | Kullanıcı Yönetimi modülü (ayrı MODAL pencere) | 📋 Plan |
-| 6.86 | Durum çubuğu + StatusMessage + Notification: redesign + refactor | 🔨 Aktif — **Chunk-1 ✅🧪**; Chunk-2 (In-App message + OS toast kaldırma + progress) sırada |
+| 6.86 | Durum çubuğu + StatusMessage + Notification: redesign + refactor | 🔨 Aktif — **Chunk-1 ✅🧪 onaylı** + **ana pencere çubuğu/aktif bağlam ✅🧪 onaylı (Oturum 272)**; Chunk-2 (In-App message + OS toast kaldırma + progress) sırada |
 | 6.87 | Veritabanı Güncelleme sayfası komple yeniden tasarımı | 📋 Plan (Kural 14 araştırması hazır) |
 
 ## 4. Karar Logu (Yeni)
@@ -72,7 +72,8 @@ Her modül çekirdek üzerine bağımsız eklenir: **Cari (B1) → Stok (B2) →
 | 2026-09-15 | **Bu proje ana projedir;** eski referans dönemler (master/WebToXaml/viewpackage/InventEase) arşivde | Kullanıcı kararı (Oturum 271) |
 | 2026-09-15 | **Doküman/log yapısı sadeleştirildi:** DURUM.md (tek "nerede kaldık" yüzeyi) + kompakt LOG indeksi + eski cilt/dokümanlar arşivde | Kullanıcı kararı — "model 170k token log okuyor" |
 | 2026-09-15 | **Faz 6.86 Chunk-1:** durum çubuğu + StatusMessage/StatusBar servis refactor + `ShellStatusBar` sıfırdan Fluent footer | Kullanıcı onayı (Chunk-1 sınıf planı) |
-| 2026-09-15 | **Durum çubuğu ana pencere kararı bekliyor:** ana akış `ShellView` kullanmadığı için footer ana pencerede görünmüyor | Oturum 271 — "şimdilik not düş, sonra karar" |
+| 2026-09-15 | **Durum çubuğu ana pencere kararı (çözüldü):** ana pencereye `MainShellView` altına tam genişlik footer olarak eklendi; `FirmaShellView`'de yok; `ShellView` (detay) aynen; mesajlar pencere başına ayrı | Kullanıcı kararı (Oturum 272) |
+| 2026-09-15 | **Durum çubuğu bağlamı:** sağ blokta aktif firma + mali dönem + tenant bağlantı noktası birincil, Sistem.db ikincil | Kullanıcı kararı (Oturum 272) — SAP status bar bağlam deseni |
 | 2026-09-15 | **Notification → In-App message; OS toast terk edildi** (CommunityToolkit paketi + AUMID hack'i kaldırılacak); çökme bildirimi = dialog | Kullanıcı kararı — "kullanmayacaksan onu da sil" |
 | 2026-09-15 | **Güncel iş sırası:** 6.86 (aktif) → 6.87 | Kullanıcı kararı (Oturum 270/271) |
 

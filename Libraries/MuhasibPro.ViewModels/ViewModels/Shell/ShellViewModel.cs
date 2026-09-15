@@ -101,14 +101,14 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         }
         public virtual void Unsubscribe() { MessageService.Unsubscribe(this); }
 
-        private void UserInfoyuStatusBaraYaz()
+        protected void UserInfoyuStatusBaraYaz()
         {
             if (UserInfo?.KullaniciModel != null)
                 StatusBarService.UserName = UserInfo.KullaniciModel.AdiSoyadi;
         }
 
         /// <summary>Sistem veritabanı göstergesini gerçek durumdan besler (Kural 7).</summary>
-        private async Task SistemVeritabaniDurumunuYazAsync()
+        protected async Task SistemVeritabaniDurumunuYazAsync()
         {
             try
             {
