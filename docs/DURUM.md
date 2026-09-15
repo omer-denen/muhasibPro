@@ -37,7 +37,7 @@
 1. **6.87 v2:** tenant update sayfası kalsın mı (baştan tasarım), yoksa kaldırılıp "erişimde otomatik migration + hafif onay/progress" mi?
 2. **Ayarlar rozeti:** FirmaShell güncelleme bildirimi kapatılınca Ayarlar butonuna güncelleme ikonu; giriş yeri (Ayarlar içi güncelleme yüzeyi **mı** / Mali Dönem Yönetimi'ne yönlendirme **mi**).
 3. **Doküman maddeleri:** (a) `docs/VIEW-BAGIMLILIK.md` dursun/arşive? (b) `KONTROL-LISTESI` kapanan yakın fazlar (6.69/6.70/6.79–6.84) arşive alınsın mı?
-4. **Commit durumu:** Oturum 273 işleri **henüz commit edilmedi** (6.87 v1 + 6.90 Velopack). Önceki: `d5310a2` + `2ff1a6c`.
+4. **Commit durumu:** **temiz (Oturum 273 commit edildi):** `af77b50` (6.90 Velopack + dev-mode testleri + 6.91 planı) + `fde34df` (6.87 v1 — reddedildi/geçici). Önceki: `d5310a2` + `2ff1a6c`.
 
 ## Son oturum (273, 2026-09-15)
 6.87 v1 redesign **kullanıcı tarafından reddedildi** ("referansı sil, baştan tasarım"). İki-katman güncelleme ayrımı netleşti (app update/Velopack ↔ tenant şema migration). **Faz 6.90 kurulumu:** `release.yml` repo adresi dinamik, derleme-zamanı gömülü varsayılan FeedUrl, admin + dev-mode kaynak düzenleme. **Dev-mode test entegrasyonu:** "Modül Entegrasyon Testleri" (donanım POST, 41/41 canlı) + "Tanılama" (sistem 7 + güncelleme öz-testi) + "Kaynağı Doğrula". **Faz 6.91 planı** (güncelleme sonrası doğrulama + kurtarma) yazıldı. Build 0 hata + test **509/509**. Detay: `docs/LOG/LOG-261-280.md` Oturum 273.
