@@ -1,12 +1,19 @@
+using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
+using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.DevServices;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.DTOModel.DevModel;
 using MuhasibPro.Business.DTOModel.SistemModel;
+using MuhasibPro.Data.Contracts.Database.Common.Helpers;
+using MuhasibPro.Domain;
 using MuhasibPro.Domain.Enum;
+using MuhasibPro.Domain.Models;
 using MuhasibPro.ViewModels.Infrastructure.Common;
 using MuhasibPro.ViewModels.Infrastructure.ViewModels;
+using MuhasibPro.ViewModels.ViewModels.Sistem;
+using MuhasibPro.ViewModels.ViewModels.Sistem.SistemDbYonetim;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -21,19 +28,34 @@ public class GelistiriciAraclariViewModel : ViewModelBase
     private readonly IDevModeProvider _devMode;
     private readonly IDevAraclariService _araclar;
     private readonly IYolAciciService _yolAcici;
+    private readonly IUpdateService _updateService;
+    private readonly SistemDiagnosticsViewModel _diagnostics;
+    private readonly IModulTestCalistirici _modulTestleri;
 
     private DevAracDurumuModel _durum = new();
+    private UpdateSettingsModel _guncellemeAyarlari;
     private bool _islemSuruyor;
 
     public GelistiriciAraclariViewModel(
         ICommonServices commonServices,
         IDevModeProvider devMode,
         IDevAraclariService araclar,
-        IYolAciciService yolAcici) : base(commonServices)
+        IYolAciciService yolAcici,
+        IUpdateService updateService = null,
+        IApplicationPaths appPaths = null,
+        ISistemDatabaseService sistemDb = null,
+        ISistemDiagnosticsService diagnosticsService = null,
+        IModulTestCalistirici modulTestleri = null) : base(commonServices)
     {
         _devMode = devMode;
         _araclar = araclar;
         _yolAcici = yolAcici;
+        _updateService = updateService;
+        _modulTestleri = modulTestleri;
+
+        // Sistem tanılama (7 test) dev-mode'a yeniden kullanım için bağlanır (Kural 4: kopya yok).
+        if (appPaths != null && sistemDb != null && diagnosticsService != null)
+            _diagnostics = new SistemDiagnosticsViewModel(appPaths, sistemDb, diagnosticsService, commonServices);
 
         YenileCommand = new AsyncRelayCommand(YenileAsync, () => !_islemSuruyor);
         KimligiOnarCommand = new AsyncRelayCommand(KimligiOnarAsync, () => !_islemSuruyor);
@@ -41,6 +63,10 @@ public class GelistiriciAraclariViewModel : ViewModelBase
         TransferTaraCommand = new AsyncRelayCommand(TransferTaraAsync, () => !_islemSuruyor);
         LogKlasoruAcCommand = new RelayCommand(() => YolAc(_durum.LogKlasoru, "Log klasörü"));
         VeriKlasoruAcCommand = new RelayCommand(() => YolAc(_durum.VeriKlasoru, "Veri klasörü"));
+        VarsayilanaSifirlaCommand = new RelayCommand(VarsayilanaSifirla);
+        KaynagiDogrulaCommand = new AsyncRelayCommand(KaynagiDogrulaAsync);
+        TanilamaCalistirCommand = new AsyncRelayCommand(TanilamaCalistirAsync, () => !_islemSuruyor);
+        ModulTestCalistirCommand = new AsyncRelayCommand(ModulTestCalistirAsync, () => !_islemSuruyor);
         YardimCommand = new AsyncRelayCommand(YardimGosterAsync);
     }
 
@@ -53,7 +79,236 @@ public class GelistiriciAraclariViewModel : ViewModelBase
     public ICommand TransferTaraCommand { get; }
     public ICommand LogKlasoruAcCommand { get; }
     public ICommand VeriKlasoruAcCommand { get; }
+    public ICommand VarsayilanaSifirlaCommand { get; }
+    public ICommand KaynagiDogrulaCommand { get; }
+    public ICommand TanilamaCalistirCommand { get; }
     public ICommand YardimCommand { get; }
+
+    /// <summary>Çalışma-zamanı tanılama sonuçları (sistem sınıfları + güncelleme kaynağı + kimlik).</summary>
+    public ObservableCollection<SistemTestResult> TanilamaSonuclari { get; } = new();
+
+    private string _tanilamaOzeti = string.Empty;
+    public string TanilamaOzeti
+    {
+        get => _tanilamaOzeti;
+        private set
+        {
+            if (Set(ref _tanilamaOzeti, value))
+                NotifyPropertyChanged(nameof(TanilamaVar));
+        }
+    }
+
+    public bool TanilamaVar => !string.IsNullOrWhiteSpace(_tanilamaOzeti);
+
+    public ICommand ModulTestCalistirCommand { get; }
+
+    /// <summary>Modül entegrasyon testleri (donanım POST): DI kaydı/çözümü + kritik akış smoke'ları.</summary>
+    public ObservableCollection<ModulTestSonucu> ModulTestSonuclari { get; } = new();
+
+    private string _modulTestOzeti = string.Empty;
+    public string ModulTestOzeti
+    {
+        get => _modulTestOzeti;
+        private set
+        {
+            if (Set(ref _modulTestOzeti, value))
+                NotifyPropertyChanged(nameof(ModulTestVar));
+        }
+    }
+
+    public bool ModulTestVar => !string.IsNullOrWhiteSpace(_modulTestOzeti);
+
+    /// <summary>Güncelleme kaynağı adresi (repo/feed) — dev-mode buradan değiştirir; değişiklik anında kaydedilir.</summary>
+    public string FeedUrl
+    {
+        get => _guncellemeAyarlari?.FeedUrl ?? string.Empty;
+        set
+        {
+            if (_guncellemeAyarlari != null && _guncellemeAyarlari.FeedUrl != value?.Trim())
+            {
+                _guncellemeAyarlari.FeedUrl = value?.Trim() ?? string.Empty;
+                NotifyPropertyChanged(nameof(FeedUrl));
+                _ = GuncellemeKaynakKaydetAsync();
+            }
+        }
+    }
+
+    /// <summary>Derlemede gömülü varsayılan kaynak (mevcut git repo adresi); boş olabilir.</summary>
+    public string VarsayilanFeedUrl => UpdateSettingsModel.VarsayilanFeedUrl;
+
+    private async Task GuncellemeKaynakKaydetAsync()
+    {
+        if (_updateService == null || _guncellemeAyarlari == null)
+            return;
+        await _updateService.SaveSettingsAsync(_guncellemeAyarlari);
+        Sonuc(StatusMessageType.Success, "Güncelleme kaynağı kaydedildi.");
+    }
+
+    private void VarsayilanaSifirla()
+    {
+        if (string.IsNullOrWhiteSpace(VarsayilanFeedUrl))
+        {
+            Sonuc(StatusMessageType.Warning, "Varsayılan kaynak adresi bulunamadı — bu derlemede gömülü git adresi yok.");
+            return;
+        }
+        FeedUrl = VarsayilanFeedUrl;
+        Sonuc(StatusMessageType.Success, "Güncelleme kaynağı varsayılana döndürüldü.");
+    }
+
+    private string _dogrulamaDetayi = string.Empty;
+    /// <summary>"Kaynağı Doğrula" sonucu — normalize öz-testi (+ varsa bağlantı denemesi) satırları.</summary>
+    public string DogrulamaDetayi
+    {
+        get => _dogrulamaDetayi;
+        private set
+        {
+            if (Set(ref _dogrulamaDetayi, value))
+                NotifyPropertyChanged(nameof(DogrulamaVar));
+        }
+    }
+
+    public bool DogrulamaVar => !string.IsNullOrWhiteSpace(_dogrulamaDetayi);
+
+    /// <summary>
+    /// Dev-mode öz-testi: derlemede gömülü kaynağı + normalize sözleşmesini (birim testleriyle aynı örneklerle)
+    /// doğrular; ardından kaynağa bağlanmayı dener. Testlerin dev-mode'a entegrasyonu.
+    /// </summary>
+    private async Task KaynagiDogrulaAsync()
+    {
+        var ozTest = AppGuncellemeBilgisi.OzTest();
+        var satirlar = new List<string>
+        {
+            $"Gömülü varsayılan: {Metin(VarsayilanFeedUrl)}",
+            $"Girilen adres (normalize): {Metin(AppGuncellemeBilgisi.Normalize(FeedUrl))}",
+            $"Normalizasyon öz-testi: {ozTest.Gecen}/{ozTest.Toplam} geçti",
+        };
+        satirlar.AddRange(ozTest.Detaylar);
+
+        if (_updateService != null && !string.IsNullOrWhiteSpace(FeedUrl))
+        {
+            try
+            {
+                var bilgi = await _updateService.CheckForUpdatesAsync();
+                satirlar.Add(bilgi == null
+                    ? "Bağlantı: kaynağa ulaşıldı — güncel."
+                    : $"Bağlantı: güncelleme var — v{bilgi.TargetFullRelease.Version}.");
+            }
+            catch (Exception ex)
+            {
+                satirlar.Add("Bağlantı: ulaşılamadı — " + ex.Message);
+            }
+        }
+
+        DogrulamaDetayi = string.Join(Environment.NewLine, satirlar);
+        Sonuc(ozTest.Basarili ? StatusMessageType.Success : StatusMessageType.Error,
+            ozTest.Basarili
+                ? $"Güncelleme kaynağı doğrulandı (öz-test {ozTest.Gecen}/{ozTest.Toplam})."
+                : "Güncelleme kaynağı öz-testi başarısız.");
+    }
+
+    private static string Metin(string deger) => string.IsNullOrWhiteSpace(deger) ? "-" : deger;
+
+    /// <summary>
+    /// Tüm çalışma-zamanı tanılamayı çalıştırır: mevcut sistem sınıfı testleri (7) +
+    /// güncelleme kaynağı öz-testi + kimlik/damga özeti. "Sorun nerede" tek listede görünür.
+    /// Not: Bu xUnit paketi değildir (o CI'da koşar); uygulama içi çalışma-zamanı kontrolleridir.
+    /// </summary>
+    private async Task TanilamaCalistirAsync()
+    {
+        if (_diagnostics == null)
+        {
+            Sonuc(StatusMessageType.Warning, "Tanılama servisleri kullanılamıyor (bağımlılıklar çözülemedi).");
+            return;
+        }
+        if (_islemSuruyor)
+            return;
+
+        IsYukleniyor = true;
+        SonucMesaji = "Tanılama çalışıyor…";
+        try
+        {
+            await _diagnostics.RunAsync(_ => { }, _ => { });
+
+            var tumu = new List<SistemTestResult>();
+            tumu.AddRange(_diagnostics.TestSonuclari);
+            tumu.AddRange(UzantiKontrolleri());
+
+            TanilamaSonuclari.Clear();
+            foreach (var test in tumu)
+                TanilamaSonuclari.Add(test);
+
+            var gecen = tumu.Count(t => t.BasariliMi);
+            TanilamaOzeti = $"Tanılama: {gecen}/{tumu.Count} geçti • {DateTime.Now:HH:mm:ss}";
+            Sonuc(gecen == tumu.Count ? StatusMessageType.Success : StatusMessageType.Warning, TanilamaOzeti);
+        }
+        catch (Exception ex)
+        {
+            Sonuc(StatusMessageType.Error, "Tanılama hatası: " + ex.Message);
+        }
+        finally
+        {
+            IsYukleniyor = false;
+        }
+    }
+
+    private IEnumerable<SistemTestResult> UzantiKontrolleri()
+    {
+        var ozTest = AppGuncellemeBilgisi.OzTest();
+        yield return new SistemTestResult
+        {
+            Kategori = "Güncelleme",
+            TestAdi = "Kaynak normalize öz-testi",
+            BasariliMi = ozTest.Basarili,
+            Mesaj = $"{ozTest.Gecen}/{ozTest.Toplam} örnek geçti",
+            Detay = $"Gömülü varsayılan: {Metin(VarsayilanFeedUrl)} • Girilen (normalize): {Metin(AppGuncellemeBilgisi.Normalize(FeedUrl))}"
+        };
+        yield return new SistemTestResult
+        {
+            Kategori = "Kimlik/Veri",
+            TestAdi = "Dönem damgaları",
+            BasariliMi = true,
+            Mesaj = string.IsNullOrWhiteSpace(DamgaOzeti) ? "Damga bilgisi yok" : DamgaOzeti,
+            Detay = $"Kurulum={KurulumIdKisa}, Makine={MakineIdKisa}, Tenant kaydı={TenantDamgalari.Count}"
+        };
+    }
+
+    /// <summary>
+    /// Modül entegrasyon testleri (donanım POST): her modülün DI'da kayıtlı/çözülebilir ve kritik akışının
+    /// çalıştığını doğrular. Sonuç "hangi modül kırık" sorusunu tek listede yanıtlar.
+    /// </summary>
+    private async Task ModulTestCalistirAsync()
+    {
+        if (_modulTestleri == null)
+        {
+            Sonuc(StatusMessageType.Warning, "Modül testleri servisi kullanılamıyor (bağımlılık çözülemedi).");
+            return;
+        }
+        if (_islemSuruyor)
+            return;
+
+        IsYukleniyor = true;
+        SonucMesaji = "Modül entegrasyon testleri çalışıyor…";
+        try
+        {
+            var sonuclar = await _modulTestleri.CalistirAsync();
+
+            ModulTestSonuclari.Clear();
+            foreach (var s in sonuclar)
+                ModulTestSonuclari.Add(s);
+
+            var gecen = sonuclar.Count(s => s.Basarili);
+            ModulTestOzeti = $"Modül testleri: {gecen}/{sonuclar.Count} geçti • {DateTime.Now:HH:mm:ss}";
+            Sonuc(gecen == sonuclar.Count ? StatusMessageType.Success : StatusMessageType.Warning, ModulTestOzeti);
+        }
+        catch (Exception ex)
+        {
+            Sonuc(StatusMessageType.Error, "Modül testi hatası: " + ex.Message);
+        }
+        finally
+        {
+            IsYukleniyor = false;
+        }
+    }
 
     /// <summary>Durum yükleniyor bayrağı (Kural 11 — ring; sonuç zorunlu).</summary>
     public bool IsYukleniyor
@@ -124,6 +379,8 @@ public class GelistiriciAraclariViewModel : ViewModelBase
             TenantDamgalari.Clear();
             foreach (var damga in _durum.TenantDamgalari)
                 TenantDamgalari.Add(damga);
+
+            _guncellemeAyarlari = _updateService != null ? await _updateService.GetSettingsAsync() : null;
         }
         finally
         {
@@ -136,6 +393,8 @@ public class GelistiriciAraclariViewModel : ViewModelBase
             NotifyPropertyChanged(nameof(SistemDbYolu));
             NotifyPropertyChanged(nameof(DamgaOzeti));
             NotifyPropertyChanged(nameof(AyrintiliLog));
+            NotifyPropertyChanged(nameof(FeedUrl));
+            NotifyPropertyChanged(nameof(VarsayilanFeedUrl));
             IsYukleniyor = false;
         }
     }
@@ -234,6 +493,10 @@ public class GelistiriciAraclariViewModel : ViewModelBase
             new() { Baslik = "\"Kimliği Sıfırla\"", Aciklama = "Yeni kurulum kimliği üretir ve bu makinedeki tüm dönemleri yeni kimlikle damgalar. Yıkıcıdır; yalnızca kontrollü test/kimlik yenileme senaryosunda kullanılır." },
             new() { Baslik = "\"Transfer Taraması\"", Aciklama = "Açılışta çalışan taşınmış-veri taramasını elle tetikler; sonuçta farklı kuruluma ait dönem sayısını veya sessiz onarılan kimlik sayısını gösterir." },
             new() { Baslik = "Ayrıntılı log", Aciklama = "Dosya günlüğünün seviyesini Debug'a indirir; teşhis için daha ayrıntılı kayıt tutulur. Kapatınca Information seviyesine döner." },
+            new() { Baslik = "Güncelleme kaynağı", Aciklama = "Uygulamanın yeni sürüm arayacağı adres (GitHub repo veya Velopack feed). Değişiklik anında kaydedilir. Boş bırakılırsa derlemede gömülü varsayılan (mevcut git repo adresi) kullanılır; \"Varsayılana sıfırla\" bu adrese döndürür." },
+            new() { Baslik = "\"Kaynağı Doğrula\"", Aciklama = "Üretim birim testleriyle aynı normalize örneklerini çalıştırır (git@/ssh/.git biçimleri → https) ve ardından kaynağa bağlanmayı dener. Gömülü varsayılan ve girilen adresin normalize çıktısı sonuç satırlarında gösterilir." },
+            new() { Baslik = "Tanılama (çalışma-zamanı)", Aciklama = "\"Çalıştır\" sistem sınıfı testlerini (dosya/bağlantı/migration/veri/yetki — 7 test), güncelleme kaynağı normalize öz-testini ve kimlik/damga özetini tek listede toplar. Her satır PASS/FAIL ve mesaj gösterir; bir sorunda hangi alanda olduğunu buradan görürsünüz. Not: bu, CI'daki xUnit paketi değil uygulama içi çalışma-zamanı kontrolleridir." },
+            new() { Baslik = "Modül Entegrasyon Testleri", Aciklama = "\"Tümünü test et\" her modülü (çekirdek, log, sistem/tenant veritabanı, yedekleme, kimlik, firma/dönem, lisans/yetki, güncelleme, ayar sağlayıcıları, dev araçları) iki yönden kontrol eder: (1) DI'da kayıtlı ve çözülebiliyor mu, (2) kritik akışı salt-okunur çalışıyor mu. Donanım POST gibi; hangi modülün koptuğunu gösterir. Yalnız geliştirme derlemesinde görünür." },
             new() { Baslik = "Klasör açma", Aciklama = "\"Log klasörünü aç\" ve \"Veri klasörünü aç\" düğmeleri ilgili yolları varsayılan dosya gezgininde açar. Yollar salt-okunur gösterilir." },
         });
     }

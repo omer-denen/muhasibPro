@@ -41,6 +41,54 @@
             </Grid>
         </Border>
 
+        <!-- Modül Entegrasyon Testleri (donanım POST) -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Modül Entegrasyon Testleri" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
+
+            <controls:SettingsCard Header="Tüm modülleri test et"
+                                   Description="Her modülün DI'da kayıtlı/çözülebilir olduğunu ve kritik akışının çalıştığını doğrular (çekirdek, log, sistem/tenant DB, yedekleme, kimlik, firma/dönem, lisans/yetki, güncelleme, ayarlar, dev araçları).">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconShield}" />
+                </controls:SettingsCard.HeaderIcon>
+                <Button Content="Tümünü test et" Command="{Binding ModulTestCalistirCommand}"
+                        AutomationProperties.AutomationId="ModulTestButton"
+                        Style="{StaticResource MuhasibPrimaryButtonStyle}" MinWidth="140" />
+            </controls:SettingsCard>
+
+            <TextBlock Text="{Binding ModulTestOzeti}" Margin="2,4,0,0" FontSize="12" FontWeight="SemiBold"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Visibility="{Binding ModulTestVar, Converter={StaticResource TrueToVis}}" />
+
+            <ItemsControl ItemsSource="{Binding ModulTestSonuclari}" Margin="2,4,0,0"
+                          Visibility="{Binding ModulTestVar, Converter={StaticResource TrueToVis}}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,0,6" Padding="10" CornerRadius="{StaticResource ControlCornerRadius}"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                            <StackPanel Spacing="2">
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Modul}" FontSize="11" FontWeight="SemiBold"
+                                               Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Ad}" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding DurumMetni}" FontSize="11" FontWeight="SemiBold"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </Grid>
+                                <TextBlock Text="{Binding Mesaj}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Detay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
         <!-- Kurulum Kimliği -->
         <StackPanel Spacing="4">
             <TextBlock Text="Kurulum Kimliği" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
@@ -139,6 +187,82 @@
                     </StackPanel>
                 </ScrollViewer>
             </controls:SettingsCard>
+        </StackPanel>
+
+        <!-- Güncelleme Kaynağı -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Güncelleme Kaynağı" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
+
+            <controls:SettingsCard Header="Kaynak adresi (repo/feed)"
+                                   Description="Uygulamanın güncelleme arayacağı adres. Boşsa derlemede gömülü varsayılan kullanılır.">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconDownload}" />
+                </controls:SettingsCard.HeaderIcon>
+                <StackPanel Spacing="6" MinWidth="420">
+                    <TextBox Text="{Binding FeedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             PlaceholderText="https://github.com/kullanici/repo" FontSize="12" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Varsayılana sıfırla" Command="{Binding VarsayilanaSifirlaCommand}"
+                                AutomationProperties.AutomationId="KaynakVarsayilanButton"
+                                Style="{StaticResource SecondaryButtonStyle}" MinWidth="140" />
+                        <Button Content="Kaynağı Doğrula" Command="{Binding KaynagiDogrulaCommand}"
+                                AutomationProperties.AutomationId="KaynakDogrulaButton"
+                                Style="{StaticResource SecondaryButtonStyle}" MinWidth="140" />
+                        <TextBlock VerticalAlignment="Center" FontSize="11"
+                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}">
+                            <Run Text="Varsayılan: " /><Run Text="{Binding VarsayilanFeedUrl, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
+            </controls:SettingsCard>
+        </StackPanel>
+
+        <!-- Tanılama (çalışma-zamanı öz-test) -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="Tanılama (çalışma-zamanı)" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
+
+            <controls:SettingsCard Header="Tümünü çalıştır"
+                                   Description="Sistem sınıfı testleri + güncelleme kaynağı öz-testi + kimlik/damga özeti. Sorunun hangi alanda olduğunu gösterir. (xUnit paketi değil — o CI'da koşar.)">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconWrench}" />
+                </controls:SettingsCard.HeaderIcon>
+                <Button Content="Çalıştır" Command="{Binding TanilamaCalistirCommand}"
+                        AutomationProperties.AutomationId="TanilamaButton"
+                        Style="{StaticResource MuhasibPrimaryButtonStyle}" MinWidth="120" />
+            </controls:SettingsCard>
+
+            <TextBlock Text="{Binding TanilamaOzeti}" Margin="2,4,0,0" FontSize="12" FontWeight="SemiBold"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Visibility="{Binding TanilamaVar, Converter={StaticResource TrueToVis}}" />
+
+            <ItemsControl ItemsSource="{Binding TanilamaSonuclari}" Margin="2,4,0,0"
+                          Visibility="{Binding TanilamaVar, Converter={StaticResource TrueToVis}}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,0,6" Padding="10" CornerRadius="{StaticResource ControlCornerRadius}"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                            <StackPanel Spacing="2">
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Kategori}" FontSize="11" FontWeight="SemiBold"
+                                               Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding TestAdi}" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding DurumMetni}" FontSize="11" FontWeight="SemiBold"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </Grid>
+                                <TextBlock Text="{Binding Mesaj}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Detay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </StackPanel>
 
         <!-- Günlük ve Klasörler -->

@@ -142,6 +142,9 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
             }
         }
 
+        /// <summary>Derlemede gömülü varsayılan kaynak (mevcut git repo adresi); boş olabilir.</summary>
+        public string VarsayilanFeedUrl => UpdateSettingsModel.VarsayilanFeedUrl;
+
         private bool _progressVisible;
         public bool ProgressVisible { get => _progressVisible; set => Set(ref _progressVisible, value); }
 
@@ -246,6 +249,20 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
 
         public ICommand CheckNowCommand => new AsyncRelayCommand(CheckNowAsync, () => IsCheckButtonEnabled);
         public ICommand UpdateActionCommand => new AsyncRelayCommand(UpdateActionAsync);
+
+        /// <summary>Kaynak adresini derlemede gömülü varsayılana (mevcut git repo) döndürür.</summary>
+        public ICommand VarsayilanaSifirlaCommand => new RelayCommand(VarsayilanaSifirla);
+
+        private void VarsayilanaSifirla()
+        {
+            if (string.IsNullOrWhiteSpace(VarsayilanFeedUrl))
+            {
+                StatusActionMessage("Varsayılan kaynak adresi bulunamadı — bu derlemede gömülü git adresi yok.", StatusMessageType.Warning);
+                return;
+            }
+            FeedUrl = VarsayilanFeedUrl;
+            StatusActionMessage("Güncelleme kaynağı varsayılana döndürüldü.", StatusMessageType.Success);
+        }
 
         private ICommand _yardimCommand;
 

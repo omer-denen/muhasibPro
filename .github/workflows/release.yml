@@ -4,9 +4,11 @@ name: Velopack Release
 #   git tag v1.1.2
 #   git push origin v1.1.2
 # Sürümün tek kaynağı tag'dir (v öneki atılır): hem exe (csproj)
-# hem paket (vpk pack -v) aynı sürümü alır. Uygulama tarafı değişiklik
-# gerektirmez — FeedUrl'e repo adresi yazılınca GithubSource
-# Release'teki nupkg'leri otomatik bulur.
+# hem paket (vpk pack -v) aynı sürümü alır. Repo adresi SABİT DEĞİL —
+# mevcut checkout'un (${{ github.server_url }}/${{ github.repository }})
+# adresi kullanılır; böylece fork/başka repoya taşınınca workflow değişmez.
+# Uygulama tarafı, derleme anında bu adresi gömerek (GuncellemeFeedUrl)
+# varsayılan güncelleme kaynağı yapar.
 
 on:
   push:
@@ -33,6 +35,12 @@ jobs:
           $v = "${{ github.ref_name }}".TrimStart('v')
           "version=$v" >> $env:GITHUB_OUTPUT
 
+      - name: Repo adresini belirle (feed kaynağı)
+        id: feed
+        shell: pwsh
+        run: |
+          "url=${{ github.server_url }}/${{ github.repository }}" >> $env:GITHUB_OUTPUT
+
       - name: csproj sürümünü tag ile eşitle
         shell: pwsh
         run: |
@@ -42,17 +50,17 @@ jobs:
           $xml.Save('MuhasibPro/MuhasibPro.csproj')
 
       - name: Publish
-        run: dotnet publish MuhasibPro/MuhasibPro.csproj -c Release -o publish
+        run: dotnet publish MuhasibPro/MuhasibPro.csproj -c Release -o publish -p:GuncellemeFeedUrl=${{ steps.feed.outputs.url }}
 
       - name: vpk kur
         run: dotnet tool install --global vpk
 
       - name: Önceki sürümü indir (delta paketi için)
         continue-on-error: true # ilk release'te önceki yoktur, sorun değil
-        run: vpk download github -o Releases --repoUrl https://github.com/omer-denen/muhasibPro --token ${{ secrets.GITHUB_TOKEN }}
+        run: vpk download github -o Releases --repoUrl ${{ github.server_url }}/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pack
         run: vpk pack -u MuhasibPro -v ${{ steps.version.outputs.version }} -p publish -e MuhasibPro.exe -o Releases
 
       - name: GitHub Release'e yükle
-        run: vpk upload github -o Releases --repoUrl https://github.com/omer-denen/muhasibPro --token ${{ secrets.GITHUB_TOKEN }} --publish --tag ${{ github.ref_name }}
+        run: vpk upload github -o Releases --repoUrl ${{ github.server_url }}/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --tag ${{ github.ref_name }}

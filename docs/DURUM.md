@@ -8,39 +8,49 @@
 ---
 
 ## Aktif iş
+- **Faz 6.91 — Güncelleme sonrası doğrulama + kurtarma (uçtan uca) — 📋 PLAN (kod yok; sonraki context)** — ayrıntı: `docs/KONTROL-LISTESI.md` Faz 6.91 + `REFERANSLAR` Oturum 273.
+  - **Kullanıcı isteği:** güncelleme sonrası uygulama dosyaları + Sistem.db + MaliDönem (tenant) DB doğrulama, kurtarma/restore — uçtan uca.
+  - **Özet plan:** (1) pre-update gerçek Sistem.db yedeği + sürüm damgası; (2) `OnRestarted`/`OnFirstRun` yalnız bayrak; (3) aktivasyon sonrası async `IPostUpdateDogrulamaService`: dosya doğrulama → Sistem.db migrate+verify (hata'da yedekten restore) → tenant tarama (bozuk=son yedekten restore, pending=rapor, oto-migrate yok) → sonuç InfoBar+log; (4) dev-mode Tanılama'da görünür.
+- **Faz 6.90 — Velopack git güncelleme akışı (kurulum ✅, uçtan uca canlı test bekliyor → 6.91'e bağlı)** — Oturum 273:
+  - **`release.yml` repo adresi artık SABİT DEĞİL:** `${{ github.server_url }}/${{ github.repository }}`; `dotnet publish ... -p:GuncellemeFeedUrl=<repo>`.
+  - **Derleme-zamanı varsayılan kaynak:** `MuhasibPro.csproj` → `GuncellemeFeedAdresiEkle` (`BeforeTargets="GetAssemblyAttributes"`), `git config --get remote.origin.url` (veya CI property) → `AssemblyMetadata("GuncellemeFeedUrl")`; `Domain.AppGuncellemeBilgisi` okur + normalize eder.
+  - **Servis:** `UpdateService.GetSettingsAsync` boş kaynakta gömülü varsayılanı döndürür. **Admin:** Denetim Masası → Güncelleme kaynak adresi + "Varsayılana sıfırla". **Dev-mode:** Geliştirici Araçları → "Güncelleme Kaynağı" kartı (düzenle + varsayılana sıfırla + "Kaynağı Doğrula").
+  - **Dev-mode test entegrasyonu (Oturum 273):** "Modül Entegrasyon Testleri" (donanım POST — `IModulTestCalistirici`: 34 DI çözümü + 5 fonksiyonel probe) + "Tanılama" (sistem testleri 7 + güncelleme öz-testi + kimlik). Amaç: sorun olunca hangi modülün koptuğunu uygulama içinden görme.
+  - **Test:** `AppGuncellemeBilgisiTests` (+9) + `ModulTestCalistiriciTests` (+1). Build 0 hata; **509/509**. Canlı (_ot293_*_): modül testleri **41/41**, FeedUrl gömülü varsayılan `github.com/omer-denen/muhasibPro`.
+  - **Kapı:** uçtan uca canlı (kurulum Setup.exe → `vpk pack/upload` → uygulama güncellemeyi görür/indirir/uygular) + delta kanıtı + onay.
+  - **Sırada (altyapı):** Velopack `OnRestarted` hook'ları (boş) → sistem.db senkronu + tenant pending tespiti; `PostUpdateDatabaseSyncAsync` bağlanmalı.
+- **Faz 6.87 — Veritabanı Güncelleme sayfası redesign:** v1 (hero + iki sütun) **kullanıcı reddetti** (Oturum 273); "referansı sil, baştan tasarım" istendi. Ayrıca "tenant DB update sayfası gerekli mi, gerçek update ile ilgilenelim" sorusu açık. Karar: önce **6.90 (gerçek update)**, sonra 6.87 yeniden.
+  - **Envanter (mevcut):** `TenantDatabaseUpdateView.xaml(.cs)` · `TenantDatabaseUpdateViewModel` (Akis yöneticisi + facade'a bölündü) · `TenantDatabaseUpdateCoordinator` · dialog.
+  - **Açık karar:** (a) sayfa kalsın mı / kaldırılıp erişimde otomatik migration + hafif onay mı, (b) yeni tasarım yönü.
+- **Bildirim davranışı (kullanıcı isteği, bekliyor):** FirmaShell güncelleme bildirimi kapatılınca **Ayarlar butonuna güncelleme ikonu** (bir sonraki oturuma kadar). Giriş yeri (Ayarlar içi update vs Mali Dönem Yönetimi) kararı bekliyor.
 - **Faz 6.86 — Durum çubuğu + `StatusMessageService` + `NotificationService` redesign/refactor** — **KAPANDI (onaylandı, commit `2ff1a6c`).**
   - Chunk-1 ✅ (Oturum 271): `ShellStatusBar` sıfırdan + servis refactor.
   - Ana pencere çubuğu + aktif bağlam ✅ onaylı (Oturum 272): firma/dönem/tenant yalnız yüklü tenant'tan, `BaglamGoster` ile yalnız MainShell'de.
   - **Chunk-2a ✅ onaylı:** in-app InfoBar hattı (`IInAppMessageService` Scoped — pencere başına ayrı), `InAppMessageHost` (MainShellView + ShellView), OS toast/CommunityToolkit/AUMID kaldırıldı, `NotificationEnabled` bağlı.
   - **Chunk-2b:** yalnız Login ringi; kalan 4 sabit ring → **6.88** (view'lar refactoring bekliyor).
-- **Sıradaki iş — Faz 6.87: Veritabanı Güncelleme sayfası (`TenantDatabaseUpdateView`) komple redesign** (Oturum 272 planı sunuldu, **Kural 8 onayı bekliyor**).
-  - **Envanter (mevcut):** `MuhasibPro/Views/ShellViews/Shell/TenantDatabaseUpdateView.xaml(.cs)` (209 satır, 4 kart alt alta) · `Libraries/MuhasibPro.ViewModels/ViewModels/Shell/Tenant/TenantDatabaseUpdateViewModel.cs` (389 satır) · `TenantDatabaseUpdateCoordinator` · dialog `TenantDatabaseUpdateDialog`.
-  - **Mevcut eksikler (altyapı):** `LoadAsync` sırasında yükleme durumu/ring yok (boş→dolu sıçraması); "güncel — işlem gerekmiyor" **kırmızı hata** gösteriyor; adım bazlı **determinate ilerleme yok**; legacy `MuhasibPetrol*` token'ları; VM 389 satır (Kural 1).
-  - **Önerilen tasarım:** Katman-2 ana border + header (başlık/bağlam solda, birincil aksiyon sağda, `?`) → **durum hero kartı** (sürüm `1.0→1.1` + göç rozeti + tek hüküm + çalışırken determinate bar) → **iki sütun: sol "İşlem akışı" (adım rozetli stepper) · sağ "Değişiklikler" (headline + tablo değişimleri)** → sonuç InfoBar. Dar ekranda alt alta.
-  - **Altyapı:** `IsChecking`+ring; nötr "güncel" durumu; `Yedek ~30 · Göç ~70 · Doğrulama ~100` yüzde; `MuhasibPetrol*` → `{ThemeResource}`; `TenantDatabaseUpdateViewModel` bölme (`TenantUpdateAkisYoneticisi` + facade).
-  - **Kural 14/19:** araştırma hazır (`REFERANSLAR` Oturum 269: QB company-file update + Verify/Rebuild, MS progress controls, Fluent stepper; Oturum 272: MS app-settings layout ~1040px/grup). Uygulamadan önce seçilen layout satırı `REFERANSLAR`'a işlenecek.
-  - **Kapı:** Kural 8 sınıf onayı → build 0/0 + test + Kural 18 canlı (Yedek→Göç→Doğrulama + hata/oto-geri-alma; `Temp/opencode/sqlrun` kontrollü test dönemi) + onay.
 
 ## Çalışma sırası
-- **6.87** (Veritabanı Güncelleme redesign — plan hazır, onay bekliyor) → **6.88** (MaliDonemYönetimView + SistemDbYonetimView redesign + RAF panel temizliği + progress) → **6.89** (LoginView "Beni hatırla" + QuickLogin).
+- **6.91** (güncelleme sonrası doğrulama + kurtarma — plan hazır) → **6.90 canlı** (Setup → `vpk pack/upload` → güncelle/delta) → **6.87 v2** (update sayfası: kaldır mı/kalsın mı + baştan tasarım) → **6.88** (MaliDonemYönetimView + SistemDbYonetimView redesign + RAF panel temizliği + progress) → **6.89** (LoginView "Beni hatırla" + QuickLogin).
 - **Rafta:** 6.72 Dalga 1-3, 6.73, 6.74, 6.75 kalan, 6.76, 6.78 Adım 4, 6.85 (Kullanıcı Yönetimi modal), **"Varsayılan firma"** kavramı. (6.71 kapandı.)
 
 ## Açık kararlar (kullanıcı bekliyor)
-1. **6.87 sınıf planı onayı** (yukarıdaki redesign; onaylanınca uygulanır).
-2. **Doküman maddeleri:** (a) `docs/VIEW-BAGIMLILIK.md` dursun/arşive? (b) `KONTROL-LISTESI` kapanan yakın fazlar (6.69/6.70/6.79–6.84) arşive alınsın mı?
-3. **Commit durumu:** **temiz** — Oturum 272 işleri commit edildi: `d5310a2` (durum çubuğu) + `2ff1a6c` (Chunk-2a + fazlar).
+1. **6.87 v2:** tenant update sayfası kalsın mı (baştan tasarım), yoksa kaldırılıp "erişimde otomatik migration + hafif onay/progress" mi?
+2. **Ayarlar rozeti:** FirmaShell güncelleme bildirimi kapatılınca Ayarlar butonuna güncelleme ikonu; giriş yeri (Ayarlar içi güncelleme yüzeyi **mı** / Mali Dönem Yönetimi'ne yönlendirme **mi**).
+3. **Doküman maddeleri:** (a) `docs/VIEW-BAGIMLILIK.md` dursun/arşive? (b) `KONTROL-LISTESI` kapanan yakın fazlar (6.69/6.70/6.79–6.84) arşive alınsın mı?
+4. **Commit durumu:** Oturum 273 işleri **henüz commit edilmedi** (6.87 v1 + 6.90 Velopack). Önceki: `d5310a2` + `2ff1a6c`.
 
-## Son oturum (272, 2026-09-15)
-Faz 6.86 kapandı (onaylı): ana pencere durum çubuğu + aktif firma/dönem/tenant bağlamı (yalnız MainShell, yüklü-tenant kapısı); in-app InfoBar hattı + OS toast/CommunityToolkit/AUMID kaldırma (pencere-başına izolasyon); `FirmaShellViewModel.OnTenantUpdateAvailable` kaldırıldı. Faz 6.71 kapandı (m.3 iptal; m.4→6.86/6.88; m.5→6.88); 6.88 + 6.89 açıldı. 6.87 redesign planı sunuldu. Build 0 hata + test 498/498. Detay: `docs/LOG/LOG-261-280.md` Oturum 272.
+## Son oturum (273, 2026-09-15)
+6.87 v1 redesign **kullanıcı tarafından reddedildi** ("referansı sil, baştan tasarım"). İki-katman güncelleme ayrımı netleşti (app update/Velopack ↔ tenant şema migration). **Faz 6.90 kurulumu:** `release.yml` repo adresi dinamik, derleme-zamanı gömülü varsayılan FeedUrl, admin + dev-mode kaynak düzenleme. **Dev-mode test entegrasyonu:** "Modül Entegrasyon Testleri" (donanım POST, 41/41 canlı) + "Tanılama" (sistem 7 + güncelleme öz-testi) + "Kaynağı Doğrula". **Faz 6.91 planı** (güncelleme sonrası doğrulama + kurtarma) yazıldı. Build 0 hata + test **509/509**. Detay: `docs/LOG/LOG-261-280.md` Oturum 273.
 
-## Son önceki oturum (271, 2026-09-15)
-Faz 6.86 Chunk-1: `StatusMessageService` 440→4 dosya, `ShellStatusBar` sıfırdan Fluent footer, ölü üye/converter temizliği. Build 0/0 + test 498/498 + canlı Dark/Light. Detay: `docs/LOG/LOG-261-280.md` Oturum 271.
+## Son önceki oturum (272, 2026-09-15)
+Faz 6.86 kapandı (onaylı): ana pencere durum çubuğu + aktif bağlam; in-app InfoBar hattı + OS toast kaldırma. 6.71 kapandı; 6.88 + 6.89 açıldı. Build 0 hata + test 498/498. Detay: `docs/LOG/LOG-261-280.md` Oturum 272.
 
 ## Kapılar / komutlar
 - **Build:** `dotnet build MuhasibPro.sln -p:Platform=x64 -c Debug --nologo`
 - **Test:** `dotnet test Libraries/MuhasibPro.Tests/MuhasibPro.Tests.csproj -c Debug --no-build`
 - **Canlı (Kural 18):** Debug exe `MuhasibPro\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\MuhasibPro.exe`; giriş `korkutomer` / `Ok241341`; veri `MuhasibPro\Databases`; UIA betikleri `C:\Users\Code\AppData\Local\Temp\opencode\` (sqlrun yardımcısı dahil).
-- **Beklenen test sayısı:** 498/498.
+- **Velopack:** tag push (`v1.1.4`) → `.github/workflows/release.yml` (dinamik repo) → GitHub Release; test için `*-Setup.exe` ile kurmak şart (portable exe güncelleme görmez). FeedUrl varsayılanı derlemede gömülü.
+- **Beklenen test sayısı:** 509/509.
 
 ## Bilinen açık uçlar / notlar
 - **Bildirimler (6.86):** OS toast kaldırıldı; in-app InfoBar yalnız `MainShellView` + `ShellView` host'larında ve **pencere başına ayrı** (`IInAppMessageService` Scoped — yansımaz). `FirmaShellView`'de host yok; `FirmaShellViewModel.OnTenantUpdateAvailable` kaldırıldı (dönem güncelleme sinyali **Mali Dönem listesi** içinde — `MaliDonemListViewModel`).

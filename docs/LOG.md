@@ -315,6 +315,7 @@
 | 270 | 2026-09-15 | CircleIconButtonStyle dark tonu: ana border yüzeyiyle uyum | ✅🧪 | C14 |
 | 271 | 2026-09-15 | Faz 6.86 Chunk-1: durum çubuğu + StatusMessage/StatusBar refactor | ✅🧪 | C14 |
 | 272 | 2026-09-15 | Faz 6.86: durum çubuğu ana pencereye (MainShellView) + aktif firma/mali dönem/tenant bağlamı | ✅🧪 | C14 |
+| 273 | 2026-09-15 | 6.87 v1 reddi + Faz 6.90: Velopack git güncelleme akışı (dinamik repo + gömülü varsayılan FeedUrl + admin/dev-mode) | ✅🧪 | C14 |
 
 ---
 

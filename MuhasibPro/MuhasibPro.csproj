@@ -216,4 +216,22 @@
   <ItemGroup>
     <PRIResource Remove="Views\SistemViews\**" />
   </ItemGroup>
+
+  <!-- Güncelleme feed adresi (varsayılan kaynak): CI'da -p:GuncellemeFeedUrl ile verilir;
+       verilmezse mevcut checkout'un git remote adresinden okunur (repo sabit değil).
+       AssemblyMetadata olarak gömülür; Domain'deki AppGuncellemeBilgisi runtime'da okur/normalize eder. -->
+  <Target Name="GuncellemeFeedAdresiEkle" BeforeTargets="GetAssemblyAttributes">
+    <Exec Condition="'$(GuncellemeFeedUrl)' == ''"
+          Command="git config --get remote.origin.url"
+          ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" ItemName="_GuncellemeGitSatirlari" />
+    </Exec>
+    <PropertyGroup>
+      <GuncellemeFeedUrl Condition="'$(GuncellemeFeedUrl)' == ''">@(_GuncellemeGitSatirlari)</GuncellemeFeedUrl>
+      <_GuncellemeFeedUrlTrim>$(GuncellemeFeedUrl.Trim())</_GuncellemeFeedUrlTrim>
+    </PropertyGroup>
+    <ItemGroup>
+      <AssemblyMetadata Include="GuncellemeFeedUrl" Value="$(_GuncellemeFeedUrlTrim)" />
+    </ItemGroup>
+  </Target>
 </Project>

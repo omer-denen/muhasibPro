@@ -49,12 +49,16 @@ public class UpdateService : IUpdateService
         try
         {
             var s = await _localSettings.ReadSettingAsync<UpdateSettingsModel>(UpdateSettingsModel.SettingsKey);
-            return s ?? new UpdateSettingsModel { AutoCheckOnStartup = true, ShowNotifications = true, IncludeBetaVersions = false, LastCheckTime = null };
+            s ??= new UpdateSettingsModel { AutoCheckOnStartup = true, ShowNotifications = true, IncludeBetaVersions = false, LastCheckTime = null };
+            // Kaynak adresi girilmemişse derlemede gömülü varsayılan (mevcut git repo adresi) kullanılır.
+            if (string.IsNullOrWhiteSpace(s.FeedUrl))
+                s.FeedUrl = UpdateSettingsModel.VarsayilanFeedUrl;
+            return s;
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "GetSettingsAsync failed");
-            return new UpdateSettingsModel();
+            return new UpdateSettingsModel { FeedUrl = UpdateSettingsModel.VarsayilanFeedUrl };
         }
     }
 

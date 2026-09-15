@@ -281,6 +281,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] Denetim Masası'nda yalnız DEBUG'da görünen **Geliştirici Araçları** bölümü (`AyarBolumu.GelistiriciAraclari` + `AyarlarNavigationMenu` 8. satır + `MenuGorunurMu` DEBUG kapısı) + `?` yardım dialogu (Kural 13) + her aksiyonda onay; işlemler `ISistemLogService`'e `DEV` kaynak damgasıyla yazılır (`DevAraclariService`). ✅ Eklendi 🧪 Test edildi
 - [x] Yetenekler: kurulum kimliği **onarım** (`ReAlignTenantKurulumIdsAsync`, yalnız makine-aynı) / **sıfırlama + damga** (yeni kimlik + makine-aynı dönemleri yeniden damgalama), **transfer taramasını elle tetikleme** (`ISplashRoutingService.CheckTransferAsync`), **dönem şema damgaları** görünümü (`ITenantVersionReader.GetStampsAsync`), **ayrıntılı log seviyesi** (`ILogSeviyesiYoneticisi` + `FileLoggerProvider.IsEnabled` eşik), **log/veri klasörü açma** (`IYolAciciService` → App `YolAciciService`). ✅ Eklendi 🧪 Test edildi
 - [x] Kapsam dışı korundu (kullanıcı kararı): restore hüküm Block/RequireCode bypass + zorla göç + silme/saklama kilidi bypass — uygulanmadı. ✅
+- [x] **Ek (Oturum 273) — Güncelleme kaynağı + Modül Entegrasyon Testleri:** (a) Geliştirici Araçları'na **"Güncelleme Kaynağı"** kartı (repo/feed adresi düzenleme + varsayılana sıfırla + "Kaynağı Doğrula" öz-testi); (b) **"Modül Entegrasyon Testleri"** (donanım POST): her modülün DI'da kayıtlı/çözülebilir olduğunu + kritik akışının salt-okunur çalıştığını doğrular (`IModulTestCalistirici`/`ModulTestCalistirici`, 34 DI çözümü + 5 fonksiyonel probe); (c) **"Tanılama"** (mevcut `SistemDiagnosticsViewModel` 7 test + güncelleme öz-testi + kimlik özeti). Build 0 hata; test **509/509**; **canlı: "Modül testleri 41/41 geçti" + FeedUrl gömülü varsayılan** (`ot293_modul_test`/`ot293_tanilama`). ✅🧪
 - [x] Kapı: Kural 14 araştırması (MS "Settings for developers" + Dialog controls → `REFERANSLAR` ✅) + Kural 8 sınıf onayı (kullanıcı "tamamını onayla") + build 0 hata + `dotnet test` **498/498** (6 yeni test) + Kural 18 canlı kanıt (`Temp/opencode/ot269_s1..s7`, DEV SistemLog kaydı) + kullanıcı onayı. ✅🧪
 - **Not (mimari bekçi):** `DevAraclariService` ilk denemede `Services/Installation`'a konuldu → `ArchitectureTests.Kurulum_Ile_SistemDb_Yonetimi_Ayrik` kırmızı; tenant servisine yaslandığı için `Services|Contracts/SistemServices/DevServices` altına taşındı. Ders `HATALAR.md`'de.
 
@@ -382,7 +383,9 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 
 ---
 
-## Faz 6.87 — Veritabanı Güncelleme sayfası (`TenantDatabaseUpdateView`) komple yeniden tasarımı (Oturum 269 kullanıcı kararı — 📋 plan)
+## Faz 6.87 — Veritabanı Güncelleme sayfası (`TenantDatabaseUpdateView`) komple yeniden tasarımı (Oturum 269 kullanıcı kararı — 📋 plan; **v1 reddedildi, Oturum 273**)
+
+> **Oturum 273 güncellemesi:** v1 redesign (hero + iki sütun + InfoBar) kullanıcı tarafından **reddedildi** ("Güncelleme sayfasından bahsediyorum; referansı sil, baştan tasarım"). Ayrıca "tenant DB update sayfası gerekli mi, gerçek update ile ilgilenelim" kararı açık. v1 XAML'e geri dönülecek; yön: (a) sayfa kalsın + baştan tasarım, veya (b) kaldır → erişimde otomatik migration + hafif onay/progress. **Karar bekliyor.**
 
 > **Kullanıcı isteği:** 6.83 canlı turunda ekran görüldükten sonra — "güncelleme sayfası komple yeniden tasarlanacak".
 
@@ -422,3 +425,47 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 **Kapsam (incelenecek):** `Views/Login/LoginView.xaml(.cs)`, `Views/Login/QuickLoginPanel.xaml(.cs)`, `Views/Login/NamePasswordControl.xaml`, `LoginViewModel`/`QuickLoginAccountsViewModel` + ilgili servisler — "Beni hatırla" bayrağının kalıcılığı/şifre saklama niyeti, QuickLogin hesap listesi davranışı, Kural 13 yardım metinlerinin güncelliği.
 
 **Kapı:** Kural 14 araştırması (Kural 19 defteri) + Kural 8 sınıf onayları + build 0/0 + test + Kural 18 canlı + onay.
+
+---
+
+## Faz 6.90 — Velopack git güncelleme akışı (repo adresi dinamik + gömülü varsayılan kaynak) (Oturum 273 kullanıcı kararı — 🔨 kurulum ✅)
+
+> **Kullanıcı isteği (Oturum 273):** "Bu işlemi git üzerinden komple kur. Git adresi değişebilir; varsayılan olarak mevcut git'i kullana. Dev-mode + admin güncelleme adresini (repo adresini) değiştirebilir."
+
+**Yapılan (✅ kod + test):**
+- `release.yml`: repo adresi sabit değil — `${{ github.server_url }}/${{ github.repository }}`; `dotnet publish ... -p:GuncellemeFeedUrl=<repo>`.
+- `MuhasibPro.csproj`: `GuncellemeFeedAdresiEkle` hedefi (`BeforeTargets="GetAssemblyAttributes"`) → `git config --get remote.origin.url` (veya CI property) → `AssemblyMetadata("GuncellemeFeedUrl")`.
+- `MuhasibPro.Domain.AppGuncellemeBilgisi`: metadata okur + normalize eder (`git@`/`ssh://`/`.git` → https).
+- `UpdateService.GetSettingsAsync`: boş kaynakta gömülü varsayılanı döndürür.
+- Admin (`UpdateView` Ayarlar): kaynak adresi + "Varsayılana sıfırla" + gömülü varsayılan gösterimi.
+- Dev-mode (`GelistiriciAraclariPaneli`, yalnız DEBUG): "Güncelleme Kaynağı" kartı (anında kayıt + sıfırla).
+- Test: `AppGuncellemeBilgisiTests` (+9). Build 0 hata; **507/507**.
+
+**Kalan (kapı):**
+- [ ] Uçtan uca canlı: Setup.exe ile kur → `vpk pack/upload` (tag) → uygulama "güncelleme var" görür → indir/kur (delta kanıtı) → onay.
+- [ ] Velopack `OnRestarted` hook (boş) → sistem.db senkronu + tenant pending tespiti; `PostUpdateDatabaseSyncAsync` bağlanmalı. **→ Faz 6.91'e taşındı.**
+
+---
+
+## Faz 6.91 — Güncelleme sonrası doğrulama + kurtarma (uçtan uca) (Oturum 273 kullanıcı isteği — 📋 plan)
+
+> **Kullanıcı isteği:** "Güncelleme sonrası oluşabilecek uygulama dosyaları, veritabanları (sistem, malidönem) doğrulama, kurtarma/restore gibi işlemleri uçtan uca yapılandır."
+
+**Araştırma (Kural 14/19 → REFERANSLAR):**
+- **Velopack hooks:** `OnRestarted`/`OnFirstRun` normal açılışta çalışır (UI'lı, uygulama devam eder) → post-update doğrulama **buraya**; `OnBefore/AfterUpdateFastCallback` headless + 15-30sn, süre aşılırsa kill → **DB işi konmaz**.
+- **Hoppscotch:** yeni sürüm ilk açılışında **sürüme-özel otomatik yedek**, en yeni 3'ü sakla, sorunda downgrade+restore.
+- **Octopus/Flyway/Redgate:** rollback scripti yedek/restore yerine geçmez; **deploy öncesi yedek şart**; yedek **kullanıcı veri değiştirene kadar** geçerli → kurtarma penceresi açılıştır; bütünlük doğrula.
+
+**Tasarım (mevcut koda dayalı):**
+1. **Pre-update (uygulanmadan önce):** `UpdateViewModel.InstallUpdate` → `ApplyUpdatesAndRestartWithDatabaseSync()` çağırsın. `UpdateService.PrepareForUpdateAsync` **gerçek Sistem.db yedeği** alsın (şu an yalnız kontrol) + `UpdateSettingsModel`'e `LastUpdateFromVersion`/`LastUpdateBackupPath` kaydetsin.
+2. **Hook (bayrak):** `App.VelopackInitialize()` (startup step; host/DI hazır) → `OnRestarted`/`OnFirstRun` yalnız **bayrak yazar** (localSettings `PostUpdatePending=true` + from/to); UI thread bloklanmaz, ağır iş sonra çalışır.
+3. **Post-update saga** (`IPostUpdateDogrulamaService`, Business.Scoped, DI) — aktivasyon sonrası **async**:
+   - (a) **Uygulama dosyaları:** çalışan sürüm == paket sürümü; kritik dosyalar mevcut; migration assembly yüklü.
+   - (b) **Sistem.db:** state oku (connect/valid/pending) → gerekirse `InitializeSistemDatabaseAsync` (migrate) + yeniden doğrula; **başarısızsa** pre-update yedekten restore (`ISistemDatabaseOperationService`/`ISistemBackupManager`).
+   - (c) **Tenant (mali dönem) DB'leri:** listeyi tara; her biri `GetTenantDatabaseStateAsync` (connect/valid/pending); **bozuk** olanı `ITenantSQLiteBackupManager` son yedekten restore; pending'leri raporla (**oto-migrate YOK** — erişimde zaten migrate).
+   - (d) **Sonuç:** adım rozetli `PostUpdateSonucu` → in-app InfoBar + `ISistemLogService`; bayrağı temizle (tekrar çalışmaz).
+4. Sonuç dev-mode **"Tanılama"** ile de görülebilir.
+
+**Dokunulacak dosyalar:** `MuhasibPro/App.xaml.cs` (hook) · `MuhasibPro/Services/UIService/UpdateService.cs` (Prepare gerçek yedek + WithDatabaseSync) · `ViewModels/Settings/UpdateViewModel.InstallUpdate` · yeni `Business/Contracts|Services/.../PostUpdate*` + `AddServicesHostBuilderExtensions` · `IActivationService`/`ActivationService` (aktivasyon sonrası tetik) · sonuç gösterimi.
+
+**Kapı:** build 0/0 + test + **Kural 18 canlı** (kontrollü: bir sürüm `vpk pack` → kur → güncelle → `OnRestarted` doğrulama; Sistem.db yedeği + restore denenir) + onay.

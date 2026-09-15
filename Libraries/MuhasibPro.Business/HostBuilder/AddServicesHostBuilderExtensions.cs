@@ -67,6 +67,8 @@ namespace MuhasibPro.Business.HostBuilder
                 services.AddSingleton<ILogSeviyesiYoneticisi, LogSeviyesiYoneticisi>();
                 // Geliştirici araçları Scoped — Scoped tenant/kurulum servislerine yaslanır.
                 services.AddScoped<IDevAraclariService, DevAraclariService>();
+                // Modül entegrasyon testleri (donanım POST) — DI çözümüne yaslanır (Scoped).
+                services.AddScoped<IModulTestCalistirici, ModulTestCalistirici>();
 
             });
             return host;

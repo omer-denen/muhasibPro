@@ -5,6 +5,7 @@ using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.SistemServices.DevServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;using MuhasibPro.Business.DTOModel.SistemModel;
+using MuhasibPro.Data.Contracts.Database.Common.Helpers;
 using MuhasibPro.Domain.Common;
 using MuhasibPro.Domain.Entities.SistemEntity;
 using MuhasibPro.ViewModels.Infrastructure.Common;
@@ -72,7 +73,10 @@ public class DenetimMasasiViewModel : ViewModelBase
         IUpdateService updateService = null,
         IDevModeProvider devMode = null,
         IDevAraclariService devAraclari = null,
-        IYolAciciService yolAcici = null) : base(commonServices)
+        IYolAciciService yolAcici = null,
+        IApplicationPaths appPaths = null,
+        ISistemDiagnosticsService diagnosticsService = null,
+        IModulTestCalistirici modulTestleri = null) : base(commonServices)
     {
         _firmaService = firmaService;
         _auth = auth;
@@ -84,7 +88,7 @@ public class DenetimMasasiViewModel : ViewModelBase
         FirmaKayit = new FirmaKayitAyarlarViewModel(commonServices, kayitSaglayici, auth);
         Donem = new DonemAyarlarViewModel(commonServices, donemSaglayici, auth);
         GirisPaneli = new GirisDashboardViewModel(commonServices, firmaService, auth, sistemDb, updateService);
-        GelistiriciAraclari = new GelistiriciAraclariViewModel(commonServices, devMode, devAraclari, yolAcici);
+        GelistiriciAraclari = new GelistiriciAraclariViewModel(commonServices, devMode, devAraclari, yolAcici, updateService, appPaths, sistemDb, diagnosticsService, modulTestleri);
         GirisPaneli.BolumAcildi += b => SeciliBolum = b;
         Menuler = new ObservableCollection<AyarlarNavigationMenu>(AyarlarNavigationMenu.VarsayilanMenuler());
         GorunurMenuleriTazele();

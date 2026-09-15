@@ -56,14 +56,16 @@ Her modül çekirdek üzerine bağımsız eklenir: **Cari (B1) → Stok (B2) →
 | 6.79 | Sistem.db yaşam-döngüsü güvenliği (açılış yedeği + kapanış WAL) | ✅🧪 |
 | 6.80 | Katmanlı sayfa yapısı (zemin → ana border → kartlar) | 🔒 Mühürlü (Katman 2 turu tamam) |
 | 6.81 | Sahte transfer alarmı + dialog rötüşü + tek örnek | ✅🧪 |
-| 6.82 | Dev-mode (yalnız DEBUG): kimlik/transfer + teşhis araçları | ✅🧪 (kullanıcı onaylı) |
+| 6.82 | Dev-mode (yalnız DEBUG): kimlik/transfer + teşhis araçları | ✅🧪 (kullanıcı onaylı) — **Ek (Oturum 273):** güncelleme kaynağı düzenleme + **Modül Entegrasyon Testleri** (donanım POST) + Tanılama koşucusu |
 | 6.83 | TenantDatabaseUpdateView canlı doğrulama turu | 🔨 Kısmi — ekran doğrulandı; **6.87'ye devredildi** |
 | 6.84 | FirmaShellView seçim deneyimi yeniden tasarımı | ✅🧪 (onaylı "gayet başarılı") |
 | 6.85 | Kullanıcı Yönetimi modülü (ayrı MODAL pencere) | 📋 Plan |
-| 6.86 | Durum çubuğu + StatusMessage + Notification: redesign + refactor | 🔨 Aktif — **Chunk-1 ✅🧪 onaylı** + **ana pencere çubuğu/aktif bağlam ✅🧪 onaylı** + **Chunk-2a ✅🧪** (in-app InfoBar + OS toast kaldırma; onay bekliyor) + **Chunk-2b 🔨 kısmi** (Login ring; kalan 4 ring **6.88'e devredildi** — view'lar refactoring bekliyor) |
-| 6.87 | Veritabanı Güncelleme sayfası komple yeniden tasarımı | 📋 Plan (Kural 14 araştırması hazır) |
+| 6.86 | Durum çubuğu + StatusMessage + Notification: redesign + refactor | ✅🧪 KAPANDI (onaylı; commit `2ff1a6c`) — Chunk-1 + ana pencere çubuğu/bağlam + Chunk-2a (in-app InfoBar + OS toast kaldırma); Chunk-2b kalan ring'ler **6.88** |
+| 6.87 | Veritabanı Güncelleme sayfası komple yeniden tasarımı | ⚠️ v1 redesign kullanıcı **reddetti** (Oturum 273) — baştan tasarım **veya** kaldırıp erişimde otomatik migration kararı bekliyor |
 | 6.88 | MaliDonemYönetimView + SistemDbYonetimView yeniden tasarımı (+ RAF panel temizliği + 6.71 progress) | 📋 Plan (kullanıcı kararı — bu view'lara ara iş yapılmayacak; 6.71/m.3 envanteri + m.5 RAF panel + m.4 progress burada birleşti) |
 | 6.89 | LoginView — "Beni hatırla" + QuickLogin (hızlı giriş) incelenmesi | 📋 Plan (kullanıcı kararı — Oturum 272) |
+| 6.90 | Velopack git güncelleme akışı (repo adresi dinamik + gömülü varsayılan FeedUrl + admin/dev-mode düzenleme) | 🔨 Kurulum ✅ — `release.yml` dinamik repo, `AssemblyMetadata` gömülü kaynak, admin + dev-mode düzenleme; uçtan uca canlı test (Setup → pack/upload → güncelle) bekliyor |
+| 6.91 | Güncelleme sonrası doğrulama + kurtarma (uçtan uca): app dosyaları + Sistem.db + tenant DB | 📋 Plan (Oturum 273) — pre-update yedek + `OnRestarted` bayrak + async doğrulama/restore saga |
 
 ## 4. Karar Logu (Yeni)
 
@@ -82,6 +84,11 @@ Her modül çekirdek üzerine bağımsız eklenir: **Cari (B1) → Stok (B2) →
 | 2026-09-15 | **Bildirim kanalı pencere-başına:** `IInAppMessageService` Scoped; in-app InfoBar yalnız tetikleyen/aktif pencerede görünür, diğer pencerelere yansımaz; `FirmaShellView`'de host **yok** (yönlendirme/listeleme paneli) | Kullanıcı kararı (Oturum 272) |
 | 2026-09-15 | **Notification → In-App message; OS toast terk edildi** (CommunityToolkit paketi + AUMID hack'i kaldırılacak); çökme bildirimi = dialog | Kullanıcı kararı — "kullanmayacaksan onu da sil" |
 | 2026-09-15 | **Güncel iş sırası:** 6.86 (aktif) → 6.87 | Kullanıcı kararı (Oturum 270/271) |
+| 2026-09-15 | **Faz 6.90 açıldı + kuruldu:** Velopack git güncelleme akışı — `release.yml` repo adresi dinamik (`${{ github.repository }}`); uygulama derlemede gömülü git remote'u varsayılan FeedUrl yapar; admin + dev-mode kaynak adresini değiştirebilir | Kullanıcı kararı (Oturum 273) — "git adresi değişebilir, varsayılan mevcut git; dev-mode + admin değiştirebilir" |
+| 2026-09-15 | **6.87 v1 (hero + iki sütun redesign) reddedildi;** "referansı sil, baştan tasarım" + "tenant update sayfası gerekli mi, gerçek update ile ilgilenelim" | Kullanıcı kararı (Oturum 273) |
+| 2026-09-15 | **İki-katman güncelleme ayrımı:** app update (Velopack, binary) ↔ tenant şema migration (EF Core, erişimde runtime: yedek→göç→doğrula→oto-geri-al). App update tenant DB'yi migrate etmez | Araştırma bulgusu (Kural 14) — Oturum 273 |
+| 2026-09-15 | **Dev-mode'a "Modül Entegrasyon Testleri" (donanım POST):** her modülün DI'da kayıtlı/çözülebilir + kritik akışının çalışır olduğunu tek listede doğrular; ayrıca Tanılama (sistem testleri) + güncelleme kaynağı öz-testi. xUnit paketi uygulamada koşmaz (CI) | Kullanıcı kararı (Oturum 273) — "her modül entegre edildiğinde çalışıyor mu; sorun olunca nerede olduğunu buradan gör" |
+| 2026-09-15 | **Faz 6.91 açıldı (plan):** güncelleme sonrası uçtan uca doğrulama + kurtarma — pre-update yedek, `OnRestarted` bayrak, async doğrulama (dosya/Sistem.db/tenant) + bozukta yedekten restore. FastCallback'e DB işi konmaz | Kullanıcı kararı (Oturum 273) — "güncelleme sonrası dosya/DB doğrulama ve restore'u uçtan uca yapılandır" |
 
 ## 5. Referanslar
 - `docs/DURUM.md`, `docs/LOG.md`, `docs/AKIS-PLANI.md`, `docs/WINUI-MIMARISI.md`, `docs/TASARIM-KURALLARI.md`, `docs/REFERANSLAR.md`

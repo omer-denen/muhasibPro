@@ -102,7 +102,13 @@
                                 <TextBlock Text="Güncelleme kaynağı" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                 <TextBox Text="{x:Bind ViewModel.FeedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="https://github.com/kullanici/repo" FontSize="12" />
                                 <TextBlock Text="GitHub repo adresi veya Velopack feed adresi. Değişiklik otomatik kaydedilir." FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                <Button Content="Bağlantıyı Dene" Style="{StaticResource SecondaryCompactButtonStyle}" Command="{x:Bind ViewModel.CheckNowCommand, Mode=OneWay}" HorizontalAlignment="Left" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button Content="Bağlantıyı Dene" Style="{StaticResource SecondaryCompactButtonStyle}" Command="{x:Bind ViewModel.CheckNowCommand, Mode=OneWay}" />
+                                    <Button Content="Varsayılana sıfırla" Style="{StaticResource SecondaryCompactButtonStyle}" Command="{x:Bind ViewModel.VarsayilanaSifirlaCommand, Mode=OneWay}" ToolTipService.ToolTip="Derlemede gömülü repo adresine döndür" />
+                                </StackPanel>
+                                <TextBlock FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap">
+                                    <Run Text="Varsayılan (gömülü): " /><Run Text="{x:Bind ViewModel.VarsayilanFeedUrl, Mode=OneWay}" />
+                                </TextBlock>
                             </StackPanel>
                         </Border>
 
