@@ -20,6 +20,9 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
 
         public MuhasibPro.Business.Contracts.UIServices.ILocalSettingsService LocalSettingsService { get; }
 
+        /// <summary>Yerel ayarlarda kayıtlı son dönem seçimi (rozet için; LoadLastSelectionAsync doldurur).</summary>
+        public long SonKayitliDonemId { get; private set; }
+
         private FirmaModel _selectedFirma;
         public FirmaModel SelectedFirma
         {
@@ -97,6 +100,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
                 await Task.Delay(200);
 
                 var lastDonemId = await LocalSettingsService.ReadSettingAsync<long>("LastSelectedDonemId");
+                SonKayitliDonemId = lastDonemId;
                 if (lastDonemId > 0)
                 {
                     var lastDonem = maliDonemList.Items?.FirstOrDefault(d => d.Id == lastDonemId);

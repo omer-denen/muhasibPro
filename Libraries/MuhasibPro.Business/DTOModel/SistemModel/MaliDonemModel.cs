@@ -184,6 +184,10 @@ public class MaliDonemModel : ObservableObject
     /// <summary>Seçimde analiz sürerken kart içinde ProgressRing gösterilir.</summary>
     public bool IsDbAnalyzing { get => _isDbAnalyzing; set => Set(ref _isDbAnalyzing, value); }
 
+    private bool _sonCalisilanMi;
+    /// <summary>En son giriş yapılan dönem mi? (FirmaShell satırında "Son çalışılan" rozeti; liste yüklemede işaretlenir).</summary>
+    public bool SonCalisilanMi { get => _sonCalisilanMi; set => Set(ref _sonCalisilanMi, value); }
+
     public bool DbGuncelMi => DbAnalizYapildi && DbDurum == DatabaseStatusResult.Healty;
 
     public bool DbGuncellemeGerekliMi => DbAnalizYapildi && DbDurum == DatabaseStatusResult.RequiredUpdating;

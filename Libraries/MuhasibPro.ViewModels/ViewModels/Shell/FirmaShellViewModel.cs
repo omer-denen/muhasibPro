@@ -66,9 +66,68 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
                     NotifyPropertyChanged(nameof(SelectedFirma));
                     NotifyPropertyChanged(nameof(IsFirmaSelected));
                     NotifyPropertyChanged(nameof(HasSelection));
+                    NotifyPropertyChanged(nameof(SecimOzeti));
+                    NotifyPropertyChanged(nameof(DevamEtNedenTooltip));
+                    NotifyPropertyChanged(nameof(BosDonemBaslik));
                     (DevamEtCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
                 }
             };
+            // Toplu analiz bittiğinde dönem durumu (DB yok/güncelleme gerekli) değişir — özeti tazele.
+            sharedMaliDonemList.TopluAnalizTamamlandi += () =>
+            {
+                _ = ContextService.RunAsync(() =>
+                {
+                    NotifyPropertyChanged(nameof(SecimOzeti));
+                    NotifyPropertyChanged(nameof(DevamEtNedenTooltip));
+                });
+            };
+        }
+
+        /// <summary>0-dönem boş-durum kartı başlığı — firma adıyla (Kural 7: hardcoded metin yok).</summary>
+        public string BosDonemBaslik
+        {
+            get
+            {
+                var firma = Selection.SelectedFirma;
+                if (firma == null)
+                    return "Bu firmada mali dönem yok";
+                return $"{firma.KisaUnvani} firmasında mali dönem yok";
+            }
+        }
+
+        /// <summary>CTA alt barı solundaki seçim özeti: "Firma • Yıl • durum".</summary>
+        public string SecimOzeti
+        {
+            get
+            {
+                var firma = Selection.SelectedFirma;
+                if (firma == null)
+                    return "Firma seçilmedi";
+                var donem = Selection.SelectedMaliDonem;
+                if (donem == null)
+                    return $"{firma.KisaUnvani} • Dönem seçilmedi";
+                var durum = donem.DbDosyaYokMu ? "DB yok"
+                    : donem.KapaliMi ? "Kapalı"
+                    : donem.DbGuncellemeGerekliMi ? "Güncelleme gerekli"
+                    : "Açık";
+                return $"{firma.KisaUnvani} • {donem.MaliYil} • {durum}";
+            }
+        }
+
+        /// <summary>"Çalışma Alanına Geç" butonu pasifken nedenini söyleyen tooltip.</summary>
+        public string DevamEtNedenTooltip
+        {
+            get
+            {
+                if (!Selection.HasSelection)
+                    return "Önce firma ve mali dönem seçin";
+                var donem = Selection.SelectedMaliDonem;
+                if (donem?.DbDosyaYokMu == true)
+                    return "Veritabanı dosyası yok — bu döneme girilemez";
+                if (donem?.KapaliMi == true)
+                    return "Kapalı döneme girilemez — açık bir dönem seçin";
+                return "Seçili firma ve dönemle çalışma alanına geç";
+            }
         }
 
         public ShellArgs ViewModelArgs { get; set; }
@@ -89,12 +148,15 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         {
             await DialogService.ShowYardimAsync("Firma & Mali Dönem Seçimi — Yardım", new List<YardimMaddesiDto>
             {
-                new() { Baslik = "Firma nasıl seçerim?", Aciklama = "Sol listeden bir firma seçin; sağda o firmanın mali dönemleri listelenir." },
-                new() { Baslik = "Mali dönem nasıl seçerim?", Aciklama = "Sağdaki dönem kartlarından birini seçin; 'Çalışma Alanına Geç' butonu etkinleşir." },
-                new() { Baslik = "Yeni firma eklemek", Aciklama = "'Yeni Firma' butonu firma tanımlama penceresini açar; kayıt sonrası liste tazelenir." },
-                new() { Baslik = "Yeni mali dönem açmak", Aciklama = "Seçili firmanın dönem listesinden yeni dönem açılabilir; işlem adım adım ilerler." },
-                new() { Baslik = "Çalışma alanına geçiş", Aciklama = "Firma ve dönem seçiliyken 'Çalışma Alanına Geç' ile ana panele geçilir. Veritabanı güncellemesi gerekiyorsa önce onay istenir." },
-                new() { Baslik = "Denetim Masası", Aciklama = "Üstteki 'Denetim Masası' butonu tüm ayarları ayrı bir pencerede açar." },
+                new() { Baslik = "Firma nasıl seçerim?", Aciklama = "Yukarıdaki firma seçiciye tıklayın; açılan listede firma kodu, ünvan veya şehir yazarak arayabilirsiniz. Bir firmaya tıkladığınızda seçilir ve liste kapanır; firma bilgileri alttaki kartta görünür." },
+                new() { Baslik = "Mali dönem nasıl seçerim?", Aciklama = "Sağdaki mali dönem listesinden bir satıra tıklayın; seçilen satır genişleyip dönemin veritabanı, boyut, durum ve son yedek bilgilerini gösterir. Seçim sonrası 'Çalışma Alanına Geç' butonu etkinleşir." },
+                new() { Baslik = "Yeni firma eklemek", Aciklama = "FİRMA başlığının sağındaki 'Yeni Firma' butonu firma tanımlama penceresini açar; kayıt sonrası liste tazelenir. Seçili firma kartındaki 'Düzenle' ile mevcut firma bilgileri açılır." },
+                new() { Baslik = "Yeni mali dönem açmak", Aciklama = "Mali dönem listesi başlığındaki 'Yeni Mali Dönem Aç' butonu yeni dönem penceresini açar; veritabanı oluşturma adımları sırayla gösterilir. Dönem yoksa boş-durum kartındaki 'Yeni mali dönem aç' bağlantısı da aynı pencereyi açar." },
+                new() { Baslik = "Mali Dönem İşlemleri", Aciklama = "Seçili firma kartındaki 'Mali Dönem İşlemleri' butonu yedekleme, arşivleme ve kurtarma işlemlerini içeren yönetim penceresini açar." },
+                new() { Baslik = "Güncelleme bildirimi", Aciklama = "Bir dönemin veritabanı şema güncellemesi bekliyorsa listenin üstünde sarı bilgi çubuğu görünür. Tek dönemde 'Güncelle' doğrudan güncelleme sayfasını açar; birden çok dönemde 'İncele' listesinden istediğiniz dönemi seçin." },
+                new() { Baslik = "Son çalışılan rozeti", Aciklama = "En son giriş yapılan dönemin satırında 'Son çalışılan' rozeti görünür; liste sırası değişmez. Açılışta bu dönem otomatik seçilir (kapalıysa ilk açık döneme düşülür)." },
+                new() { Baslik = "Çalışma alanına geçiş", Aciklama = "Firma ve açık bir dönem seçiliyken alttaki 'Çalışma Alanına Geç' ile ana panele geçilir. Buton pasifse nedenini üzerine gelerek görebilirsiniz (dönem kapalı ya da veritabanı dosyası yok)." },
+                new() { Baslik = "Ayarlar", Aciklama = "Sağ üstteki 'Ayarlar' butonu tüm uygulama ayarlarını ayrı bir pencerede açar." },
             });
         }
 
@@ -119,6 +181,8 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
                     return;
                 }
                 await Selection.LoadLastSelectionAsync(FirmaList, MaliDonemList);
+                MaliDonemList.SonCalisilanDonemId = Selection.SonKayitliDonemId;
+                MaliDonemList.UygulaSonCalisilanIsareti();
 
                 // LoadDataAsync otomatik ilk öğeyi seçer ama dispatch henüz çalışmamış olabilir → garantile
                 if (Selection.SelectedFirma == null && FirmaList.SelectedItem != null)
@@ -191,8 +255,13 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
                 await ContextService.RunAsync(async () =>
                 {
                     MaliDonemVM.OnItemSelected();
-                    Selection.SelectMaliDonem(MaliDonemList.SelectedItem);
-                    if (Selection.SelectedMaliDonem != null)
+                    // Aynı dönemin yeniden seçilmesi (liste tazelemesi / flyout açılışı) tenant
+                    // geçişini tekrar tetiklemez — koordinatör yalnız dönem gerçekten değişince çalışır.
+                    var secili = MaliDonemList.SelectedItem;
+                    var onceki = Selection.SelectedMaliDonem;
+                    bool ayniDonem = secili != null && onceki != null && secili.Id == onceki.Id;
+                    Selection.SelectMaliDonem(secili);
+                    if (!ayniDonem && Selection.SelectedMaliDonem != null)
                         await UpdateCoordinator.EnsureSwitchedAsync(Selection.SelectedMaliDonem.DatabaseName, Selection.SelectedFirma, Selection.SelectedMaliDonem);
                 });
             }

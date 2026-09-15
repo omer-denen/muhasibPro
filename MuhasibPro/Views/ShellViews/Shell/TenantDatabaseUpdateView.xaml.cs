@@ -21,5 +21,15 @@ namespace MuhasibPro.Views.ShellViews.Shell
             var shellArgs = e.Parameter as ShellArgs;
             await ViewModel.LoadAsync(shellArgs?.Parameter as TenantDatabaseUpdateArgs);
         }
+
+        /// <summary>Kural 17 Katman 2: ana border gölgesi — receiver Loaded'da (ctor'da değil; Splash emsali).</summary>
+        private void OnPageLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            try
+            {
+                AnaBorderShadow.Receivers.Add(RootGrid);
+            }
+            catch { }
+        }
     }
 }

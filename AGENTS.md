@@ -154,13 +154,14 @@ Veritabanından/diskten veri çeken **her** dinamik yüzey (sayfa, panel, kart, 
 
 ### 17. Katmanlı sayfa yapısı (zemin → ana border → kartlar) — KESİN
 **Her yeni view/sayfa ve güncellenen her view bu yapıya uyar. Uymayan sayfa önce bu yapıya taşınır, sonra içerik eklenir.** (Kullanıcı kuralı, Oturum 241; ana border + tint kararı Oturum 248.)
+🔒 **MÜHÜR (Oturum 254 — kullanıcı kararı):** Bu mimari **kilitlidir** — ana tasarım dili `zemin → ana border (ana kart) → içerik kartları`. Bundan sonra oluşturulacak/güncellenecek **her View, UserControl ve Dialog bu yapı üzerine inşa edilir.** Görünüm işlerinde kapsam yalnızca: (a) View içindeki kontrol yerleşimleri (elemanların yeri/düzeni), (b) **araştırma sonucu** (Kural 14) eklenen/çıkarılan buton ve kontrollerdir. **Katman 2 ana border ve Katman 3 iç kart stilleri (renk/radius/gölge/padding/hairline/kart arası boşluk) mührün parçasıdır; habersiz değiştirilmez** — değişiklik ancak kullanıcı kararıyla (mühür revizyonu) yapılır.
 
 - **Katman 1 — zemin (kök `Border`, tüm sayfayı kaplar):**
   - Sayfanın en dış elemanı **`Border`** olur; kök `Grid` + `Background` kombinasyonu **yasak**.
-  - İçinde `Image` (`Stretch="UniformToFill"`, kaynağı temaya göre `light`/`dark`) + üzerine yarı-saydam tint katmanı (`SolidBackgroundFillColorBaseBrush`, **~%35 opak** — zemin görseli görünür kalır). **Ham/net resim gösterilmez — her zaman tint üstte.**
-  - Statiktir; sayfa içeriği değişince yeniden oluşturulmaz. (Varlık: `Assets/Images/light.jpg`/`dark.jpg`.)
+  - İçinde `Image` (`Stretch="UniformToFill"`, kaynağı `UygulamaZeminGorseli` = **tek görsel `light.jpg`**) + üzerine **tema perdesi** (`MuhasibZeminPerdeBrush`: Light `#59F3F3F3` ≈%35, Dark `#D9202020` ≈%85 — zemin görünür kalır). **Ham/net resim gösterilmez — her zaman perde üstte.**
+  - Statiktir; sayfa içeriği değişince yeniden oluşturulmaz. (Oturum 251 kararı: tek görsel + tema perdesi = iki ayrı görselden daha stabil.)
 - **Katman 2 — ana border (ana panel):**
-  - Zeminin üzerinde duran, tüm içeriği kapsayan tek çerçeveli panel: `Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"`, `BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"`, `BorderThickness="1"`, `CornerRadius="{StaticResource OverlayCornerRadius}"`, `Padding="24"`.
+  - Zeminin üzerinde duran, tüm içeriği kapsayan tek çerçeveli panel: `Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"`, `BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}"` (Light beyaz `#FFFFFFFF` — Oturum 258 mühür revizyonu, kullanıcı kararı / Dark yumuşak gri `#45C9CCD1`), `BorderThickness="1.5"` (Oturum 268 mühür revizyonu, kullanıcı kararı: "bir tık arttır"), `CornerRadius="{StaticResource OverlayCornerRadius}"`, `Padding="24"`, `Translation="0,0,32"`.
   - Elevation: `ThemeShadow` (receiver `Loaded`/`OnPageLoaded` içinde try/catch ile eklenir — **asla ctor'da**).
   - Kenarlardan boşluklu; zemin görseli çevresinde görünür kalır.
 - **Katman 3 — içerik kartları (her mantıksal blok ayrı `Border`, ana border içinde):**

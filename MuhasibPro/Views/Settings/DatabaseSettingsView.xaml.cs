@@ -20,5 +20,15 @@ namespace MuhasibPro.Views.Settings
         {
             await ViewModel.LoadAsync();
         }
+
+        /// <summary>Kural 17 Katman 2: ana border gölgesi — receiver Loaded'da (ctor'da değil; Splash emsali).</summary>
+        private void OnPageLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            try
+            {
+                AnaBorderShadow.Receivers.Add(RootGrid);
+            }
+            catch { }
+        }
     }
 }

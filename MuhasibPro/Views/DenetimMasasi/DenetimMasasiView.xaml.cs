@@ -125,7 +125,7 @@ namespace MuhasibPro.Views.DenetimMasasi
         private async void OnYardimClick(object sender, RoutedEventArgs e)
         {
             var dialog = new Views.Components.YardimDialog();
-            dialog.IcerikAta("Denetim Masası — Yardım", new List<Views.Components.YardimMaddesi>
+            dialog.IcerikAta("Ayarlar — Yardım", new List<Views.Components.YardimMaddesi>
             {
                 new() { Baslik = "Bu pencere ne işe yarar?", Aciklama = "Firma ve dönem seçiminden bağımsız, tüm uygulama ayarlarının tek yönetim penceresi. Firma seçiminden ayrı açılır; arkadaki seçim ekranı bu pencere açıkken kilitlidir." },
                 new() { Baslik = "Giriş sayfası", Aciklama = "Üstte üç durum düğmesi: MuhasibPro (sürüm ve dağıtım bilgisi), Sistem Veritabanı (bağlantı durumu + dosya boyutu; tıklayınca Veritabanı bölümü açılır) ve Uygulama Güncelleme (son kontrol zamanı; tıklayınca Güncelleme bölümü açılır). Altında 'Kullanıcıya Ait Firmalar' bölümü yer alır." },

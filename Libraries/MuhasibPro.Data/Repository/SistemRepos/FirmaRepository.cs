@@ -192,11 +192,9 @@ namespace MuhasibPro.Data.Repository.SistemRepos
 
         public async Task<int> GetFirmalarCountAsync(DataRequest<Firma> request)
         {
+            // Arama filtresi GetQuery içinde tek kaynakta uygulanır (ToLower'lı); burada
+            // ikinci bir ham-Query filtresi sayfa/sayaç tutarsızlığı üretiyordu — kaldırıldı.
             IQueryable<Firma> items = GetQuery(request);
-            if(!string.IsNullOrEmpty(request.Query))
-            {
-                items = items.Where(r => r.ArananTerim.Contains(request.Query));
-            }
             // Where
             if(request.Where != null)
             {

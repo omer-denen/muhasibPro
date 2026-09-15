@@ -14,4 +14,8 @@ public interface IKurulumKayitService
     Task<KurulumKayitModel> GetOrCreateAsync();
     Task<KurulumKayitModel?> GetAsync();
     Task EnsureAsync();
+
+    /// <summary>Kimlik kaybı onarımı: kurulum kimliğini verilen değere geri yazar
+    /// (tenant damgalarıyla uyum — aynı makinede yenilenen kimliğin düzeltilmesi).</summary>
+    Task UpdateKurulumIdAsync(string kurulumId);
 }

@@ -52,9 +52,15 @@ public static class AppSurumBilgisi
         get
         {
             var zaman = DerlemeZamani;
-            return string.IsNullOrEmpty(zaman)
+            var govde = string.IsNullOrEmpty(zaman)
                 ? $"v{Surum} Pro Multi-Tenant"
                 : $"v{Surum} Pro Multi-Tenant • {zaman}";
+#if DEBUG
+            // Geliştirme derlemesi ayırt edilebilsin (yayınlanan sürümle karışmasın).
+            return $"DEV • {govde}";
+#else
+            return govde;
+#endif
         }
     }
 }

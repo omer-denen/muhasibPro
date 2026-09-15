@@ -20,7 +20,7 @@
     <Border x:Name="KokZemin" CornerRadius="0">
         <Grid>
             <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
-            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
 
             <Grid x:Name="RootGrid" Background="Transparent">
 
@@ -29,53 +29,82 @@
                 <Grid x:Name="PanelWrap" MaxWidth="1600" Margin="24,48,24,24" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Border x:Name="AnaBorder"
                             Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                            CornerRadius="{StaticResource OverlayCornerRadius}" Padding="24">
+                            BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}" BorderThickness="1.5"
+                            CornerRadius="{StaticResource OverlayCornerRadius}" Padding="24"
+                            Translation="0,0,32">
                         <Border.Shadow>
                             <ThemeShadow x:Name="AnaBorderShadow" />
                         </Border.Shadow>
                         <Grid x:Name="PanelGrid">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <!-- Baslik seridi (Logo | Denetim Masasi | UserInfo) — panel ust kenari, sabit -->
-                            <Border x:Name="StickyHeader" Grid.Row="0" Padding="0,0,0,12">
-                                <Grid x:Name="HeaderGrid" HorizontalAlignment="Stretch">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <!-- Tek border: 3 icerik sola yasli, aralarda dikey separator, logo yuksekliginde compact -->
-                                    <Border Grid.Column="0" Style="{StaticResource CustomModernCard}" Padding="4" CornerRadius="{StaticResource MuhasibPillCornerRadius}" VerticalAlignment="Center" HorizontalAlignment="Left">
-                                        <StackPanel Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
-                                            <!-- Logo -->
-                                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Padding="6,2,8,2">
-                                                <Image Width="22" Height="22" Source="ms-appx:///Assets/AppIcon.png" Stretch="Uniform" VerticalAlignment="Center" />
-                                                <TextBlock Text="MuhasibPro" FontSize="13" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                                            </StackPanel>
+                            <!-- Header — solda logo, ortada dashboard basligi, sagda Ayarlar + UserInfo -->
+                            <Grid x:Name="HeaderGrid" Grid.Row="0" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                                            <Rectangle Width="1" Height="20" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.7" VerticalAlignment="Center" Margin="4,0"/>
+                                <Border Grid.Column="0" Style="{StaticResource CustomModernCard}" Padding="8,4" CornerRadius="{StaticResource MuhasibPillCornerRadius}" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                        <Image Width="22" Height="22" Source="ms-appx:///Assets/AppIcon.png" Stretch="Uniform" VerticalAlignment="Center" />
+                                        <TextBlock Text="MuhasibPro" FontSize="13" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
 
-                                            <!-- Denetim Masası — ayrı pencere açar (Oturum 244) -->
-                                            <Button x:Name="DenetimMasasiButton" Click="OnDenetimMasasiClick" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Padding="0" Background="Transparent" BorderThickness="0" VerticalAlignment="Center" ToolTipService.ToolTip="Denetim Masası — tüm ayarlar (ayrı pencere)">
-                                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" MinHeight="28" Padding="8,2">
-                                                    <FontIcon Glyph="{StaticResource IconSettings}" FontSize="11" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                                                    <TextBlock Text="Denetim Masası" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                                                </StackPanel>
-                                            </Button>
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="4,0">
+                                    <TextBlock Text="Firma &amp; Mali Dönem" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    <TextBlock Text="Çalışma ortamınızı seçin ve veritabanı bağlantısını kurun" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
 
-                                            <Rectangle Width="1" Height="20" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.7" VerticalAlignment="Center" Margin="4,0"/>
-
-                                            <!-- UserInfo — compact, aynı kapsül içinde -->
-                                            <components:UserInfoControl DataContext="{x:Bind ViewModel, Mode=OneWay}" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <!-- Tema kisayolu: kayar anahtar (sol=Acik / sag=Koyu).
+                                         Sistem temasi Gorunum'de; anahtar Sistem'deyken efektif temayi gosterir. -->
+                                    <Border x:Name="TemaPill" CornerRadius="{StaticResource MuhasibPillCornerRadius}"
+                                            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                            Padding="8,2" VerticalAlignment="Center"
+                                            ToolTipService.ToolTip="Tema: Açık / Koyu (Sistem teması için: Ayarlar → Görünüm)">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                            <FontIcon Glyph="{StaticResource IconBrightness}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" ToolTipService.ToolTip="Açık tema" />
+                                            <ToggleSwitch x:Name="TemaToggle" MinWidth="0" Padding="0" Margin="0" VerticalAlignment="Center"
+                                                          OnContent="" OffContent=""
+                                                          AutomationProperties.AutomationId="TemaToggle"
+                                                          Toggled="OnTemaToggleToggled" />
+                                            <FontIcon Glyph="{StaticResource IconContrast}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" ToolTipService.ToolTip="Koyu tema" />
                                         </StackPanel>
                                     </Border>
-                                </Grid>
-                            </Border>
+                                    <Button x:Name="AyarlarButton" AutomationProperties.AutomationId="AyarlarButton" Click="OnDenetimMasasiClick"
+                                            CornerRadius="{StaticResource MuhasibCardCornerRadius}" Padding="0" Background="Transparent" BorderThickness="0" VerticalAlignment="Center"
+                                            ToolTipService.ToolTip="Ayarlar — tüm uygulama ayarları (ayrı pencere)">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" MinHeight="30" Padding="8,2">
+                                            <FontIcon Glyph="{StaticResource IconSettings}" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                            <TextBlock Text="Ayarlar" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Rectangle Width="1" Height="20" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.7" VerticalAlignment="Center" />
+                                    <components:UserInfoControl DataContext="{x:Bind ViewModel, Mode=OneWay}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
 
-                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0">
+                            <!-- Yukleme / guncelleme ilerlemesi (Kural 11) -->
+                            <StackPanel Grid.Row="1" Spacing="4" Margin="0,12,0,12">
+                                <ProgressBar IsIndeterminate="True" Height="2" VerticalAlignment="Top"
+                                             Foreground="{ThemeResource AccentFillColorDefaultBrush}" Background="Transparent"
+                                             Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
+                                <StackPanel Spacing="4" Visibility="{x:Bind ViewModel.Progress.IsUpdating, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                                    <ProgressBar IsIndeterminate="True" Height="4" Foreground="{ThemeResource AccentFillColorDefaultBrush}" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                    <TextBlock Text="{x:Bind ViewModel.Progress.UpdateStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0">
                                 <Grid x:Name="ContentRoot" HorizontalAlignment="Stretch">
                                     <VisualStateManager.VisualStateGroups>
                                         <VisualStateGroup>
@@ -126,36 +155,7 @@
                                     </VisualStateManager.VisualStateGroups>
 
                                     <StackPanel Spacing="12">
-
-                                        <!-- Yuklenme progress (Kural 11) -->
-                                        <ProgressBar IsIndeterminate="True" Height="2" VerticalAlignment="Top"
-                                                     Foreground="{ThemeResource AccentFillColorDefaultBrush}" Background="Transparent"
-                                                     Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
-                                        <!-- Güncelleme ilerlemesi (onaylı göç) -->
-                                        <StackPanel Spacing="4" Visibility="{x:Bind ViewModel.Progress.IsUpdating, Mode=OneWay, Converter={StaticResource TrueToVis}}">
-                                            <ProgressBar IsIndeterminate="True" Height="4" Foreground="{ThemeResource AccentFillColorDefaultBrush}" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
-                                            <TextBlock Text="{x:Bind ViewModel.Progress.UpdateStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
-                                        </StackPanel>
-
-                                        <!-- Baslik + birincil aksiyon (ana border icinde, kart degil) -->
-                                        <Grid ColumnSpacing="12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
-                                                <TextBlock Text="Firma &amp; Mali Dönem" FontSize="20" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                                <TextBlock Text="Çalışma ortamınızı seçin ve veritabanı bağlantısını kurun" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                            </StackPanel>
-                                            <Button Grid.Column="1" Click="OnYeniFirmaClick" VerticalAlignment="Center" Style="{StaticResource MuhasibPrimaryButtonStyle}" ToolTipService.ToolTip="Yeni firma tanımla">
-                                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                                    <FontIcon Glyph="{StaticResource IconAdd}" FontSize="12" Foreground="{ThemeResource MuhasibOnInkBrush}" VerticalAlignment="Center" />
-                                                    <TextBlock Text="Yeni Firma" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibOnInkBrush}" VerticalAlignment="Center" />
-                                                </StackPanel>
-                                            </Button>
-                                        </Grid>
-
-                                        <!-- 2 panel (Katman 3 kartlar) -->
+                                        <!-- 2 panel (Katman 3 kartlar): sol firma secici + secili firma karti, sag donem listesi -->
                                         <Grid x:Name="PanelsGrid" ColumnSpacing="12" RowSpacing="10">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -175,10 +175,36 @@
 
                                         <!-- Surum footer (metin code-behind'den: AppSurumBilgisi.Metin) -->
                                         <TextBlock x:Name="SurumFooter" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" Opacity="0.6" />
-
                                     </StackPanel>
                                 </Grid>
                             </ScrollViewer>
+
+                            <!-- CTA alt bari (Kural 16: birincil aksiyon her zaman gorunur) — solda secim ozeti, sagda gecis -->
+                            <Grid Grid.Row="3" Margin="0,12,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Rectangle Grid.Row="0" Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.6" />
+                                <Grid Grid.Row="1" Margin="0,12,0,0" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                        <FontIcon Glyph="{StaticResource IconCheckCircle}" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind ViewModel.SecimOzeti, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" x:Name="DevamEtButton"
+                                            Content="Çalışma Alanına Geç"
+                                            IsEnabled="{x:Bind ViewModel.HasSelection, Mode=OneWay}"
+                                            Command="{x:Bind ViewModel.DevamEtCommand, Mode=OneWay}"
+                                            Style="{StaticResource AccentButtonStyle}"
+                                            CornerRadius="{StaticResource MuhasibPillCornerRadius}"
+                                            ToolTipService.ToolTip="{x:Bind ViewModel.DevamEtNedenTooltip, Mode=OneWay}"
+                                            Padding="16,10" />
+                                </Grid>
+                            </Grid>
                         </Grid>
                     </Border>
 

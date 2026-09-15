@@ -12,7 +12,7 @@
     <Border x:Name="KokZemin" CornerRadius="0">
         <Grid>
             <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
-            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
 
     <Grid x:Name="RootGrid" Background="Transparent">
         <Grid.RowDefinitions>

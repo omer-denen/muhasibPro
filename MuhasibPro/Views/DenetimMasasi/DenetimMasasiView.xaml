@@ -89,7 +89,7 @@
                                VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                     <Button Grid.Column="1" Width="32" Height="32" Padding="0"
                             Style="{StaticResource CircleIconButtonStyle}" VerticalAlignment="Center" Click="OnYardimClick"
-                            ToolTipService.ToolTip="Denetim Masası hakkında yardım">
+                            ToolTipService.ToolTip="Ayarlar hakkında yardım">
                         <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="14" />
                     </Button>
                 </Grid>

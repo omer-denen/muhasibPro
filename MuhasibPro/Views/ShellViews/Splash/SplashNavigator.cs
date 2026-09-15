@@ -79,7 +79,15 @@ public static class SplashNavigator
         if (routing == null)
             return;
 
+        // Kimlik kaybı (makine aynı) CheckTransferAsync içinde onarılır; burada yalnız gerçek
+        // transfer (başka makine) kalır. Bildirim yalnız geliştirme derlemesinde gösterilir;
+        // Release'de gerçek transfer bilgisi geri-yükleme hükmünde (bloklayan akış) çıkar (Kural 18 dev kapısı).
         var check = await routing.CheckTransferAsync();
+
+        if (check.AlignedCount > 0)
+            Debug.WriteLine($"Kurulum kimligi onarildi: {check.AlignedCount} donem • benimsenen={check.AdoptedKurulumId}");
+
+#if DEBUG
         if (!check.HasMismatches)
             return;
 
@@ -90,5 +98,9 @@ public static class SplashNavigator
         };
         dialog.SetMismatches(check.Mismatches);
         await DialogHelper.ShowCenteredAsync(dialog);
+#else
+        if (check.HasMismatches)
+            Debug.WriteLine($"Tasinmis veri: {check.Mismatches.Count} donem (bildirim yalniz DEBUG derlemesinde)");
+#endif
     }
 }

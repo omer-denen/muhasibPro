@@ -2,6 +2,36 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
+## StaticResource tema fırçası — çalışma-zamanı tema geçişinde beyaz-beyaz (ÇÖZÜLDÜ — 2026-09-14 — Oturum 253)
+- **Belirti:** Uygulama Dark açılıp Denetim Masası'ndan Light'a geçilince `FirmaShell` sol firma kartı beyaz-beyaz oldu ("KAYITLI FİRMALAR", "Korkut Mermer", "Yetkili/İletişim" okunmaz); açılıştan Light başlatınca sorun yoktu.
+- **Sebep:** `FirmalarListControl` (22 nokta) + `UserInfoControl` + `NavSidebarControl` + `AnimatedInfoBorder` tema fırçalarını `{StaticResource TextFillColor*/SystemFillColor*}` ile alıyordu; `StaticResource` **load-time** çözülür ve Dark değerine kilitlenir — canlı tema değişiminde güncellenmez (Oturum 230 dersinin FirmaShell çocuklarındaki tekrarı).
+- **Çözüm:** İlgili tüm tema fırçaları `{ThemeResource}`'a çevrildi (4 dosya); ayrıca aynı süpürme `TenantDatabaseUpdateView`/`UpdateView`/`MainShellView`'da yapıldı. Canlı kanıt: runtime switch sonrası `ot253h_firmashell_light.png` okunur; açılıştan Light `ot253i_firmashell_light.png`. Kural: tema-bağımlı fırça **kullanım yerinde** `ThemeResource` (TASARIM-KURALLARI).
+- Tarih: 2026-09-14
+
+## Gömülü modda zemin gizleme — KokZemin tüm içeriği sarıyor (ÇÖZÜLDÜ — 2026-09-14 — Oturum 253)
+- **Belirti:** Denetim Masası → Güncelleme sayfası (gömülü `UpdateView`) tamamen **boş** açıldı (yalnız kabuk başlığı görünüyor).
+- **Sebep:** Katman-2 dönüşümünde `UpdateView`'un kök `KokZemin` Border'ı hem zemin katmanını (Image + perde) hem de tüm içeriği sarıyor; `GomuluUygula` "zemin gizle" niyetiyle `KokZemin.Visibility=Collapsed` yapınca içerik de gizlendi.
+- **Çözüm:** Gömülü modda yalnız zemin **katmanları** gizlenir (`ZeminGorseli` + `ZeminPerdesi` x:Name'leri); panel + içerik görünür kalır. Ders: kök Border'a Visibility ile "zemin gizleme" yapılmaz — katman ayrı adlandırılır.
+- Tarih: 2026-09-14
+
+## Sahte "Taşınmış Veri" uyarısı — kurulum kimliği yeniden üretildi (ÇÖZÜLDÜ — 2026-09-14 — Oturum 252)
+- **Belirti:** Uygulama her açılışta "Taşınmış Veri Tespit Edildi" dialogu gösteriyordu; kullanıcı aynı makinede publish→uninstall sonrası bunun neden çıktığını sordu.
+- **Sebep:** Kurulum kimliği `LocalSettings.json` + Sistem.db `GlobalAyarlar` aynasında tutuluyor; Oturum 251'de pilot tema temizliği için `LocalSettings.json` silinince ayna da yoktu → `KurulumKayitService.GetOrCreateAsync` **yeni bir `KurulumId` üretti** (`8ae5…`, 13.09 22:24:34). Dönem damgaları eski kimlikteydi (`9e67…`) ve `MakineId` aynıydı; `TenantVersionReader` makine/kurulum ayrımı yapmadan "farklı kurulum" saydı → sahte transfer alarmı.
+- **Çözüm:** `CheckTransferAsync` ayrımı — makine farklı → gerçek transfer (dialog + olay); makine aynı → kimlik kaybı, sessiz onarım: tek eski kimlik `UpdateKurulumIdAsync` ile damgadan geri alınır (eski yedeklerle uyum), karışık kimlik `ReAlignTenantKurulumIdsAsync` ile güncel kimliğe eşitlenir. Uyarı dialogu yalnız DEBUG. Canlı kanıt: GlobalAyarlar + LocalSettings `9e67…`'ye döndü, dialog çıkmadı (`ot252_*`).
+- Tarih: 2026-09-14
+
+## ContentDialog açık temada dark açılıyor — popup katmanı tema mirası (ÇÖZÜLDÜ — 2026-09-14 — Oturum 252)
+- **Belirti:** OS Dark + uygulama Light iken transfer dialogu Dark (akrilik koyu) açıyordu; içerik fırçaları `ThemeResource` olmasına rağmen.
+- **Sebep:** `ContentDialog` popup katmanında render edilir; kök `Frame`'e yazılan `RequestedTheme` (tema servisi) popup'a miras gitmiyor — dialog `Application.RequestedTheme`/sistem temasına düşüyor. `DialogHelper` yalnız XamlRoot atıyordu, tema yazmıyordu.
+- **Çözüm:** `DialogHelper.ApplyAppTheme(dialog)` — `IThemeSelectorService.Theme` runtime'dan `dialog.RequestedTheme`'e yazılır; `ShowCenteredAsync` + `DialogService.CreateDialog` aynı kapı. XAML'de hardcode yok (kural korunur). Canlı kanıt: `ot252_transfer_dialog.png` açık tema.
+- Tarih: 2026-09-14
+
+## PowerShell toplu metin değişimi XAML encoding'ini bozar — Türkçe mojibake (ÇÖZÜLDÜ — 2026-09-13 — Oturum 251 devam)
+- **Belirti:** 9 XAML dosyasında tek satırlık perde değişimi sonrası `git diff` tüm dosyayı değişmiş gösterdi; Türkçe karakterler `BaÅŸlÄ±k`, `VeritabanÄ±`, em-dash `â€”` oldu; dosya başına BOM eklendi.
+- **Sebep:** `Get-Content -Raw` (BOM'suz UTF-8 dosyayı Windows-1254 olarak okur) + `Set-Content -Encoding UTF8` (BOM'lu yazar) roundtrip'i çift-encoding üretti. Edit tool encoding'i korur; script'li replace korumaz.
+- **Çözüm:** `git checkout --` ile 9 dosya geri alındı; değişiklik `edit` tool ile dosya başına uygulandı. Kural: XAML/metin dosyalarında toplu değişim script'le YAPILMAZ (edit tool) veya `[IO.File]::ReadAllText/WriteAllText(UTF8Encoding($false))` kullanılır.
+- Tarih: 2026-09-13
+
 ## Denetim Masası Giriş'te firma "0 dönem" — dönem projeksiyonu eksik (ÇÖZÜLDÜ — 2026-09-13 — Oturum 251)
 - **Belirti:** Giriş sayfası firma kartı "0 dönem" gösteriyordu; aynı firma FirmaShell'de 3 dönemli (`2025/2026/2027`).
 - **Sebep:** `FirmaListelemeService.GetFirmalarWithUserId` `CreateFirmaModelAsync` sonrası `MaliDonemler` listesini modele **haritalamıyordu** (sorgu dönemleri getiriyordu; `GetFirmalarPageAsync` haritalıyordu, bu yol atlanmıştı).
@@ -774,3 +804,27 @@ Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 - Belirti: `LoginView.xaml.cs`'te `OnYardimClick`/`OnTeshisClicked` (kullanıcı: "code-behind metodla dolu").
 - Ders: View'a bağlı command mantığı (yardım/teşhis/navigasyon) ViewModel command'ına taşınır; View chrome gerektiren dialog App katmanındaki `IDialogService` üzerinden açılır (`ShowYardimAsync`). Code-behind yalnız lifecycle + gölge receiver taşır.
 - Tarih: 2026-09-13
+
+## Oturum 267 - Container sablonunda \{Binding Selected}\ cozulmuyor (DERS)
+- Belirti: Donem listesi secerken sol hub (accent bar) canlida hic gorunmuyordu; kuyruk animasyonu da ayni baglama ile bos kaliyordu. Akordiyon (DataTemplate) ayni \Selected\ baglamasiyla calisiyordu.
+- Kok neden: \ListViewItem\ **container sablonunun** DataContext'i item modeli DEGIL — \{Binding Selected, FallbackValue=Collapsed}\ cozulmeyince sessizce Collapsed'a dusuyordu (6.84'ten beri; kullaniciya "orjinal stilde solda kutu cikiyor" hatirasi stok PİLOT gostergesinden geliyordu).
+- Ders: Container (\ItemContainerStyle\) sablonunda item modeli ozelligi \{Binding Content.X, RelativeSource={RelativeSource Mode=TemplatedParent}}\ ile baglanir; dogrudan \{Binding}\ + FallbackValue sessiz kaybolma demektir. Tekrari yasak.
+- Tarih: 2026-09-15
+
+## Oturum 267 - WinUI dash deseni: toplam > yol uzunlugu = cizim yok (DERS)
+- Belirti: \StrokeDashArray=\"100 3300\"\ tek-kuyruk deseni hic cizmiyordu (offset animasyonu dogru ilerlerken bile); \"1 10\" ciziyordu.
+- Kok neden: WinUI shape dash cizicisi desen toplami yol uzunlugunu gecince deseni dusuruyor (buyuk bosluklu tek-dash kalibi calismiyor).
+- Ders: Tek kuyruk gerekiyorsa desen boyut-bazli kurulur: \gap = perimeter − 101\ (toplam yolun 1px altinda; 1px kirinti gorunmez). Kod: \OrbitRingControl.StartOrbit\. Tekrari yasak.
+- Tarih: 2026-09-15
+
+## Oturum 268 - Dependent animasyon (StrokeDashOffset) = UI thread takilmasi; "yapay" dekoratif animasyon (DERS)
+- Belirti: Donem kartindaki donen kuyruk stabil degildi (yuk altinda takiliyor); ayrica dinlenme offset'i bir kuyruk boyu fazla oldugu icin kuyruk hub'i gecip ust kenarda duruyordu ("sol hub icinde durmasi gereken cizgi hub'i geciyor").
+- Kok neden: (1) \Shape.StrokeDashOffset\ bagimsiz animasyon DEGIL (\EnableDependentAnimation=True\ → UI thread); (2) rest hesabinda kuyruk basi \hubDistance\ yerine \hubDistance + kuyrukUzunlugu\ hedeflenmisti.
+- Ders (kullanici karari): Secim gibi kalici durumlar icin **dekoratif animasyon yapilmaz** — "animasyon yapmak icin yapilmis gibi" olur. Cozum durum farkidir (secili kart dis panel karti dolgusuna burunur + sol hub). Animasyon gerekirse bagimsiz ozellik (Opacity/Scale/Translation) kullanilir, sonsuz/surekli animasyondan kacinilir (MS Motion). Tekrari yasak.
+- Tarih: 2026-09-15
+
+## Oturum 268 - Hover perdesi Light temada gorunmuyor (DERS)
+- Belirti: Liste satirinda fare ile uzerine gelince Light temada hicbir gorsel degisiklik yoktu (248→248); Dark'ta calisiyordu.
+- Kok neden: `HoverOverlay` `ControlFillColorSecondaryBrush` kullaniyordu (her iki temada da **acik/beyaz** renkli) + `Opacity=0.30` → Light'ta efektif alfa ≈ %1.8 = gorunmez.
+- Ders: Hover gibi tema-farkinda olmasi gereken perdeler `SubtleFillColor*` veya **DesignTokens'ta Light siyah / Dark beyaz tanimli token** ile yapilir; `ControlFillColorSecondaryBrush` tek basina Light'ta koyulastirmaz. Uygulama: `MuhasibHoverOverlayBrush` (Light `#14000000` / Dark `#1AFFFFFF`). Kod: `Cards.xaml` HoverOverlay. Tekrari yasak.
+- Tarih: 2026-09-15

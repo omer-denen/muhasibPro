@@ -43,6 +43,15 @@
             <Color x:Key="MuhasibInkPressedColor">#000000</Color>
             <Color x:Key="MuhasibOnInkColor">#FFFFFF</Color>
 
+            <!-- Kural 17 ana border hairline — Light: beyaz cizgi (Oturum 258 muhur revizyonu, kullanici karari; Dark degismedi) -->
+            <Color x:Key="MuhasibAnaBorderCizgiColor">#FFFFFFFF</Color>
+
+            <!-- Liste satiri hover perdesi — Light: siyah (tema-farkinda; ControlFillColorSecondary Light'ta gorunmuyordu) -->
+            <Color x:Key="MuhasibHoverOverlayColor">#14000000</Color>
+
+            <!-- Kural 17 zemin perdesi — Light: bugunku %35 tint'in birebir karsiligi (#59≈0.35 x #F3F3F3) -->
+            <SolidColorBrush x:Key="MuhasibZeminPerdeBrush" Color="#59F3F3F3" />
+
             <!-- Kural 17: kok zemin gorseli (tema-bazli). Assets/Images/light.jpg -->
             <BitmapImage x:Key="UygulamaZeminGorseli" UriSource="ms-appx:///Assets/Images/light.jpg" />
         </ResourceDictionary>
@@ -70,8 +79,17 @@
             <Color x:Key="MuhasibInkPressedColor">#C0C0C0</Color>
             <Color x:Key="MuhasibOnInkColor">#1B1B1B</Color>
 
-            <!-- Kural 17: kok zemin gorseli (tema-bazli). Assets/Images/dark.jpg -->
-            <BitmapImage x:Key="UygulamaZeminGorseli" UriSource="ms-appx:///Assets/Images/dark.jpg" />
+            <!-- Kural 17 ana border hairline — Dark: yumusak gri cizgi (beyaz parlamasi yok, ≈%27 gri) -->
+            <Color x:Key="MuhasibAnaBorderCizgiColor">#45C9CCD1</Color>
+
+            <!-- Liste satiri hover perdesi — Dark: beyaz (tema-farkinda) -->
+            <Color x:Key="MuhasibHoverOverlayColor">#1AFFFFFF</Color>
+
+            <!-- Kural 17 zemin perdesi — Dark: ayni light.jpg uzerine koyu perde (≈%85 x #202020) -->
+            <SolidColorBrush x:Key="MuhasibZeminPerdeBrush" Color="#D9202020" />
+
+            <!-- Kural 17: kok zemin gorseli — TEK gorsel (light.jpg); dark farki perdeden gelir (stabil kompozisyon) -->
+            <BitmapImage x:Key="UygulamaZeminGorseli" UriSource="ms-appx:///Assets/Images/light.jpg" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 
@@ -110,6 +128,12 @@
     <SolidColorBrush x:Key="MuhasibPrimaryLightBrush" Color="{ThemeResource MuhasibPrimaryLightColor}" />
     <SolidColorBrush x:Key="MuhasibPrimaryBorderBrush" Color="{ThemeResource MuhasibPrimaryBorderColor}" />
     <SolidColorBrush x:Key="MuhasibOnPrimaryBrush" Color="{ThemeResource MuhasibOnPrimaryColor}" />
+
+    <!-- Kural 17 ana border hairline (Light beyaz / Dark acik gri — ThemeDictionaries) -->
+    <SolidColorBrush x:Key="MuhasibAnaBorderCizgiBrush" Color="{ThemeResource MuhasibAnaBorderCizgiColor}" />
+
+    <!-- Liste satiri hover perdesi (tema-farkinda: Light siyah / Dark beyaz) -->
+    <SolidColorBrush x:Key="MuhasibHoverOverlayBrush" Color="{ThemeResource MuhasibHoverOverlayColor}" />
 
     <!-- Durum — Danger hover/pressed (Buttons.xaml DangerButtonStyle + DismissButtonStyle icin) -->
     <SolidColorBrush x:Key="MuhasibDangerHoverBrush" Color="#A32417" />

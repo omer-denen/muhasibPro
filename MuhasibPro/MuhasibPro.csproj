@@ -126,7 +126,6 @@
   <ItemGroup>
     <None Remove="appsettings.json" />
     <None Remove="Assets\Images\background_muhasib.png" />
-    <None Remove="Assets\Images\dark.jpg" />
     <None Remove="Assets\Images\light.jpg" />
     <None Remove="Controls\DataGrid.xaml" />
     <None Remove="Controls\DataList.xaml" />

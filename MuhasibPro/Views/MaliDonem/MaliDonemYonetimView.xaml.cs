@@ -42,6 +42,16 @@ public sealed partial class MaliDonemYonetimView : Page
         ViewModel.Unsubscribe();
     }
 
+    /// <summary>Kural 17 Katman 2: ana border gölgesi — receiver Loaded'da (ctor'da değil; Splash emsali).</summary>
+    private void OnPageLoaded(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            AnaBorderShadow.Receivers.Add(RootLayout);
+        }
+        catch { }
+    }
+
     private async void OnTopluYedekleClick(object sender, RoutedEventArgs e)
     {
         var vm = ViewModel.GenelBakisVM;

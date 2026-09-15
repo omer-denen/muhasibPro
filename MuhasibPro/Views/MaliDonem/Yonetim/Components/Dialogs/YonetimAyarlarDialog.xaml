@@ -9,7 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     DefaultButton="None"
-    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
     BorderThickness="1"
     CornerRadius="{StaticResource ControlCornerRadius}">

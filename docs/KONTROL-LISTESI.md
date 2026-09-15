@@ -894,7 +894,7 @@ Sıra: Splash → paylaşılan stiller → SistemKurulum → FirmaShell → Mali
 
 ---
 
-## Faz 6.80 — Katmanlı sayfa yapısı (zemin → ana border → kartlar, tema-resimli zemin) (Oturum 241; ana border + tint kararı Oturum 248, 🔨 devam)
+## Faz 6.80 — Katmanlı sayfa yapısı (zemin → ana border → kartlar, tema-resimli zemin) (Oturum 241; ana border + tint kararı Oturum 248; **🔒 mühür Oturum 254** — mimari kilitli, yeni View/UserControl/Dialog bu yapı üzerine; ana kart + iç kart stilleri mühürlü)
 
 **Kullanıcı kuralı (kesin, Oturum 248 güncel):** Her yeni/güncellenen view 3 katmana oturur: (1) **zemin** — kök `Border` (tüm sayfa; `Image` UniformToFill + tema tonlu tint `SolidBackgroundFillColorBaseBrush` **~%35**, ham resim gösterilmez, statik), (2) **ana border** — zeminin üzerinde tüm içeriği kapsayan çerçeveli panel (`CardBackgroundFillColorSecondaryBrush` + `CardStrokeColorDefaultBrush` 1px + `OverlayCornerRadius` + `Padding 24` + `ThemeShadow`, kenarlardan boşluklu), (3) **içerik kartları** — ana border içinde ayrı `Border` (`CardBackgroundFillColorDefaultBrush` + `ControlCornerRadius`/`OverlayCornerRadius` + `CardStrokeColorDefaultBrush` 1px + `ThemeShadow` + `Translation` + `Padding` 16/12/20, kart arası 12px, iç içe >2 seviye yasak). **Dialog zemini opak** (`SolidBackgroundFillColorBaseBrush`). Sadece Fluent ThemeResource; hardcode hex yasak. Yasak: kök Grid+Background; ana border'sız zemine kart.
 - [x] Kaynak assetler: `Assets/Images/light.jpg` + `dark.jpg` (kullanıcı ekledi) ✅
@@ -926,7 +926,94 @@ Sıra: Splash → paylaşılan stiller → SistemKurulum → FirmaShell → Mali
 - [x] **Veri bug fix:** `GetFirmalarWithUserId` dönem projeksiyonu (`0 dönem` → gerçek dönemler) — HATALAR kaydı ✅
 - [x] **Doğrulama:** build 0 hata + test **481/481**; canlı kanıt `ot251l_home.png` (+ `ot251i`/`ot251j`/`ot251k`, UIA dökümleri); **kullanıcı onayı ALINDI (2026-09-13)** ✅
 
-- [ ] **Ana border paneli** kalan view'lara tek tek (MaliDonemYonetim, TenantDatabaseUpdate, Update, MainShell, ShellView, DatabaseSettings, SistemDbYonetim, DenetimMasasi) + ilgili dialog opaklığı + `?` panel köşesi ⬜
-- [ ] Kalan 3 logo (`ExtendedSplash`/`KurulumSplash`/`SistemDbYonetim`) canlı doğrulama (FirmaShell logosu Oturum 249 canlı kanıtında görünür) ⬜
-- [ ] FirmaShell Light/Mica canlı teyidi (Dark ✅; **tema fix'i sonrası Light global çalışıyor** — FirmaShell Light kanıtı sıradaki turda) ⬜
-- [ ] Sıradaki view'lar topolojik sıra: `MaliDonemYonetimView` → `TenantDatabaseUpdateView` → `UpdateView` → `MainShellView` → `ShellView` → `DatabaseSettingsView` ⬜
+### Kural 17 hairline + tek görsel/tema perdesi (Oturum 251 devam, ✅🧪)
+- [x] **Hairline token** (`MuhasibAnaBorderCizgiBrush`): Light `#E6DFE1E4` / Dark `#45C9CCD1` (yumuşak gri; beyaz ilk deneme "patlıyor" geri bildirimiyle revize) — pilot `ExtendedSplash` + `LoginView` `AnaBorder`; `Translation Z 32` + `ThemeShadow`; canlı Light/Dark + **kullanıcı onayı ("budur")** ✅ + **Oturum 258 mühür revizyonu:** Light → `#FFFFFFFF` (Dark `#45C9CCD1` aynen) ✅
+- [x] **Zemin:** tek görsel `light.jpg` + tema perdesi `MuhasibZeminPerdeBrush` (Light `#59F3F3F3` ≈%35 = eski tint birebir; Dark `#D9202020` ≈%85) — `Login`/`ExtendedSplash` canlı; 9 view token swap (`MainShell`/`MaliDonemYonetim`/`SistemDbYonetim`/`Update`/`DatabaseSettings`/`TenantDatabaseUpdate`/`ShellView`/`KurulumSplash`/`FirmaShell`) — build 0/0 ✅
+- [x] Kural metinleri güncellendi: `AGENTS.md` Kural 17 + `docs/TASARIM-KURALLARI.md` (perde brush + hairline token + Translation Z) ✅
+- [x] Ders kaydı: PowerShell toplu replace XAML encoding bozar → `HATALAR.md` (edit tool kuralı) ✅
+- [x] Kullanıcı kararı kaydı: **365 tasarımı İPTAL** + "gri yön yok, mevcut kartlarımızı kullanacağız" (LOG/ROADMAP) ✅
+- [x] Ana border hairline kalan ana panellere (FirmaShell `AnaBorder`, KurulumSplash kartı) — **Oturum 253:** `MuhasibAnaBorderCizgiBrush` + FirmaShell'e eksik `Translation="0,0,32"`; canlı Dark (`ot253a_firmashell_dark.png`) + Light (`ot253i_firmashell_light.png`) ✅🧪
+- [x] `dark.jpg` asset kaldırıldı (tek görsel+perde sonrası kullanılmıyor) + `light.jpg` 5000×3333 → 2560×1706 (RAM kazancı) — **Oturum 253** (ffmpeg q2, 435 KB→56 KB) ✅
+
+- [x] **Ana border paneli** kalan view'lara tek tek — **Oturum 253:** `MaliDonemYonetim` (CustomElevatedCard→AnaBorder), `TenantDatabaseUpdate`, `Update` (+gömülü mod zemin-gizleme fix), `SistemDbYonetim` (`?` panel köşesine), `DatabaseSettings`, `MainShell` (sağ içerik paneli; sidebar zeminde + latent DataContext fix); `ShellView` pencere chrome'u → panel eklenmedi (kullanıcı kararı), `DenetimMasasi` Mica istisnası sabit; **dialog opaklığı:** 10 dialog kökü `SolidBackgroundFillColorBaseBrush`; **`?` panel köşesi:** 5 yeni VM `YardimCommand`; `InventFrostPanelStyle` silindi (Kural 4); canlı Dark/Light `ot253a-i_*` ✅🧪
+- [x] Kalan 3 logo (`ExtendedSplash`/`KurulumSplash`/`SistemDbYonetim`) canlı doğrulama — **Oturum 253:** `SistemDbYonetim` logosu canlı Light (`ot253i_sistemdb_light.png`); `ExtendedSplash`/`KurulumSplash` logosu önceki pilot turlarında görünür (Oturum 248/251-252) ✅
+- [x] FirmaShell Light/Mica canlı teyidi — **Oturum 253:** `ot253i_firmashell_light.png` (açılıştan Light) + runtime switch `ot253h_firmashell_light.png`; Static→Theme süpürmesi sonrası beyaz-beyaz giderildi ✅🧪
+- [x] Sıradaki view'lar topolojik sıra: `MaliDonemYonetimView` → `TenantDatabaseUpdateView` → `UpdateView` → `MainShellView` → `ShellView` → `DatabaseSettingsView` — **Oturum 253 tamamlandı** (TenantDatabaseUpdate canlı turu: göç bekleyen dönem yok → erişilemedi, dürüst kayıt; DatabaseSettingsView canlı rota yok → ölü görünüm notu) ✅🧪
+
+> **Oturum 253 kalan notu:** `DatabaseSettingsView` + `DatabaseSettingsViewModel` canlı rotaya sahip değil (yalnız `Startup.Register` + `AyarYayinTests` bağı) — Kural 4 temizlik kararı ayrı oturumda (test `YedekSaklamaAyarlarViewModel`'e taşınabilir). `Cards.xaml` `CustomCompactCard` 0 caller (eski "rezerve" kaydı Fluent yönünde geçersiz) — temizlik adayı.
+
+---
+
+## Faz 6.81 — Sahte transfer alarmı + dialog rötüşü + tek örnek (Oturum 252, ✅🧪)
+- [x] **Kök neden (kanıtlı):** `LocalSettings.json` silinince (Oturum 251 pilot temizlik) kurulum kimliği yeniden üretildi → aynı makinedeki dönem damgaları "farklı kurulum" göründü → sahte "Taşınmış Veri" alarmı; `MakineId` iki tarafta aynıydı ✅
+- [x] **Business/Data ayrımı:** `CheckTransferAsync` — makine farklı → gerçek transfer (dialog + `TransferDetectedEvent`); makine aynı → kimlik kaybı sessizce onarılır (tek kimlik → `UpdateKurulumIdAsync` ile damgadan geri alma; karışık → `ReAlignTenantKurulumIdsAsync` ile güncel kimliğe eşitleme); `TransferCheckResult` + `AlignedCount`/`AdoptedKurulumId` ✅ Eklendi 🧪 Test edildi
+- [x] **Dialog:** yalnız `#if DEBUG` (release'de bilgi geri-yükleme hükmünde); tek "Kapat" butonu; profesyonel içerik + "yalnız geliştirme derlemesinde" notu ✅ Eklendi 🧪 Test edildi
+- [x] **Tema:** `DialogHelper.ApplyAppTheme` — dialog `RequestedTheme`'i uygulama temasından yazılır (açık temada dark dialog fix; XAML hardcode yok); `DialogService.CreateDialog` de aynı kapıdan ✅ Eklendi 🧪 Test edildi
+- [x] **DEV işareti:** `AppSurumBilgisi.Metin` DEBUG'da `DEV • v…` (Login/FirmaShell/SistemDbYonetim footer'ları) ✅ Eklendi 🧪 Test edildi
+- [x] **Çift açılma:** yeni `SingleInstanceGuard` (named Mutex + 3 sn tolerans + "zaten açık" `#32770` uyarısı + pencereyi öne getirme) + `App` ctor kapısı ✅ Eklendi 🧪 Test edildi
+- [x] **Test:** `SplashRoutingTests` +2 — build 0 hata + **483/483** ✅🧪
+- [x] **Canlı kanıt (Kural 18):** `ot252_login_light.png` (DEV + onarım sonrası dialog yok), DB `KurulumId=9e67…`, `ot252_transfer_dialog.png` (açık tema + tek buton), `ot252_ikinci_ornek_uyari.png`, `ot252_final_clean.png` ✅
+- [ ] **Kullanıcı onayı:** canlı kanıtlar sunuldu — onay bekliyor ⬜
+
+## Faz 6.82 — Dev-mode (yalnız DEBUG): kimlik/transfer + teşhis araçları (Oturum 252 kullanıcı kararı — **sıra: Katman 2 sonrası**, 📋 plan)
+- [ ] `IDevModeProvider` (Business contracts; DEBUG'da `true`, Release'de NullProvider `false`) + `AddDevMode` DI kaydı — sürüm/derleme kapısı, kullanıcı ayarı DEĞİL ✅ karar
+- [ ] Denetim Masası'nda yalnız DEBUG'da görünen **Geliştirici Araçları** alanı + yardım sayfası (Kural 13) + her aksiyonda onay ve `SistemLogService`'e `DEV` damgası
+- [ ] İlk yetenekler (onaylı): kurulum kimliği onarımı/sıfırlama + damga, transfer taramasını elle tetikleme, ayrıntılı log seviyesi, log klasörü/DB yollarını açma, şema sürümü damgası
+- [ ] Kapsam dışı (kullanıcı kararı): restore hüküm Block/RequireCode bypass + zorla göç + silme/saklama kilidi bypass
+- [ ] Kapı: Kural 14 araştırması + Kural 8 sınıf onayları + build 0/0 + test + canlı kanıt
+
+## Faz 6.83 — TenantDatabaseUpdateView canlı doğrulama turu (Oturum 254 kullanıcı kararı — 📋 plan)
+> **Neden ayrı faz:** Oturum 253'te Katman-2 dönüşümü yapıldı (AnaBorder + `?` + gömülü değil, tenant `Güncelle` akışı) ancak **göç bekleyen dönem olmadığı için ekran canlı açılamadı**; Kural 18 canlı kanıtı eksik — kullanıcı "ayrı faz aç, unutmayalım" dedi.
+- [ ] **(a) Kontrollü test ortamı:** bir tenant DB'nin şema sürüm damgasını geriye çek (yedek al → `TenantDBVersiyon`/history damgası eski sürüme) → kart "Güncelleme Gerekli" rozeti → `Güncelle` butonu ile ekranı aç; test sonrası damga/yedeği geri al (veri kaybı yok)
+- [ ] **(b) Canlı akış (Kural 18):** panel + `?` yardım dialogu (Light/Dark), `Geri` (firma seçimine dönüş), "Yedekle ve Güncelle" (Yedek→Göç→Doğrulama adımları), hata dalı + otomatik geri alma (adım 4), "Çalışma Alanına Geç" + seçim kaydı
+- [ ] **(c) Kanıt + kayıt:** `ot6_83_*` ekran görüntüleri + UIA dökümü; LOG/KONTROL/ROADMAP güncelleme; kullanıcı onayı
+- [ ] **Kapı:** Kural 8 sınıf onayı (gerekirse görünüm düzeltmesi) + build 0/0 + test + canlı kanıt + onay
+
+## Faz 6.84 — FirmaShellView seçim deneyimi yeniden tasarımı (Oturum 255 kullanıcı talebi — 🔨 uygulama başladı, yarım/kirli ağaçta; Oturum 257'de loglandı, commit yok)
+
+**Araştırma (Kural 14/19 → REFERANSLAR):** Sage 50 Company Selection (tam liste + ad/versiyon/VKN/mali yıl/veri yolu kolonları + satır aksiyonları + Add Company) · Tally Gateway (F3 → şirket listesi; yüklü şirket bilgisi ekranda görünür kalır) · Oracle Retail Select Company (liste üstü arama; filtre tüm sonuçlarda) · Deltek Select a Company (arama + sonuç sayısı) · MS Radio Buttons ("seçenekler bağlama göre değişiyorsa liste kontrolü kullan") · MS AutoSuggestBox (yazarken filtre + zengin ItemTemplate + SuggestionChosen) · MS ComboBox (çok satırlı/zengin içerik ComboBox'ta değil listede).
+
+**Kesinleşen kararlar (Oturum 256 — onaylı; FirmaShellView modüler dashboard çekirdeği):**
+1. **Header/dashboard:** en solda logo; en sağda **simgeli `Ayarlar`** butonu + `UserInfoControl`; orta alan dashboard başlığına ayrılır. "Denetim Masası" görünür metinleri **"Ayarlar"** olur (kod sınıf adları aynı): `FirmaShellView` buton+tooltip, pencere başlığı, `FirmaShellViewModel`/`DenetimMasasiView`/`SistemDbYonetimView` yardım metinleri.
+2. **Firma seçimi:** **seçici buton + Flyout** (içinde arama; **sonuç yoksa "Firma bulunamadı"**); seçim → flyout kapanır; altında **seçili firma kartı** (detay + `N dönem`; aksiyonlar ayrı konforlu satır: `Düzenle` → `FirmaDetailsViewModel` düzenleme yolu, `Mali Dönem İşlemleri` → mevcut yönetim penceresi).
+3. **Mali dönemler:** önce **liste**; **seçilen satır açılıp kart gibi durur** (accordion); seçim işareti accent; **`RadioButton` stili tamamen kalkar** (mühür revizyonu).
+4. **Busy + tenant güvenliği:** her dönem kendi `IsDbAnalyzing` ring'i (20sn tavan, sonuç zorunlu); tenant geçişi tek kapı (`UpdateCoordinator`) + `_dbGate` serileştirme; hata → seçim geri + hata bandı; kartta Açık/Kapalı/Güncelleme gerekli/DB yok bilgisi.
+5. **Güncelleme bildirimi (araştırma: MS InfoBar):** bloklamayan **InfoBar** — tek dönemde doğrudan `TenantDatabaseUpdateView`; çok dönemde "N dönemde güncelleme hazır → İncele" listesi (satır başı Güncelle → ilgili sayfa).
+6. **CTA:** alt bar solda `Firma • Yıl • durum` özeti, sağda `Çalışma Alanına Geç` (uygunsa aktif; değilse disabled + neden tooltip).
+7. **Renk/token sözleşmesi:** ink siyah "Aktif Seçim" hapı kalkar → accent seçim göstergesi; olive/petrol alias yığını view'dan çıkar; ikonlar TextFill ikincil; durumlar `SystemFillColorSuccess/Caution/Critical/Attention`.
+8. **UX kabul kriteri:** klavye (ok/Enter/Esc), flyout kapanınca odak dönüşü, boş-durumlar ring ile çakışmaz, UIA adları, tooltip kapsamı; **dashboard çekirdeği modüler bloklar** (Firma seçici / Dönem listesi / Güncelleme InfoBar'ı / CTA özeti).
+9. **Davranış korunur (regresyon yasak):** `Selection.SelectFirma/SelectMaliDonem`, `DevamEt` guard'ları, koordinatör, son-seçim kaydı, Kural 13 yardım.
+
+**Kapsam (sınıf sınıf — Kural 8):** `Cards.xaml` (seçimli liste stili; `MuhasibCardRadioButtonStyle` 0 caller kalınca silinir) → `MaliDonemlerListControl` → `FirmalarListControl` → `FirmaShellView.xaml(+.cs)` → VM'ler (`FirmaShellViewModel`, `FirmaListViewModel`, `MaliDonemListViewModel`) → "Ayarlar" metin süpürmesi → yardım.
+**Kapı:** Kural 8 sınıf onayları + Kural 14 araştırma kaydı (✅ defterde) + build 0/0 + test + **Kural 18 canlı (Light/Dark, busy + tenant geçişi)** + yardım güncel + kullanıcı onayı.
+
+**Oturum 257 durum notu (kirli ağaç, commit yok):** son oturumdaki model uygulamaya loglanmadan başlamış — `Cards.xaml` seçimli liste stili + `FirmalarListControl` seçici Flyout/"Firma bulunamadı"/seçili kart + `MaliDonemlerListControl` InfoBar + `FirmaShellViewModel` `SecimOzeti`/`DevamEtNedenTooltip` + `MaliDonemListViewModel` `Guncelleme*` bildirimi + yardım metinleri ("Ayarlar" dahil); build 0/0 + test 483/483 doğrulandı (yeni test yok). Eksik: accordion detay kartı tamamlama, "Ayarlar" süpürmesi, klavye/odak/UIA kriterleri, canlı tur + onay.
+
+**Oturum 260 sayımı (kod yok, rapor):** 12 dosya satır-sayımıyla doğrulandı — accordion detay **kodda tamam** (DB yok uyarısı + Veritabanı/Boyut + DB Durumu + Son Yedek + Yedek; yalnız canlı doğrulama bekliyor); "Ayarlar" süpürmesi **tamam** (görünür "Denetim Masası" 0, pencere başlığı "Ayarlar"); radio referansı 0, Petrol/Olive/Ink 0, ölü handler 0. Kalan kod (6 küçük): (1) flyout açılışında arama `Focus()` yok, (2) ok-tuşu gezinmesi seçimi anında değiştiriyor (canlıda değerlendir), (3) firma-seçili + 0-dönem boş-durumu yok, (4) bayat "soldan" metni + kapalı-dönem yorumu, (5) `FirmaRepository` count `ToLower` tutarsızlığı (pre-existing), (6) sessiz `catch {}` ×3. Kalan doğrulama: Kural 18 canlı tur + onay, Kural 8 sınıf onayları, 6.84 testi, REFERANSLAR `Durum` ✅.
+
+**Oturum 261 tamamlama (kod ✅, doğrulama Windows'ta):** (1) flyout odak ✅, (2) ok-tuşu canlı-takip KORUNDU (ComboBox + eski-radio paritesi, kod yok) ✅, (3) 0-dönem kartı + `BosDonemBaslik` VM'den (firma adıyla) + `HyperlinkButton` → mevcut saga ✅, (4) bayat metinler ✅, (5) count tek-kaynak (`Firma` + `MaliDonem` reposu) ✅, (6) sessiz catch 0 + ölü using silindi ✅; **(7) "Son çalışılan" rozeti** (Sage/QB araştırması → REFERANSLAR; `SonCalisilanMi` + `SonKayitliDonemId` + satır rozeti + yardım) ✅; `FirmaShellSecimDeneyimiTests` 10 fact (beklenti 493/493) ✅. Kararlar (tool-onaylı): ek yönlendirme YOK, varsayılan bayrağı YOK, MRU sıralama YOK (yıl sırası korunur). Kalan: Windows'ta build 0/0 + test + smoke + Kural 18 canlı tur + onay + REFERANSLAR ✅ + commit.
+
+**Oturum 262 ek kapsam (kod ✅):** başlıkta tema kısayolu — Ayarlar'ın solunda 3 segmentli hap (Sistem/Açık/Koyu), model üzerinden kayıt (Görünüm ile aynı kaynak), `ThemeChanged` çift-yön senkronu, hata-bildirimi, fail-soft. Yardım maddesi kullanıcı kararıyla YOK (Kural 13 istisnası). Birim test yok (UI kablolemesi, katman engeli — LOG 262'de gerekçeli). Canlı tur kapsamına eklendi (segment tıklama + Görünüm tutarlılığı).
+
+**Oturum 263 PİLOT:** dönem listesi stok stile alındı (`ItemContainerStyle` kaldırıldı, tek satır); stil firma flyout'unda yaşıyor, geri dönüş hazır. Kart ↔ stok kararı canlı görüntüye göre verilecek.
+
+**Oturum 264 PİLOT devamı (canlı geri bildirim):** satır içeriği büyütüldü (yıl 17, rozet 28, hap/metin +1pt) + satır aralığı 8px (stok template koruyan minimal stil). Karar yine canlı görüntüye göre.
+
+**Oturum 265 PİLOT iptal (canlı hüküm: "olmadı"):** kart stiline + orijinal ölçülere tam dönüş doğrulandı. Stok denemesi kapatıldı, 6.84 kart tasarımı geçerli.
+
+**Oturum 266 tema v2 (kod ✅):** 3 segment → kayar anahtar (sol güneş=Açık, sağ yarım-daire=Koyu; E706/E7A1 MS-teyitli). Sistem ikiliye sığmaz → efektif tema gösterilir, dönüş Görünüm'de. Canlı tur kapsamına eklendi.
+
+**Oturum 267 seçim stili (kod ✅, onay bekliyor):** kullanıcı talebi — mavi tam-çerçeve kaldırıldı, sol dikey hub (3px, mevcut ölçü) korundu, seçilince **hub'dan çıkıp kartı dolanıp hub'da duran kuyruk** eklendi (`MuhasibDonemSelectionListItemStyle` + yeni `OrbitRingControl`, storyboard; Kural 14/19 araştırmalı). Canlı teşhiste 3 bug çözüldü: (a) container şablonunda `{Binding Selected}` çözülmüyor → `TemplatedParent Content.Selected` (hub 6.84'ten beri canlıda yoktu — HATALAR), (b) kuyruk VSM ile sürülünce seçim değişiminde **tüm kartlarda animasyon** → model.Selected bağlaması (kullanıcı raporuyla kapatıldı), (c) WinUI dash desen toplamı > yol uzunluğu = çizim yok → desen boyut-bazlı (`gap=perimeter−101`) — HATALAR. x64 build 0 hata + test 492/492 + UIA/piksel kanıtlı canlı (hub görünür, kuyruk hub'da dinlenip saat yönünde dönüyor, seçimsiz kartta 0). Kalan: kullanıcı onayı + Light tema turu + REFERANSLAR durum ✅ + commit.
+
+**Oturum 268 seçim animasyonu (kod ✅, ONAYLI "gayet başarılı"):** orbit **kaldırıldı** (kuyruk hub'ı geçiyordu + `StrokeDashOffset` bağımlı → takılma); `SelectionWaveControl` nabzı denendi, **kullanıcı reddetti** → **animasyon sınıfları tümüyle silindi** (Kural 4). NİHAİ: **seçili dönem/firma satırı ana kart rengini alır** (`CardBackgroundFillColorSecondaryBrush` → panel üstüne binince içeride/çukur), **seçimsiz saydam**, seçim yalnız sol accent hub; **seçili firma kartı** (sol panel) da aynı; **hover tema-farkında token** `MuhasibHoverOverlayBrush` (Light `#14000000` / Dark `#1AFFFFFF`) ile iki temada görünür (eski `ControlFillColorSecondaryBrush` Light'ta etkisizdi — HATALAR). Ayrıca **ana border `1→1.5`** (10 Katman-2 view; mühür revizyonu — AGENTS Kural 17 + TASARIM-KURALLARI). Kural 14/19: MS Motion → REFERANSLAR güncel. x64 **0 hata + 492/492**; canlı Dark/Light kanıt (`ot275_*`/`ot276_*`: Light panel 250/seçili 248/hover 251→231; Dark panel 76/seçili 82/hover 77→95). Commit yapıldı.
+
+## Faz 6.85 — Kullanıcı Yönetimi modülü (ayrı MODAL pencere; Oturum 256 kullanıcı kararı — 📋 plan, 6.84'ten sonra)
+
+**Araştırma (Kural 14/19 → REFERANSLAR):** QuickBooks Desktop "Users & Roles" (yalnız admin kullanıcı oluşturur/yönetir; kullanıcı + rol + aktive; self hesap ayrı) · MYOB "Manage Users/Roles" (rol bazlı yetki; kullanıcı yönetimi rol yönetiminden ayrı) · MS InfoBar (bildirim) + mevcut DenetimMasasi modal pencere deseni.
+
+- [ ] **Modal pencere:** `KullaniciYonetimiViewModel` + `KullaniciYonetimiView` (ayrı `Views/KullaniciYonetimi/`), `Startup` + DI kaydı, `CreateNewViewAsync<KullaniciYonetimiViewModel>(null, "Kullanıcı Yönetimi")` ile açılır (`DenetimMasasi` boyut/yardım deseni); FirmaShell/Ayarlar içine gömülmez.
+- [ ] **Kullanıcı listesi + işlemler (admin):** `IKullaniciService` ile liste; **yeni kullanıcı** (`AuthenticationService.Register` — ek kullanıcıya izinli; duplicate kontrolü var), düzenle (`UpdateKullaniciAsync`), aktif/pasif (`SetAktifAsync`; seed yönetici koruması hazır), şifre belirle (`SifreBelirleAsync`), silme (guard'lı). Kapı: `AyarYetkiDenetimi.KullaniciYoneticiMi`.
+- [ ] **Hesabım (kullanıcıya has — ayrı yüzey, karışmaz):** Kullanıcı Bilgilerim (ad/iletişim/avatar) + Şifre Değiştir (mevcut şifre doğrulamalı) — küçük ayrı dialog; `UserInfoControl` menüsünden açılır.
+- [ ] **UserInfoControl menüsü:** iki grup (Hesabım / Yönetim[admin]) + Oturumu Kapat; **sahte madde yok** (madde ancak yüzey hazır olunca eklenir).
+- [ ] **Rol atama notu:** roller KFR (firma-bağımlı) — bu fazda gösterim; atama iyileştirmesi ayrı iş.
+- [ ] **Kapı:** Kural 8 sınıf onayları + Kural 14 araştırma + build 0/0 + test + Kural 18 canlı + Kural 13 yardım + onay.

@@ -27,7 +27,7 @@
                     <TextBlock Text="ÖRNEK DIŞ TİCARET" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <TextBlock Text="2026 Dönemi" FontSize="10" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                        <Ellipse Width="5" Height="5" Fill="{StaticResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" />
+                        <Ellipse Width="5" Height="5" Fill="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" />
                     </StackPanel>
                 </StackPanel>
             </Grid>

@@ -67,6 +67,28 @@ public class KurulumKayitService : IKurulumKayitService
         await GetOrCreateAsync();
     }
 
+    /// <summary>Kimlik kaybı onarımı: aynı makinedeki dönem damgaları tek eski kurulum kimliğinde
+    /// birleşiyorsa kimlik oradan geri alınır (eski kimlikli yedeklerle uyum korunur).</summary>
+    public async Task UpdateKurulumIdAsync(string kurulumId)
+    {
+        if (string.IsNullOrWhiteSpace(kurulumId))
+            return;
+
+        var mevcut = await GetAsync();
+        var machineGuid = !string.IsNullOrWhiteSpace(mevcut?.MachineGuid)
+            ? mevcut!.MachineGuid
+            : await _makineProvider.GetMachineIdAsync();
+
+        var model = new KurulumKayitModel
+        {
+            KurulumId = kurulumId.Trim(),
+            MachineGuid = machineGuid,
+            OlusturmaTarihi = mevcut?.OlusturmaTarihi ?? DateTime.Now
+        };
+
+        await SaveAsync(model);
+    }
+
     private async Task SaveAsync(KurulumKayitModel model)
     {
         await _localSettings.SaveSettingAsync(KeyKurulumId, model.KurulumId);

@@ -36,7 +36,7 @@
     <Border x:Name="KokZemin" CornerRadius="0">
         <Grid>
             <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
-            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
 
     <Grid x:Name="SplashOverlay" Background="Transparent">
 
@@ -48,8 +48,8 @@
             VerticalAlignment="Center"
             Translation="0,0,32"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1"
+            BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}"
+            BorderThickness="1.5"
             CornerRadius="{StaticResource OverlayCornerRadius}"
             Padding="16">
             <Border.Shadow>

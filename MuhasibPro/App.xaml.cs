@@ -8,6 +8,7 @@ using MuhasibPro.Business.HostBuilder;
 using MuhasibPro.Contracts.UIService;
 using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Helpers;
+using MuhasibPro.Helpers;
 using MuhasibPro.Helpers.WindowHelpers;
 using MuhasibPro.HostBuilders;
 using MuhasibPro.Views;
@@ -39,6 +40,14 @@ namespace MuhasibPro
 
         public App()
         {
+            // Tek örnek: ikinci çalıştırma uyarı gösterip kapanır (aynı anda tek pencere).
+            if (!SingleInstanceGuard.TryAcquire())
+            {
+                SingleInstanceGuard.ShowAlreadyRunningWarning();
+                Environment.Exit(0);
+                return;
+            }
+
             this.InitializeComponent();
             CultureInitialize();
             _host = CreateHostBuilder().Build();

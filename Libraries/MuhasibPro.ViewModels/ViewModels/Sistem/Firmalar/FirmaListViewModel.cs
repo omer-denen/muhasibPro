@@ -112,19 +112,20 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.Firmalar
                 await ContextService.RunAsync(
                     () =>
                     {
-                        long preservedId = SelectedItem?.Id ?? 0;
-                        SelectedItem = null;
+                        // Filtre boşsa seçim korunur (arama sırasında seçili firma kartı/dönemleri
+                        // kaybolmaz); sonuç doluysa seçim aynı Id'de tutulur, yoksa ilk öğeye düşer.
+                        var oncekiSecili = SelectedItem;
+                        long preservedId = oncekiSecili?.Id ?? 0;
                         ItemsSource.Clear();
                         foreach (var item in Items)
                         {
                             ItemsSource.Add(item);
                         }
-                        if (!IsMultipleSelection && ItemsSource.Count > 0)
-                        {
-                            SelectedItem = preservedId > 0
-                                ? ItemsSource.FirstOrDefault(i => i.Id == preservedId) ?? ItemsSource.First()
-                                : ItemsSource.First();
-                        }
+                        if (IsMultipleSelection || ItemsSource.Count == 0)
+                            return;
+                        SelectedItem = preservedId > 0
+                            ? ItemsSource.FirstOrDefault(i => i.Id == preservedId) ?? ItemsSource.First()
+                            : ItemsSource.First();
                     });
             }
             else

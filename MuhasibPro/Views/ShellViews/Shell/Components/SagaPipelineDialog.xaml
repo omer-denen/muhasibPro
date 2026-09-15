@@ -11,7 +11,7 @@
     PrimaryButtonStyle="{StaticResource InventDialogPrimaryStyle}"
     CloseButtonText="Vazgeç"
     DefaultButton="None"
-    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
     BorderThickness="1"
     CornerRadius="{StaticResource ControlCornerRadius}">

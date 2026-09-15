@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:MuhasibPro.Converters"
     mc:Ignorable="d"
+    Loaded="OnPageLoaded"
     Background="Transparent">
 
     <Page.Resources>
@@ -16,12 +17,23 @@
 
     <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + ~%87 opak tint). Statik; icerik degisince yeniden olusmaz. -->
     <Border x:Name="KokZemin" CornerRadius="0">
-        <Grid>
-            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
-            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+        <Grid x:Name="RootGrid">
+            <Image x:Name="ZeminGorseli" Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border x:Name="ZeminPerdesi" Background="{ThemeResource MuhasibZeminPerdeBrush}" />
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Spacing="12" Padding="24,18,24,24" MaxWidth="720" HorizontalAlignment="Center">
+        <!-- Kural 17 — Katman 2: ana border paneli; Kural 13 ? panelin sag ust kosesinde.
+             Gömülü modda (Denetim Masası) GomuluUygula KokZemin'i gizler. -->
+        <Grid x:Name="PanelWrap" MaxWidth="800" Margin="24,18,24,24" HorizontalAlignment="Center">
+        <Border x:Name="AnaBorder"
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}" BorderThickness="1.5"
+                CornerRadius="{StaticResource OverlayCornerRadius}" Padding="24"
+                Translation="0,0,32">
+            <Border.Shadow>
+                <ThemeShadow x:Name="AnaBorderShadow" />
+            </Border.Shadow>
+        <StackPanel Spacing="12">
 
             <!-- Başlık (gömülü modda GomuluUygula ile gizlenir — çift başlık olmaz) -->
             <Grid x:Name="BaslikSatiri" ColumnSpacing="12">
@@ -30,12 +42,12 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
-                    <TextBlock Text="Güncellemeler" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextFillColorPrimaryBrush}" />
-                    <TextBlock Text="Uygulama sürümü ve güncelleme kaynağı" FontSize="13" Foreground="{StaticResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="Güncellemeler" FontSize="20" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    <TextBlock Text="Uygulama sürümü ve güncelleme kaynağı" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <Button Content="Şimdi Kontrol Et" Style="{StaticResource SecondaryCompactButtonStyle}" Command="{x:Bind ViewModel.CheckNowCommand, Mode=OneWay}" IsEnabled="{x:Bind ViewModel.IsCheckButtonEnabled, Mode=OneWay}" />
-                    <TextBlock Text="{x:Bind ViewModel.LastCheckText, Mode=OneWay}" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" />
+                    <TextBlock Text="{x:Bind ViewModel.LastCheckText, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" />
                 </StackPanel>
             </Grid>
 
@@ -54,7 +66,7 @@
                                     </StackPanel>
                                 </StackPanel>
 
-                                <ProgressBar Minimum="0" Maximum="100" Value="{x:Bind ViewModel.ProgressPercentage, Mode=OneWay}" Foreground="{StaticResource MuhasibPetrolBrush}" Visibility="{x:Bind ViewModel.ProgressVisible, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
+                                <ProgressBar Minimum="0" Maximum="100" Value="{x:Bind ViewModel.ProgressPercentage, Mode=OneWay}" Foreground="{ThemeResource MuhasibPetrolBrush}" Visibility="{x:Bind ViewModel.ProgressVisible, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
                                 <TextBlock Text="{x:Bind ViewModel.ProgressText, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                 <TextBlock Text="{x:Bind ViewModel.ProgressDetails, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
 
@@ -108,6 +120,16 @@
             </Pivot>
 
         </StackPanel>
+        </Border>
+
+            <!-- Kural 13: sayfa yardimi (VM command) — ana border'in sag ust kosesinde (gömülü modda gizlenir) -->
+            <Button x:Name="YardimButton" AutomationProperties.AutomationId="YardimButton" Width="36" Height="36" Padding="0" Margin="0,-10,-10,0"
+                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Style="{StaticResource CircleIconButtonStyle}" Command="{x:Bind ViewModel.YardimCommand}"
+                    ToolTipService.ToolTip="Güncellemeler hakkında yardım">
+                <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="15" />
+            </Button>
+        </Grid>
     </ScrollViewer>
         </Grid>
     </Border>

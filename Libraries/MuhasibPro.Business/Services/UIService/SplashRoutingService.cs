@@ -83,17 +83,51 @@ namespace MuhasibPro.Business.Services.UIService
                 catch { /* best-effort */ }
 
                 var mismatches = await _versionReader.ScanMismatchesAsync(currentKurulum, currentMachine);
-                var lines = mismatches.Select(m => FormatMismatch(m, currentKurulum)).ToList();
+
+                // Ayrım (Kural 7 — karar veriden): makine farklı → gerçek transfer (veri başka makineden);
+                // makine aynı → kurulum kimliği yenilenmiş (yeniden kurulum/temizlik) = kimlik kaybı.
+                // Kimlik kaybı kullanıcıya sorulmaz, sessizce onarılır; makine farklıysa bildirim değerlidir.
+                var gercekTransfer = mismatches.Where(m => m.MakineFarkli).ToList();
+                var kimlikKaybi = mismatches.Where(m => !m.MakineFarkli).ToList();
+
+                int aligned = 0;
+                string adopted = string.Empty;
+                if (kimlikKaybi.Count > 0)
+                {
+                    var kimlikler = kimlikKaybi
+                        .Select(m => m.VersiyonKurulumId ?? string.Empty)
+                        .Where(id => !string.IsNullOrWhiteSpace(id))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                    if (kimlikler.Count == 1)
+                    {
+                        // Tüm dönemler tek eski kimlikte: kimlik damgalardan geri alınır —
+                        // o kimlikle alınmış eski yedeklerle uyum korunur.
+                        await _kurulumKayitService.UpdateKurulumIdAsync(kimlikler[0]);
+                        adopted = kimlikler[0];
+                        currentKurulum = adopted;
+                        aligned = kimlikKaybi.Count;
+                    }
+                    else if (kimlikler.Count > 1)
+                    {
+                        // Karışık kimlik: kaynak belirsiz → dönemler güncel kimliğe eşitlenir.
+                        aligned = await _tenantService.ReAlignTenantKurulumIdsAsync(
+                            kimlikKaybi.Select(m => m.DatabaseName).ToList());
+                    }
+                }
 
                 var result = new TransferCheckResult
                 {
                     CurrentKurulumId = currentKurulum,
                     CurrentMachineId = currentMachine,
-                    Mismatches = lines
+                    Mismatches = gercekTransfer.Select(m => FormatMismatch(m, currentKurulum)).ToList(),
+                    AlignedCount = aligned,
+                    AdoptedKurulumId = adopted
                 };
 
                 if (result.HasMismatches)
-                    _eventBus.Publish(this, new TransferDetectedEvent(currentKurulum, currentMachine, lines));
+                    _eventBus.Publish(this, new TransferDetectedEvent(currentKurulum, currentMachine, result.Mismatches));
 
                 return result;
             }

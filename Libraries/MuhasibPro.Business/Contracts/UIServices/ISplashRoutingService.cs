@@ -34,13 +34,21 @@ namespace MuhasibPro.Business.Contracts.UIServices
             $"exists={IsDatabaseExists} ready={IsDatabaseReady} pending={PendingMigrationCount} target={Target}";
     }
 
-    /// <summary>Taşınmış-veri taraması sonucu — dialog gösterimi View'a aittir (Business dialog bilmez).</summary>
+    /// <summary>Taşınmış-veri taraması sonucu — dialog gösterimi View'a aittir (Business dialog bilmez).
+    /// <see cref="Mismatches"/> yalnız gerçek transferi (makine farklı) taşır; makinesi aynı olan
+    /// kurulum-kimliği kayıpları <c>CheckTransferAsync</c> içinde sessizce onarılır.</summary>
     public class TransferCheckResult
     {
         public string CurrentKurulumId { get; set; } = string.Empty;
         public string CurrentMachineId { get; set; } = string.Empty;
         public IReadOnlyList<string> Mismatches { get; set; } = Array.Empty<string>();
         public bool HasMismatches => Mismatches.Count > 0;
+
+        /// <summary>Sessizce onarılan (makinesi aynı) dönem sayısı — teşhis/log içindir.</summary>
+        public int AlignedCount { get; set; }
+
+        /// <summary>Onarımda dönem damgalarından geri alınan kurulum kimliği; onarım yoksa boş.</summary>
+        public string AdoptedKurulumId { get; set; } = string.Empty;
     }
 
     /// <summary>

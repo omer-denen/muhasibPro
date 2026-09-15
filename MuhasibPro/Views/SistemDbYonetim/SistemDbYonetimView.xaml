@@ -7,6 +7,7 @@
     xmlns:components="using:MuhasibPro.Views.SistemDbYonetim.Components"
     xmlns:converters="using:MuhasibPro.Converters"
     mc:Ignorable="d"
+    Loaded="OnPageLoaded"
     Background="Transparent">
 
     <Page.Resources>
@@ -19,22 +20,33 @@
     <Border x:Name="KokZemin" CornerRadius="0">
         <Grid>
             <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
-            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
 
-            <Grid x:Name="RootGrid" Background="Transparent">
+            <!-- Kural 17 — Katman 2: ana border paneli (tum icerigi cerceveler);
+                 Kural 13 ? butonu panelin sag ust kosesinde. -->
+            <Grid x:Name="RootGrid" Background="Transparent" Padding="24,48,24,24">
+                <Grid x:Name="PanelWrap">
+                <Border x:Name="AnaBorder"
+                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}" BorderThickness="1.5"
+                        CornerRadius="{StaticResource OverlayCornerRadius}" Padding="24"
+                        Translation="0,0,32">
+                    <Border.Shadow>
+                        <ThemeShadow x:Name="AnaBorderShadow" />
+                    </Border.Shadow>
+                <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
         <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-            <StackPanel MaxWidth="1100" HorizontalAlignment="Center" Spacing="16" Padding="32,24,32,28">
+            <StackPanel MaxWidth="1100" HorizontalAlignment="Center" Spacing="16" Padding="6,2,6,6">
 
                 <!-- ===== SAYFA HEADER (migration/onarım bağlamı) ===== -->
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
@@ -54,12 +66,6 @@
                             <TextBlock Text="{x:Bind ViewModel.DbDurumMetni, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
-
-                    <!-- Yardım (Kural 13) -->
-                    <Button Grid.Column="3" Width="32" Height="32" Padding="0" Style="{StaticResource CircleIconButtonStyle}" VerticalAlignment="Center" Click="OnYardimClick"
-                            ToolTipService.ToolTip="Bu sayfa hakkında yardım">
-                        <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="14" />
-                    </Button>
                 </Grid>
 
                 <!-- ===== BÖLÜM: DURUM VE İŞLEMLER ===== -->
@@ -148,6 +154,17 @@
                 <TextBlock x:Name="SurumFooter" Style="{StaticResource CaptionTextBlockStyle}" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center" Opacity="0.6" />
             </StackPanel>
             </Border>
+            </Grid>
+            </Border>
+
+                <!-- Kural 13: sayfa yardimi — ana border'in sag ust kosesinde -->
+                <Button x:Name="YardimButton" AutomationProperties.AutomationId="YardimButton" Width="36" Height="36" Padding="0" Margin="0,-10,-10,0"
+                        HorizontalAlignment="Right" VerticalAlignment="Top"
+                        Style="{StaticResource CircleIconButtonStyle}" Click="OnYardimClick"
+                        ToolTipService.ToolTip="Bu sayfa hakkında yardım">
+                    <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="15" />
+                </Button>
+                </Grid>
             </Grid>
         </Grid>
     </Border>

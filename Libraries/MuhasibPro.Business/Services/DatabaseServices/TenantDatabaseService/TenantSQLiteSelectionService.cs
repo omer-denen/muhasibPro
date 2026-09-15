@@ -142,14 +142,15 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
                     message: "Veritabanı adı boş olamaz");
             }
 
-            // Aynı tenant kontrolü (case-insensitive)
+            // Aynı tenant kontrolü (case-insensitive) — idempotent: zaten bağlıysa bu bir hata değil,
+            // mevcut bağlantı korunur (liste tazeleme / yeniden seçim akışları buradan geçer).
             if (IsTenantLoaded &&
                 string.Equals(CurrentTenant.DatabaseName, databaseName,
                     StringComparison.OrdinalIgnoreCase))
             {
-                return new ErrorApiDataResponse<TenantContext>(
+                return new SuccessApiDataResponse<TenantContext>(
                     data: CurrentTenant,
-                    message: "Zaten bu mali dönemi kullanıyorsunuz!");
+                    message: $"Zaten bu mali dönem bağlı: {databaseName}");
             }
             // Eski tenant: WAL birleştir + bağlantıyı bırak + Sistem.db'ye logla.
             // Başarısızlık geçişi engellemez (WAL dosyası diskte durur, veri kaybolmaz) — uyarı loglanır.

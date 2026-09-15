@@ -129,7 +129,68 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
                 model.DbAnalizYapildi = true;
                 model.DbDurum = Domain.Enum.DatabaseEnum.DatabaseStatusResult.RequiredUpdating;
                 model.DbAnalizDetay = $"Güncelleme gerekli: {e.FromVersion} → {e.ToVersion}.";
+                TazeleGuncellemeBildirimi();
             });
+        }
+
+        // ----- Güncelleme bildirimi (InfoBar): liste + özet + aksiyon metni -----
+
+        /// <summary>Şema güncellemesi bekleyen dönemler (InfoBar "İncele" listesi).</summary>
+        public IReadOnlyList<MaliDonemModel> GuncellemeBekleyenDonemler =>
+            ItemsSource?.Where(m => m != null && m.DbGuncellemeGerekliMi).ToList() ?? new List<MaliDonemModel>();
+
+        private bool _guncellemeVarMi;
+        /// <summary>En az bir dönemde şema güncellemesi hazırsa InfoBar açılır.</summary>
+        public bool GuncellemeVarMi { get => _guncellemeVarMi; private set => Set(ref _guncellemeVarMi, value); }
+
+        private string _guncellemeOzeti = string.Empty;
+        /// <summary>InfoBar mesajı — tek/çok dönem durumuna göre dürüst metin.</summary>
+        public string GuncellemeOzeti { get => _guncellemeOzeti; private set => Set(ref _guncellemeOzeti, value); }
+
+        private string _guncellemeAksiyonMetni = string.Empty;
+        /// <summary>InfoBar aksiyon metni: tek dönemde "Güncelle", çok dönemde "İncele (N)".</summary>
+        public string GuncellemeAksiyonMetni { get => _guncellemeAksiyonMetni; private set => Set(ref _guncellemeAksiyonMetni, value); }
+
+        private bool _bosDurumGoster;
+        /// <summary>Firma seçiliyken liste boşsa boş-durum kartı gösterilir (Kural 11).</summary>
+        public bool BosDurumGoster { get => _bosDurumGoster; private set => Set(ref _bosDurumGoster, value); }
+
+        /// <summary>En son giriş yapılan dönem Id'si (FirmaShell "Son çalışılan" rozeti; kayıt yoksa 0).</summary>
+        public long SonCalisilanDonemId { get; set; }
+
+        /// <summary>Listede kayıtlı Id'ye uyan satırı "Son çalışılan" olarak işaretler (her yüklemede tazelenir).</summary>
+        public void UygulaSonCalisilanIsareti()
+        {
+            if (ItemsSource == null)
+                return;
+            foreach (var m in ItemsSource)
+            {
+                if (m != null)
+                    m.SonCalisilanMi = SonCalisilanDonemId > 0 && m.Id == SonCalisilanDonemId;
+            }
+        }
+
+        /// <summary>Güncelleme bildirimi özetini listeden yeniden hesaplar (analiz/E1/yenileme sonrası).</summary>
+        public void TazeleGuncellemeBildirimi()
+        {
+            var bekleyen = GuncellemeBekleyenDonemler;
+            GuncellemeVarMi = bekleyen.Count > 0;
+            if (bekleyen.Count == 0)
+            {
+                GuncellemeOzeti = string.Empty;
+                GuncellemeAksiyonMetni = string.Empty;
+            }
+            else if (bekleyen.Count == 1)
+            {
+                GuncellemeOzeti = $"{bekleyen[0].MaliYil} dönemi için şema güncellemesi hazır.";
+                GuncellemeAksiyonMetni = "Güncelle";
+            }
+            else
+            {
+                GuncellemeOzeti = $"{bekleyen.Count} dönemde şema güncellemesi hazır: {string.Join(", ", bekleyen.Select(m => m.MaliYil))}.";
+                GuncellemeAksiyonMetni = $"İncele ({bekleyen.Count})";
+            }
+            NotifyPropertyChanged(nameof(GuncellemeBekleyenDonemler));
         }
 
         public MaliDonemListArgs CreateArgs()
@@ -179,6 +240,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
                     });
                 ItemsCount = 0;
                 SelectedItem = null;
+                BosDurumGoster = false; // Firma yokken "Bir firma seçin" kartı gösterilir, bu değil.
             } else
             {
                 DataRequest<MaliDonem> request = BuildDataRequest();
@@ -213,10 +275,13 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
                                     pick = ItemsSource.FirstOrDefault(i => !i.KapaliMi) ?? ItemsSource.First();
                                 SelectedItem = pick;
                             }
+                            BosDurumGoster = ItemsSource.Count == 0;
+                            UygulaSonCalisilanIsareti();
                         });
                     // Tüm kartlar paralel analizlenir (seçili + seçili-olmayan). Fire-and-forget:
                     // liste akışı bloklanmaz; tenant analizi kendi bağlantısını açar, içindeki
                     // Global.db backfill'i _dbGate'ten geçer, kapı tutuluyorsa kuyrukta bekler.
+                    TazeleGuncellemeBildirimi();
                     _ = AnalyzeAllDbStatusesAsync(ItemsSource.Where(m => m != null).ToList());
                 }
             }
@@ -239,6 +304,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
             {
                 // Savunma: AnalyzeDbStatusAsync fırlatmaz; liste akışı yine de kırılmaz.
             }
+            TazeleGuncellemeBildirimi();
             TopluAnalizTamamlandi?.Invoke();
         }
 
@@ -307,7 +373,11 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
             }
             finally
             {
-                await ContextService.RunAsync(() => model.IsDbAnalyzing = false);
+                await ContextService.RunAsync(() =>
+                {
+                    model.IsDbAnalyzing = false;
+                    TazeleGuncellemeBildirimi();
+                });
             }
         }
 

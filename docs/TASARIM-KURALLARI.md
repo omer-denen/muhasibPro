@@ -2,6 +2,8 @@
 
 > **KESİN KURAL (Oturum 241, kullanıcı; ana border + tint kararı Oturum 248):** Her yeni view/sayfa ve güncellenen her view bu yapıya uyar. Uymayan sayfa **önce bu yapıya taşınır**, sonra içerik eklenir. Bu doküman `AGENTS.md` Kural 17'nin ayrıntısıdır — çelişkide Kural 17 esastır.
 >
+> 🔒 **MÜHÜR (Oturum 254 — kullanıcı kararı):** Bu mimari **kilitlidir.** Bundan sonra oluşturulacak/güncellenecek **her View, UserControl ve Dialog** zemin → ana border (ana kart) → içerik kartları yapısı üzerine inşa edilir. Görünüm işlerinde kapsam yalnızca: **(a)** View içindeki kontrol yerleşimleri (elemanların yeri/düzeni), **(b)** **araştırma sonucu** (Kural 14) eklenen/çıkarılan buton ve kontroller. **Katman 2 ana border ve Katman 3 iç kart stilleri (renk/radius/gölge/padding/hairline/kart arası boşluk) mührün parçasıdır; habersiz değiştirilmez** — değişiklik ancak kullanıcı kararıyla (mühür revizyonu) yapılır.
+>
 > Kapsam: `MuhasibPro/Views/**/*.xaml` (Page + UserControl + ContentDialog dahil). Görsel dil **Windows 11 Fluent**'tir.
 
 ## Genel ilke
@@ -13,20 +15,20 @@ Sayfa = **zemin (statik)** + **ana border (ana panel)** + **kartlar (içerik)**.
 ## Katman 1 — Zemin
 
 - Sayfanın **en dış elemanı tek `Border`** olur. Kök `Grid` + `Background` **yasak**.
-- İçerik: `Image` (`Stretch="UniformToFill"`, kaynağı temaya göre `light`/`dark`) + üzerine **yarı-saydam tint** (`SolidBackgroundFillColorBaseBrush`, **~%35 opak** — görsel görünür kalır). Ham/net resim gösterilmez.
+- İçerik: `Image` (`Stretch="UniformToFill"`, kaynağı `UygulamaZeminGorseli` = **tek görsel `light.jpg`**) + üzerine **tema perdesi** (`MuhasibZeminPerdeBrush`, Light `#59F3F3F3` ≈%35 / Dark `#D9202020` ≈%85 — görsel görünür kalır). Ham/net resim gösterilmez.
 - Zemin statiktir; sayfa içeriği değişince yeniden oluşturulmaz.
 
 ```xml
 <Border x:Name="KokZemin" CornerRadius="0">
     <Grid>
         <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
-        <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+        <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
         <!-- Katman 2 -->
     </Grid>
 </Border>
 ```
 
-**Tema-resimli zemin:** `DesignTokens.xaml` → `UygulamaZeminGorseli`: Light `light.jpg`, Dark `dark.jpg`.
+**Tek görsel + tema perdesi (Oturum 251):** `DesignTokens.xaml` → `UygulamaZeminGorseli` her iki temada `light.jpg`; dark görünüm perdeden gelir (iki ayrı zemin görselinden daha stabil kompozisyon).
 
 ---
 
@@ -37,11 +39,11 @@ Zeminin üzerinde duran, **tüm içeriği kapsayan tek çerçeveli panel**:
 | Özellik | Değer |
 |---|---|
 | `Background` | `{ThemeResource CardBackgroundFillColorSecondaryBrush}` |
-| `BorderBrush` | `{ThemeResource CardStrokeColorDefaultBrush}` |
-| `BorderThickness` | `1` |
+| `BorderBrush` | `{ThemeResource MuhasibAnaBorderCizgiBrush}` (Light beyaz `#FFFFFFFF` — Oturum 258 mühür revizyonu, kullanıcı kararı / Dark yumuşak gri `#45C9CCD1`) |
+| `BorderThickness` | `1.5` (Oturum 268 mühür revizyonu, kullanıcı kararı: "bir tık arttır") |
 | `CornerRadius` | `{StaticResource OverlayCornerRadius}` |
 | `Padding` | `24` |
-| Elevation | `ThemeShadow` (receiver `Loaded`/`OnPageLoaded` içinde try/catch — **asla ctor'da**) |
+| Elevation | `Translation="0,0,32"` + `ThemeShadow` (receiver `Loaded`/`OnPageLoaded` içinde try/catch — **asla ctor'da**) |
 
 - Kenarlardan boşluklu; zemin görseli panelin çevresinde görünür kalır.
 

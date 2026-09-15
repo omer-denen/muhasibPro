@@ -19,7 +19,7 @@
     <Border x:Name="KokZemin" CornerRadius="0">
         <Grid>
             <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
-            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
 
             <Grid x:Name="RootGrid" Background="Transparent">
 
@@ -35,8 +35,9 @@
                         <Grid x:Name="PanelWrap" MaxWidth="1040" Margin="24" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Border x:Name="AnaBorder"
                                 Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                                CornerRadius="{StaticResource OverlayCornerRadius}" Padding="24">
+                                BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}" BorderThickness="1.5"
+                                CornerRadius="{StaticResource OverlayCornerRadius}" Padding="24"
+                                Translation="0,0,32">
                             <Border.Shadow>
                                 <ThemeShadow x:Name="AnaBorderShadow" />
                             </Border.Shadow>
@@ -82,7 +83,7 @@
                                 </VisualStateManager.VisualStateGroups>
 
                                 <!-- SOL: marka + sistem durumu + hizli giris -->
-                                <StackPanel x:Name="SolPanel" Grid.Column="0" Grid.Row="0" Spacing="12" VerticalAlignment="Center">
+                                <StackPanel x:Name="SolPanel" Grid.Column="0" Grid.Row="0" Spacing="12" VerticalAlignment="Top">
                                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                                         <Image Width="52" Height="52" Source="ms-appx:///Assets/AppIcon.png" Stretch="Uniform" VerticalAlignment="Center" />
                                         <StackPanel Spacing="2" VerticalAlignment="Center">

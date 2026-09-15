@@ -267,7 +267,7 @@ public class BusinessDatabaseTests
     }
 
     [Fact]
-    public async Task SwitchTenantAsync_AyniTenant_Hata()
+    public async Task SwitchTenantAsync_AyniTenant_IdempotentBasari()
     {
         var (service, _, _) = BuildSelectionService(
             tenantLoaded: true,
@@ -275,8 +275,9 @@ public class BusinessDatabaseTests
 
         var sonuc = await service.SwitchTenantAsync("db_x");
 
-        sonuc.Success.Should().BeFalse();
-        sonuc.Message.Should().Contain("Zaten bu mali dönemi kullanıyorsunuz");
+        sonuc.Success.Should().BeTrue();
+        sonuc.Data.Should().NotBeNull();
+        sonuc.Data!.DatabaseName.Should().Be("DB_X");
     }
 
     [Fact]

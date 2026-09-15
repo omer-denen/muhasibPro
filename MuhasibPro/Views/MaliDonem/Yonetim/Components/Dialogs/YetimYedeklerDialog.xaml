@@ -9,7 +9,7 @@
     mc:Ignorable="d"
     CloseButtonText="Kapat"
     DefaultButton="Close"
-    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
     BorderThickness="1"
     CornerRadius="{StaticResource ControlCornerRadius}">

@@ -29,6 +29,24 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
             set => Set(ref _isPaneOpen, value);
         }
 
+        private System.Windows.Input.ICommand _yardimCommand;
+
+        /// <summary>Kural 13: sayfa yardımı (içerik ViewModel'de, dialog chrome'u App'te).</summary>
+        public System.Windows.Input.ICommand YardimCommand =>
+            _yardimCommand ??= new Infrastructure.Common.AsyncRelayCommand(YardimGoster);
+
+        private async Task YardimGoster()
+        {
+            await DialogService.ShowYardimAsync("Çalışma Alanı — Yardım", new List<MuhasibPro.Business.DTOModel.SistemModel.YardimMaddesiDto>
+            {
+                new() { Baslik = "Bu ekran nedir?", Aciklama = "Girişten sonra açılan ana çalışma alanıdır: solda modül menüsü, sağdaki panelde seçili modülün içeriği gösterilir." },
+                new() { Baslik = "Sol menü", Aciklama = "Cari, Stok, Fatura gibi modüller listelenir; seçili modül vurgulanır ve içerik paneli ona göre değişir." },
+                new() { Baslik = "Tenant kartı", Aciklama = "Bağlı olan firma ve mali dönem veritabanını, WAL (Write-Ahead Logging) durumunu gösterir. Bağlantı sorununda dönem seçimine dönüp yeniden bağlanın." },
+                new() { Baslik = "'Snapshot Yedek'", Aciklama = "Açık dönemin hızlı yedeğini alır. Bu buton Faz B ile etkinleşecek; şu an hazırlık yer tutucusudur." },
+                new() { Baslik = "Modül açılmıyorsa", Aciklama = "Henüz hazırlanmamış modüller bilgi mesajı gösterir; hazır olduklarında menüden açılır." },
+            });
+        }
+
         public override async Task LoadAsync(ShellArgs args)
         {
             InitializeNavigationItems();

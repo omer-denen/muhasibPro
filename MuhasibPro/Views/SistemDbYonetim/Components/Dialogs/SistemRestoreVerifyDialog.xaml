@@ -9,7 +9,7 @@
     PrimaryButtonText="Geri Yükle"
     CloseButtonText="Vazgeç"
     DefaultButton="Close"
-    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
     BorderThickness="1"
     CornerRadius="{StaticResource ControlCornerRadius}">

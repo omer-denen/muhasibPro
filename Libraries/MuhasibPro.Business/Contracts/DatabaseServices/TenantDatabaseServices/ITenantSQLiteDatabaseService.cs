@@ -14,7 +14,9 @@ namespace MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices
         Task<ApiDataResponse<TenantContext>> SwitchTenantAsync(string databaseName );
         Task<ApiDataResponse<DatabaseConnectionAnalysis>> GetTenantDatabaseStateAsync(string databaseName);
         Task<int> BackfillMissingTenantIdentitiesAsync();
-   
-        
+
+        /// <summary>Aynı makinede karışık kurulum kimliği damgası: verilen dönemlerin
+        /// <c>KurulumId</c> değerini güncel kimliğe eşitler (kimlik kaybı onarımı, best-effort).</summary>
+        Task<int> ReAlignTenantKurulumIdsAsync(IReadOnlyCollection<string> databaseNames);
     }
 }

@@ -14,12 +14,25 @@ namespace MuhasibPro.Views.Settings
 
         public UpdateViewModel ViewModel { get; }
 
-        /// <summary>Denetim Masası içi gömülü mod: başlık satırı gizlenir (kabukta zaten
-        /// 28px başlık var) + zemin saydamlaşır (çift başlık/çift zemin olmaz).</summary>
+        /// <summary>Denetim Masası içi gömülü mod: başlık satırı + zemin katmanı gizlenir
+        /// (kabukta zaten 28px başlık var; çift başlık/çift zemin olmaz). Panel ve içerik kalır.</summary>
         public void GomuluUygula()
         {
             BaslikSatiri.Visibility = Visibility.Collapsed;
-            Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            ZeminGorseli.Visibility = Visibility.Collapsed;
+            ZeminPerdesi.Visibility = Visibility.Collapsed;
+            PanelWrap.Margin = new Thickness(0, 8, 0, 0);
+            YardimButton.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>Kural 17 Katman 2: ana border gölgesi — receiver Loaded'da (ctor'da değil; Splash emsali).</summary>
+        private void OnPageLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            try
+            {
+                AnaBorderShadow.Receivers.Add(RootGrid);
+            }
+            catch { }
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)

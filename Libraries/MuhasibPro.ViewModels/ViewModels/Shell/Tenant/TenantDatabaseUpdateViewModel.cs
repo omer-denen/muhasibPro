@@ -206,6 +206,25 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
         public ICommand ContinueCommand { get; }
         public ICommand GoBackCommand { get; }
 
+        private ICommand _yardimCommand;
+
+        /// <summary>Kural 13: sayfa yardımı (içerik ViewModel'de, dialog chrome'u App'te).</summary>
+        public ICommand YardimCommand => _yardimCommand ??= new AsyncRelayCommand(YardimGoster);
+
+        private async Task YardimGoster()
+        {
+            await DialogService.ShowYardimAsync("Veritabanı Güncelleme — Yardım", new List<YardimMaddesiDto>
+            {
+                new() { Baslik = "Bu sayfa ne yapar?", Aciklama = "Seçili mali dönemin veritabanı şemasını yeni sürüme günceller. Akış üç adımdır: önce güvenlik yedeği alınır, sonra bekleyen göçler uygulanır, en son bağlantı ve şema doğrulanır." },
+                new() { Baslik = "Sürüm şeridi", Aciklama = "Solda mevcut, sağda güncellenecek şema sürümü; yanındaki rozet bekleyen göç sayısını gösterir. Göç yoksa işlem gerekmez." },
+                new() { Baslik = "Değişiklik listesi", Aciklama = "Hangi tabloya hangi kolonların eklendiğini/güncellendiğini gösterir. 'Kaldırılanlar' satırları yalnızca bilgilendirir — veri silinmez." },
+                new() { Baslik = "İşlem adımları", Aciklama = "Yedek → Göç → Doğrulama sırayla işlenir; her adımın altında o anki durum yazar. Doğrulama geçilemezse dördüncü adım 'Geri alma' açılır ve yedekten otomatik dönülür." },
+                new() { Baslik = "'Yedekle ve Güncelle'", Aciklama = "İşlemi başlatır. Buton yalnız göç gerekiyorsa ve işlem çalışmıyorken aktiftir. Hata olursa kırmızı bantta neden yazar; geri alma da başarısızsa yedeğin yolu verilir (elle geri yükleme için)." },
+                new() { Baslik = "'Çalışma Alanına Geç'", Aciklama = "Doğrulama başarılı olduğunda görünür. Seçimi kaydeder, pencereyi kapatır ve ana ekrandaki 'Devam Et' ile çalışma alanına geçilir." },
+                new() { Baslik = "'Geri'", Aciklama = "Hiçbir değişiklik yapmadan firma seçim ekranına döner." },
+            });
+        }
+
         public async Task LoadAsync(TenantDatabaseUpdateArgs args)
         {
             Args = args ?? new TenantDatabaseUpdateArgs();

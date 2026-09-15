@@ -33,16 +33,16 @@
                     <Border Width="8" Height="8" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{ThemeResource SystemFillColorSuccessBrush}" BorderBrush="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderThickness="1.5" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-1,-1"/>
                 </Grid>
                 <StackPanel Spacing="0" VerticalAlignment="Center" MinWidth="82">
-                    <TextBlock x:Name="NameText" Text="Ömer Korkut" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextFillColorPrimaryBrush}"/>
+                    <TextBlock x:Name="NameText" Text="Ömer Korkut" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
                     <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                         <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="4,0,4,1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
                             <TextBlock Text="Admin" FontSize="8" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         </Border>
-                        <TextBlock Text="•" FontSize="8" Foreground="{StaticResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
-                        <TextBlock Text="Aktif oturum" FontSize="8" Foreground="{StaticResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="•" FontSize="8" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="Aktif oturum" FontSize="8" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
-                <FontIcon Glyph="&#xE70D;" FontSize="8" Foreground="{StaticResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="1,0,0,0"/>
+                <FontIcon Glyph="&#xE70D;" FontSize="8" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Margin="1,0,0,0"/>
             </StackPanel>
         </Border>
     </Button>

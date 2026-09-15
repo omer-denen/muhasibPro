@@ -18,173 +18,245 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Header — baslik + sayi -->
-        <Grid Grid.Row="0">
-            <StackPanel Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
-                <Border Width="28" Height="28" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Background="{StaticResource MuhasibPetrolTintBrush}" BorderBrush="{StaticResource MuhasibPetrolBorderBrush}" BorderThickness="1" VerticalAlignment="Center">
-                    <FontIcon Glyph="{StaticResource IconBuilding}" FontSize="13" Foreground="{StaticResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Border>
-                <TextBlock Text="KAYITLI FİRMALAR" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                <Border Background="{StaticResource MuhasibOliveTintBrush}" BorderBrush="{StaticResource MuhasibOliveBorderBrush}" BorderThickness="1" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Padding="7,2">
-                    <TextBlock Text="{Binding FirmaList.ItemsSource.Count, FallbackValue='0'}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" FontWeight="SemiBold" Foreground="{StaticResource MuhasibOliveDeepBrush}" VerticalAlignment="Center" />
-                </Border>
-                <ProgressRing Width="12" Height="12" IsActive="True" Foreground="{StaticResource MuhasibPetrolBrush}" Visibility="{Binding IsBusy, Converter={StaticResource TrueToVis}, FallbackValue=Collapsed}" Margin="2,0,0,0" VerticalAlignment="Center" />
-            </StackPanel>
-        </Grid>
+        <!-- Baslik + firma secici buton (Flyout: arama + sonuc listesi) -->
+        <StackPanel Grid.Row="0" Spacing="8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
+                    <Border Width="28" Height="28" CornerRadius="{StaticResource ControlCornerRadius}" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" VerticalAlignment="Center">
+                        <FontIcon Glyph="{StaticResource IconBuilding}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="FİRMA" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                    <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Padding="7,2">
+                        <TextBlock Text="{Binding FirmaList.ItemsSource.Count, FallbackValue='0'}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                    </Border>
+                </StackPanel>
+                <Button Grid.Column="1" Click="OnYeniFirmaClicked" Style="{StaticResource SecondaryCompactButtonStyle}" VerticalAlignment="Center" HorizontalAlignment="Right"
+                        ToolTipService.ToolTip="Yeni firma tanımla">
+                    <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                        <FontIcon Glyph="{StaticResource IconAdd}" FontSize="11" VerticalAlignment="Center" />
+                        <TextBlock Text="Yeni Firma" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </Grid>
 
-        <!-- Arama -->
-        <TextBox Grid.Row="1"
-                 x:Name="SearchBox"
-                 PlaceholderText="Firma kodu, ünvanı veya şehir ara..."
-                 FontSize="12"
-                 Padding="12,9"
-                 Background="{StaticResource CardBackgroundFillColorDefaultBrush}"
-                 BorderBrush="{StaticResource CardStrokeColorDefaultBrush}"
-                 Foreground="{StaticResource TextFillColorPrimaryBrush}"
-                 CornerRadius="{StaticResource MuhasibPillCornerRadius}"
-                 TextChanged="OnSearchTextChanged" />
-
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,4,0" Background="Transparent">
-            <ItemsControl ItemsSource="{Binding FirmaList.ItemsSource, Mode=OneWay}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Vertical" Spacing="10" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <RadioButton Style="{StaticResource MuhasibCardRadioButtonStyle}" HorizontalAlignment="Stretch"
-                                     IsChecked="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Checked="OnFirmaRadioChecked">
-                            <Grid RowSpacing="0">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-
-                                <!-- Kompakt header — her zaman -->
-                                <Grid Grid.Row="0" ColumnSpacing="12">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <Border Grid.Column="0" Width="46" Height="46" CornerRadius="{StaticResource MuhasibCardCornerRadius}" VerticalAlignment="Center"
-                                            Background="{StaticResource MuhasibPetrolBrush}">
-                                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="0">
-                                            <TextBlock Text="{Binding FirmaNo, FallbackValue='-'}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource MuhasibOnPetrolBrush}" HorizontalAlignment="Center" />
-                                            <TextBlock Text="{Binding FirmaKodu, FallbackValue='-'}" FontSize="7" Foreground="{StaticResource MuhasibOnPetrolBrush}" Opacity="0.85" HorizontalAlignment="Center" Margin="0,-1,0,0" />
-                                        </StackPanel>
-                                    </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-                                        <TextBlock Text="{Binding KisaUnvani}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
-                                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Il, FallbackValue=''}" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="90" Visibility="{Binding Il, Converter={StaticResource StringToVis}}" />
-                                            <TextBlock Text="•" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" Visibility="{Binding Il, Converter={StaticResource StringToVis}}" />
-                                            <TextBlock Text="{Binding Ilce, FallbackValue=''}" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="90" Visibility="{Binding Ilce, Converter={StaticResource StringToVis}}" />
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Visibility="{Binding VergiNo, Converter={StaticResource StringToVis}}">
-                                            <TextBlock Text="VKN:" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
-                                            <TextBlock Text="{Binding VergiNo}" FontSize="11" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                        <Border Background="{StaticResource MuhasibInkBrush}" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Padding="8,3" VerticalAlignment="Center" Visibility="{Binding Selected, Converter={StaticResource TrueToVis}}">
-                                            <TextBlock Text="Aktif Seçim" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MuhasibOnInkBrush}" />
-                                        </Border>
-                                        <Border Background="{StaticResource MuhasibOliveTintBrush}" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Padding="8,3" VerticalAlignment="Center" BorderBrush="{StaticResource MuhasibOliveBorderBrush}" BorderThickness="1" Visibility="{Binding Selected, Converter={StaticResource FalseToVis}}">
-                                            <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource MuhasibOliveDeepBrush}" VerticalAlignment="Center">
-                                                <Run Text="{Binding MaliDonemler.Count, FallbackValue='0'}" />
-                                                <Run Text=" Dönem" />
-                                            </TextBlock>
-                                        </Border>
-                                    </StackPanel>
-                                </Grid>
-
-                                <!-- Zengin detay — sadece seçiliyken -->
-                                <StackPanel Grid.Row="1" Spacing="7" Margin="0,10,0,0" Visibility="{Binding Selected, Converter={StaticResource TrueToVis}}">
-                                    <StackPanel Spacing="6">
-                                        <Grid ColumnSpacing="6" Visibility="{Binding YetkiliKisi, Converter={StaticResource StringToVis}}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                                <FontIcon Glyph="{StaticResource IconUser}" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
-                                                <TextBlock Text="Yetkili:" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
-                                            </StackPanel>
-                                            <TextBlock Grid.Column="1" Text="{Binding YetkiliKisi}" FontSize="10" Foreground="{StaticResource TextFillColorSecondaryBrush}" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
-                                        </Grid>
-                                        <Grid ColumnSpacing="6">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                                <FontIcon Glyph="{StaticResource IconInfo}" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
-                                                <TextBlock Text="İletişim:" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
-                                            </StackPanel>
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
-                                                <TextBlock Text="{Binding Telefon1, FallbackValue='-'}" FontSize="10" Foreground="{StaticResource TextFillColorSecondaryBrush}" Visibility="{Binding Telefon1, Converter={StaticResource StringToVis}}" />
-                                                <TextBlock Text="•" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" Visibility="{Binding Telefon1, Converter={StaticResource StringToVis}}" />
-                                                <TextBlock Text="{Binding Eposta, FallbackValue='-'}" FontSize="10" Foreground="{StaticResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="160" Visibility="{Binding Eposta, Converter={StaticResource StringToVis}}" />
-                                            </StackPanel>
-                                        </Grid>
-                                        <Grid ColumnSpacing="6" Visibility="{Binding VergiDairesi, Converter={StaticResource StringToVis}}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                                <FontIcon Glyph="{StaticResource IconShield}" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
-                                                <TextBlock Text="Vergi:" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
-                                            </StackPanel>
-                                            <TextBlock Grid.Column="1" HorizontalAlignment="Right" FontSize="10" Foreground="{StaticResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis">
-                                                <Run Text="{Binding VergiDairesi}" /><Run Text=" — " /><Run Text="{Binding VergiNo}" />
-                                            </TextBlock>
-                                        </Grid>
-                                        <Grid ColumnSpacing="6" Visibility="{Binding Adres, Converter={StaticResource StringToVis}}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Top">
-                                                <FontIcon Glyph="{StaticResource IconInfo}" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
-                                                <TextBlock Text="Adres:" FontSize="10" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
-                                            </StackPanel>
-                                            <TextBlock Grid.Column="1" Text="{Binding Adres}" FontSize="10" Foreground="{StaticResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" TextAlignment="Right" HorizontalAlignment="Right" />
-                                        </Grid>
-                                    </StackPanel>
-                                    <Rectangle Height="1" Fill="{StaticResource CardStrokeColorDefaultBrush}" Opacity="0.6" Margin="0,2,0,0" />
-                                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
-                                        <Button Tag="{Binding}" Click="OnMaliDonemYonetimClick" Style="{StaticResource PetrolButtonStyle}" ToolTipService.ToolTip="Mali Dönem İşlemleri (yönetim penceresi)">
-                                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                                <FontIcon Glyph="{StaticResource IconHardDrive}" FontSize="11" Foreground="{StaticResource MuhasibOnPetrolBrush}" />
-                                                <TextBlock Text="Mali Dönem İşlemleri" Foreground="{StaticResource MuhasibOnPetrolBrush}" />
-                                            </StackPanel>
-                                        </Button>
-                                        <Button Tag="{Binding}" Click="OnEditFirmaClick" Style="{StaticResource PetrolTintButtonStyle}" ToolTipService.ToolTip="Düzenle">
-                                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                                <FontIcon Glyph="{StaticResource IconEdit}" FontSize="11" />
-                                                <TextBlock Text="Düzenle" />
-                                            </StackPanel>
-                                        </Button>
-                                        <Border Background="{StaticResource MuhasibOliveTintBrush}" CornerRadius="{StaticResource MuhasibPillCornerRadius}" Padding="8,3" VerticalAlignment="Center" BorderBrush="{StaticResource MuhasibOliveBorderBrush}" BorderThickness="1">
-                                            <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource MuhasibOliveDeepBrush}">
-                                                <Run Text="{Binding MaliDonemler.Count, FallbackValue='0'}" />
-                                                <Run Text=" Dönem" />
-                                            </TextBlock>
-                                        </Border>
-                                    </StackPanel>
-                                </StackPanel>
+            <Button x:Name="FirmaSeciciButton" AutomationProperties.AutomationId="FirmaSeciciButton"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                    CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="12,10"
+                    Click="OnFirmaSeciciClick"
+                    ToolTipService.ToolTip="Firma seç (aramak için yazın)">
+                <FlyoutBase.AttachedFlyout>
+                    <Flyout x:Name="FirmaSeciciFlyout" Placement="Bottom" Opened="OnFirmaFlyoutOpened">
+                        <Grid Width="360" RowSpacing="8">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBox x:Name="FirmaAramaBox" Grid.Row="0"
+                                     PlaceholderText="Firma ara (kodu, ünvanı, şehir)..."
+                                     FontSize="12" Padding="12,8"
+                                     CornerRadius="{StaticResource MuhasibControlCornerRadius}"
+                                     TextChanged="OnFirmaAramaChanged" />
+                            <Grid Grid.Row="1" MinHeight="72" MaxHeight="320">
+                                <ListView x:Name="FirmaFlyoutListesi"
+                                          ItemsSource="{Binding FirmaList.ItemsSource, Mode=OneWay}"
+                                          SelectedItem="{Binding FirmaList.SelectedItem, Mode=OneWay}"
+                                          SelectionMode="Single"
+                                          SelectionChanged="OnFirmaSecimDegisti"
+                                          IsItemClickEnabled="True"
+                                          ItemClick="OnFirmaItemClick"
+                                          ItemContainerStyle="{StaticResource MuhasibSelectionListItemStyle}"
+                                          Padding="0" Background="Transparent">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnSpacing="10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Width="30" Height="30" CornerRadius="{StaticResource MuhasibControlCornerRadius}"
+                                                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding FirmaKodu, FallbackValue='-'}" FontSize="10" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding KisaUnvani}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Il, FallbackValue=''}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="90" Visibility="{Binding Il, Converter={StaticResource StringToVis}}" />
+                                                        <TextBlock Text="•" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{Binding Il, Converter={StaticResource StringToVis}}" />
+                                                        <TextBlock FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}">
+                                                            <Run Text="{Binding MaliDonemler.Count, FallbackValue='0'}" />
+                                                            <Run Text="dönem" />
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="2" Text="{Binding VergiNo, FallbackValue=''}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" Visibility="{Binding VergiNo, Converter={StaticResource StringToVis}}" />
+                                                <FontIcon Grid.Column="3" Glyph="{StaticResource IconCheckMark}" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" Visibility="{Binding Selected, Converter={StaticResource TrueToVis}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                                <!-- Bos durum: sonuc yok (code-behind: BosDurumText.Guncelle) -->
+                                <TextBlock x:Name="BosDurumText" Text="Firma bulunamadı" FontSize="12" Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
                             </Grid>
-                        </RadioButton>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+                        </Grid>
+                    </Flyout>
+                </FlyoutBase.AttachedFlyout>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Grid.Column="0" Glyph="{StaticResource IconSearch}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="{Binding FirmaList.SelectedItem.KisaUnvani, FallbackValue='Firma seçin'}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <FontIcon Grid.Column="2" Glyph="{StaticResource IconChevronDown}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                </Grid>
+            </Button>
+        </StackPanel>
+
+        <!-- Secili firma karti — detay + N donem + konforlu aksiyonlar.
+             ANA KART rengi (CardBackgroundFillColorSecondaryBrush) → sol panel icinde
+             iceride/çukur durur (mali donem secili kartiyla ayni dil). -->
+        <Border Grid.Row="1" Padding="16"
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                CornerRadius="{StaticResource OverlayCornerRadius}"
+                Visibility="{Binding IsFirmaSelected, Converter={StaticResource TrueToVis}, FallbackValue=Collapsed}">
+            <StackPanel Spacing="12">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Width="46" Height="46" CornerRadius="{StaticResource MuhasibControlCornerRadius}" VerticalAlignment="Center"
+                            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                        <TextBlock Text="{Binding FirmaList.SelectedItem.FirmaKodu, FallbackValue='-'}" FontSize="13" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                        <TextBlock Text="{Binding FirmaList.SelectedItem.KisaUnvani, FallbackValue='-'}" FontSize="14" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding FirmaList.SelectedItem.FirmaKodu, FallbackValue=''}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{Binding FirmaList.SelectedItem.FirmaKodu, Converter={StaticResource StringToVis}}" />
+                            <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{Binding FirmaList.SelectedItem.Il, Converter={StaticResource StringToVis}}" />
+                            <TextBlock Text="{Binding FirmaList.SelectedItem.Il, FallbackValue=''}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="110" Visibility="{Binding FirmaList.SelectedItem.Il, Converter={StaticResource StringToVis}}" />
+                            <TextBlock Text="•" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{Binding FirmaList.SelectedItem.VergiNo, Converter={StaticResource StringToVis}}" />
+                            <TextBlock Text="{Binding FirmaList.SelectedItem.VergiNo, FallbackValue=''}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{Binding FirmaList.SelectedItem.VergiNo, Converter={StaticResource StringToVis}}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                            CornerRadius="{StaticResource MuhasibPillCornerRadius}" Padding="9,3" VerticalAlignment="Center">
+                        <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                            <Run Text="{Binding FirmaList.SelectedItem.MaliDonemler.Count, FallbackValue='0'}" />
+                            <Run Text="Dönem" />
+                        </TextBlock>
+                    </Border>
+                </Grid>
+
+                <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.6" />
+
+                <!-- Firma detaylari -->
+                <StackPanel Spacing="6">
+                    <Grid ColumnSpacing="6" Visibility="{Binding FirmaList.SelectedItem.YetkiliKisi, Converter={StaticResource StringToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                            <FontIcon Glyph="{StaticResource IconUser}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock Text="Yetkili:" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="{Binding FirmaList.SelectedItem.YetkiliKisi}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                    <Grid ColumnSpacing="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                            <FontIcon Glyph="{StaticResource IconInfo}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock Text="İletişim:" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+                            <TextBlock Text="{Binding FirmaList.SelectedItem.Telefon1, FallbackValue='-'}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Visibility="{Binding FirmaList.SelectedItem.Telefon1, Converter={StaticResource StringToVis}}" />
+                            <TextBlock Text="•" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{Binding FirmaList.SelectedItem.Eposta, Converter={StaticResource StringToVis}}" />
+                            <TextBlock Text="{Binding FirmaList.SelectedItem.Eposta, FallbackValue='-'}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="160" Visibility="{Binding FirmaList.SelectedItem.Eposta, Converter={StaticResource StringToVis}}" />
+                        </StackPanel>
+                    </Grid>
+                    <Grid ColumnSpacing="6" Visibility="{Binding FirmaList.SelectedItem.VergiDairesi, Converter={StaticResource StringToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                            <FontIcon Glyph="{StaticResource IconShield}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock Text="Vergi:" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis">
+                            <Run Text="{Binding FirmaList.SelectedItem.VergiDairesi}" /><Run Text=" — " /><Run Text="{Binding FirmaList.SelectedItem.VergiNo}" />
+                        </TextBlock>
+                    </Grid>
+                    <Grid ColumnSpacing="6" Visibility="{Binding FirmaList.SelectedItem.Adres, Converter={StaticResource StringToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" VerticalAlignment="Top">
+                            <FontIcon Glyph="{StaticResource IconInfo}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock Text="Adres:" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="{Binding FirmaList.SelectedItem.Adres}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" TextAlignment="Right" HorizontalAlignment="Right" />
+                    </Grid>
+                </StackPanel>
+
+                <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.6" />
+
+                <!-- Konforlu aksiyon satiri -->
+                <Grid ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Tag="{Binding FirmaList.SelectedItem}" Click="OnMaliDonemYonetimClick" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Style="{StaticResource AccentButtonStyle}" MinHeight="34"
+                            ToolTipService.ToolTip="Mali Dönem İşlemleri (yönetim penceresi)">
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <FontIcon Glyph="{StaticResource IconHardDrive}" FontSize="12" VerticalAlignment="Center" />
+                            <TextBlock Text="Mali Dönem İşlemleri" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1" Tag="{Binding FirmaList.SelectedItem}" Click="OnEditFirmaClick" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Style="{StaticResource SecondaryCompactButtonStyle}" MinHeight="34"
+                            ToolTipService.ToolTip="Firma bilgilerini düzenle">
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <FontIcon Glyph="{StaticResource IconEdit}" FontSize="12" VerticalAlignment="Center" />
+                            <TextBlock Text="Düzenle" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Bos durum: firma secili degil -->
+        <Border Grid.Row="1" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Padding="16"
+                Visibility="{Binding IsFirmaSelected, Converter={StaticResource FalseToVis}, FallbackValue=Collapsed}">
+            <StackPanel Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <FontIcon Glyph="{StaticResource IconInfo}" FontSize="14" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    <TextBlock Text="Firma seçilmedi" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+                <TextBlock Text="Yukarıdaki seçiciden bir firma seçin; firma bilgileri ve mali dönemleri görüntülenir. Kayıt yoksa 'Yeni Firma' ile tanımlayın." FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

@@ -1,6 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
@@ -36,7 +36,7 @@ public sealed partial class MaliDonemlerListControl : UserControl
         var firma = vm.SelectedFirma;
         if (firma == null)
         {
-            GetNotification()?.Show("Firma Seçilmedi", "Lütfen önce soldan bir şirket seçin.", NotificationType.Warning);
+            GetNotification()?.Show("Firma Seçilmedi", "Lütfen önce yukarıdaki firma seçicisinden bir şirket seçin.", NotificationType.Warning);
             return;
         }
 
@@ -114,29 +114,21 @@ public sealed partial class MaliDonemlerListControl : UserControl
         }
     }
 
-    private async void OnMaliDonemRadioChecked(object sender, RoutedEventArgs e)
+    private async void OnDonemSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (sender is not RadioButton { DataContext: MaliDonemModel clicked })
+        if (sender is not ListView { SelectedItem: MaliDonemModel selectedDonem })
             return;
 
         var vm = GetViewModel();
         if (vm == null)
             return;
 
-        // TwoWay IsChecked zaten clicked.Selected=true yaptı; ViewModel tek doğruluk için SelectedItem senkronla (diğerleri false)
-        if (!ReferenceEquals(vm.MaliDonemList.SelectedItem, clicked))
-            vm.MaliDonemList.SelectedItem = clicked;
-
-        var selectedDonem = clicked;
-
-        // Kapalı dönem seçildiğinde sadece animasyonlu geri bildirim
+        // Kapalı dönem seçildiğinde uyarı bandı gösterilir, giriş engellenir
+        // (CTA sarsıntı animasyonu kalktı — buton artık FirmaShellView alt barında).
         if (selectedDonem.KapaliMi)
         {
             if (_isLoaded)
-            {
                 ShowClosedWarning($"{selectedDonem.MaliYil} kapalı dönem — giriş engellendi. Lütfen açık bir dönem seçin.");
-                ShakeDevamEtButton();
-            }
             return;
         }
 
@@ -154,29 +146,59 @@ public sealed partial class MaliDonemlerListControl : UserControl
             notification?.Show("Güncelleme Gerekli", $"{selectedDonem.MaliYil} dönemi veritabanı güncellenmeyi bekliyor.", NotificationType.Warning);
     }
 
-    private void ShowClosedWarning(string text)
+    /// <summary>InfoBar aksiyonu: tek dönemde doğrudan güncelleme sayfası; çok dönemde "İncele" listesi (flyout).</summary>
+    private void OnGuncellemeAksiyonClick(object sender, RoutedEventArgs e)
     {
-        try { ClosedWarningBorder?.ShowAsync(text, 2600); } catch { }
+        var vm = GetViewModel();
+        var bekleyen = vm?.MaliDonemList?.GuncellemeBekleyenDonemler;
+        if (bekleyen == null || bekleyen.Count == 0)
+            return;
+        if (bekleyen.Count == 1)
+        {
+            _ = DonemGuncelleAsync(bekleyen[0]);
+            return;
+        }
+        if (sender is FrameworkElement element)
+            FlyoutBase.ShowAttachedFlyout(element);
     }
 
-    private void ShakeDevamEtButton()
+    /// <summary>"İncele" listesindeki satır aksiyonu — ilgili dönemin güncelleme sayfasını açar.</summary>
+    private void OnDonemGuncelleClick(object sender, RoutedEventArgs e)
     {
+        if (sender is Button { Tag: MaliDonemModel model })
+            _ = DonemGuncelleAsync(model);
+    }
+
+    private async Task DonemGuncelleAsync(MaliDonemModel donem)
+    {
+        var vm = GetViewModel();
+        var firma = vm?.SelectedFirma;
+        if (donem == null || firma == null || string.IsNullOrWhiteSpace(donem.DatabaseName))
+            return;
         try
         {
-            var storyboard = new Storyboard();
-            var anim = new DoubleAnimationUsingKeyFrames();
-            Storyboard.SetTarget(anim, DevamEtTransform);
-            Storyboard.SetTargetProperty(anim, "TranslateX");
-            anim.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(0), Value = 0 });
-            anim.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(60), Value = -8 });
-            anim.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(120), Value = 8 });
-            anim.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(180), Value = -6 });
-            anim.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(240), Value = 6 });
-            anim.KeyFrames.Add(new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(300), Value = 0 });
-            storyboard.Children.Add(anim);
-            storyboard.Begin();
+            var args = new ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateArgs
+            {
+                DatabaseName = donem.DatabaseName,
+                Firma = firma,
+                MaliDonem = donem
+            };
+            var nav = ServiceLocator.Current.GetService<INavigationService>();
+            if (nav == null)
+                return;
+            await nav.CreateNewViewAsync<ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateViewModel>(
+                new ViewModels.ViewModels.Shell.ShellArgs { Parameter = args }, "Veritabanı Güncelleme");
         }
-        catch { }
+        catch (Exception ex)
+        {
+            GetNotification()?.Show("Güncelleme Açılamadı", ex.Message, NotificationType.Danger);
+        }
+    }
+
+    private void ShowClosedWarning(string text)
+    {
+        try { ClosedWarningBorder?.ShowAsync(text, 2600); }
+        catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FirmaShell] Kapalı-dönem uyarısı gösterilemedi: {ex.Message}"); }
     }
 
     /// <summary>DataContext → IMaliDonemListHost çözümle (FirmaShell VM veya yönetim VM; fallback: visual parent).</summary>

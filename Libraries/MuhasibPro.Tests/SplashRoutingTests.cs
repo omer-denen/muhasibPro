@@ -38,12 +38,13 @@ public class SplashRoutingTests
             }, "durum");
 
     private static SplashRoutingService BuildDefault(
+        out Mock<IKurulumKayitService> kurulum,
         out Mock<ITenantSQLiteDatabaseService> tenant,
         out Mock<ITenantVersionReader> reader,
         out Mock<IEventBus> bus)
     {
         var sistem = new Mock<ISistemDatabaseService>();
-        var kurulum = new Mock<IKurulumKayitService>();
+        kurulum = new Mock<IKurulumKayitService>();
         kurulum.Setup(k => k.GetOrCreateAsync())
             .ReturnsAsync(new KurulumKayitModel { KurulumId = "K123456789", MachineGuid = "M1" });
         var makine = new Mock<IMakineKimligiProvider>();
@@ -161,12 +162,12 @@ public class SplashRoutingTests
         karar.Target.Should().Be(SplashTarget.MigrationRequired);
     }
 
-    // === Transfer testleri (degismedi) ===
+    // === Transfer testleri ===
 
     [Fact]
     public async Task CheckTransfer_UyumsuzlukYoksa_BosDoner_OlayYayinlamaz()
     {
-        var svc = BuildDefault(out var tenant, out var reader, out var bus);
+        var svc = BuildDefault(out _, out var tenant, out var reader, out var bus);
         reader.Setup(r => r.ScanMismatchesAsync(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(new List<TenantMismatchInfo>());
 
@@ -180,9 +181,9 @@ public class SplashRoutingTests
     }
 
     [Fact]
-    public async Task CheckTransfer_UyumsuzlukVarsa_Formatlar_Ve_OlayYayinlar()
+    public async Task CheckTransfer_UyumsuzlukVarsa_Formatlar_VeOlayYayinlar()
     {
-        var svc = BuildDefault(out _, out var reader, out var bus);
+        var svc = BuildDefault(out _, out _, out var reader, out var bus);
         reader.Setup(r => r.ScanMismatchesAsync(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(new List<TenantMismatchInfo>
             {
@@ -196,6 +197,51 @@ public class SplashRoutingTests
         sonuc.Mismatches[0].Should().Contain("db-KODU_2027");
         sonuc.Mismatches[0].Should().Contain("ESKIKURU");
         bus.Verify(b => b.Publish(It.IsAny<object>(), It.IsAny<TransferDetectedEvent>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CheckTransfer_AyniMakine_TekEskiKimlik_Onarilir_DialogCikmaz()
+    {
+        var svc = BuildDefault(out var kurulum, out var tenant, out var reader, out var bus);
+        reader.Setup(r => r.ScanMismatchesAsync(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new List<TenantMismatchInfo>
+            {
+                new() { DatabaseName = "db-F-0001_2025", VersiyonKurulumId = "eski-kurulum-1", VersiyonMakineId = "M1", KurulumFarkli = true, MakineFarkli = false },
+                new() { DatabaseName = "db-F-0001_2026", VersiyonKurulumId = "ESKI-KURULUM-1", VersiyonMakineId = "M1", KurulumFarkli = true, MakineFarkli = false }
+            });
+
+        var sonuc = await svc.CheckTransferAsync();
+
+        sonuc.HasMismatches.Should().BeFalse();
+        sonuc.AlignedCount.Should().Be(2);
+        sonuc.AdoptedKurulumId.Should().Be("eski-kurulum-1");
+        sonuc.CurrentKurulumId.Should().Be("eski-kurulum-1");
+        kurulum.Verify(k => k.UpdateKurulumIdAsync("eski-kurulum-1"), Times.Once);
+        tenant.Verify(t => t.ReAlignTenantKurulumIdsAsync(It.IsAny<IReadOnlyCollection<string>>()), Times.Never);
+        bus.Verify(b => b.Publish(It.IsAny<object>(), It.IsAny<TransferDetectedEvent>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CheckTransfer_AyniMakine_KarisikKimlik_DonemlerGuncelKimligeEsitlenir()
+    {
+        var svc = BuildDefault(out var kurulum, out var tenant, out var reader, out var bus);
+        tenant.Setup(t => t.ReAlignTenantKurulumIdsAsync(It.IsAny<IReadOnlyCollection<string>>())).ReturnsAsync(2);
+        reader.Setup(r => r.ScanMismatchesAsync(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(new List<TenantMismatchInfo>
+            {
+                new() { DatabaseName = "db-F-0001_2025", VersiyonKurulumId = "KIMLIKA", VersiyonMakineId = "M1", KurulumFarkli = true, MakineFarkli = false },
+                new() { DatabaseName = "db-F-0001_2026", VersiyonKurulumId = "KIMLIKB", VersiyonMakineId = "M1", KurulumFarkli = true, MakineFarkli = false }
+            });
+
+        var sonuc = await svc.CheckTransferAsync();
+
+        sonuc.HasMismatches.Should().BeFalse();
+        sonuc.AlignedCount.Should().Be(2);
+        sonuc.AdoptedKurulumId.Should().BeEmpty();
+        kurulum.Verify(k => k.UpdateKurulumIdAsync(It.IsAny<string>()), Times.Never);
+        tenant.Verify(t => t.ReAlignTenantKurulumIdsAsync(
+            It.Is<IReadOnlyCollection<string>>(l => l.Count == 2)), Times.Once);
+        bus.Verify(b => b.Publish(It.IsAny<object>(), It.IsAny<TransferDetectedEvent>()), Times.Never);
     }
 
     [Fact]

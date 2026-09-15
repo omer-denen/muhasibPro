@@ -26,6 +26,8 @@ namespace MuhasibPro.Services.CommonServices
                 Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style
             };
 
+            DialogHelper.ApplyAppTheme(dialog);
+
             dialog.Title = title;
             dialog.SetIcon(icon);
 

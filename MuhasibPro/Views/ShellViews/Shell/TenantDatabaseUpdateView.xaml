@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:MuhasibPro.Converters"
     mc:Ignorable="d"
+    Loaded="OnPageLoaded"
     Background="Transparent">
 
     <Page.Resources>
@@ -16,12 +17,22 @@
 
     <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + ~%87 opak tint). Statik; icerik degisince yeniden olusmaz. -->
     <Border x:Name="KokZemin" CornerRadius="0">
-        <Grid>
+        <Grid x:Name="RootGrid">
             <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
-            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Spacing="12" Padding="24,18,24,24" MaxWidth="640" HorizontalAlignment="Center">
+        <!-- Kural 17 — Katman 2: ana border paneli; Kural 13 ? panelin sag ust kosesinde. -->
+        <Grid x:Name="PanelWrap" MaxWidth="720" Margin="24,18,24,24" HorizontalAlignment="Center">
+        <Border x:Name="AnaBorder"
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}" BorderThickness="1.5"
+                CornerRadius="{StaticResource OverlayCornerRadius}" Padding="24"
+                Translation="0,0,32">
+            <Border.Shadow>
+                <ThemeShadow x:Name="AnaBorderShadow" />
+            </Border.Shadow>
+        <StackPanel Spacing="12">
 
             <!-- Başlık + aksiyon -->
             <Border Style="{StaticResource CustomModernCard}" Padding="16">
@@ -33,11 +44,11 @@
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="Geri" Style="{StaticResource SecondaryCompactButtonStyle}" Command="{x:Bind ViewModel.GoBackCommand, Mode=OneWay}" VerticalAlignment="Center" ToolTipService.ToolTip="Firma seçimine dön" />
                     <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                        <TextBlock Text="Veritabanı Güncelleme" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextFillColorPrimaryBrush}" />
-                        <TextBlock FontSize="12" Foreground="{StaticResource TextFillColorSecondaryBrush}" TextWrapping="Wrap">
+                        <TextBlock Text="Veritabanı Güncelleme" FontSize="18" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap">
                             <Run Text="{x:Bind ViewModel.FirmaUnvani, Mode=OneWay}" /><Run Text=" • " /><Run Text="{x:Bind ViewModel.DonemYili, Mode=OneWay}" /><Run Text=" Mali Dönemi" />
                         </TextBlock>
-                        <TextBlock Text="{x:Bind ViewModel.Args.DatabaseName, Mode=OneWay}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{StaticResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Text="{x:Bind ViewModel.Args.DatabaseName, Mode=OneWay}" FontSize="11" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                     </StackPanel>
                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
                         <Button Content="Yedekle ve Güncelle" Style="{StaticResource MuhasibPrimaryButtonStyle}" Command="{x:Bind ViewModel.StartUpdateCommand, Mode=OneWay}" IsEnabled="{x:Bind ViewModel.CanStart, Mode=OneWay}" Visibility="{x:Bind ViewModel.ShowContinue, Mode=OneWay, Converter={StaticResource FalseToVis}}" />
@@ -169,7 +180,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <ProgressBar IsIndeterminate="True" Height="3" Foreground="{StaticResource MuhasibPetrolBrush}" Background="Transparent" Visibility="{x:Bind ViewModel.IsRunning, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
+                    <ProgressBar IsIndeterminate="True" Height="3" Foreground="{ThemeResource MuhasibPetrolBrush}" Background="Transparent" Visibility="{x:Bind ViewModel.IsRunning, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
 
                     <!-- Sonuç bantları -->
                     <Border Padding="10" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" BorderBrush="{ThemeResource SystemFillColorCriticalBrush}" BorderThickness="1" Visibility="{x:Bind ViewModel.HasError, Mode=OneWay, Converter={StaticResource TrueToVis}}">
@@ -182,6 +193,16 @@
             </Border>
 
         </StackPanel>
+        </Border>
+
+            <!-- Kural 13: sayfa yardimi (VM command) — ana border'in sag ust kosesinde -->
+            <Button x:Name="YardimButton" AutomationProperties.AutomationId="YardimButton" Width="36" Height="36" Padding="0" Margin="0,-10,-10,0"
+                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Style="{StaticResource CircleIconButtonStyle}" Command="{x:Bind ViewModel.YardimCommand}"
+                    ToolTipService.ToolTip="Veritabanı güncelleme hakkında yardım">
+                <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="15" />
+            </Button>
+        </Grid>
     </ScrollViewer>
         </Grid>
     </Border>

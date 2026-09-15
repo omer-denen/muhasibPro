@@ -6,11 +6,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    PrimaryButtonText="Anladım"
+    PrimaryButtonText="Kapat"
     PrimaryButtonStyle="{StaticResource InventDialogPrimaryStyle}"
-    CloseButtonText="Kapat"
     DefaultButton="Primary"
-    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
     BorderThickness="1"
     CornerRadius="{StaticResource ControlCornerRadius}">
@@ -25,14 +24,17 @@
                 <FontIcon Glyph="{StaticResource IconUpload}" FontSize="18" Foreground="{ThemeResource SystemFillColorCautionBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
-                <TextBlock Text="Taşınma" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" CharacterSpacing="60"/>
-                <TextBlock Text="Taşınmış Veri Tespit Edildi" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                <TextBlock Text="TAŞINMA" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" CharacterSpacing="60"/>
+                <TextBlock Text="Taşınmış Veri Algılandı" FontSize="16" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
             </StackPanel>
         </Grid>
     </ContentDialog.Title>
 
     <StackPanel Spacing="12" MinWidth="420">
-        <TextBlock Text="Bu kurulumda farklı bir kurulumdan gelen dönem veritabanları bulundu. Yedekler doğrulanırken kurulum/makine uyuşmazlığı amber uyarı olarak gösterilecektir." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
+        <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="Bu bilgisayarda, başka bir kurulum veya makinede oluşturulmuş mali dönem veritabanları bulundu. Verileriniz kullanılmaya devam eder; ancak bu dönemlerden alınan yedekler doğrulanırken kurulum/makine uyuşmazlığı uyarısı gösterilir ve geri yükleme doğrulama kodu isteyebilir."/>
+        <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="Verileri başka bir bilgisayardan siz taşıdıysanız bu beklenen bir durumdur; taşımadıysanız veri kaynağını kontrol edin."/>
         <Border Padding="12" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
             <StackPanel Spacing="6">
                 <Grid ColumnSpacing="8">
@@ -48,7 +50,7 @@
             </StackPanel>
         </Border>
         <StackPanel Spacing="4">
-            <TextBlock Text="Uyuşmayan dönemler:" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+            <TextBlock Text="Etkilenen mali dönem veritabanları" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
             <ItemsControl x:Name="MismatchList">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -59,5 +61,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </StackPanel>
+        <TextBlock Text="Bu bildirim yalnızca geliştirme derlemesinde gösterilir." FontSize="11"
+                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
     </StackPanel>
 </ContentDialog>

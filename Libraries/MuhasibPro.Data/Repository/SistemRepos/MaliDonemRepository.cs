@@ -63,13 +63,11 @@ namespace MuhasibPro.Data.Repository.SistemRepos
 
         public async Task<int> GetMaliDonemlerCountAsync(DataRequest<MaliDonem> request)
         {
+            // Arama filtresi GetQuery içinde tek kaynakta uygulanır (ToLower'lı); burada
+            // ikinci bir ham-Query filtresi sayfa/sayaç tutarsızlığı üretiyordu — kaldırıldı.
             IQueryable<MaliDonem> items = GetQuery(request);
             items = items.Include(r => r.Firma);
 
-            if (!string.IsNullOrEmpty(request.Query))
-            {
-                items = items.Where(r => r.ArananTerim.Contains(request.Query));
-            }
             // Where
             if (request.Where != null)
             {

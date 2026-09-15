@@ -318,6 +318,40 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
             return patched;
         }
 
+        /// <summary>Kimlik kaybı onarımı (karışık damga): verilen dönemlerin kurulum kimliğini
+        /// güncel kimliğe eşitler — makine aynı olduğu için veri bu kurulumun sayılır.</summary>
+        public async Task<int> ReAlignTenantKurulumIdsAsync(IReadOnlyCollection<string> databaseNames)
+        {
+            int patched = 0;
+            try
+            {
+                if (databaseNames == null || databaseNames.Count == 0)
+                    return 0;
+
+                var kurulum = await _kurulumService.GetOrCreateAsync();
+                foreach (var dbName in databaseNames)
+                {
+                    try
+                    {
+                        if (string.IsNullOrWhiteSpace(dbName)) continue;
+                        if (!_applicationPaths.TenantDatabaseFileExists(dbName)) continue;
+                        var baglanti = await BaglantiDegerleriAsync();
+                        using var ctx = _appDbContextFactory.CreateDbContext(
+                            dbName, baglanti.CommandTimeoutSec, baglanti.BusyTimeoutMs, baglanti.Pooling);
+                        var ver = ctx.TenantDatabaseVersiyonlar.FirstOrDefault(v => v.DatabaseName == dbName);
+                        if (ver == null) continue;
+                        if (string.Equals(ver.KurulumId, kurulum.KurulumId, StringComparison.OrdinalIgnoreCase)) continue;
+                        ver.KurulumId = kurulum.KurulumId;
+                        await ctx.SaveChangesAsync();
+                        patched++;
+                    }
+                    catch { continue; }
+                }
+            }
+            catch (Exception ex) { _logger.LogWarning(ex, "Kurulum kimligi esitleme hatasi"); }
+            return patched;
+        }
+
         /// <summary>Doğrudan tenant context açılışları için bağlantı değerleri
         /// (Oturum 127). Sağlayıcı yoksa/okunamazsa hepsi null → fabrika varsayılanları.</summary>
         private async Task<(int? CommandTimeoutSec, int? BusyTimeoutMs, bool? Pooling)> BaglantiDegerleriAsync()

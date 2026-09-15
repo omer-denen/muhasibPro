@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:components="using:MuhasibPro.Views.MainShell.Components"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Loaded="OnPageLoaded"
     mc:Ignorable="d"
     Background="Transparent">
 
@@ -13,9 +14,9 @@
     <Border x:Name="KokZemin" CornerRadius="0">
         <Grid>
             <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
-            <Border Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" Opacity="0.35" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
 
-    <Grid Background="Transparent">
+    <Grid x:Name="RootGrid" Background="Transparent">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
@@ -24,15 +25,26 @@
         <!-- Sol: NavSidebar 240 -->
         <components:NavSidebarControl Grid.Column="0" />
 
-        <!-- Sağ: yüzen başlık satırı + buz kap -->
+        <!-- Kural 17 — Katman 2: sağ içerik ana border paneli (sidebar zemin üzerinde kalır);
+             Kural 13 ? panelin sağ üst köşesinde. -->
         <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+            <Grid x:Name="PanelWrap" Margin="24,48,24,24">
+                <Border x:Name="AnaBorder"
+                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}" BorderThickness="1.5"
+                        CornerRadius="{StaticResource OverlayCornerRadius}" Padding="24"
+                        Translation="0,0,32">
+                    <Border.Shadow>
+                        <ThemeShadow x:Name="AnaBorderShadow" />
+                    </Border.Shadow>
+                    <Grid RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-            <!-- Yüzen başlık satırı -->
-            <Grid Grid.Row="0" Padding="24,12,24,12">
+            <!-- Başlık + birincil aksiyon (panel içi, kart değil) -->
+            <Grid Grid.Row="0">
                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                     <TextBlock Text="Genel Bakış" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                 </StackPanel>
@@ -40,16 +52,15 @@
                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Button Style="{StaticResource GhostTintPetrolButtonStyle}" ToolTipService.ToolTip="Snapshot Yedek (Faz B)">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="{StaticResource IconBackup}" FontSize="12" Foreground="{StaticResource MuhasibPetrolDeepBrush}" />
-                            <TextBlock Text="Snapshot Yedek" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource MuhasibPetrolDeepBrush}" />
+                            <FontIcon Glyph="{StaticResource IconBackup}" FontSize="12" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
+                            <TextBlock Text="Snapshot Yedek" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
             </Grid>
 
-            <!-- Buz kap: tenant kartı + içerik -->
-            <Border Grid.Row="1" Margin="24,0,24,24" Style="{StaticResource InventFrostPanelStyle}">
-                <Grid>
+            <!-- Tenant kartı + içerik (panel içi) -->
+            <Grid Grid.Row="1">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -63,16 +74,16 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <Border Width="40" Height="40" Background="{StaticResource MuhasibPetrolTintBrush}" CornerRadius="{StaticResource MuhasibCardCornerRadius}">
-                                <FontIcon Glyph="{StaticResource IconCheckMark}" FontSize="18" Foreground="{StaticResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Border Width="40" Height="40" Background="{ThemeResource MuhasibPetrolTintBrush}" CornerRadius="{StaticResource MuhasibCardCornerRadius}">
+                                <FontIcon Glyph="{StaticResource IconCheckMark}" FontSize="18" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                                 <TextBlock Text="MuhasibPro — Ana Çalışma Alanı" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                 <TextBlock Text="Tenant bağlantısı başarılı — Çok kiracılı SQLite aktif" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <Border Background="{StaticResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="8,4">
-                                    <TextBlock Text="WAL Aktif" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource SystemFillColorSuccessBrush}" />
+                                <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="8,4">
+                                    <TextBlock Text="WAL Aktif" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
                                 </Border>
                             </StackPanel>
                         </Grid>
@@ -82,17 +93,27 @@
                     <Frame x:Name="ContentFrame" Grid.Row="1" Padding="0,16,0,0">
                         <Grid>
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                                <FontIcon Glyph="{StaticResource IconCheckMark}" FontSize="48" Foreground="{StaticResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
+                                <FontIcon Glyph="{StaticResource IconCheckMark}" FontSize="48" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
                                 <TextBlock Text="Hazır — Tenant seçimi başarılı" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
                                 <TextBlock Text="FirmaShell → MainShell geçişi doğrulandı. Faz B modülleri (Cari/Stok/Fatura) bu iskelet üzerine eklenecek." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="520" HorizontalAlignment="Center" />
-                                <Border Background="{StaticResource MuhasibPetrolTintBrush}" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Padding="12,8" Margin="0,8,0,0" HorizontalAlignment="Center">
-                                    <TextBlock Text="Çekirdek (Aşama A) 0 kusur ile tamamlandı — Güncelleme altyapısı dahil" FontSize="11" Foreground="{StaticResource MuhasibPetrolDeepBrush}" TextAlignment="Center" TextWrapping="Wrap" />
+                                <Border Background="{ThemeResource MuhasibPetrolTintBrush}" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Padding="12,8" Margin="0,8,0,0" HorizontalAlignment="Center">
+                                    <TextBlock Text="Çekirdek (Aşama A) 0 kusur ile tamamlandı — Güncelleme altyapısı dahil" FontSize="11" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" TextAlignment="Center" TextWrapping="Wrap" />
                                 </Border>
                             </StackPanel>
                         </Grid>
                     </Frame>
                 </Grid>
-            </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Kural 13: sayfa yardimi (VM command) — ana border'in sag ust kosesinde -->
+                <Button x:Name="YardimButton" AutomationProperties.AutomationId="YardimButton" Width="36" Height="36" Padding="0" Margin="0,-10,-10,0"
+                        HorizontalAlignment="Right" VerticalAlignment="Top"
+                        Style="{StaticResource CircleIconButtonStyle}" Command="{x:Bind ViewModel.YardimCommand}"
+                        ToolTipService.ToolTip="Çalışma alanı hakkında yardım">
+                    <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="15" />
+                </Button>
+            </Grid>
         </Grid>
     </Grid>
         </Grid>

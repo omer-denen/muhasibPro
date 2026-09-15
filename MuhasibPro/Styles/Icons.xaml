@@ -33,6 +33,7 @@
     <x:String x:Key="IconBackup">&#xEA35;</x:String>
     <x:String x:Key="IconChevronRight">&#xE76C;</x:String>
     <x:String x:Key="IconChevronLeft">&#xE76B;</x:String>
+    <x:String x:Key="IconChevronDown">&#xE70D;</x:String>
     <x:String x:Key="IconHardDrive">&#xEDA2;</x:String>
     <x:String x:Key="IconShield">&#xE1D6;</x:String>
     <x:String x:Key="IconZap">&#xE99A;</x:String>
@@ -54,5 +55,7 @@
     <x:String x:Key="IconTerminal">&#xE756;</x:String>
     <x:String x:Key="IconHelpCircle">&#xE897;</x:String>
     <x:String x:Key="IconClear">&#xE711;</x:String>
+    <x:String x:Key="IconBrightness">&#xE706;</x:String>
+    <x:String x:Key="IconContrast">&#xE7A1;</x:String>
 
 </ResourceDictionary>
