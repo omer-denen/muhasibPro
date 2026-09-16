@@ -285,12 +285,13 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] Kapı: Kural 14 araştırması (MS "Settings for developers" + Dialog controls → `REFERANSLAR` ✅) + Kural 8 sınıf onayı (kullanıcı "tamamını onayla") + build 0 hata + `dotnet test` **498/498** (6 yeni test) + Kural 18 canlı kanıt (`Temp/opencode/ot269_s1..s7`, DEV SistemLog kaydı) + kullanıcı onayı. ✅🧪
 - **Not (mimari bekçi):** `DevAraclariService` ilk denemede `Services/Installation`'a konuldu → `ArchitectureTests.Kurulum_Ile_SistemDb_Yonetimi_Ayrik` kırmızı; tenant servisine yaslandığı için `Services|Contracts/SistemServices/DevServices` altına taşındı. Ders `HATALAR.md`'de.
 
-## Faz 6.83 — TenantDatabaseUpdateView canlı doğrulama turu (Oturum 254 kullanıcı kararı — 🔨 KISMİ; Oturum 269'da ekran doğrulandı, tasarım istenince 6.87'ye devredildi)
-> **Neden ayrı faz:** Oturum 253'te Katman-2 dönüşümü yapıldı (AnaBorder + `?` + gömülü değil, tenant `Güncelle` akışı) ancak **göç bekleyen dönem olmadığı için ekran canlı açılamadı**; Kural 18 canlı kanıtı eksik — kullanıcı "ayrı faz aç, unutmayalım" dedi.
-- [ ] **(a) Kontrollü test ortamı:** bir tenant DB'nin şema sürüm damgasını geriye çek (yedek al → `TenantDBVersiyon`/history damgası eski sürüme) → kart "Güncelleme Gerekli" rozeti → `Güncelle` butonu ile ekranı aç; test sonrası damga/yedeği geri al (veri kaybı yok)
-- [ ] **(b) Canlı akış (Kural 18):** panel + `?` yardım dialogu (Light/Dark), `Geri` (firma seçimine dönüş), "Yedekle ve Güncelle" (Yedek→Göç→Doğrulama adımları), hata dalı + otomatik geri alma (adım 4), "Çalışma Alanına Geç" + seçim kaydı
-- [ ] **(c) Kanıt + kayıt:** `ot6_83_*` ekran görüntüleri + UIA dökümü; LOG/KONTROL/ROADMAP güncelleme; kullanıcı onayı
-- [ ] **Kapı:** Kural 8 sınıf onayı (gerekirse görünüm düzeltmesi) + build 0/0 + test + canlı kanıt + onay
+## Faz 6.83 — TenantDatabaseUpdateView canlı doğrulama turu — ❌ GEÇERSİZ (kapatıldı, Oturum 278)
+> **KAPANIŞ (Oturum 278):** Bu fazın tüm maddeleri **`TenantDatabaseUpdateView`** canlı turu içindi; sayfa **Faz 6.91-E'de silindi** (göç erişim anında onay + inline). Dolayısıyla faz **geçersiz — kapatıldı**; canlı kanıt ihtiyacı 6.91-E'nin kendi canlı turuna taşındı.
+> **Neden ayrı faz (tarihsel):** Oturum 253'te Katman-2 dönüşümü yapıldı (AnaBorder + `?` + gömülü değil, tenant `Güncelle` akışı) ancak **göç bekleyen dönem olmadığı için ekran canlı açılamadı**; Kural 18 canlı kanıtı eksik — kullanıcı "ayrı faz aç, unutmayalım" dedi.
+- [x] ~~(a) Kontrollü test ortamı~~ — geçersiz (sayfa yok)
+- [x] ~~(b) Canlı akış~~ — geçersiz (sayfa yok); yeni akış 6.91-E
+- [x] ~~(c) Kanıt + kayıt~~ — geçersiz
+- [x] ~~**Kapı**~~ — geçersiz
 
 ## Faz 6.84 — FirmaShellView seçim deneyimi yeniden tasarımı (Oturum 255 kullanıcı talebi — ✅ TAMAMLANDI + kullanıcı onaylı "gayet başarılı", Oturum 268; commit atıldı)
 
@@ -383,7 +384,8 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 
 ---
 
-## Faz 6.87 — Veritabanı Güncelleme sayfası (`TenantDatabaseUpdateView`) komple yeniden tasarımı (Oturum 269 kullanıcı kararı — 📋 plan; **v1 reddedildi, Oturum 273**)
+## Faz 6.87 — Veritabanı Güncelleme sayfası (`TenantDatabaseUpdateView`) komple yeniden tasarımı — ❌ GEÇERSİZ (kapatıldı, Oturum 278)
+> **KAPANIŞ (Oturum 278):** Kullanıcı kararı "sayfa geçersiz → SİL" olarak uygulandı (**Faz 6.91-E**): `TenantDatabaseUpdateView` silindi, göç erişim anında onay + inline ilerlemeye taşındı. Yeniden tasarım gerekmiyor — faz **geçersiz, kapatıldı**. (Aşağıdaki v1/kapı notları tarihseldir.)
 
 > **Oturum 273 güncellemesi:** v1 redesign (hero + iki sütun + InfoBar) kullanıcı tarafından **reddedildi** ("Güncelleme sayfasından bahsediyorum; referansı sil, baştan tasarım"). Ayrıca "tenant DB update sayfası gerekli mi, gerçek update ile ilgilenelim" kararı açık. v1 XAML'e geri dönülecek; yön: (a) sayfa kalsın + baştan tasarım, veya (b) kaldır → erişimde otomatik migration + hafif onay/progress. **Karar bekliyor.**
 
