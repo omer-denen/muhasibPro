@@ -147,13 +147,14 @@ public interface IYardimIcerikKaynagi { IReadOnlyList<YardimHamKaynak> Kaynaklar
 - `MuhasibPro/Services/AiAsistan/GomuluYardimIcerikKaynagi.cs` (EmbeddedResource okuyucu)
 - `MuhasibPro/Services/AiAsistan/FoundryYardimVektorUretici.cs` (Foundry embedding; `FoundryAsistanSohbetService` deseni)
 - `Domain/Models/AiAsistanSettings.cs` → `EmbeddingModelAlias` + `VarsayilanEmbeddingModelAlias = "qwen3-embedding-0.6b"` + `GetEmbeddingModelAlias()`
-- `docs/yardim/*.md` (içerik; App csproj'a `<EmbeddedResource Include="..\docs\yardim\**\*.md" Link="Yardim\%(Filename)%(Extension)" />`)
+- App csproj: `<EmbeddedResource Include="..\docs\yardim\**\*.md" Link="Yardim\%(Filename)%(Extension)" />` (**içerik dosyalarını BENTE** — parser'ı kendi test fixture'ınla test et, `docs/yardim/*.md` dosyalarına yazma)
 - `MuhasibPro/Services/AiAsistan/FoundryAsistanSohbetService.cs` → retrieval'ı `IYardimBilgiTabani.AraAsync`'e çevir
 - `Business/Services/SistemServices/AiAsistan/AsistanPromptKurucu.cs` → `YardimAramaSonucu` overload
 - **Sil (Kural 4):** `Business/Contracts/SistemServices/AiAsistan/IYardimIcerikSaglayici.cs`
 - **Test:** `YardimMarkdownCozumleyiciTests`, `RrfBirlestiriciTests`, `YardimBilgiTabaniTests` (temp-dir SQLite + sahte `IYardimVektorUretici`), `YardimSkorlayiciTests` güncelle
 
-**Bende (UI/entegrasyon/doğrulama) — sözleşme dondurulduktan sonra:**
+**Bende (içerik + UI/entegrasyon/doğrulama) — sözleşme dondurulduktan sonra:**
+- **İçerik:** `docs/yardim/*.md` — başlangıç seti (9 sayfa) Oturum 278'de yazıldı; gözden geçirme/genişletme bende (Kural 13/14/19)
 - **Sil (Kural 4):** `ViewModels/Services/YardimIcerikToplayici.cs` + `Tests/YardimIcerikToplayiciTests.cs`
 - `ViewModels/ViewModels/Shell/GelistiriciAraclariViewModel.cs` → öz-test "RAG derlemi" satırı `IYardimBilgiTabani.TumKayitlar().Count`
 - `ViewModels/ViewModels/Shell/AsistanSohbetViewModel.cs` + `Views/MainShell/Components/AsistanSohbetPaneli.xaml` → **"Yardım dizini hazırlanıyor"** durumu/ilerlemesi (Kural 11/12)
