@@ -518,6 +518,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
    - **6.91-D:** `IPostUpdateDogrulamaService` saga (dosya + Sistem.db migrate/verify/restore + dönem tarama/rapor) — açılış splash adımı.
    - **6.91-E:** TenantDatabaseUpdateView silme + erişimde onay/inline göç refactor (Kural 8 sınıf onayları).
    - **6.91-F:** UX (determinate + adım rozeti + tek özet) + dev-mode Tanılama + yardım.
+   - **6.91-G ⬜ (kullanıcı isteği, Oturum 278):** `AsistanBilgi.db` (AI yardım bilgi tabanı) post-update **tazeleme** adımı — saga'ya 4. adım `AI Yardım Dizini` (`IYardimBilgiTabani.HazirlaAsync`; içerik sürümü değiştiyse yeniden indeks, embedding önbellekte değilse lexical-only + uyarı; bozuk DB yeniden oluşturulur; **bloklamaz → Dikkat**). İleri-uyumluluk guard'ı/migration UYGULANMAZ (önbellek). UI: `GuncellemeSonrasiView` adım şeridi 4 adım (Kural 8 onayı). **Bağımlılık:** 6.93 motoru (Adım 1). Ayrıntı: `docs/YARDIM-DB-PLAN.md` → "Güncelleme modülü entegrasyonu".
 
 ### Uygulama durumu — 6.91-A ✅ (Oturum 274)
 - **Veri kökü:** `%LocalAppData%\MuhasibPro` → **`%AppData%\MuhasibPro`** (Roaming). `ApplicationPaths.GetAppDataFolderPath` + dev fallback güncellendi; uninstall artık veriyi silmez.
@@ -603,5 +604,6 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [ ] **1. Motor (diğer model):** `IYardimBilgiTabani` + DTO'lar, `YardimMarkdownCozumleyici`, `RrfBirlestirici`, `YardimSkorlayici` (TR normalizasyon), `YardimVektorDeposu` (SQLite), `YardimBilgiTabaniService`, `GomuluYardimIcerikKaynagi`, `FoundryYardimVektorUretici`, `AiAsistanSettings.EmbeddingModelAlias`, `docs/yardim/*.md`, retrieval'ı `FoundryAsistanSohbetService`/`AsistanPromptKurucu`'ya bağlama, `IYardimIcerikSaglayici` silme + testler ⬜
 - [ ] **2. UI/entegrasyon (bende):** asistan paneli "yardım dizini hazırlanıyor" + Denetim dizin durum satırı + öz-test sayımı + `YardimIcerikToplayici` silme + DI + Kural 13/14/19 + docs ⬜
 - [ ] **3. Doğrulama (bende):** build 0/0 + test + **Kural 18 canlı** (S1 indeks kurulumu, S2 anlamsal soru→doğru madde, S3 embedding'siz fallback, S4 içerik güncelle→yeniden indeks) + onay ⬜
+- [ ] **4. Güncelleme modülü entegrasyonu (bende — Faz 6.91-G):** app güncellemesinde `AsistanBilgi.db` tazelenir (post-update saga 4. adım `AI Yardım Dizini`); bloklamaz, embedding önbellekte değilse lexical-only. Motor (Adım 1) sonrası ⬜
 
 **Kapı:** build 0/0 + test + Kural 18 canlı + `REFERANSLAR`/doküman güncel + kullanıcı onayı.

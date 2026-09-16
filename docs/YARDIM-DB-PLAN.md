@@ -108,8 +108,9 @@ public class YardimIndexDurumu
 public interface IYardimBilgiTabani
 {
     Task<YardimIndexDurumu> DurumGetirAsync(CancellationToken ct = default);
-    /// <summary>İçeriği okur, DB'yi tazeler, eksik vektörleri üretir. Embedding yoksa lexical'e düşer (fırlatmaz).</summary>
-    Task HazirlaAsync(IProgress<YardimIndexDurumu>? ilerleme = null, CancellationToken ct = default);
+    /// <summary>İçeriği okur, DB'yi tazeler, eksik vektörleri üretir. Embedding yoksa lexical'e düşer (fırlatmaz).
+    /// <paramref name="modelIndirmeyeIzin"/> false ise embedding modeli İNDİRİLMEZ; yalnız önbellekte varsa kullanılır (güncelleme adımı 6.91-G).</summary>
+    Task HazirlaAsync(bool modelIndirmeyeIzin = true, IProgress<YardimIndexDurumu>? ilerleme = null, CancellationToken ct = default);
     Task<IReadOnlyList<YardimAramaSonucu>> AraAsync(string soru, int enFazla, CancellationToken ct = default);
     /// <summary>Yüklü tüm kayıtlar (dev-mode öz-testi sayımı için).</summary>
     IReadOnlyList<YardimKaydi> TumKayitlar();
@@ -120,6 +121,8 @@ public interface IYardimVektorUretici
 {
     string ModelAlias { get; }
     Task<int> VektorBoyutuAsync(CancellationToken ct = default);
+    /// <summary>Embedding modeli önbellekte/yüklenebilir mi (İNDİRME YAPMAZ). Güncelleme adımı bunu kontrol eder.</summary>
+    Task<bool> OnbellekteMiAsync(CancellationToken ct = default);
     Task<IReadOnlyList<float[]>> UretAsync(IReadOnlyList<string> metinler, IProgress<double>? ilerleme = null, CancellationToken ct = default);
 }
 
@@ -130,7 +133,9 @@ public interface IYardimIcerikKaynagi { IReadOnlyList<YardimHamKaynak> Kaynaklar
 ```
 
 ## Davranış (net)
-- **`HazirlaAsync`:** içerik oku → parse → hash karşılaştır → Madde yaz → eksik vektörleri `IYardimVektorUretici.UretAsync(..., IProgress<double>)` ile üret (ilerleme `YardimIndexDurumu`'na eşlenir) → meta yaz. Embedding adımı **hata verirse iptal dışında fırlatmaz**; `VektorVarMi=false` + `Mesaj` (sebep) ile biter (lexical fallback canlı kalır).
+- **`HazirlaAsync(modelIndirmeyeIzin, ilerleme, ct)`:** içerik oku → parse → hash karşılaştır → Madde yaz → eksik vektörleri `IYardimVektorUretici.UretAsync(..., IProgress<double>)` ile üret (ilerleme `YardimIndexDurumu`'na eşlenir) → meta yaz.
+  - `modelIndirmeyeIzin=false` ve `IYardimVektorUretici.OnbellekteMiAsync()` false ise **vektör adımı atlanır** (model indirilmez) → `VektorVarMi=false` + lexical-only.
+  - Embedding adımı **hata verirse iptal dışında fırlatmaz**; `VektorVarMi=false` + `Mesaj` (sebep) ile biter (lexical fallback canlı kalır).
 - **`AraAsync`:** soru jetonla → **lexical** skor (başlık ağırlıklı; büyük/küçük + diakritik normalizasyonu; token "starts-with" eşleşmesi) → `VektorVarMi` ise sorguyu göm + **cosine** ile sırala → **RRF** (`k=60`, `w_lex=0.4`, `w_vec=0.6`; vektör yoksa `w_lex=1`) → top `enFazla` → `Yontem` etiketi.
 - **Eşzamanlılık:** `SemaphoreSlim` (hazırla/ara yarışı yok). Boş/tek-kelime soruda lexical yeterli; cosine için ham skor eşiği uygulanmaz (küçük derlem).
 - **İlk kullanımda indirme:** embedding modeli yoksa `IYardimVektorUretici` (App/Foundry impl) modeli indirip yükler (ilerleme verir); başarısızsa `AraAsync` lexical sonuç döndürür, kullanıcı hata görmez (yalnız durum satırında "semantik indeks yok" bilgisi).
@@ -173,6 +178,19 @@ public interface IYardimIcerikKaynagi { IReadOnlyList<YardimHamKaynak> Kaynaklar
 - AI panelinde dizin durumu görünür ve ring kapanır (Kural 11).
 - Canlı: (S1) içerik/indeks kurulumu, (S2) anlamsal soru → doğru madde, (S3) embedding'siz fallback, (S4) içerik güncelle→yeniden indeks.
 - `REFERANSLAR`/`LOG`/`KONTROL-LISTESI`/`DURUM` güncel; kullanıcı onayı.
+
+## Güncelleme modülü entegrasyonu (Faz 6.91-G — kullanıcı isteği, Oturum 278)
+`AsistanBilgi.db` uygulama güncellemesinde **tazelenmelidir** (gömülü içerik sürümü değişir). Güncelleme modülüne (6.91 post-update sagası) **4. adım** olarak eklenir:
+
+- **Ad adı:** `AI Yardım Dizini`. Sıra: Uygulama → Sistem.db → Dönemler → **AI Yardım Dizini** (en son, kritik olmayan).
+- **Davranış:** `IYardimBilgiTabani.HazirlaAsync(ilerleme, ct)` çağrılır.
+  - İçerik sürümü aynıysa ve DB geçerliyse → hızlı **Atlandı/Güncel** (yeniden gömme yok).
+  - İçerik değiştiyse → yeni/değişen maddeleri yaz; vektörleri **yalnız embedding modeli önbellekteyse** üret (güncelleme sırasında **model İNDİRİLMEZ**); yoksa lexical-only + uyarı ("semantik indeks yok").
+  - Bozuk/uyumsuz `AsistanBilgi.db` → dosya **yeniden oluşturulur** (önbellek; migration/restore YOK, ileri-uyumluluk guard'ı uygulanmaz).
+- **Hata politikası:** bloklamaz. Hata/uyarı → adım `Uyari` (sonuç türü **Dikkat**); uygulama açılışı **bloklanmaz** (Sistem.db'den farklı: bu bir önbellek).
+- **Sahiplik:** saga adımı + `GuncellemeSonrasiView` 4. adım rozeti (**bende**, Kural 8 onayı) — motor API'si (`HazirlaAsync`) **diğer modelin** (frozen sözleşme).
+- **Bağımlılık:** 6.93 motoru (Adım 1) bitmeden 6.91-G kodlanamaz (arayüz gerekir).
+- **Tetik:** sagayı tetikleyen mevcut `UpdateSettingsModel.PostUpdatePending` aynen geçerli; ek bayrak yok.
 
 ## Açık noktalar (motor çalışırken netleşecek)
 - Embedding modeli `AsistanBilgi.db` küçük hacimli — `DiskKullanimiAsync` sayımına dahil olur (Denetim "İndirilmiş modeller"de görünür).
