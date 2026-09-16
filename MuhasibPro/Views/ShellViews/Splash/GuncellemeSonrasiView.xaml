@@ -223,7 +223,7 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="sistem:PostUpdateAdimGorunum">
-                                        <Grid Width="150">
+                                        <Grid Width="120">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="30" />
                                                 <RowDefinition Height="Auto" />

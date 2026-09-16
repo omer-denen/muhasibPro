@@ -14,7 +14,6 @@ using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Models;
 using MuhasibPro.ViewModels.Infrastructure.Common;
 using MuhasibPro.ViewModels.Infrastructure.ViewModels;
-using MuhasibPro.ViewModels.Services;
 using MuhasibPro.ViewModels.ViewModels.Sistem;
 using MuhasibPro.ViewModels.ViewModels.Sistem.SistemDbYonetim;
 using System.Collections.ObjectModel;
@@ -36,6 +35,7 @@ public class GelistiriciAraclariViewModel : ViewModelBase
     private readonly IModulTestCalistirici _modulTestleri;
     private readonly ISurumOzellikService _surumService;
     private readonly IAsistanSohbetService _asistanSohbet;
+    private readonly IYardimBilgiTabani? _yardimBilgiTabani;
 
     private DevAracDurumuModel _durum = new();
     private UpdateSettingsModel _guncellemeAyarlari;
@@ -52,7 +52,8 @@ public class GelistiriciAraclariViewModel : ViewModelBase
         ISistemDiagnosticsService diagnosticsService = null,
         IModulTestCalistirici modulTestleri = null,
         ISurumOzellikService surumService = null,
-        IAsistanSohbetService asistanSohbet = null) : base(commonServices)
+        IAsistanSohbetService asistanSohbet = null,
+        IYardimBilgiTabani yardimBilgiTabani = null) : base(commonServices)
     {
         _devMode = devMode;
         _araclar = araclar;
@@ -61,6 +62,7 @@ public class GelistiriciAraclariViewModel : ViewModelBase
         _modulTestleri = modulTestleri;
         _surumService = surumService;
         _asistanSohbet = asistanSohbet;
+        _yardimBilgiTabani = yardimBilgiTabani;
 
         // Sistem tanılama (7 test) dev-mode'a yeniden kullanım için bağlanır (Kural 4: kopya yok).
         if (appPaths != null && sistemDb != null && diagnosticsService != null)
@@ -181,7 +183,7 @@ public class GelistiriciAraclariViewModel : ViewModelBase
     public bool DogrulamaVar => !string.IsNullOrWhiteSpace(_dogrulamaDetayi);
 
     private string _aiOzTestDetayi = string.Empty;
-    /// <summary>"AI Öz-testi" sonucu — sürüm hakkı + model durumu + RAG derlemi satırları (Faz 6.92).</summary>
+    /// <summary>"AI Öz-testi" sonucu — sürüm hakkı + model durumu + yardım dizini satırları (Faz 6.93).</summary>
     public string AiOzTestDetayi
     {
         get => _aiOzTestDetayi;
@@ -232,7 +234,7 @@ public class GelistiriciAraclariViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Dev-mode AI öz-testi (Faz 6.92): sürüm hakkı + model durumu + RAG derlemi.
+    /// Dev-mode AI öz-testi (Faz 6.92/6.93): sürüm hakkı + model durumu + yardım dizini (madde sayısı + semantik indeks).
     /// Salt-okunur: model indirmez/yüklemez; eksik servis satırda raporlanır, fırlatılmaz.
     /// </summary>
     public async Task AiOzTestAsync()
@@ -274,14 +276,19 @@ public class GelistiriciAraclariViewModel : ViewModelBase
             }
         }
 
-        try
+        if (_yardimBilgiTabani == null)
+            satirlar.Add("Yardım dizini: servis çözülemedi.");
+        else
         {
-            var sayfalar = new YardimIcerikToplayici().TumSayfalariGetir();
-            satirlar.Add($"RAG derlemi: {sayfalar.Count} sayfa, {sayfalar.Sum(s => s.Maddeler.Count)} madde.");
-        }
-        catch (Exception ex)
-        {
-            satirlar.Add("RAG derlemi: okunamadı — " + ex.Message);
+            try
+            {
+                var dizin = await _yardimBilgiTabani.DurumGetirAsync();
+                satirlar.Add($"Yardım dizini: {dizin.MaddeSayisi} madde • semantik indeks: {(dizin.VektorVarMi ? "var" : "yok")}.");
+            }
+            catch (Exception ex)
+            {
+                satirlar.Add("Yardım dizini: okunamadı — " + ex.Message);
+            }
         }
 
         AiOzTestDetayi = string.Join(Environment.NewLine, satirlar);
@@ -570,7 +577,7 @@ public class GelistiriciAraclariViewModel : ViewModelBase
     internal const string YardimAnahtari = "GelistiriciAraclari";
     internal const string YardimBasligi = "Geliştirici Araçları — Yardım";
 
-    /// <summary>Kural 13 içeriği + Faz 6.92 RAG derlemi (tek kaynak burası; toplayıcı buradan okur).</summary>
+    /// <summary>Kural 13 içeriği (AI bilgi tabanı artık `docs/yardim/*.md` — bu içerik yalnız ? dialogu).</summary>
     internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
     {
         new() { Baslik = "Bu bölüm nedir?", Aciklama = "Yalnızca geliştirme (DEBUG) derlemesinde görünen iç araçlardır; normal kullanıcı akışının parçası değildir. Her aksiyon onay ister ve Sistem günlüğüne DEV kaynağıyla yazılır." },
@@ -581,7 +588,7 @@ public class GelistiriciAraclariViewModel : ViewModelBase
         new() { Baslik = "Ayrıntılı log", Aciklama = "Dosya günlüğünün seviyesini Debug'a indirir; teşhis için daha ayrıntılı kayıt tutulur. Kapatınca Information seviyesine döner." },
         new() { Baslik = "Güncelleme kaynağı", Aciklama = "Uygulamanın yeni sürüm arayacağı adres (GitHub repo veya Velopack feed). Değişiklik anında kaydedilir. Boş bırakılırsa derlemede gömülü varsayılan (mevcut git repo adresi) kullanılır; \"Varsayılana sıfırla\" bu adrese döndürür." },
         new() { Baslik = "\"Kaynağı Doğrula\"", Aciklama = "Üretim birim testleriyle aynı normalize örneklerini çalıştırır (git@/ssh/.git biçimleri → https) ve ardından kaynağa bağlanmayı dener. Gömülü varsayılan ve girilen adresin normalize çıktısı sonuç satırlarında gösterilir." },
-        new() { Baslik = "AI Bağlantı Öz-testi", Aciklama = "\"Öz-testi Çalıştır\" sürüm hakkını, model durumunu ve RAG derlemini (sayfa/madde sayısı) tek listede gösterir. Salt-okunurdur, model indirmez. Model hazır değilse Denetim Masası → Yapay Zeka → \"Modeli Hazırla\" ile indirilir." },
+        new() { Baslik = "AI Bağlantı Öz-testi", Aciklama = "\"Öz-testi Çalıştır\" sürüm hakkını, model durumunu ve yardım dizinini (madde sayısı + semantik indeks var/yok) tek listede gösterir. Salt-okunurdur, model indirmez. Yardım dizini çalışma alanındaki asistan panelinde ilk soruda hazırlanır." },
         new() { Baslik = "Tanılama (çalışma-zamanı)", Aciklama = "\"Çalıştır\" sistem sınıfı testlerini (dosya/bağlantı/migration/veri/yetki — 7 test), güncelleme kaynağı normalize öz-testini ve kimlik/damga özetini tek listede toplar. Her satır PASS/FAIL ve mesaj gösterir; bir sorunda hangi alanda olduğunu buradan görürsünüz. Not: bu, CI'daki xUnit paketi değil uygulama içi çalışma-zamanı kontrolleridir." },
         new() { Baslik = "Modül Entegrasyon Testleri", Aciklama = "\"Tümünü test et\" her modülü (çekirdek, log, sistem/tenant veritabanı, yedekleme, kimlik, firma/dönem, lisans/yetki, güncelleme, ayar sağlayıcıları, dev araçları) iki yönden kontrol eder: (1) DI'da kayıtlı ve çözülebiliyor mu, (2) kritik akışı salt-okunur çalışıyor mu. Donanım POST gibi; hangi modülün koptuğunu gösterir. Yalnız geliştirme derlemesinde görünür." },
         new() { Baslik = "Klasör açma", Aciklama = "\"Log klasörünü aç\" ve \"Veri klasörünü aç\" düğmeleri ilgili yolları varsayılan dosya gezgininde açar. Yollar salt-okunur gösterilir." },

@@ -44,6 +44,11 @@
     </Content>
   </ItemGroup>
 
+  <!-- Faz 6.93: AI yardım içeriği gömülü kaynaktan okunur (GomuluYardimIcerikKaynagi). -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\docs\yardim\**\*.md" Link="Yardim\%(Filename)%(Extension)" />
+  </ItemGroup>
+
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>

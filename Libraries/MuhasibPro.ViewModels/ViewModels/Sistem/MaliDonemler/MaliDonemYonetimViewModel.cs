@@ -594,7 +594,7 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
     internal const string YardimAnahtari = "MaliDonemYonetim";
     internal const string YardimBasligi = "Mali Dönem Yönetimi — Yardım";
 
-    /// <summary>Kural 13 içeriği + Faz 6.92 RAG derlemi (tek kaynak burası; toplayıcı buradan okur).</summary>
+    /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
     internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
     {
         new() { Baslik = "Bu pencere ne işe yarar?", Aciklama = "Seçili firmanın mali dönemlerini yönetir: yedekleme, bakım, analiz, arşivleme ve silme. Soldan dönem seçin; sağdaki kartlar ve yedek listesi o döneme bağlanır." },

@@ -35,6 +35,16 @@
                 </Button>
             </Grid>
 
+            <!-- Yardım dizini durumu (Faz 6.93, Kural 11/12: kısa=ring, uzun=determinate bar + sonuç) -->
+            <StackPanel Spacing="6">
+                <TextBlock Text="{Binding DizinDurumMetni}" Style="{StaticResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
+                <StackPanel Spacing="6" Visibility="{Binding IsDizinHazirlaniyor, Converter={StaticResource TrueToVis}}">
+                    <TextBlock Text="{Binding DizinAsamasi}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <ProgressBar Value="{Binding DizinYuzde}" Maximum="100" />
+                </StackPanel>
+            </StackPanel>
+
             <!-- Sürüm kilidi -->
             <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,10" Visibility="{Binding KilitliMi, Converter={StaticResource TrueToVis}}">
                 <StackPanel Orientation="Horizontal" Spacing="8">

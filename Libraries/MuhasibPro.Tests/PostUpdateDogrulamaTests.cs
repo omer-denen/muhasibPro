@@ -4,6 +4,7 @@ using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
 using MuhasibPro.Business.Contracts.DatabaseServices.UpdateDogrulama;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
+using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
@@ -106,12 +107,24 @@ public class PostUpdateDogrulamaTests
 
     // ---------------- orkestratör: akış ----------------
 
+    private static Mock<IYardimBilgiTabani> VektorluTabani(bool vektor = true, int madde = 60)
+    {
+        var kb = new Mock<IYardimBilgiTabani>();
+        kb.Setup(k => k.HazirlaAsync(It.IsAny<bool>(), It.IsAny<IProgress<YardimIndexDurumu>?>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        kb.Setup(k => k.DurumGetirAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new YardimIndexDurumu { HazirMi = madde > 0, MaddeSayisi = madde, VektorVarMi = vektor, Asama = "Hazır" });
+        return kb;
+    }
+
     private static PostUpdateDogrulamaService Orkestrator(
         IUygulamaDosyaDogrulayici uygulama,
         ISistemDbGocDogrulayici sistem,
         ITenantTaramaDogrulayici tenant,
-        Mock<ILocalSettingsService> local)
-        => new(uygulama, sistem, tenant, local.Object, Mock.Of<ISistemLogService>());
+        Mock<ILocalSettingsService> local,
+        IYardimBilgiTabani? bilgiTabani = null)
+        => new(uygulama, sistem, tenant, local.Object, Mock.Of<ISistemLogService>(),
+            bilgiTabani ?? VektorluTabani().Object);
 
     [Fact]
     public async Task Calistir_Basarili_AdimlarVeDamga()
@@ -134,7 +147,7 @@ public class PostUpdateDogrulamaTests
         sonuc.Basarili.Should().BeTrue();
         sonuc.Bloklayici.Should().BeFalse();
         sonuc.SonucTuru.Should().Be(PostUpdateSonucTuru.Temiz);
-        sonuc.Adimlar.Should().HaveCount(3);
+        sonuc.Adimlar.Should().HaveCount(4);
         sonuc.Adimlar.Should().OnlyContain(a => a.Durum == PostUpdateAdimDurumu.Basarili);
         var kayit = await local.Object.ReadSettingAsync<UpdateSettingsModel>(UpdateSettingsModel.SettingsKey);
         kayit!.LastUpdateVerifiedAt.Should().NotBeNull();
@@ -159,8 +172,8 @@ public class PostUpdateDogrulamaTests
         sonuc.SonucTuru.Should().Be(PostUpdateSonucTuru.UygulamaBasarisiz);
         sonuc.Baslik.Should().Be("Uygulama güncellenemedi");
         sonuc.Ozet.Should().Contain("dosya eksik");
-        sonuc.Adimlar.Should().HaveCount(3);
-        sonuc.Adimlar.Count(a => a.Durum == PostUpdateAdimDurumu.Atlandi).Should().Be(2);
+        sonuc.Adimlar.Should().HaveCount(4);
+        sonuc.Adimlar.Count(a => a.Durum == PostUpdateAdimDurumu.Atlandi).Should().Be(3);
         sistem.Verify(s => s.DogrulaAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
         tenant.Verify(t => t.TaraAsync(It.IsAny<IProgress<double>?>(), It.IsAny<CancellationToken>()), Times.Never);
         // Uygulama hatası tek sefer gösterilir: damga atılır, bekleyen bayrak temizlenir.
@@ -188,6 +201,7 @@ public class PostUpdateDogrulamaTests
         sonuc.SonucTuru.Should().Be(PostUpdateSonucTuru.SistemBasarisiz);
         sonuc.Baslik.Should().Be("Sistem veritabanı güncellenemedi");
         sonuc.Adimlar.Should().Contain(a => a.Ad == "Mali Dönem Veritabanları" && a.Durum == PostUpdateAdimDurumu.Atlandi);
+        sonuc.Adimlar.Should().Contain(a => a.Ad == "AI Yardım Dizini" && a.Durum == PostUpdateAdimDurumu.Atlandi);
         tenant.Verify(t => t.TaraAsync(It.IsAny<IProgress<double>?>(), It.IsAny<CancellationToken>()), Times.Never);
         // Sert blok: damga atılmaz, bayrak temizlenmez → sonraki açılışta tekrar denenir.
         var kayit = await local.Object.ReadSettingAsync<UpdateSettingsModel>(UpdateSettingsModel.SettingsKey);
@@ -226,6 +240,56 @@ public class PostUpdateDogrulamaTests
         var kayit = await local.Object.ReadSettingAsync<UpdateSettingsModel>(UpdateSettingsModel.SettingsKey);
         kayit!.LastUpdateVerifiedAt.Should().NotBeNull();
         kayit.PostUpdatePending.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Calistir_DizinSemantikYok_Dikkat_Bloklamaz()
+    {
+        var local = AyarServisi(Ayar());
+        var uygulama = new Mock<IUygulamaDosyaDogrulayici>();
+        uygulama.Setup(u => u.DogrulaAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(DogrulamaAdimSonucu.Ok("ok"));
+        var sistem = new Mock<ISistemDbGocDogrulayici>();
+        sistem.Setup(s => s.DogrulaAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(DogrulamaAdimSonucu.Ok("ok"));
+        var tenant = new Mock<ITenantTaramaDogrulayici>();
+        tenant.Setup(t => t.TaraAsync(It.IsAny<IProgress<double>?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TenantTaramaSonucu { Taranan = 1, Mesaj = "1 dönem tarandı" });
+
+        var sonuc = await Orkestrator(uygulama.Object, sistem.Object, tenant.Object, local, VektorluTabani(vektor: false).Object)
+            .CalistirAsync();
+
+        sonuc.Basarili.Should().BeTrue();
+        sonuc.SonucTuru.Should().Be(PostUpdateSonucTuru.Dikkat);
+        sonuc.Adimlar.Should().Contain(a => a.Ad == "AI Yardım Dizini" && a.Durum == PostUpdateAdimDurumu.Uyari);
+        var kayit = await local.Object.ReadSettingAsync<UpdateSettingsModel>(UpdateSettingsModel.SettingsKey);
+        kayit!.LastUpdateVerifiedAt.Should().NotBeNull();
+        kayit.PostUpdatePending.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Calistir_DizinPatlarsa_Uyari_Bloklamaz()
+    {
+        var local = AyarServisi(Ayar());
+        var uygulama = new Mock<IUygulamaDosyaDogrulayici>();
+        uygulama.Setup(u => u.DogrulaAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(DogrulamaAdimSonucu.Ok("ok"));
+        var sistem = new Mock<ISistemDbGocDogrulayici>();
+        sistem.Setup(s => s.DogrulaAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(DogrulamaAdimSonucu.Ok("ok"));
+        var tenant = new Mock<ITenantTaramaDogrulayici>();
+        tenant.Setup(t => t.TaraAsync(It.IsAny<IProgress<double>?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TenantTaramaSonucu { Taranan = 0, Mesaj = "dönem yok" });
+        var kb = new Mock<IYardimBilgiTabani>();
+        kb.Setup(k => k.HazirlaAsync(It.IsAny<bool>(), It.IsAny<IProgress<YardimIndexDurumu>?>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("disk dolu"));
+
+        var sonuc = await Orkestrator(uygulama.Object, sistem.Object, tenant.Object, local, kb.Object).CalistirAsync();
+
+        sonuc.Basarili.Should().BeTrue();
+        sonuc.SonucTuru.Should().Be(PostUpdateSonucTuru.Dikkat);
+        sonuc.Adimlar.Should().Contain(a => a.Ad == "AI Yardım Dizini" && a.Durum == PostUpdateAdimDurumu.Uyari
+            && a.Mesaj!.Contains("disk dolu"));
     }
 
     // ---------------- uygulama dosyası doğrulayıcı ----------------

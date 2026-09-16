@@ -3,14 +3,15 @@ using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 
 namespace MuhasibPro.Business.Services.SistemServices.AiAsistan;
 
-/// <summary>Faz 6.92 RAG v1: sistem promptu + bağlam + madde listesi + kırpılmış geçmiş kurar. Saf fonksiyondur.</summary>
+/// <summary>Faz 6.93: sistem promptu + bağlam + bilgi tabanı maddeleri + kırpılmış geçmiş kurar. Saf fonksiyondur.</summary>
 public static class AsistanPromptKurucu
 {
     /// <summary>Sohbet mesajı. Rol: "system" / "user" / "assistant" (model sözleşmesi).</summary>
     public record SohbetMesaji(string Rol, string Icerik);
 
-    public static IReadOnlyList<SohbetMesaji> MesajlariKur(
-        IReadOnlyList<YardimSkorlayici.Eslesme> bulunanlar,
+    /// <summary>Bilgi tabanı arama sonuçlarıyla kurar (uyarı-strip, bağlam, geçmiş kırpma aynı).</summary>
+    public static IReadOnlyList<SohbetMesaji> AramaSonuclariylaKur(
+        IReadOnlyList<YardimAramaSonucu>? bulunanlar,
         AsistanSoruDto soru,
         int maksGecmisTur)
     {
@@ -37,9 +38,9 @@ public static class AsistanPromptKurucu
         {
             sistem.Append(" Yardım maddeleri:");
             int sira = 1;
-            foreach (var eslesme in bulunanlar)
+            foreach (var sonuc in bulunanlar)
             {
-                sistem.Append($" {sira}. [{eslesme.Sayfa.Baslik}] {eslesme.Madde.Baslik} — {eslesme.Madde.Aciklama}");
+                sistem.Append($" {sira}. [{sonuc.Sayfa}] {sonuc.Baslik} — {sonuc.Icerik}");
                 sira++;
             }
         }

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using MuhasibPro.Business.Contracts.DatabaseServices.UpdateDogrulama;
+using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Services.SistemServices.LogServices;
@@ -8,40 +9,46 @@ using MuhasibPro.Domain.Models.PostUpdateModel;
 
 namespace MuhasibPro.Business.Services.DatabaseServices.UpdateDogrulama
 {
-    /// <summary>Faz 6.91-D (Revizyon 3): güncelleme sonrası doğrulama orkestratörü (Kural 1 — yalnız akış).
-    /// Üç adım: uygulama dosyaları → Sistem.db (guard/göç/verify/restore) → dönem taraması.
+    /// <summary>Faz 6.91-D/6.91-G: güncelleme sonrası doğrulama orkestratörü (Kural 1 — yalnız akış).
+    /// Dört adım: uygulama dosyaları → Sistem.db (guard/göç/verify/restore) → dönem taraması → AI yardım dizini.
     /// Sert blok (Sistem.db) damga atmaz → sonraki açılışta tekrar denenir; diğer her durum damgalanır (tek sefer).</summary>
     public class PostUpdateDogrulamaService : IPostUpdateDogrulamaService
     {
         private const string AdUygulama = "Uygulama Dosyaları";
         private const string AdSistemDb = "Sistem Veritabanı";
         private const string AdDonemler = "Mali Dönem Veritabanları";
+        private const string AdDizin = "AI Yardım Dizini";
 
         private const double UygulamaBaslangic = 5;
         private const double UygulamaBitis = 20;
         private const double SistemBaslangic = 25;
         private const double SistemBitis = 55;
         private const double DonemBaslangic = 60;
-        private const double DonemBitis = 95;
+        private const double DonemBitis = 88;
+        private const double DizinBaslangic = 90;
+        private const double DizinBitis = 98;
 
         private readonly IUygulamaDosyaDogrulayici _uygulamaDosya;
         private readonly ISistemDbGocDogrulayici _sistemDb;
         private readonly ITenantTaramaDogrulayici _tenantTarama;
         private readonly ILocalSettingsService _localSettings;
         private readonly ISistemLogService _logService;
+        private readonly IYardimBilgiTabani? _yardimBilgiTabani;
 
         public PostUpdateDogrulamaService(
             IUygulamaDosyaDogrulayici uygulamaDosya,
             ISistemDbGocDogrulayici sistemDb,
             ITenantTaramaDogrulayici tenantTarama,
             ILocalSettingsService localSettings,
-            ISistemLogService logService)
+            ISistemLogService logService,
+            IYardimBilgiTabani? yardimBilgiTabani = null)
         {
             _uygulamaDosya = uygulamaDosya;
             _sistemDb = sistemDb;
             _tenantTarama = tenantTarama;
             _localSettings = localSettings;
             _logService = logService;
+            _yardimBilgiTabani = yardimBilgiTabani;
         }
 
         /// <summary>Tetik yalnız başarılı ön-yedek sonrası yazılan <see cref="UpdateSettingsModel.PostUpdatePending"/> bayrağıdır
@@ -89,6 +96,7 @@ namespace MuhasibPro.Business.Services.DatabaseServices.UpdateDogrulama
                 if (!sistem.Basarili)
                 {
                     Atla(ilerleme, sonuc, AdDonemler, DonemBaslangic, "Sistem veritabanı doğrulanamadığı için atlandı");
+                    Atla(ilerleme, sonuc, AdDizin, DizinBaslangic, "Sistem veritabanı doğrulanamadığı için atlandı");
                     return await SistemBasarisizAsync(sonuc, sistem.Mesaj, ilerleme, sw);
                 }
 
@@ -105,13 +113,16 @@ namespace MuhasibPro.Business.Services.DatabaseServices.UpdateDogrulama
                 sonuc.GelecekSemaDonemSayisi = tarama.GelecekSema;
                 sonuc.RaporSatirlari.AddRange(tarama.RaporSatirlari);
 
-                bool uyariVar = sistem.Uyari || tarama.Taranamadi || tarama.Bozuk > 0 || tarama.GelecekSema > 0;
+                bool donemUyari = sistem.Uyari || tarama.Taranamadi || tarama.Bozuk > 0 || tarama.GelecekSema > 0;
                 AdimBitir(ilerleme, donemAdim,
-                    uyariVar ? PostUpdateAdimDurumu.Uyari : PostUpdateAdimDurumu.Basarili,
+                    donemUyari ? PostUpdateAdimDurumu.Uyari : PostUpdateAdimDurumu.Basarili,
                     tarama.Mesaj, DonemBitis);
 
+                // (d2) AI yardım dizini (Faz 6.91-G) — bloklamaz; eksik semantik indeks = Dikkat.
+                bool dizinUyari = await DizinAdimiAsync(ilerleme, sonuc, cancellationToken);
+
                 // (e) Sonuç + doğrulandı damgası
-                await BasariliAsync(sonuc, uyariVar, ilerleme, cancellationToken);
+                await BasariliAsync(sonuc, donemUyari || dizinUyari, ilerleme, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -185,6 +196,65 @@ namespace MuhasibPro.Business.Services.DatabaseServices.UpdateDogrulama
             Atla(ilerleme, sonuc, AdUygulama, UygulamaBaslangic, mesaj);
             Atla(ilerleme, sonuc, AdSistemDb, SistemBaslangic, mesaj);
             Atla(ilerleme, sonuc, AdDonemler, DonemBaslangic, mesaj);
+            Atla(ilerleme, sonuc, AdDizin, DizinBaslangic, mesaj);
+        }
+
+        /// <summary>AI Yardım Dizini adımı (Faz 6.91-G): gömülü sürümden içerik tazelenir; embedding modeli
+        /// İNDİRİLMEZ (yalnız önbellekteki vektörler kullanılır). Bloklamaz — hata/eksik indeks "Uyari" (Dikkat).</summary>
+        private async Task<bool> DizinAdimiAsync(
+            IProgress<PostUpdateAdimSonucu>? ilerleme, PostUpdateDogrulamaSonucu sonuc, CancellationToken ct)
+        {
+            var adim = AdimBasla(ilerleme, sonuc, AdDizin, DizinBaslangic, "AI yardım dizini tazeleniyor...");
+            if (_yardimBilgiTabani == null)
+            {
+                AdimBitir(ilerleme, adim, PostUpdateAdimDurumu.Atlandi, "Bilgi tabanı kullanılamıyor", DizinBitis);
+                return false;
+            }
+            try
+            {
+                var kopru = new DizinIlerlemeKopru(d => ilerleme?.Report(
+                    new PostUpdateAdimSonucu
+                    {
+                        Ad = AdDizin,
+                        Durum = PostUpdateAdimDurumu.DevamEdiyor,
+                        Mesaj = string.Empty,
+                        Yuzde = DizinBaslangic + d * (DizinBitis - DizinBaslangic) / 100
+                    }));
+                await _yardimBilgiTabani.HazirlaAsync(modelIndirmeyeIzin: false, kopru, ct);
+                var durum = await _yardimBilgiTabani.DurumGetirAsync(ct);
+                if (durum.MaddeSayisi == 0)
+                {
+                    AdimBitir(ilerleme, adim, PostUpdateAdimDurumu.Uyari,
+                        "Yardım dizini oluşturulamadı (içerik okunamadı).", DizinBitis);
+                    return true;
+                }
+                if (durum.VektorVarMi)
+                {
+                    AdimBitir(ilerleme, adim, PostUpdateAdimDurumu.Basarili,
+                        $"{durum.MaddeSayisi} madde • anlamsal arama hazır", DizinBitis);
+                    return false;
+                }
+                AdimBitir(ilerleme, adim, PostUpdateAdimDurumu.Uyari,
+                    $"{durum.MaddeSayisi} madde • semantik indeks yok (asistan panelinde ilk soruda tamamlanır)", DizinBitis);
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                AdimBitir(ilerleme, adim, PostUpdateAdimDurumu.Uyari, "Yardım dizini tazelenemedi: " + ex.Message, DizinBitis);
+                return true;
+            }
+        }
+
+        /// <summary>Bilgi tabanı ilerlemesini (0-100) adım yüzdesine köprüler — senkron iletim (Kural 12).</summary>
+        private sealed class DizinIlerlemeKopru : IProgress<YardimIndexDurumu>
+        {
+            private readonly Action<double> _ileten;
+            public DizinIlerlemeKopru(Action<double> ileten) => _ileten = ileten;
+            public void Report(YardimIndexDurumu value) => _ileten(value.IlerlemeYuzde ?? 0);
         }
 
         private async Task<PostUpdateDogrulamaSonucu> UygulamaBasarisizAsync(

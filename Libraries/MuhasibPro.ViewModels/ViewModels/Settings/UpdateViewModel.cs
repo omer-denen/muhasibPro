@@ -274,7 +274,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
         internal const string YardimAnahtari = "Update";
         internal const string YardimBasligi = "Güncellemeler — Yardım";
 
-        /// <summary>Kural 13 içeriği + Faz 6.92 RAG derlemi (tek kaynak burası; toplayıcı buradan okur).</summary>
+        /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
         internal static List<MuhasibPro.Business.DTOModel.SistemModel.YardimMaddesiDto> YardimMaddeleri() => new()
         {
             new() { Baslik = "Bu sayfa ne yapar?", Aciklama = "Uygulamanın sürümünü ve güncelleme kaynağını yönetir: yeni sürüm arar, indirir ve kurar." },

@@ -21,6 +21,7 @@ public class AsistanSohbetViewModel : ViewModelBase
     private readonly ISurumOzellikService _surum;
     private readonly IPermissionService _yetki;
     private readonly IFirmaWithMaliDonemSelectedService _secim;
+    private readonly IYardimBilgiTabani? _yardimTabani;
     private CancellationTokenSource? _gonderCts;
 
     public AsistanSohbetViewModel(
@@ -29,13 +30,15 @@ public class AsistanSohbetViewModel : ViewModelBase
         IAiAsistanSettingsProvider ayarlar,
         ISurumOzellikService surum,
         IPermissionService yetki,
-        IFirmaWithMaliDonemSelectedService secim) : base(commonServices)
+        IFirmaWithMaliDonemSelectedService secim,
+        IYardimBilgiTabani? yardimTabani = null) : base(commonServices)
     {
         _sohbet = sohbet;
         _ayarlar = ayarlar;
         _surum = surum;
         _yetki = yetki;
         _secim = secim;
+        _yardimTabani = yardimTabani;
     }
 
     public ObservableCollection<AsistanMesajSatiri> Mesajlar { get; } = new();
@@ -103,6 +106,36 @@ public class AsistanSohbetViewModel : ViewModelBase
         private set => Set(ref _modelDurumMetni, value);
     }
 
+    private string _dizinDurumMetni = string.Empty;
+    /// <summary>Yardım bilgi tabanı dizin durumu (madde sayısı + semantik indeks) — Faz 6.93.</summary>
+    public string DizinDurumMetni
+    {
+        get => _dizinDurumMetni;
+        private set => Set(ref _dizinDurumMetni, value);
+    }
+
+    private bool _isDizinHazirlaniyor;
+    /// <summary>Yardım dizini hazırlanıyor (Kural 11: ring/bar bayrağı try-finally ile kapanır).</summary>
+    public bool IsDizinHazirlaniyor
+    {
+        get => _isDizinHazirlaniyor;
+        private set { if (Set(ref _isDizinHazirlaniyor, value)) GonderKomutunuTazele(); }
+    }
+
+    private string _dizinAsamasi = string.Empty;
+    public string DizinAsamasi
+    {
+        get => _dizinAsamasi;
+        private set => Set(ref _dizinAsamasi, value);
+    }
+
+    private double _dizinYuzde;
+    public double DizinYuzde
+    {
+        get => _dizinYuzde;
+        private set => Set(ref _dizinYuzde, value);
+    }
+
     private AsyncRelayCommand? _gonder;
     public ICommand GonderCommand => _gonder ??= new AsyncRelayCommand(GonderAsync, GonderilebilirMi);
     private RelayCommand? _durdur;
@@ -116,7 +149,7 @@ public class AsistanSohbetViewModel : ViewModelBase
     }
 
     private bool GonderilebilirMi() =>
-        !KilitliMi && !IsGonderiliyor && !IsHazirlaniyor && !string.IsNullOrWhiteSpace(SoruMetni);
+        !KilitliMi && !IsGonderiliyor && !IsHazirlaniyor && !IsDizinHazirlaniyor && !string.IsNullOrWhiteSpace(SoruMetni);
 
     public async Task LoadAsync()
     {
@@ -126,6 +159,11 @@ public class AsistanSohbetViewModel : ViewModelBase
                 "Merhaba! Ben MuhasibPro yardım asistanıyım. Uygulamanın yardım maddelerine göre cevap veririm — örneğin 'mali dönem nasıl arşivlenir?' diye sorabilirsin."));
         }
         await KapiyiDenetleAsync();
+        if (!KilitliMi && _yardimTabani != null)
+        {
+            // Panel açılışı: dizini model indirmeden (lexical) hazırla; semantik indeks ilk soruda eklenir.
+            await DiziniHazirlaAsync(modelIndirmeyeIzin: false);
+        }
     }
 
     public async Task KapiyiDenetleAsync()
@@ -180,6 +218,13 @@ public class AsistanSohbetViewModel : ViewModelBase
         if (KilitliMi || string.IsNullOrWhiteSpace(SoruMetni))
             return;
 
+        if (_yardimTabani != null)
+        {
+            var dizin = await _yardimTabani.DurumGetirAsync();
+            if (!dizin.VektorVarMi)
+                await DiziniHazirlaAsync(modelIndirmeyeIzin: true);
+        }
+
         var soru = SoruMetni.Trim();
         SoruMetni = string.Empty;
         var gecmis = Mesajlar
@@ -199,6 +244,9 @@ public class AsistanSohbetViewModel : ViewModelBase
             var ayar = await _ayarlar.GetAsync();
             if (!durum.HazirMi || !ModelAliasUyusuyorMu(durum, ayar))
                 await HazirlaIcAsync();
+            // Model hazırlanamadıysa ham "Asistan hazır değil" yerine gerçek sebep hata bandında kalsın (Kural 11/12).
+            if (!string.IsNullOrEmpty(HataMetni))
+                return;
             var istek = new AsistanSoruDto
             {
                 Soru = soru,
@@ -260,6 +308,65 @@ public class AsistanSohbetViewModel : ViewModelBase
         finally
         {
             IsHazirlaniyor = false;
+        }
+    }
+
+    /// <summary>Yardım bilgi tabanı dizinini hazırlar (Kural 11/12: bayrak + determinate bar + sonuç).
+    /// Model indirmeye izin yoksa yalnız lexical dizin kurulur (fırlatmaz — motor hatayı yutar).</summary>
+    private async Task DiziniHazirlaAsync(bool modelIndirmeyeIzin)
+    {
+        if (_yardimTabani == null)
+            return;
+        IsDizinHazirlaniyor = true;
+        DizinAsamasi = "Hazırlanıyor";
+        DizinYuzde = 0;
+        try
+        {
+            var ilerleme = new Progress<YardimIndexDurumu>(d =>
+            {
+                if (d.IlerlemeYuzde.HasValue)
+                    DizinYuzde = d.IlerlemeYuzde.Value;
+                if (!string.IsNullOrWhiteSpace(d.Asama))
+                    DizinAsamasi = d.Asama;
+            });
+            await _yardimTabani.HazirlaAsync(modelIndirmeyeIzin, ilerleme);
+            await DizinDurumunuYukleAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            HataMetni = ex.Message;
+            StatusError(ex.Message);
+            await LogSistemExceptionAsync("AsistanSohbet", "YardimDizini", ex);
+        }
+        finally
+        {
+            IsDizinHazirlaniyor = false;
+        }
+    }
+
+    /// <summary>Yardım dizini durumunu okur (madde sayısı + semantik indeks var/yok) — Kural 11: boş-durum metni.</summary>
+    public async Task DizinDurumunuYukleAsync()
+    {
+        if (_yardimTabani == null)
+        {
+            DizinDurumMetni = string.Empty;
+            return;
+        }
+        try
+        {
+            var durum = await _yardimTabani.DurumGetirAsync();
+            DizinDurumMetni = durum.MaddeSayisi == 0
+                ? "Yardım dizini hazır değil — ilk soruda hazırlanır"
+                : durum.VektorVarMi
+                    ? $"Yardım dizini hazır: {durum.MaddeSayisi} madde • anlamsal arama açık"
+                    : $"Yardım dizini hazır: {durum.MaddeSayisi} madde • yalnız anahtar kelime";
+        }
+        catch (Exception ex)
+        {
+            DizinDurumMetni = "Yardım dizini okunamadı: " + ex.Message;
         }
     }
 

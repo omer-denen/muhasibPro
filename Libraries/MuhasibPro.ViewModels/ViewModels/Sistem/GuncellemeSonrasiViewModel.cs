@@ -6,14 +6,15 @@ using MuhasibPro.ViewModels.Infrastructure.ViewModels;
 
 namespace MuhasibPro.ViewModels.ViewModels.Sistem;
 
-/// <summary>Faz 6.91-D: uygulama güncellendikten sonra açılışta çalışan doğrulama ekranı.
-/// Sonuç hero'su üstte; altında üç adımlı şerit (Uygulama → Sistem.db → Dönemler).
+/// <summary>Faz 6.91-D/6.91-G: uygulama güncellendikten sonra açılışta çalışan doğrulama ekranı.
+/// Sonuç hero'su üstte; altında dört adımlı şerit (Uygulama → Sistem.db → Dönemler → AI Yardım Dizini).
 /// Temizse otomatik Login'e; uyarıda "Devam Et"; uygulama hatasında "Kapat"; Sistem.db hatasında "Veritabanı Yönetimi".</summary>
 public class GuncellemeSonrasiViewModel : ViewModelBase
 {
     private const string AdUygulama = "Uygulama Dosyaları";
     private const string AdSistemDb = "Sistem Veritabanı";
     private const string AdDonemler = "Mali Dönem Veritabanları";
+    private const string AdDizin = "AI Yardım Dizini";
 
     private readonly IPostUpdateDogrulamaService _saga;
     private readonly Dictionary<string, PostUpdateAdimGorunum> _adimSozluk = new(StringComparer.Ordinal);
@@ -28,7 +29,8 @@ public class GuncellemeSonrasiViewModel : ViewModelBase
         {
             new(AdUygulama, "Uygulama", "Kritik dosyalar ve sürüm"),
             new(AdSistemDb, "Sistem.db", "Şema uyumluluğu, güncelleme ve doğrulama"),
-            new(AdDonemler, "Dönemler", "Dönem taraması ve bozuk kurtarma")
+            new(AdDonemler, "Dönemler", "Dönem taraması ve bozuk kurtarma"),
+            new(AdDizin, "Yardım Dizini", "Asistan yardım dizini tazeleme (bloklamaz)")
         };
         for (int i = 0; i < Adimlar.Count; i++)
         {

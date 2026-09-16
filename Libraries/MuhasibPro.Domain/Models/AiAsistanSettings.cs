@@ -11,9 +11,16 @@
         /// <summary>Foundry katalog model adı. Geçici varsayılan (doküman örneği); Türkçe final seçimi Windows canlı testte.</summary>
         public const string VarsayilanModelAlias = "qwen2.5-0.5b";
 
+        /// <summary>Foundry katalog embedding model adı (Faz 6.93 hibrit RAG).</summary>
+        public const string VarsayilanEmbeddingModelAlias = "qwen3-embedding-0.6b";
+
         /// <summary>Foundry katalog model adı. Kritik — değişimi indirme/disk etkisi yapar, yalnızca yönetici.</summary>
         [YoneticiAyari]
         public string ModelAlias { get; set; } = VarsayilanModelAlias;
+
+        /// <summary>Foundry katalog embedding model adı. Kritik — değişimi yeniden indeksleme etkisi yapar, yalnızca yönetici.</summary>
+        [YoneticiAyari]
+        public string EmbeddingModelAlias { get; set; } = VarsayilanEmbeddingModelAlias;
 
         /// <summary>Asistan etkin mi? Kapalıysa giriş noktası pasif görünür.</summary>
         public bool EtkinMi { get; set; } = true;
@@ -29,6 +36,9 @@
 
         public string GetModelAlias() =>
             string.IsNullOrWhiteSpace(ModelAlias) ? VarsayilanModelAlias : ModelAlias.Trim();
+
+        public string GetEmbeddingModelAlias() =>
+            string.IsNullOrWhiteSpace(EmbeddingModelAlias) ? VarsayilanEmbeddingModelAlias : EmbeddingModelAlias.Trim();
 
         public int GetMaksGecmisTur() => Math.Clamp(MaksGecmisTur, 0, 20);
 

@@ -4,12 +4,12 @@ using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
+using MuhasibPro.Business.Services.SistemServices.AiAsistan;
 using MuhasibPro.Business.Services.SistemServices.LogServices;
 using MuhasibPro.Contracts.UIService;
 using MuhasibPro.Services.AiAsistan;
 using MuhasibPro.Services.CommonServices;
 using MuhasibPro.Services.UIService;
-using MuhasibPro.ViewModels.Services;
 
 namespace MuhasibPro.HostBuilders
 {
@@ -42,7 +42,11 @@ namespace MuhasibPro.HostBuilders
                 services.AddSingleton<IYolAciciService, YolAciciService>();
                 // Faz 6.92: AI asistan (sözleşme Business, impl App — DialogService emsali).
                 services.AddSingleton<IAsistanSohbetService, FoundryAsistanSohbetService>();
-                services.AddSingleton<IYardimIcerikSaglayici, YardimIcerikToplayici>();
+                // Faz 6.93: AI yardım bilgi tabanı (AsistanBilgi.db + hibrit RAG).
+                // Depo/gömülü içerik App'te, orkestratör Business'ta; üçü de durum tutar → Singleton.
+                services.AddSingleton<IYardimIcerikKaynagi, GomuluYardimIcerikKaynagi>();
+                services.AddSingleton<IYardimVektorUretici, FoundryYardimVektorUretici>();
+                services.AddSingleton<IYardimBilgiTabani, YardimBilgiTabaniService>();
 
 
 

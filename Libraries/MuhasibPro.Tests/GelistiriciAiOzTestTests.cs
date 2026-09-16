@@ -35,7 +35,7 @@ public class GelistiriciAiOzTestTests
 
         vm.AiOzTestVar.Should().BeTrue();
         vm.AiOzTestDetayi.Should().Contain("çözülemedi");
-        vm.AiOzTestDetayi.Should().Contain("RAG derlemi:");
+        vm.AiOzTestDetayi.Should().Contain("Yardım dizini:");
     }
 
     [Fact]

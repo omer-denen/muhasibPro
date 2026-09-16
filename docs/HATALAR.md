@@ -2,6 +2,30 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
+## Bilgi tabanı `HazirlaAsync(modelIndirmeyeIzin:true)` embedding modelini indirmiyordu (AÇIK — devredildi, 2026-09-17 — Oturum 280)
+- **Belirti:** Asistan panelinde dizin kuruluyor ama `Yardım dizini hazır: 60 madde • yalnız anahtar kelime` kalıyor; soru sorulunca "Asistan hazır değil. Önce HazirlaAsync çağırın." (canlı `ot279b_*`).
+- **Sebep:** `YardimBilgiTabaniService.cs:142-149` — `modelIndirmeyeIzin:true` dalında dahi `_vektorUretici.OnbellekteMiAsync()` ile kapı kapatılmış; model önbellekte değilse `UretAsync` hiç çağrılmıyor (oysa indirme `UretAsync` içinde). Sözleşme: `OnbellekteMiAsync` yalnız `modelIndirmeyeIzin:false` (6.91-G) kapısıdır.
+- **Çözüm (istenen):** `true` iken doğrudan `UretAsync` (indirir); `false` iken önbellek kapısı + lexical-only. Ek şüphe: iki servisin ayrı `FoundryLocalManager.CreateAsync` çağırması (doğrulanacak). **Sahiplik: motor diğer modelde** — brief `KONTROL-LISTESI` "Görev devri A".
+- Tarih: 2026-09-17
+
+## Model hazırlığı hatası yutulup ham "Asistan hazır değil" mesajı gösteriliyordu (ÇÖZÜLDÜ - 2026-09-17 - Oturum 280)
+- **Belirti:** Model indirilemediğinde sohbete model servisinin ham istisnası ("Asistan hazır değil. Önce HazirlaAsync çağırın.") düşüyor, gerçek sebep kayboluyordu.
+- **Sebep:** `AsistanSohbetViewModel.HazirlaIcAsync` hatayı `HataMetni`'ye yazıyor; `GonderAsync` devam edip `SorStreamingAsync`'i çağırınca ikinci hata ilkini eziyordu.
+- **Çözüm:** Hazırlık sonrası `HataMetni` doluysa akış durdurulur (gerçek sebep hata bandında kalır, Kural 11/12).
+- Tarih: 2026-09-17
+
+## Test var olmayan SQLite dosyasını `Mode=ReadWrite` ile açmaya çalışıyordu (SQLite Error 14) (ÇÖZÜLDÜ - 2026-09-17 - Oturum 280)
+- **Belirti:** `TenantCheckpointTests.Checkpoint_WalModluDosya…` kırmızı (Faz 6.73, 6.93 dışı).
+- **Sebep:** Test, oluşturmadığı `db-test.db`'yi `Mode=ReadWrite` ile açıyor; SQLite `ReadWrite` **var olan** dosya ister (Error 14 / unable to open database file).
+- **Çözüm:** `Mode=ReadWriteCreate` (dosya yoksa oluşturur). Build 0 + 641/641.
+- Tarih: 2026-09-17
+
+## Yeni overload `[]` koleksiyon ifadesiyle çağrıyı belirsizleştirdi (CS0121) (ÇÖZÜLDÜ - 2026-09-16 - Oturum 279)
+- **Belirti:** `AsistanPromptKurucu`'ya `YardimAramaSonucu` overload'ı eklenince mevcut `AsistanPromptKurucuTests` (4 çağrı: `MesajlariKur([], …)`) CS0121 ile derlenmedi — `[]` her iki `IReadOnlyList<T>`'ye de dönüşebildiği için bağlanamadı.
+- **Sebep:** Koleksiyon ifadesi hedef-tipli; iki overload da aynı konumda farklı generic liste alınca derleyici seçim yapamaz.
+- **Çözüm:** Yeni metoda **farklı ad** verildi (`AramaSonuclariylaKur`); mevcut imza ve testleri aynen korundu. Ders: mevcut çağrılarda `[]`/`null` geçilen metoda aynı-şekilli overload ekleme — yeni ada aç (Open-Closed + sahiplik saygısı).
+- Tarih: 2026-09-16
+
 ## `SettingsExpander` varsayılan kapalı gelince liste/aksiyon görünmüyordu ("iğne araması") (ÇÖZÜLDÜ - 2026-09-16 - Oturum 278)
 - **Belirti:** Denetim "Model yönetimi" kartında `SettingsExpander` başlık + disk özetini gösteriyor, ama indirilmiş model satırı ve `Sil` butonu canlıda görünmüyordu (UIA'da `Sil` yok). Kullanıcı yönetim listesini görmek için expander'ı elle açmak zorundaydı.
 - **Sebep:** Toolkit `SettingsExpander.IsExpanded` varsayılanı **false**; `ItemsSource` satırları yalnız açılınca realize edilir (Kural 16: "kritik bölüm gömülü kalmaz / iğne araması tasarım bug'ı").

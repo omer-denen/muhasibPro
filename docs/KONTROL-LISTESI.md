@@ -81,8 +81,8 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] **Data ✅ (kod mevcut):** `ITenantSQLiteDatabaseManager.CheckpointAndReleaseAsync(db)` — `PRAGMA wal_checkpoint(TRUNCATE)` + `SqliteConnection.ClearAllPools()` + `(ok, message)` kanıtı (busy>0 → ok=false + çerçeve sayıları). `TenantSQLiteDatabaseManager.CheckpointAndReleaseAsync`.
 - [x] **Business ✅ (kod mevcut):** `TenantSQLiteSelectionService.SwitchTenantAsync` + `DisconnectCurrentTenantAsync` eski-tenantı kapatır (`EskiTenantıKapatAsync` → `CheckpointAndReleaseAsync`); geçişi engellemez.
 - [x] **Kullanıcı değişimi notu ✅:** `Logout()` artık **yok** (ölü yol temizlenmiş) — not geçersizleşti.
-- [x] **Testler:** Business testleri mevcut (`BusinessDatabaseTests` Switch/Disconnect; `TenantDerinBaglantiTests`). **Ek (Oturum 278):** `TenantCheckpointTests` — gerçek dosya + WAL modu → checkpoint başarı + WAL boşaltma; dosya-yok/boş-ad hata. ⚠️ **Doğrulama bekliyor:** concurrent 6.93 motor işi derlemeyi kırdığı için testler bu oturumda koşulamadı (yardımcı tesliminde doğrulanacak).
-- [ ] **Kapı:** build 0/0 + test — 6.93 motor derlemesi yeşillenince ⬜
+- [x] **Testler:** Business testleri mevcut (`BusinessDatabaseTests` Switch/Disconnect; `TenantDerinBaglantiTests`). **Ek (Oturum 278):** `TenantCheckpointTests` — gerçek dosya + WAL modu → checkpoint başarı + WAL boşaltma; dosya-yok/boş-ad hata. ⚠️ **Kırmızı (Oturum 279, 6.93 dışı):** `Checkpoint_WalModluDosya…` — `Mode=ReadWrite` ile **olmayan** dosyayı açıyor (Error 14); yardımcı kodu çıkınca da kızarıyor. Adım 2 öncesi düzeltilmeli.
+- [ ] **Kapı:** build 0/0 ✅ (279) + test — `TenantCheckpointTests` düzeltmesi ⬜
 
 ## Faz 6.75 — Windows 11 Fluent geçişi (Mica-uyumlu, tüm ekranlar — Oturum 219, 📋 plan)
 - [x] **Kararlar:** görsel dil = Windows 11 Fluent tüm proje (AGENTS genel kural güncellendi; "toplu re-skin yok" kalktı) + Mica-uyumluluk zorunlu + **Kural 14** (view-öncesi tasarım araştırması) 📋
@@ -595,7 +595,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 
 ---
 
-## Faz 6.93 — AI Yardım Bilgi Tabanı (AsistanBilgi.db + Hibrit RAG) (Oturum 278 — plan ✅, uygulama başlamadı)
+## Faz 6.93 — AI Yardım Bilgi Tabanı (AsistanBilgi.db + Hibrit RAG) (Oturum 278 plan ✅ → Oturum 279 motor ✅ → Oturum 280 Adım 2 + 6.91-G ✅)
 
 > **Plan/sözleşme:** `docs/YARDIM-DB-PLAN.md` (dondurulmuş kontrat + veri modeli + davranış + dosya sahipliği).
 > **Sahiplik (kullanıcı kararı, Oturum 278):** **motor + veri diğer modelde**, **UI/entegrasyon/doğrulama bende**.
@@ -604,8 +604,31 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] **0. Araştırma + sözleşme ✅ (Oturum 278):** `REFERANSLAR` 278 (5 satır: Foundry RAG/embedding, BM25↔vektör/hibrit, FTS5 Türkçe sınırı, vstash RRF, on-device Türkçe karakterizasyon) + `docs/YARDIM-DB-PLAN.md` (frozen) ✅
 - [x] **0b. İçerik başlangıç seti ✅ (Oturum 278, bende):** `docs/yardim/*.md` **9 sayfa / 60 madde** (giriş, firma-dönem seçimi, çalışma alanı, mali dönem yönetimi, veritabanı/yedekleme, uygulama güncelleme, dönem şema göçü, AI asistanı, geliştirici araçları) — format `#` sayfa / `##` madde / `Etiket:` ✅
 - [ ] **1. Motor (diğer model):** `IYardimBilgiTabani` + DTO'lar, `YardimMarkdownCozumleyici`, `RrfBirlestirici`, `YardimSkorlayici` (TR normalizasyon), `YardimVektorDeposu` (SQLite), `YardimBilgiTabaniService`, `GomuluYardimIcerikKaynagi`, `FoundryYardimVektorUretici`, `AiAsistanSettings.EmbeddingModelAlias`, `docs/yardim/*.md`, retrieval'ı `FoundryAsistanSohbetService`/`AsistanPromptKurucu`'ya bağlama, `IYardimIcerikSaglayici` silme + testler ⬜
-- [ ] **2. UI/entegrasyon (bende):** asistan paneli "yardım dizini hazırlanıyor" + Denetim dizin durum satırı + öz-test sayımı + `YardimIcerikToplayici` silme + DI + Kural 13/14/19 + docs ⬜
-- [ ] **3. Doğrulama (bende):** build 0/0 + test + **Kural 18 canlı** (S1 indeks kurulumu, S2 anlamsal soru→doğru madde, S3 embedding'siz fallback, S4 içerik güncelle→yeniden indeks) + onay ⬜
-- [ ] **4. Güncelleme modülü entegrasyonu (bende — Faz 6.91-G):** app güncellemesinde `AsistanBilgi.db` tazelenir (post-update saga 4. adım `AI Yardım Dizini`); bloklamaz, embedding önbellekte değilse lexical-only. Motor (Adım 1) sonrası ⬜
+  - [x] **1a. Motor Adım 1 ✅🧪 (Oturum 279):** sözleşme DTO/interface'leri + `YardimMarkdownCozumleyici` + `RrfBirlestirici` + `YardimSkorlayici` TR ext + `YardimVektorDeposu` + `YardimBilgiTabaniService` + `GomuluYardimIcerikKaynagi` + `FoundryYardimVektorUretici` + `EmbeddingModelAlias` + csproj `EmbeddedResource` + retrieval swap (`BilgiTabani` nullable property + fallback, `AramaSonuclariylaKur`). Build 0 hata (solution x64) + yeni dosyalardan uyarı yok + `Yardim*|Rrf` **33/33** ✅. `IYardimIcerikSaglayici` SİLİNMEDİ (sıra notu) ✅. **Kalan (Adım 2, bende):** DI kaydı + eski yolun ctor'a taşınması + `IYardimIcerikSaglayici`/`YardimIcerikToplayici` silme.
+- [x] **2. UI/entegrasyon ✅🧪 (Oturum 280, bende):** DI (`IYardimIcerikKaynagi`/`IYardimVektorUretici`/`IYardimBilgiTabani` Singleton) + `FoundryAsistanSohbetService` ctor injection + eski RAG v1 yolu söküldü (`YardimIcerikToplayici` + `IYardimIcerikSaglayici` + `YardimliSayfaDto` + `MesajlariKur`/`IlgiliMaddeleriBul` silindi, Kural 4) + asistan paneli dizin durumu/ilerlemesi (Kural 11/12) + Denetim "Yapay Zeka" `Yardım dizini` kartı + `GelistiriciAraclari` öz-test sayımı + Kural 13 metinleri + `REFERANSLAR` 278 `Durum=✅`. Build 0 hata + **633/633** ✅
+- [~] **3. Doğrulama (bende):** build 0/0 ✅ + test ✅. **Kural 18 canlı (ot279*):** **S1 ✅** (panel açıldı + `Yardım dizini hazır: 60 madde`); **S2 ❌** → motor bug'ı ("Asistan hazır değil"); S3/S4 motor fix'i sonrası ⬜ · onay ⬜
+- [x] **4. Güncelleme modülü entegrasyonu ✅🧪 (Oturum 280, bende — Faz 6.91-G):** post-update saga 4. adım **`AI Yardım Dizini`** (`HazirlaAsync(modelIndirmeyeIzin:false)`, embedding indirilmez; bloklamaz, eksik semide → `Uyari`/Dikkat) + yüzde dağılımı (Dönem 60-88, Dizin 90-98) + `GuncellemeSonrasiView` 4 adımlı şerit (150→120px); 2 yeni test. Build 0 + 633/633
+- [ ] **1b. Motor fix (diğer model — devir, Oturum 280):** `modelIndirmeyeIzin:true` iken embedding **indirilsin** (`YardimBilgiTabaniService.cs:142-149` `OnbellekteMiAsync` kapısı yalnız `false` dalında kalsın) + Foundry yöneticisi tek kez kurulsun (çift `FoundryLocalManager.CreateAsync` doğrula/çöz) + testler ⬜
 
-**Kapı:** build 0/0 + test + Kural 18 canlı + `REFERANSLAR`/doküman güncel + kullanıcı onayı.
+**Kapı:** build 0/0 ✅ + test ✅ + Kural 18 canlı (S2-S4, motor fix sonrası) + `REFERANSLAR`/doküman güncel ✅ + kullanıcı onayı ⬜
+
+---
+
+## Görev devri — diğer model (Oturum 280)
+> **Çakışma kuralı:** bu görevler `Data`/`Business`/test dosyalarında; **`Views/**`, `ViewModels/**`, DI kayıtları, `docs/yardim/*.md` bu oturumda bende — dokunulmaz.**
+
+### A) 6.93 motor fix (blokaj — canlı S2-S4'ü açıyor)
+- **Belirti (canlı):** AI panelinde soru → "Asistan hazır değil. Önce HazirlaAsync çağırın."; dizin `60 madde • yalnız anahtar kelime` (semantik indeks hiç oluşmuyor).
+- **Kök neden 1 (sözleşme ihlali):** `YardimBilgiTabaniService.cs:142-149` — `modelIndirmeyeIzin:true` iken `OnbellekteMiAsync` ile kapı kapatılıyor; model önbellekte değilse **indirilmiyor**. Sözleşme (`docs/YARDIM-DB-PLAN.md`, `IYardimVektorUretici` notu): `true` → indir/yükle; `OnbellekteMiAsync` yalnız `false` (6.91-G) kapısıdır.
+- **Kök neden 2 (doğrulanacak):** `FoundryYardimVektorUretici` + `FoundryAsistanSohbetService` ayrı `_yoneticiOlustu` bayraklarıyla `FoundryLocalManager.CreateAsync` çağırıyor; ikinci çağrı atıyor olabilir (277'de tek kullanıcı varken çalışıyordu). SDK `CreateAsync` ikinci çağrı davranışını doğrula/güvene al.
+- **Kapsam:** `Business/Services|Contracts/SistemServices/AiAsistan` + `MuhasibPro/Services/AiAsistan` + testler. Arayüz/DTO **değişmez**.
+- **Test:** "önbellek yok → `UretAsync` çağrılmaz" davranışını doğrulayan test varsa düzelt (sözleşme: `true` iken çağrılır, `false` iken çağrılmaz); KB sonrası chat hazırlığının başarılı olduğunu doğrulayan test ekle. `Yardim*|Rrf` yeşil + build 0 hata.
+- **Teslim sonrası bende:** canlı S2/S3/S4 + onay.
+
+### B) Seed yönetici yetki bug'ı (DURUM açık ucu — bağımsız)
+- **Belirti:** `PermissionService` yöneticide bile tüm yetkileri `false` döner (AI paneli kilitli); canlı testte ancak dev DB'ye **geçici** KFR + `RolPermission(2300)` satırı eklenerek açılabiliyor.
+- **Kök neden (koddan doğrulandı):** (1) hiçbir kod yolu `KullaniciFirmaRol` yazmıyor (`PermissionService.cs:47-49` KFR yoksa `RolPermission`'a bakmadan `false`); (2) `RolPermission` hiç seed edilmiyor (production'da `new RolPermission`/`AddAsync` 0 caller) → `:51-54` yine boş; (3) `AuthenticationService.cs:181-194` bootstrap'ı yalnız görüntü modeline sentetik `Rol=Yönetici` yazar; PermissionService bunu okumaz. Seed yalnız `Kullanici` + 2 `KullaniciRol` üretir (`SistemDbContext.cs:76-94`, `SeedDataKullaniciRol.cs:9-33`); firma seed'i de yok.
+- **Kapsam:** `Libraries/MuhasibPro.Data` + `Libraries/MuhasibPro.Business` + `MuhasibPro.Tests`. **DI/View/ViewModel yasak.**
+- **Sıra (Kural 13/14/15):** araştır (rol→izin tohumlama + firma oluşturmada rol atama deseni; `REFERANSLAR`'a yaz) → yaklaşımı (seed migration / idempotent onarım / firma-oluşturmada KFR) sun, onay al, sonra kodla (migration = kritik yapı → Kural 8). Mevcut DB'ler için **idempotent backfill** şart.
+- **Test:** gerçek seed/DB ile integration testi (mevcut `PolitikaTests` mock'lu olduğu için bug'ı yakalamıyor) + firma→KFR + yönetici izni.
+- **Not (küçük borç):** `Permission.cs:5` yorumu "eşleme Global.db'de" diyor; tablo `SistemDbContext` (Sistem.db) içinde → yorum düzeltilmeli.

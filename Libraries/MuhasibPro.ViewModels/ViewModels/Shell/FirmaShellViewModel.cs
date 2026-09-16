@@ -144,7 +144,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         internal const string YardimAnahtari = "FirmaShell";
         internal const string YardimBasligi = "Firma & Mali Dönem Seçimi — Yardım";
 
-        /// <summary>Kural 13 içeriği + Faz 6.92 RAG derlemi (tek kaynak burası; toplayıcı buradan okur).</summary>
+        /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
         internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
         {
             new() { Baslik = "Firma nasıl seçerim?", Aciklama = "Yukarıdaki firma seçiciye tıklayın; açılan listede firma kodu, ünvan veya şehir yazarak arayabilirsiniz. Bir firmaya tıkladığınızda seçilir ve liste kapanır; firma bilgileri alttaki kartta görünür." },

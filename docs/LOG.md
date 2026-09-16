@@ -322,6 +322,8 @@
 | 277 | 2026-09-16 | Faz 6.91-D Revizyon 3: hero + 3 adım + Atlandı + B1/B2 (`PostUpdatePending`) + Light/Dark `ThemeResource` düzeltmesi + çapraz-model build açma | ✅🧪 | C14 |
 | 278 | 2026-09-16 | Faz 6.92 Adım 5c (Model yönetimi UI) + Faz 6.91-E (dönem güncelleme sayfası silindi → erişimde onay+inline göç, manuel Güncelle butonları kaldırıldı) + Faz 6.93 plan/sözleşme devri | ✅🧪 | C14 |
 | 278b | 2026-09-16 | Faz 6.93 plan/sözleşme (AI yardım bilgi tabanı `AsistanBilgi.db` + hibrit RAG): araştırma 5 satır + `YARDIM-DB-PLAN.md` frozen + motor/veri diğer modele devir (`📨`) | 📋 plan | C14 |
+| 279 | 2026-09-16 | Faz 6.93 Adım 1 motor (sözleşme birebir: KB + RRF + depo + Foundry embedding + retrieval swap) — build 0 + 33/33 + full 640/641 (tek kırmızı 6.73'ün, dokunulmadı) | ✅🧪 | C14 |
+| 280 | 2026-09-17 | Faz 6.93 Adım 2 (eski RAG v1 sökümü + DI + panel dizin durumu + Denetim kartı + öz-test) · 6.91-G (saga 4. adım `AI Yardım Dizini` + 4 adımlı şerit) · 6.73 testi düzeltildi (641/641) — canlı S1 ✅, S2 motor bug'ına takıldı (devir) | ✅🧪 | C14 |
 
 ---
 

@@ -53,6 +53,11 @@
                     <FontIcon Glyph="{StaticResource IconZap}" FontSize="16" />
                 </controls:SettingsCard.HeaderIcon>
             </controls:SettingsCard>
+            <controls:SettingsCard Header="Yardım dizini" Description="{Binding DizinDurumMetni}">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconDatabase}" FontSize="16" />
+                </controls:SettingsCard.HeaderIcon>
+            </controls:SettingsCard>
             <TextBlock Text="Model indirme/yükleme, çalışma alanındaki AI Yardım Asistanı panelinden yapılır (statü çubuğu → Asistan)."
                        Style="{StaticResource CaptionTextBlockStyle}"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"

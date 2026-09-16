@@ -28,7 +28,7 @@ public class TenantCheckpointTests
         var walPath = dbPath + "-wal";
         try
         {
-            using (var conn = new SqliteConnection($"Data Source={dbPath};Mode=ReadWrite;Pooling=False;"))
+            using (var conn = new SqliteConnection($"Data Source={dbPath};Mode=ReadWriteCreate;Pooling=False;"))
             {
                 await conn.OpenAsync();
                 using var pragma = conn.CreateCommand();

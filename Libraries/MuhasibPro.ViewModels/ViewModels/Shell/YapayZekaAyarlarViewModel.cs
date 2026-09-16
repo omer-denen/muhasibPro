@@ -23,6 +23,7 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
     private readonly IAuthenticationService? _auth;
     private readonly ISurumOzellikService? _surum;
     private readonly IAsistanSohbetService? _sohbet;
+    private readonly IYardimBilgiTabani? _yardimTabani;
     private AiAsistanSettings _ayarlar = new();
     private bool _yuklendi;
 
@@ -31,12 +32,14 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
         IAiAsistanSettingsProvider? saglayici = null,
         IAuthenticationService? auth = null,
         ISurumOzellikService? surum = null,
-        IAsistanSohbetService? sohbet = null) : base(commonServices)
+        IAsistanSohbetService? sohbet = null,
+        IYardimBilgiTabani? yardimTabani = null) : base(commonServices)
     {
         _saglayici = saglayici;
         _auth = auth;
         _surum = surum;
         _sohbet = sohbet;
+        _yardimTabani = yardimTabani;
     }
 
     public async Task LoadAsync()
@@ -55,6 +58,7 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
             NotifyPropertyChanged(nameof(IsYonetici));
             await SurumuYukleAsync();
             await ModelDurumunuYukleAsync();
+            await DizinDurumunuYukleAsync();
         }
         finally
         {
@@ -151,6 +155,14 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
     {
         get => _modelDurumMetni;
         private set => Set(ref _modelDurumMetni, value);
+    }
+
+    private string _dizinDurumMetni = string.Empty;
+    /// <summary>Yardım bilgi tabanı dizini (madde sayısı + semantik indeks) — Faz 6.93.</summary>
+    public string DizinDurumMetni
+    {
+        get => _dizinDurumMetni;
+        private set => Set(ref _dizinDurumMetni, value);
     }
 
     /// <summary>İndirilmiş modeller (disk yönetimi listesi).</summary>
@@ -437,10 +449,33 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Yardım bilgi tabanı dizinini okur (Faz 6.93) — burada hazırlanmaz; panelde ilk soruda kurulur.</summary>
+    private async Task DizinDurumunuYukleAsync()
+    {
+        if (_yardimTabani == null)
+        {
+            DizinDurumMetni = "Bilinmiyor.";
+            return;
+        }
+        try
+        {
+            var durum = await _yardimTabani.DurumGetirAsync();
+            DizinDurumMetni = durum.MaddeSayisi == 0
+                ? "Hazır değil — çalışma alanındaki asistan panelinde ilk soruda hazırlanır"
+                : durum.VektorVarMi
+                    ? $"{durum.MaddeSayisi} madde • anlamsal arama açık"
+                    : $"{durum.MaddeSayisi} madde • yalnız anahtar kelime";
+        }
+        catch
+        {
+            DizinDurumMetni = "Bilinmiyor.";
+        }
+    }
+
     private async Task YardimGoster() =>
         await DialogService.ShowYardimAsync(YardimBasligi, YardimMaddeleri());
 
-    /// <summary>Kural 13 içeriği (AI öz-yardımı RAG derlemi dışındadır — meta içerik).</summary>
+    /// <summary>Kural 13 içeriği (AI öz-yardımı bilgi tabanı dışındadır — meta içerik).</summary>
     internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
     {
         new() { Baslik = "Bu bölüm ne yapar?", Aciklama = "AI yardım asistanının ayarlarını ve model durumunu yönetir: sürüm hakkı, model seçimi ve davranış eşikleri." },
@@ -449,6 +484,7 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
         new() { Baslik = "Modeli uygula", Aciklama = "'Uygula', seçili model adını etkinleştirir. Yeni model indirilmediyse indirme başlar ve uzun sürebilir; ilerleme bu bölümde çubukla görünür. Uygulama bitince model durumu güncellenir." },
         new() { Baslik = "Model yönetimi", Aciklama = "İndirilmiş modeller boyutu ve 'Yüklü' rozetiyle listelenir; üstteki 'Yenile' listeyi ve disk kullanımını tazeler. 'Sil' modeli diskten kalıcı olarak kaldırır: önce onay ister, yüklü modeli silmeden önce bellekten bırakır. Silme geri alınamaz." },
         new() { Baslik = "Model indirme", Aciklama = "Model/yürütücü indirme bu bölümde değil, çalışma alanındaki AI Yardım Asistanı panelinden yapılır (statü çubuğu → Asistan; ilk soruda otomatik indirilir). İlerleme panelde görünür." },
+        new() { Baslik = "Yardım dizini", Aciklama = "Asistanın dayandığı yardım maddeleri uygulamaya gömülü Markdown içerikten gelir ve AsistanBilgi.db dizininde tutulur. İlk soruda kurulur; model indirilemezse yalnız anahtar kelimeyle arama yapılır ve asistan çalışmaya devam eder." },
         new() { Baslik = "Davranış eşikleri", Aciklama = "Geçmiş turu (soruya eklenen konuşma), madde sayısı (prompt'a giren yardım maddesi) ve soru zaman aşımı buradan ayarlanır." },
         new() { Baslik = "Etkin / kapalı", Aciklama = "Kapalıysa sohbet paneli kilitli görünür ve soru alınmaz. Model diskte kalır, yeniden açınca hazırlanır." },
     };

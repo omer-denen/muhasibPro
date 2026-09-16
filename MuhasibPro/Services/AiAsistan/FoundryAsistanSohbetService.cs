@@ -21,7 +21,7 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
     private const string UygulamaAdi = "MuhasibPro";
 
     private readonly IAiAsistanSettingsProvider _ayarlar;
-    private readonly IYardimIcerikSaglayici _icerik;
+    private readonly IYardimBilgiTabani _bilgiTabani;
     private readonly ILogger<FoundryAsistanSohbetService>? _logger;
     private readonly SemaphoreSlim _kapi = new(1, 1);
     private bool _yoneticiOlustu;
@@ -30,11 +30,11 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
 
     public FoundryAsistanSohbetService(
         IAiAsistanSettingsProvider ayarlar,
-        IYardimIcerikSaglayici icerik,
+        IYardimBilgiTabani bilgiTabani,
         ILogger<FoundryAsistanSohbetService>? logger = null)
     {
         _ayarlar = ayarlar;
-        _icerik = icerik;
+        _bilgiTabani = bilgiTabani;
         _logger = logger;
     }
 
@@ -132,9 +132,9 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
         if (alias != _hazirAlias)
             throw new InvalidOperationException("Model ayarı değişmiş. Önce HazirlaAsync ile yeniden hazırlayın.");
 
-        var sayfalar = _icerik.TumSayfalariGetir();
-        var bulunan = YardimSkorlayici.IlgiliMaddeleriBul(soru.Soru, sayfalar, ayar.GetEnFazlaMadde());
-        var mesajlar = AsistanPromptKurucu.MesajlariKur(bulunan, soru, ayar.GetMaksGecmisTur());
+        var sonuclar = await _bilgiTabani.AraAsync(soru.Soru, ayar.GetEnFazlaMadde(), ct).ConfigureAwait(false);
+        IReadOnlyList<AsistanPromptKurucu.SohbetMesaji> mesajlar =
+            AsistanPromptKurucu.AramaSonuclariylaKur(sonuclar, soru, ayar.GetMaksGecmisTur());
 
         var katalog = await FoundryLocalManager.Instance.GetCatalogAsync().ConfigureAwait(false);
         var model = await katalog.GetModelAsync(alias).ConfigureAwait(false)

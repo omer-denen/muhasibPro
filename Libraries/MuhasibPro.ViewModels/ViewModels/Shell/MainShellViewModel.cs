@@ -42,7 +42,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         internal const string YardimAnahtari = "MainShell";
         internal const string YardimBasligi = "Çalışma Alanı — Yardım";
 
-        /// <summary>Kural 13 içeriği + Faz 6.92 RAG derlemi (tek kaynak burası; toplayıcı buradan okur).</summary>
+        /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
         internal static List<MuhasibPro.Business.DTOModel.SistemModel.YardimMaddesiDto> YardimMaddeleri() => new()
         {
             new() { Baslik = "Bu ekran nedir?", Aciklama = "Girişten sonra açılan ana çalışma alanıdır: solda modül menüsü, sağdaki panelde seçili modülün içeriği gösterilir." },

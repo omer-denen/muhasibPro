@@ -293,7 +293,7 @@ public class LoginViewModel : ViewModelBase
     internal const string YardimAnahtari = "Login";
     internal const string YardimBasligi = "Giriş — Yardım";
 
-    /// <summary>Kural 13 içeriği + Faz 6.92 RAG derlemi (tek kaynak burası; toplayıcı buradan okur).</summary>
+    /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
     internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
     {
         new() { Baslik = "Nasıl giriş yaparım?", Aciklama = "Kullanıcı adı ve şifrenizi girip 'Sisteme Giriş Yap' butonuna basın (Enter da çalışır). Bilgiler doğruysa firma seçim ekranına geçilir." },

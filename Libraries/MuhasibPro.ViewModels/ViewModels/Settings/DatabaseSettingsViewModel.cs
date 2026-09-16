@@ -101,7 +101,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
         internal const string YardimAnahtari = "DatabaseSettings";
         internal const string YardimBasligi = "Veritabanı Ayarları — Yardım";
 
-        /// <summary>Kural 13 içeriği + Faz 6.92 RAG derlemi (tek kaynak burası; toplayıcı buradan okur).</summary>
+        /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
         internal static List<Business.DTOModel.SistemModel.YardimMaddesiDto> YardimMaddeleri() => new()
         {
             new() { Baslik = "Manuel yedek saklama limiti", Aciklama = "Her dönem için saklanacak en fazla manuel yedek sayısıdır (1-20). Limit aşılınca en eski yedek otomatik silinir (FIFO)." },
