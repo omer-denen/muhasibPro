@@ -584,8 +584,23 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] **5b. UI revizyonu ✅🧪 (Oturum 277, kullanıcı kararı):** asistan **statü çubuğunun en sağında 🤖 → sağa hizalı Flyout** (`TopEdgeAlignedRight`; MainShell yerleşimine girmez, popup); panel başlığında `?` → **gizle**; **model indirme panel içinde** (Denetim'deki "Modeli Hazırla" + hazırlık bölümü kaldırıldı, yalnız ayar + ipucu); ölü `HazirlaCommand`/panel `YardimCommand` temizlendi (Kural 4); yardım maddeleri güncellendi. Canlı: kapalı/açık/gizle (`ot277f_*`), **C2/C3 ✅** (model indi+yüklendi, düzgün Türkçe soru → RAG cevabı `ot277f_soru_19.png`). Build 0 + **604/604** ✅
 - [x] **5c. Servis/contract ✅ (diğer model, Adım 8) + UI bağlantısı ✅ (Oturum 278):** model **listele + disk**, **sil** (+unload), **alias-değişimi uygulama** bitti. UI: Denetim "Model yönetimi" (`SettingsExpander` liste + disk özeti + `Yenile` + `Sil` onay dialogu) + "Model → Uygula" (`AliasDegisiminiUygulaAsync` + determinate ilerleme) + indirme yönergeleri; sohbet panelinde alias uyuşmazlığı yeniden-hazırlama. Canlı S1/S2/S3 + restore (`ot278*`), test **617/617** ✅🧪
 - [ ] **7. Kapanış:** build 0/0 ✅ + test 617/617 ✅ + Kural 18 canlı (model liste/sil/alias-uygula ✅; Standart=kilit + streaming önceki oturumlarda) → **kullanıcı onayı bekliyor** ⬜
-- [x] **8. Model yönetimi servisi ✅ (kod, 277 isteği):** contract +4 metot (`ModelleriGetir`/`DiskKullanimi`/`ModelSil`/`AliasDegisiminiUygula`) + 3 DTO + Foundry impl (SDK imzaları DLL metaverisinden doğrulandı) + `ModelKlasorOlcer` + 4 fact; UI bağlantısı 277'de ✅
+- [x] **8. Model yönetimi servisi ✅🧪 (kod + Windows/canlış, 277 isteği):** contract +4 metot (`ModelleriGetir`/`DiskKullanimi`/`ModelSil`/`AliasDegisiminiUygula`) + 3 DTO + Foundry impl (SDK imzaları DLL metaverisinden doğrulandı) + `ModelKlasorOlcer` + 4 fact; UI 278 bağladı, canlı S1-S4 ✅, test 617/617 ✅
 
 **Kapı:** Kural 8 (Adım 5 view'ları) + build 0/0 + test + Kural 18 canlı + onay.
 **Windows doğrulama paketi ✅🧪 (Oturum 275, 2026-09-16):** restore doğrulandı (`project.assets.json`) + build 0 hata (yeni dosyalardan uyarı yok) + test **583/583** (bekçi yeşil) + bozulan eski test yok.
 **Windows doğrulama paketi Adım 5+6 ✅🧪 (Oturum 277, 2026-09-16):** build 0 hata + test **604/604** (597 + Rev3/UI değişiklikleri) + C2/C3/C4/C5/C6/C7/C8/C11 ✅ (C1 birim-testli; lisans=Deneme) + kritik bulgu (seed `KullaniciFirmaRol` yok → admin tüm yetkilerde kilitli) + UI revizyonu (statü çubuğu sağda flyout).
+
+---
+
+## Faz 6.93 — AI Yardım Bilgi Tabanı (AsistanBilgi.db + Hibrit RAG) (Oturum 278 — plan ✅, uygulama başlamadı)
+
+> **Plan/sözleşme:** `docs/YARDIM-DB-PLAN.md` (dondurulmuş kontrat + veri modeli + davranış + dosya sahipliği).
+> **Sahiplik (kullanıcı kararı, Oturum 278):** **motor + veri diğer modelde**, **UI/entegrasyon/doğrulama bende**.
+> **Kararlar:** yalnız AI kapsamı · içerik repoda `docs/yardim/*.md` · **hibrit** (lexical + Foundry embedding + RRF; FTS5 yok) · ayrı `%AppData%\MuhasibPro\AsistanBilgi.db`.
+
+- [x] **0. Araştırma + sözleşme ✅ (Oturum 278):** `REFERANSLAR` 278 (5 satır: Foundry RAG/embedding, BM25↔vektör/hibrit, FTS5 Türkçe sınırı, vstash RRF, on-device Türkçe karakterizasyon) + `docs/YARDIM-DB-PLAN.md` (frozen) ✅
+- [ ] **1. Motor (diğer model):** `IYardimBilgiTabani` + DTO'lar, `YardimMarkdownCozumleyici`, `RrfBirlestirici`, `YardimSkorlayici` (TR normalizasyon), `YardimVektorDeposu` (SQLite), `YardimBilgiTabaniService`, `GomuluYardimIcerikKaynagi`, `FoundryYardimVektorUretici`, `AiAsistanSettings.EmbeddingModelAlias`, `docs/yardim/*.md`, retrieval'ı `FoundryAsistanSohbetService`/`AsistanPromptKurucu`'ya bağlama, `IYardimIcerikSaglayici` silme + testler ⬜
+- [ ] **2. UI/entegrasyon (bende):** asistan paneli "yardım dizini hazırlanıyor" + Denetim dizin durum satırı + öz-test sayımı + `YardimIcerikToplayici` silme + DI + Kural 13/14/19 + docs ⬜
+- [ ] **3. Doğrulama (bende):** build 0/0 + test + **Kural 18 canlı** (S1 indeks kurulumu, S2 anlamsal soru→doğru madde, S3 embedding'siz fallback, S4 içerik güncelle→yeniden indeks) + onay ⬜
+
+**Kapı:** build 0/0 + test + Kural 18 canlı + `REFERANSLAR`/doküman güncel + kullanıcı onayı.

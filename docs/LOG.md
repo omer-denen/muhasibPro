@@ -321,6 +321,7 @@
 | 276 | 2026-09-16 | AI Yardım Asistanı Faz 6.92 Adım 1-6 ✅🧪 (UI drawer'a taşınıyor — 277'ye devir) | 📋 devir | C14 |
 | 277 | 2026-09-16 | Faz 6.91-D Revizyon 3: hero + 3 adım + Atlandı + B1/B2 (`PostUpdatePending`) + Light/Dark `ThemeResource` düzeltmesi + çapraz-model build açma | ✅🧪 | C14 |
 | 278 | 2026-09-16 | Faz 6.92 Adım 5c: servis→UI bağlama (Denetim "Model yönetimi" liste+disk+Sil+onay, alias Uygula, indirme yönergeleri, sohbet alias uyuşmazlığı düzeltmesi) | ✅🧪 | C14 |
+| 278b | 2026-09-16 | Faz 6.93 plan/sözleşme (AI yardım bilgi tabanı `AsistanBilgi.db` + hibrit RAG): araştırma 5 satır + `YARDIM-DB-PLAN.md` frozen + motor/veri diğer modele devir (`📨`) | 📋 plan | C14 |
 
 ---
 
