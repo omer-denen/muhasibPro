@@ -77,12 +77,12 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [ ] **Dalga 3 — Bildirim/progress disiplini:** Faz 6.71/4 ile aynı kapsam (çekirdek ekranlarına uygulanır) ⬜
 - [ ] **Mühür hükmü (kullanıcıda):** canlı E2E onayı → Faz B (Cari pilotu, saf Fluent) açılır ⬜
 
-## Faz 6.73 — Tenant geçiş doğrulaması: WAL checkpoint + dispose + DB log (Oturum 209, 📋 plan)
-- [ ] **Data:** `ITenantSQLiteDatabaseManager.CheckpointAndReleaseAsync(db)` — `PRAGMA wal_checkpoint(TRUNCATE)` + havuz bırakma + `(ok, message)` kanıtı ⬜
-- [ ] **Business:** `SwitchTenantAsync` + `DisconnectCurrentTenantAsync` eski-tenant kapatması (uyarı-logla devam, geçişi engellemez) + Sistem.db bilgi/hata logları ⬜
-- [ ] **Kullanıcı değişimi notu:** `ShellViewModel.Logout()` ölü yol (çağıranı yok) — yeni kullanıcı tenant seçince switch zaten eskiyi kapatır; logout diriltilirse `DisconnectCurrentTenantAsync` çağırmak zorunda ⬜
-- [ ] **Testler:** Data gerçek-dosya testi (WAL + TRUNCATE) + Business testleri (çağrı adı, log yazımı, fail'de devam, tenantsız pas) ⬜
-- [ ] **Kapı:** build 0/0 + test + smoke + docs ⬜
+## Faz 6.73 — Tenant geçiş doğrulaması: WAL checkpoint + dispose + DB log (Oturum 209 — ✅ KOD MEVCUT, Oturum 278 kapanış)
+- [x] **Data ✅ (kod mevcut):** `ITenantSQLiteDatabaseManager.CheckpointAndReleaseAsync(db)` — `PRAGMA wal_checkpoint(TRUNCATE)` + `SqliteConnection.ClearAllPools()` + `(ok, message)` kanıtı (busy>0 → ok=false + çerçeve sayıları). `TenantSQLiteDatabaseManager.CheckpointAndReleaseAsync`.
+- [x] **Business ✅ (kod mevcut):** `TenantSQLiteSelectionService.SwitchTenantAsync` + `DisconnectCurrentTenantAsync` eski-tenantı kapatır (`EskiTenantıKapatAsync` → `CheckpointAndReleaseAsync`); geçişi engellemez.
+- [x] **Kullanıcı değişimi notu ✅:** `Logout()` artık **yok** (ölü yol temizlenmiş) — not geçersizleşti.
+- [x] **Testler:** Business testleri mevcut (`BusinessDatabaseTests` Switch/Disconnect; `TenantDerinBaglantiTests`). **Ek (Oturum 278):** `TenantCheckpointTests` — gerçek dosya + WAL modu → checkpoint başarı + WAL boşaltma; dosya-yok/boş-ad hata. ⚠️ **Doğrulama bekliyor:** concurrent 6.93 motor işi derlemeyi kırdığı için testler bu oturumda koşulamadı (yardımcı tesliminde doğrulanacak).
+- [ ] **Kapı:** build 0/0 + test — 6.93 motor derlemesi yeşillenince ⬜
 
 ## Faz 6.75 — Windows 11 Fluent geçişi (Mica-uyumlu, tüm ekranlar — Oturum 219, 📋 plan)
 - [x] **Kararlar:** görsel dil = Windows 11 Fluent tüm proje (AGENTS genel kural güncellendi; "toplu re-skin yok" kalktı) + Mica-uyumluluk zorunlu + **Kural 14** (view-öncesi tasarım araştırması) 📋
