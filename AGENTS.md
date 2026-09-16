@@ -11,6 +11,7 @@ Bu projede çalışmaya başlamadan ÖNCE şu dosyaları oku:
 - `docs/TASARIM-KURALLARI.md` — katmanlı sayfa yapısı (zemin → ana border → kartlar), Kural 17'nin ayrıntısı (her View/XAML işinde okunur)
 - `docs/CEKIRDEK-MODUL-PLAN.md` — çekirdek faz planı ve Kesin Kurallar (Kural 7: modelden gelen gerçek veri, örn. yedek saklama `GetManuelKeep()` → `CleanOldBackupsAsync` request model ayardan okur)
 - `docs/AYARLAR-PANEL-PLAN.md` — per-view ayar panelleri haritası (varsa; her view kendi ayarını yapar)
+- `docs/YARDIM-DB-PLAN.md` — Faz 6.93 AI Yardım Bilgi Tabanı (`AsistanBilgi.db` + hibrit RAG) **dondurulmuş sözleşmesi** + motor/UI dosya sahipliği (aktif faz)
 - `docs/REFERANSLAR.md` — referans defteri: alınan kaynak + hangi view/özelliğe uygulandığı (Kural 19; yeni view/özellikten önce oku, aynı işi tekrar yapma)
 
 > **Arşiv:** `docs/Arsiv/` + `docs/LOG/Arsiv/` okuma yolunda DEĞİL — yalnız grep/arama gerekirse açılır. **Bu proje ana projedir;** eski referans dönemler (AI-Studio/WebToXaml/OOBE-şablonu vb.) yürürlükten kalktı ve arşivdedir.
