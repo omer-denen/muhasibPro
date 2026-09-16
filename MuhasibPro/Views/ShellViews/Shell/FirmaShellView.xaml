@@ -102,6 +102,39 @@
                                     <ProgressBar IsIndeterminate="True" Height="4" Foreground="{ThemeResource AccentFillColorDefaultBrush}" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
                                     <TextBlock Text="{x:Bind ViewModel.Progress.UpdateStatus, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
                                 </StackPanel>
+
+                                <!-- Inline tenant göç ilerlemesi (Faz 6.91-E; Kural 12: determinate + adım rozetleri) -->
+                                <StackPanel Spacing="6" Visibility="{x:Bind ViewModel.UpdateCoordinator.Akis.IsRunning, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                                    <ProgressBar Value="{x:Bind ViewModel.UpdateCoordinator.Akis.ProgressYuzde, Mode=OneWay}" Maximum="100" Height="4"
+                                                 Foreground="{ThemeResource AccentFillColorDefaultBrush}" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                    <TextBlock Text="{x:Bind ViewModel.UpdateCoordinator.Akis.AktifAdim, Mode=OneWay}" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextWrapping="Wrap" />
+                                    <ItemsControl ItemsSource="{x:Bind ViewModel.UpdateCoordinator.Akis.Steps, Mode=OneWay}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="14" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                              Visibility="{Binding IsDone, Converter={StaticResource TrueToVis}}" />
+                                                    <ProgressRing IsActive="{Binding IsRunning}" Width="12" Height="12"
+                                                                  Visibility="{Binding IsRunning, Converter={StaticResource TrueToVis}}" />
+                                                    <FontIcon Glyph="&#xE783;" FontSize="11" Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                                              Visibility="{Binding IsFaulted, Converter={StaticResource TrueToVis}}" />
+                                                    <FontIcon Glyph="&#xE738;" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                              Visibility="{Binding IsPending, Converter={StaticResource TrueToVis}}" />
+                                                    <TextBlock Text="{Binding Title}" FontSize="11" VerticalAlignment="Center"
+                                                               Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                                    <TextBlock Text="{Binding Detail}" FontSize="10" VerticalAlignment="Center"
+                                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                             </StackPanel>
 
                             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0">

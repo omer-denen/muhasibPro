@@ -49,7 +49,6 @@ namespace MuhasibPro.Configurations
             NavigationService.Register<MainShellViewModel, MainShellView>();
             NavigationService.Register<FirmaShellViewModel,FirmaShellView>();
             NavigationService.Register<DenetimMasasiViewModel, DenetimMasasiView>();
-            NavigationService.Register<TenantDatabaseUpdateViewModel,TenantDatabaseUpdateView>();
             
             
 

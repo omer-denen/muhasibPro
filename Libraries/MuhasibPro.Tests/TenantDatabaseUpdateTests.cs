@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Moq;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
@@ -273,16 +273,13 @@ public class TenantDatabaseUpdateTests
 
     #region TenantDatabaseUpdateCoordinator
 
-    private static (Mock<MuhasibPro.Business.Contracts.UIServices.CommonServices.ICommonServices> common, Mock<MuhasibPro.Business.Contracts.UIServices.CommonServices.IDialogService> dialogs, Mock<MuhasibPro.Business.Contracts.UIServices.CommonServices.INavigationService> nav, Mock<ITenantDatabaseUpdateService> update) CoordinatorMocks(TenantUpdateDecision karar)
+    private static (Mock<MuhasibPro.Business.Contracts.UIServices.CommonServices.ICommonServices> common, Mock<MuhasibPro.Business.Contracts.UIServices.CommonServices.IDialogService> dialogs, Mock<ITenantDatabaseUpdateService> update, Mock<ITenantSQLiteDatabaseOperationService> ops) CoordinatorMocks(TenantUpdateDecision karar)
     {
         var dialogs = new Mock<MuhasibPro.Business.Contracts.UIServices.CommonServices.IDialogService>();
         dialogs.Setup(d => d.ShowTenantUpdateConfirmAsync(It.IsAny<TenantUpdateCheckResult>())).ReturnsAsync(karar);
-        var nav = new Mock<MuhasibPro.Business.Contracts.UIServices.CommonServices.INavigationService>();
-        nav.Setup(n => n.CreateNewViewAsync<MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateViewModel>(It.IsAny<object>(), It.IsAny<string>())).ReturnsAsync(1);
         var common = new Mock<MuhasibPro.Business.Contracts.UIServices.CommonServices.ICommonServices>();
         common.SetupGet(c => c.DialogService).Returns(dialogs.Object);
-        common.SetupGet(c => c.NavigationService).Returns(nav.Object);
-        return (common, dialogs, nav, new Mock<ITenantDatabaseUpdateService>());
+        return (common, dialogs, new Mock<ITenantDatabaseUpdateService>(), new Mock<ITenantSQLiteDatabaseOperationService>());
     }
 
     private static TenantUpdateCheckResult GuncellemeGerekenKontrol() => new()
@@ -296,12 +293,12 @@ public class TenantDatabaseUpdateTests
     [Fact]
     public async Task Coordinator_GuncellemeYoksa_DogrudanSwitch()
     {
-        var (common, dialogs, nav, update) = CoordinatorMocks(TenantUpdateDecision.Vazgec);
+        var (common, dialogs, update, ops) = CoordinatorMocks(TenantUpdateDecision.Vazgec);
         update.Setup(u => u.CheckUpdateRequiredAsync("db-TEST_2027")).ReturnsAsync(new TenantUpdateCheckResult { CheckSucceeded = true, NeedsUpdate = false });
         update.Setup(u => u.SwitchAndPublishAsync("db-TEST_2027", It.IsAny<FirmaModel>(), It.IsAny<MaliDonemModel>()))
             .ReturnsAsync(new TenantUpdateSwitchResult { Success = true, ConnectionMessage = "bağlandı" });
         var progress = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantUpdateProgressViewModel();
-        var coordinator = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateCoordinator(common.Object, update.Object, progress);
+        var coordinator = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateCoordinator(common.Object, update.Object, ops.Object, progress);
 
         await coordinator.EnsureSwitchedAsync("db-TEST_2027", new FirmaModel(), new MaliDonemModel());
 
@@ -311,31 +308,41 @@ public class TenantDatabaseUpdateTests
     }
 
     [Fact]
-    public async Task Coordinator_SimdiGuncelle_SayfayaYonlendirSwitchYok()
+    public async Task Coordinator_SimdiGuncelle_InlineGocCalisir()
     {
-        var (common, dialogs, nav, update) = CoordinatorMocks(TenantUpdateDecision.SimdiGuncelle);
+        var (common, dialogs, update, ops) = CoordinatorMocks(TenantUpdateDecision.SimdiGuncelle);
         update.Setup(u => u.CheckUpdateRequiredAsync("db-TEST_2027")).ReturnsAsync(GuncellemeGerekenKontrol());
+        update.Setup(u => u.SwitchAndPublishAsync("db-TEST_2027", It.IsAny<FirmaModel>(), It.IsAny<MaliDonemModel>()))
+            .ReturnsAsync(new TenantUpdateSwitchResult { Success = true });
+        update.Setup(u => u.ValidateAsync("db-TEST_2027")).ReturnsAsync(true);
+        ops.Setup(o => o.CreateBackupAsync("db-TEST_2027", MuhasibPro.Domain.Enum.DatabaseEnum.DatabaseBackupType.Migration))
+            .ReturnsAsync(new SuccessApiDataResponse<DatabaseBackupResult>(new DatabaseBackupResult
+            {
+                IsBackupComleted = true,
+                BackupFilePath = "C:\\yedek.backup",
+                BackupFileName = "yedek.backup"
+            }, "ok"));
         var progress = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantUpdateProgressViewModel();
-        var coordinator = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateCoordinator(common.Object, update.Object, progress);
+        var coordinator = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateCoordinator(common.Object, update.Object, ops.Object, progress);
 
         await coordinator.EnsureSwitchedAsync("db-TEST_2027", new FirmaModel(), new MaliDonemModel());
 
-        nav.Verify(n => n.CreateNewViewAsync<MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateViewModel>(It.IsAny<object>(), It.IsAny<string>()), Times.Once);
-        update.Verify(u => u.SwitchAndPublishAsync(It.IsAny<string>(), It.IsAny<FirmaModel>(), It.IsAny<MaliDonemModel>()), Times.Never);
-        progress.IsUpdating.Should().BeFalse();
+        // Sayfa yok: motor inline çalıştı (yedek + göç + doğrulama) ve başarı bildirildi.
+        ops.Verify(o => o.CreateBackupAsync("db-TEST_2027", MuhasibPro.Domain.Enum.DatabaseEnum.DatabaseBackupType.Migration), Times.Once);
+        update.Verify(u => u.SwitchAndPublishAsync("db-TEST_2027", It.IsAny<FirmaModel>(), It.IsAny<MaliDonemModel>()), Times.Once);
+        dialogs.Verify(d => d.ShowSuccessAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
 
     [Fact]
     public async Task Coordinator_DahaSonra_Kalis()
     {
-        var (common, dialogs, nav, update) = CoordinatorMocks(TenantUpdateDecision.DahaSonra);
+        var (common, dialogs, update, ops) = CoordinatorMocks(TenantUpdateDecision.DahaSonra);
         update.Setup(u => u.CheckUpdateRequiredAsync("db-TEST_2027")).ReturnsAsync(GuncellemeGerekenKontrol());
         var progress = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantUpdateProgressViewModel();
-        var coordinator = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateCoordinator(common.Object, update.Object, progress);
+        var coordinator = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateCoordinator(common.Object, update.Object, ops.Object, progress);
 
         await coordinator.EnsureSwitchedAsync("db-TEST_2027", new FirmaModel(), new MaliDonemModel());
 
-        nav.Verify(n => n.CreateNewViewAsync<MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateViewModel>(It.IsAny<object>(), It.IsAny<string>()), Times.Never);
         update.Verify(u => u.SwitchAndPublishAsync(It.IsAny<string>(), It.IsAny<FirmaModel>(), It.IsAny<MaliDonemModel>()), Times.Never);
         progress.IsUpdating.Should().BeFalse();
     }
@@ -343,26 +350,25 @@ public class TenantDatabaseUpdateTests
     [Fact]
     public async Task Coordinator_Vazgec_Kalis()
     {
-        var (common, dialogs, nav, update) = CoordinatorMocks(TenantUpdateDecision.Vazgec);
+        var (common, dialogs, update, ops) = CoordinatorMocks(TenantUpdateDecision.Vazgec);
         update.Setup(u => u.CheckUpdateRequiredAsync("db-TEST_2027")).ReturnsAsync(GuncellemeGerekenKontrol());
         var progress = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantUpdateProgressViewModel();
-        var coordinator = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateCoordinator(common.Object, update.Object, progress);
+        var coordinator = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateCoordinator(common.Object, update.Object, ops.Object, progress);
 
         await coordinator.EnsureSwitchedAsync("db-TEST_2027", new FirmaModel(), new MaliDonemModel());
 
-        nav.Verify(n => n.CreateNewViewAsync<MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateViewModel>(It.IsAny<object>(), It.IsAny<string>()), Times.Never);
         update.Verify(u => u.SwitchAndPublishAsync(It.IsAny<string>(), It.IsAny<FirmaModel>(), It.IsAny<MaliDonemModel>()), Times.Never);
     }
 
     [Fact]
     public async Task Coordinator_DogrudanSwitchHatali_HataDialogu()
     {
-        var (common, dialogs, nav, update) = CoordinatorMocks(TenantUpdateDecision.Vazgec);
+        var (common, dialogs, update, ops) = CoordinatorMocks(TenantUpdateDecision.Vazgec);
         update.Setup(u => u.CheckUpdateRequiredAsync("db-TEST_2027")).ReturnsAsync(new TenantUpdateCheckResult { CheckSucceeded = false });
         update.Setup(u => u.SwitchAndPublishAsync("db-TEST_2027", It.IsAny<FirmaModel>(), It.IsAny<MaliDonemModel>()))
             .ReturnsAsync(new TenantUpdateSwitchResult { Success = false, ErrorMessage = "bağlanamadı" });
         var progress = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantUpdateProgressViewModel();
-        var coordinator = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateCoordinator(common.Object, update.Object, progress);
+        var coordinator = new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateCoordinator(common.Object, update.Object, ops.Object, progress);
 
         await coordinator.EnsureSwitchedAsync("db-TEST_2027", new FirmaModel(), new MaliDonemModel());
 
@@ -451,16 +457,6 @@ public class TenantDatabaseUpdateTests
         return (update, ops);
     }
 
-    private static MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateViewModel PageVm(
-        Mock<ITenantDatabaseUpdateService> update, Mock<ITenantSQLiteDatabaseOperationService> ops)
-    {
-        var common = new Mock<MuhasibPro.Business.Contracts.UIServices.CommonServices.ICommonServices>();
-        var settings = new Mock<MuhasibPro.Business.Contracts.UIServices.ILocalSettingsService>();
-        var selected = new Mock<IFirmaWithMaliDonemSelectedService>();
-        return new MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateViewModel(
-            common.Object, update.Object, ops.Object, settings.Object, selected.Object);
-    }
-
     private static MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateArgs PageArgs() => new()
     {
         DatabaseName = "db-TEST_2027",
@@ -468,25 +464,31 @@ public class TenantDatabaseUpdateTests
         MaliDonem = new MaliDonemModel()
     };
 
-    private static async Task BekleAsync(Func<bool> bitis)
+    private static TenantUpdateCheckResult PageCheck() => new()
     {
-        for (var i = 0; i < 100 && !bitis(); i++)
-            await Task.Delay(20);
-    }
+        DatabaseName = "db-TEST_2027",
+        CheckSucceeded = true,
+        NeedsUpdate = true,
+        CurrentVersion = "1.0",
+        TargetVersion = "2.0",
+        PendingCount = 1
+    };
+
+    private static MuhasibPro.ViewModels.ViewModels.Shell.Tenant.TenantUpdateAkisYoneticisi Akis(
+        Mock<ITenantDatabaseUpdateService> update, Mock<ITenantSQLiteDatabaseOperationService> ops)
+        => new(update.Object, ops.Object);
 
     [Fact]
     public async Task Saga_Basarili_Tamamlanir()
     {
         var (update, ops) = PageMocks();
-        var vm = PageVm(update, ops);
-        await vm.LoadAsync(PageArgs());
+        var akis = Akis(update, ops);
 
-        vm.StartUpdateCommand.Execute(null);
-        await BekleAsync(() => !vm.IsRunning);
+        await akis.RunAsync(PageArgs(), PageCheck());
 
-        vm.IsCompleted.Should().BeTrue();
-        vm.HasError.Should().BeFalse();
-        vm.Steps.Should().OnlyContain(s => s.IsDone);
+        akis.IsCompleted.Should().BeTrue();
+        akis.HasError.Should().BeFalse();
+        akis.Steps.Should().OnlyContain(s => s.IsDone);
         ops.Verify(o => o.RestoreBackupAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
@@ -494,14 +496,12 @@ public class TenantDatabaseUpdateTests
     public async Task Saga_DogrulamaBasarisiz_OtomatikGeriAlir()
     {
         var (update, ops) = PageMocks(validateFirst: false, validateAfterRestore: true);
-        var vm = PageVm(update, ops);
-        await vm.LoadAsync(PageArgs());
+        var akis = Akis(update, ops);
 
-        vm.StartUpdateCommand.Execute(null);
-        await BekleAsync(() => !vm.IsRunning);
+        await akis.RunAsync(PageArgs(), PageCheck());
 
-        vm.IsCompleted.Should().BeTrue();
-        vm.RestoredFromBackup.Should().BeTrue();
+        akis.IsCompleted.Should().BeTrue();
+        akis.RestoredFromBackup.Should().BeTrue();
         ops.Verify(o => o.RestoreBackupAsync("db-TEST_2027", "C:\\yedek.backup"), Times.Once);
     }
 
@@ -512,15 +512,13 @@ public class TenantDatabaseUpdateTests
         ops.Setup(o => o.RestoreBackupAsync("db-TEST_2027", It.IsAny<string>()))
             .ReturnsAsync(new SuccessApiDataResponse<DatabaseRestoreExecutionResult>(
                 new DatabaseRestoreExecutionResult { IsRestoreSuccess = false, Message = "yazma hatası" }, "hata"));
-        var vm = PageVm(update, ops);
-        await vm.LoadAsync(PageArgs());
+        var akis = Akis(update, ops);
 
-        vm.StartUpdateCommand.Execute(null);
-        await BekleAsync(() => !vm.IsRunning);
+        await akis.RunAsync(PageArgs(), PageCheck());
 
-        vm.IsCompleted.Should().BeFalse();
-        vm.HasError.Should().BeTrue();
-        vm.ErrorMessage.Should().Contain("C:\\yedek.backup");
+        akis.IsCompleted.Should().BeFalse();
+        akis.HasError.Should().BeTrue();
+        akis.ErrorMessage.Should().Contain("C:\\yedek.backup");
     }
 
     [Fact]
@@ -529,14 +527,12 @@ public class TenantDatabaseUpdateTests
         var (update, ops) = PageMocks();
         ops.Setup(o => o.CreateBackupAsync("db-TEST_2027", MuhasibPro.Domain.Enum.DatabaseEnum.DatabaseBackupType.Migration))
             .ReturnsAsync(new ErrorApiDataResponse<DatabaseBackupResult>(null!, "disk dolu"));
-        var vm = PageVm(update, ops);
-        await vm.LoadAsync(PageArgs());
+        var akis = Akis(update, ops);
 
-        vm.StartUpdateCommand.Execute(null);
-        await BekleAsync(() => !vm.IsRunning);
+        await akis.RunAsync(PageArgs(), PageCheck());
 
         update.Verify(u => u.SwitchAndPublishAsync(It.IsAny<string>(), It.IsAny<FirmaModel>(), It.IsAny<MaliDonemModel>()), Times.Never);
-        vm.HasError.Should().BeTrue();
+        akis.HasError.Should().BeTrue();
     }
 
     #endregion

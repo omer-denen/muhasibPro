@@ -3,13 +3,13 @@ using MuhasibPro.ViewModels.Services;
 
 namespace MuhasibPro.Tests;
 
-/// <summary>Faz 6.92 RAG v1: YardimIcerikToplayici — 8 sayfa tek kaynaktan.</summary>
+/// <summary>Faz 6.92 RAG v1: YardimIcerikToplayici — 7 sayfa tek kaynaktan (6.91-E: dönem güncelleme sayfası kalktı).</summary>
 public class YardimIcerikToplayiciTests
 {
     [Fact]
-    public void Sekiz_Sayfa()
+    public void Yedi_Sayfa()
     {
-        new YardimIcerikToplayici().TumSayfalariGetir().Should().HaveCount(8);
+        new YardimIcerikToplayici().TumSayfalariGetir().Should().HaveCount(7);
     }
 
     [Fact]

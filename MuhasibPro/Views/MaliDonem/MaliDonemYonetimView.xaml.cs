@@ -4,7 +4,6 @@ using Microsoft.UI.Xaml.Navigation;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Helpers;
 using MuhasibPro.HostBuilders;
-using MuhasibPro.ViewModels.ViewModels.Shell.Tenant;
 using MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler;
 using MuhasibPro.Views.MaliDonem.Yonetim.Components.Dialogs;
 using MuhasibPro.Views.ShellViews.Shell.Components.Dialogs;
@@ -139,28 +138,6 @@ public sealed partial class MaliDonemYonetimView : Page
         catch (Exception ex)
         {
             HataBildir(ex, "Arşivden çıkarma");
-        }
-    }
-
-    private async void OnGuncelleClick(object sender, RoutedEventArgs e)
-    {
-        var donem = ViewModel.SelectedDonem;
-        var firma = ViewModel.SelectedFirma;
-        if (donem == null || firma == null) return;
-        try
-        {
-            var nav = ServiceLocator.Current.GetService<INavigationService>();
-            var args = new TenantDatabaseUpdateArgs
-            {
-                DatabaseName = donem.DatabaseName,
-                Firma = firma,
-                MaliDonem = donem
-            };
-            await nav.CreateNewViewAsync<TenantDatabaseUpdateViewModel>(new ViewModels.ViewModels.Shell.ShellArgs { Parameter = args }, "Veritabanı Güncelleme");
-        }
-        catch (Exception ex)
-        {
-            HataBildir(ex, "Güncelleme");
         }
     }
 

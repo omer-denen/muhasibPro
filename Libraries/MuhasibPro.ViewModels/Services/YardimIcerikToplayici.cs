@@ -2,7 +2,6 @@
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.ViewModels.ViewModels.Settings;
 using MuhasibPro.ViewModels.ViewModels.Shell;
-using MuhasibPro.ViewModels.ViewModels.Shell.Tenant;
 using MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler;
 
 namespace MuhasibPro.ViewModels.Services;
@@ -16,7 +15,6 @@ public sealed class YardimIcerikToplayici : IYardimIcerikSaglayici
         new() { Anahtar = FirmaShellViewModel.YardimAnahtari, Baslik = FirmaShellViewModel.YardimBasligi, Maddeler = FirmaShellViewModel.YardimMaddeleri() },
         new() { Anahtar = MainShellViewModel.YardimAnahtari, Baslik = MainShellViewModel.YardimBasligi, Maddeler = MainShellViewModel.YardimMaddeleri() },
         new() { Anahtar = MaliDonemYonetimViewModel.YardimAnahtari, Baslik = MaliDonemYonetimViewModel.YardimBasligi, Maddeler = MaliDonemYonetimViewModel.YardimMaddeleri() },
-        new() { Anahtar = TenantDatabaseUpdateYardim.YardimAnahtari, Baslik = TenantDatabaseUpdateYardim.YardimBasligi, Maddeler = TenantDatabaseUpdateYardim.Maddeler() },
         new() { Anahtar = DatabaseSettingsViewModel.YardimAnahtari, Baslik = DatabaseSettingsViewModel.YardimBasligi, Maddeler = DatabaseSettingsViewModel.YardimMaddeleri() },
         new() { Anahtar = UpdateViewModel.YardimAnahtari, Baslik = UpdateViewModel.YardimBasligi, Maddeler = UpdateViewModel.YardimMaddeleri() },
         new() { Anahtar = GelistiriciAraclariViewModel.YardimAnahtari, Baslik = GelistiriciAraclariViewModel.YardimBasligi, Maddeler = GelistiriciAraclariViewModel.YardimMaddeleri() },

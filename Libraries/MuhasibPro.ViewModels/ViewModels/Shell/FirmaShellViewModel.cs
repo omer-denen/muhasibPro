@@ -39,6 +39,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
             IFirmaWithMaliDonemSelectedService selectedService,
             ITenantSQLiteDatabaseService tenantWorkflowService,
             ITenantDatabaseUpdateService updateService,
+            ITenantSQLiteDatabaseOperationService operations,
             IEventBus eventBus = null) : base(commonServices)
         {
             _selectedService = selectedService;
@@ -50,7 +51,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
 
             Selection = new TenantSelectionViewModel(commonServices, localSettingsService);
             Progress = new TenantUpdateProgressViewModel();
-            UpdateCoordinator = new TenantDatabaseUpdateCoordinator(commonServices, updateService, Progress);
+            UpdateCoordinator = new TenantDatabaseUpdateCoordinator(commonServices, updateService, operations, Progress);
 
             DevamEtCommand = new AsyncRelayCommand(ExecuteDevamEt, CanExecuteDevamEt);
             Selection.PropertyChanged += (s, e) =>
@@ -205,7 +206,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         {
             MessageService.Subscribe<FirmaListViewModel>(this, OnMessage);
             MessageService.Subscribe<MaliDonemListViewModel>(this, OnMaliDonemMessage);
-            MessageService.Subscribe<TenantDatabaseUpdateViewModel>(this, OnTenantUpdated);
             FirmalarVM.Subscribe();
             MaliDonemVM.Subscribe();
         }
@@ -243,28 +243,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
                         await UpdateCoordinator.EnsureSwitchedAsync(Selection.SelectedMaliDonem.DatabaseName, Selection.SelectedFirma, Selection.SelectedMaliDonem);
                 });
             }
-        }
-
-        private async void OnTenantUpdated(TenantDatabaseUpdateViewModel viewModel, string message, object args)
-        {
-            if (message != TenantEvents.Updated || args is not string databaseName)
-                return;
-            // Birincil: yerel seçim. Yedek: Continue'un yazdığı paylaşılan ayna —
-            // yönetim sayfasından girilen akışta (OnGuncelleClick) yerel seçim eşleşmeyebilir;
-            // aynadaki seçim Continue tarafından garanti yazılır. Eşleşme harf-duyarsız (B1 deseni).
-            var yerel = Selection.SelectedMaliDonem;
-            if (yerel == null || !string.Equals(yerel.DatabaseName, databaseName, StringComparison.OrdinalIgnoreCase))
-            {
-                var aynadakiDonem = _selectedService.SelectedMaliDonem;
-                if (aynadakiDonem == null || !string.Equals(aynadakiDonem.DatabaseName, databaseName, StringComparison.OrdinalIgnoreCase))
-                    return;
-                await ContextService.RunAsync(() =>
-                {
-                    Selection.SelectFirma(_selectedService.SelectedFirma);
-                    Selection.SelectMaliDonem(aynadakiDonem);
-                });
-            }
-            await ContextService.RunAsync(async () => await ExecuteDevamEt());
         }
 
         private async Task ExecuteDevamEt()

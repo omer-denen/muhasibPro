@@ -7,31 +7,35 @@ using MuhasibPro.ViewModels.ViewModels.Shell;
 namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
 {
     /// <summary>
-    /// Tenant güncelleme yönlendiricisi: güncelleme yoksa doğrudan geçiş,
-    /// varsa ön-bilgi dialogu (Güncelle → sayfa, Daha sonra/Vazgeç → shell'de kal).
-    /// Göç/doğrulama/geri alma güncelleme sayfasındadır, burada dialog/progress dışında iş yok.
+    /// Tenant güncelleme yönlendiricisi (Faz 6.91-E): erişim anında karar + **inline** göç.
+    /// Güncelleme yoksa doğrudan geçiş; pending ise onay dialogu sonrası göç motoru
+    /// (Yedek → Göç → Doğrulama → oto geri alma) **sayfa açmadan** burada çalışır; sonuç tek bildirimdir.
     /// </summary>
     public class TenantDatabaseUpdateCoordinator
     {
         private readonly IDialogService _dialogs;
-        private readonly INavigationService _navigation;
         private readonly ITenantDatabaseUpdateService _updateService;
         private readonly TenantUpdateProgressViewModel _progress;
 
         public TenantDatabaseUpdateCoordinator(
             ICommonServices commonServices,
             ITenantDatabaseUpdateService updateService,
+            ITenantSQLiteDatabaseOperationService operations,
             TenantUpdateProgressViewModel progress)
         {
             _dialogs = commonServices.DialogService;
-            _navigation = commonServices.NavigationService;
             _updateService = updateService;
             _progress = progress;
+            Akis = new TenantUpdateAkisYoneticisi(updateService, operations);
         }
+
+        /// <summary>Inline göç motoru (FirmaShell ilerleme yüzeyi buna bağlanır).</summary>
+        public TenantUpdateAkisYoneticisi Akis { get; }
 
         public async Task EnsureSwitchedAsync(string databaseName, FirmaModel firma, MaliDonemModel maliDonem)
         {
             _progress.BeginCheck();
+            Akis.Reset();
 
             var check = await _updateService.CheckUpdateRequiredAsync(databaseName);
             if (!check.CheckSucceeded || !check.NeedsUpdate)
@@ -51,23 +55,26 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
                 return;
             }
 
-            // Güncelleme var — ön-bilgi dialogu (firma/dönem ile), karar sayfaya taşır
+            // Pending — ön-bilgi dialogu (onay/daha sonra/vazgeç)
             _progress.EndProgress();
             check.FirmaUnvani = firma?.KisaUnvani ?? string.Empty;
             check.MaliYil = maliDonem?.MaliYil ?? 0;
             var decision = await _dialogs.ShowTenantUpdateConfirmAsync(check);
             if (decision != TenantUpdateDecision.SimdiGuncelle)
-                return; // DahaSonra/Vazgeç → shell'de kal, güncel başka dönem seçilebilir
+                return; // DahaSonra/Vazgeç → shell'de kal, başka dönem seçilebilir
 
-            await _navigation.CreateNewViewAsync<TenantDatabaseUpdateViewModel>(new ShellArgs
+            // INLINE göç: sayfa yok; ilerleme Akis üzerinden FirmaShell'de gösterilir (Kural 12).
+            await Akis.RunAsync(new TenantDatabaseUpdateArgs
             {
-                Parameter = new TenantDatabaseUpdateArgs
-                {
-                    DatabaseName = databaseName,
-                    Firma = firma,
-                    MaliDonem = maliDonem
-                }
-            }, "Veritabanı Güncelleme");
+                DatabaseName = databaseName,
+                Firma = firma,
+                MaliDonem = maliDonem
+            }, check);
+
+            if (Akis.IsCompleted && !Akis.HasError)
+                await _dialogs.ShowSuccessAsync("Dönem güncellendi", Akis.ResultMessage, "Tamam");
+            else
+                await _dialogs.ShowErrorAsync("Güncelleme başarısız", Akis.ErrorMessage, "Tamam");
         }
     }
 }

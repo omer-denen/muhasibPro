@@ -181,7 +181,6 @@
                                                       HizliYedekleClick="OnHizliYedekleClick"
                                                       DonemSilClick="OnDonemSilClick"
                                                       DurumYenileClick="OnDurumYenileClick"
-                                                      GuncelleClick="OnGuncelleClick"
                                                       ArsivdenCikarClick="OnArsivdenCikarClick" />
 
                             <!-- Row A sag: toplu islemler -->

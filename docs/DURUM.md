@@ -42,7 +42,7 @@
   - **Chunk-2b:** yalnız Login ringi; kalan 4 sabit ring → **6.88** (view'lar refactoring bekliyor).
 
 ## Çalışma sırası
-- **Aktif/paralel:** **6.91-D ✅ + Revizyon 3 ✅ (Oturum 277) — sırada 6.91-E:** TenantDatabaseUpdateView silme + erişimde onay/inline göç. Sonrası **6.91-F** → **6.91-G** (`AsistanBilgi.db` post-update tazeleme; 6.93 motoruna bağlı) → 6.90 canlı → 6.88 → 6.89.
+- **Aktif/paralel:** **6.91-D ✅ + Revizyon 3 ✅ (277) + 6.91-E ✅ (278)** — erişimde onay+inline göç, dönem güncelleme sayfası silindi. Sırada **6.91-F** → **6.91-G** (`AsistanBilgi.db` post-update tazeleme; 6.93 motoruna bağlı) → 6.90 canlı → 6.88 → 6.89.
 - **6.92 AI asistanı — UI ✅ + servis ✅ + bağlama ✅ (Oturum 278):** Denetim "Model yönetimi" + alias Uygula bağlandı. Sıradaki: **Adım 7 kapanış onayı**. Çakışma yok.
 - **6.93 AI Yardım Bilgi Tabanı — 🔨 plan ✅, sırada motor (diğer model):** `docs/YARDIM-DB-PLAN.md` (frozen) → motor/veri teslimi (`📨`) → bende UI/entegrasyon + Kural 18 canlı. Kullanıcı onayı: split ✅ (Oturum 278).
 - **Rafta:** 6.72 Dalga 1-3, 6.73, 6.74, 6.75 kalan, 6.76, 6.78 Adım 4, 6.85 (Kullanıcı Yönetimi modal), **"Varsayılan firma"** kavramı. (6.71 kapandı.)

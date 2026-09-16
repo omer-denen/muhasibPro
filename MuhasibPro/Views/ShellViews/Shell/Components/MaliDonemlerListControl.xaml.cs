@@ -146,53 +146,16 @@ public sealed partial class MaliDonemlerListControl : UserControl
             notification?.Show("Güncelleme Gerekli", $"{selectedDonem.MaliYil} dönemi veritabanı güncellenmeyi bekliyor.", NotificationType.Warning);
     }
 
-    /// <summary>InfoBar aksiyonu: tek dönemde doğrudan güncelleme sayfası; çok dönemde "İncele" listesi (flyout).</summary>
+    /// <summary>InfoBar aksiyonu (Faz 6.91-E): yalnız bilgilendirir — bekleyen dönemleri flyout'ta listeler.
+    /// Göç, sayfa açmadan dönem erişiminde (onay + inline) yapılır.</summary>
     private void OnGuncellemeAksiyonClick(object sender, RoutedEventArgs e)
     {
         var vm = GetViewModel();
         var bekleyen = vm?.MaliDonemList?.GuncellemeBekleyenDonemler;
         if (bekleyen == null || bekleyen.Count == 0)
             return;
-        if (bekleyen.Count == 1)
-        {
-            _ = DonemGuncelleAsync(bekleyen[0]);
-            return;
-        }
         if (sender is FrameworkElement element)
             FlyoutBase.ShowAttachedFlyout(element);
-    }
-
-    /// <summary>"İncele" listesindeki satır aksiyonu — ilgili dönemin güncelleme sayfasını açar.</summary>
-    private void OnDonemGuncelleClick(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button { Tag: MaliDonemModel model })
-            _ = DonemGuncelleAsync(model);
-    }
-
-    private async Task DonemGuncelleAsync(MaliDonemModel donem)
-    {
-        var vm = GetViewModel();
-        var firma = vm?.SelectedFirma;
-        if (donem == null || firma == null || string.IsNullOrWhiteSpace(donem.DatabaseName))
-            return;
-        try
-        {
-            var args = new ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateArgs
-            {
-                DatabaseName = donem.DatabaseName,
-                Firma = firma,
-                MaliDonem = donem
-            };
-            var nav = ServiceLocator.Current.GetService<INavigationService>();
-            if (nav == null)
-                return;
-            await nav.CreateNewViewAsync<ViewModels.ViewModels.Shell.Tenant.TenantDatabaseUpdateViewModel>(
-                new ViewModels.ViewModels.Shell.ShellArgs { Parameter = args }, "Veritabanı Güncelleme");
-        }
-        catch (Exception ex)
-        {
-            GetNotification()?.Show("Güncelleme Açılamadı", ex.Message, NotificationType.Danger);
-        }
     }
 
     private void ShowClosedWarning(string text)

@@ -182,8 +182,8 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler
             }
             else if (bekleyen.Count == 1)
             {
-                GuncellemeOzeti = $"{bekleyen[0].MaliYil} dönemi için şema güncellemesi hazır.";
-                GuncellemeAksiyonMetni = "Güncelle";
+                GuncellemeOzeti = $"{bekleyen[0].MaliYil} dönemi için şema güncellemesi hazır. Dönemi seçtiğinizde güncelleme önerilir.";
+                GuncellemeAksiyonMetni = "İncele";
             }
             else
             {

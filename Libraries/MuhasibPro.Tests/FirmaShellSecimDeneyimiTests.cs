@@ -166,8 +166,8 @@ public class FirmaShellSecimDeneyimiTests
         liste.TazeleGuncellemeBildirimi();
 
         liste.GuncellemeVarMi.Should().BeTrue();
-        liste.GuncellemeOzeti.Should().Be("2026 dönemi için şema güncellemesi hazır.");
-        liste.GuncellemeAksiyonMetni.Should().Be("Güncelle");
+        liste.GuncellemeOzeti.Should().Be("2026 dönemi için şema güncellemesi hazır. Dönemi seçtiğinizde güncelleme önerilir.");
+        liste.GuncellemeAksiyonMetni.Should().Be("İncele");
         liste.GuncellemeBekleyenDonemler.Should().ContainSingle().Which.MaliYil.Should().Be(2026);
     }
 

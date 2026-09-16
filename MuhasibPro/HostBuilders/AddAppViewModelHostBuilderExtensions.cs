@@ -24,7 +24,6 @@ public static class AddAppViewModelHostBuilderExtensions
             services.AddTransient<AsistanSohbetViewModel>();
             services.AddTransient<YapayZekaAyarlarViewModel>();
             services.AddTransient<GelistiriciAraclariViewModel>();
-            services.AddTransient<TenantDatabaseUpdateViewModel>();
             services.AddTransient<ShellViewModel>();
 
             services.AddTransient<MainShellViewModel>();

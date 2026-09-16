@@ -67,17 +67,10 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid ColumnSpacing="10" Padding="0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding MaliYil}" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                                <TextBlock Text="{Binding DbKisaDurumMetni}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                                            </StackPanel>
-                                            <Button Grid.Column="1" Content="Güncelle" Tag="{Binding}" Click="OnDonemGuncelleClick" Style="{StaticResource SecondaryCompactButtonStyle}" VerticalAlignment="Center" />
-                                        </Grid>
+                                        <StackPanel Spacing="1" Padding="0,4">
+                                            <TextBlock Text="{Binding MaliYil}" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            <TextBlock Text="{Binding DbKisaDurumMetni}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        </StackPanel>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>

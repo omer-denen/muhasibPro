@@ -22,13 +22,11 @@ public sealed partial class DonemOzetCard : UserControl
     public event RoutedEventHandler HizliYedekleClick;
     public event RoutedEventHandler DonemSilClick;
     public event RoutedEventHandler DurumYenileClick;
-    public event RoutedEventHandler GuncelleClick;
     public event RoutedEventHandler ArsivdenCikarClick;
 
     private void OnHizliYedekle(object sender, RoutedEventArgs e) => HizliYedekleClick?.Invoke(sender, e);
     private void OnDonemSil(object sender, RoutedEventArgs e) => DonemSilClick?.Invoke(sender, e);
     private void OnDurumYenile(object sender, RoutedEventArgs e) => DurumYenileClick?.Invoke(sender, e);
-    private void OnGuncelle(object sender, RoutedEventArgs e) => GuncelleClick?.Invoke(sender, e);
     private void OnArsivdenCikar(object sender, RoutedEventArgs e) => ArsivdenCikarClick?.Invoke(sender, e);
 
     private int _bilgiToken;
