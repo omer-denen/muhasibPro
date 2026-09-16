@@ -51,7 +51,7 @@
 - **Canlı test dersi:** Türkçe metni betikte literal yazma (BOM'suz `.ps1` → PS 5.1 ANSI); ContentDialog butonları `PrimaryButton`/`SecondaryButton` AutomationId ile (`HATALAR` 277/278). Model hazırlığı başarısızsa artık hata bandında gerçek sebep görünür (`HATALAR` 280).
 
 ## Son commit'ler
-`6d328d4` → … → `753f4c1` (6.73) → `262a37b` (DURUM sadeleştirme). **Uncommitted (Oturum 279+280):** 6.93 motor (11 yeni + 5 düzenleme) + Adım 2 + 6.91-G + 6.73 test düzeltmesi + dokümanlar — commit kullanıcı onayıyla.
+`262a37b` (DURUM sadeleştirme) → **`825f078` (Oturum 280: 6.93 Adım 1 motor + Adım 2 + 6.91-G + 6.73 test düzeltmesi + dokümanlar)**. Working tree temiz (yalnız 6.93 canlı S2-S4 motor fix'i bekliyor).
 
 ## Bilinen açık uçlar / notlar
 - **6.93 motor bug'ı (AÇIK, devir A):** `modelIndirmeyeIzin:true` embedding indirmiyor + olası çift `FoundryLocalManager.CreateAsync` → canlı S2-S4 bekliyor.
