@@ -155,12 +155,14 @@ public interface IYardimIcerikKaynagi { IReadOnlyList<YardimHamKaynak> Kaynaklar
 - App csproj: `<EmbeddedResource Include="..\docs\yardim\**\*.md" Link="Yardim\%(Filename)%(Extension)" />` (**içerik dosyalarını BENTE** — parser'ı kendi test fixture'ınla test et, `docs/yardim/*.md` dosyalarına yazma)
 - `MuhasibPro/Services/AiAsistan/FoundryAsistanSohbetService.cs` → retrieval'ı `IYardimBilgiTabani.AraAsync`'e çevir
 - `Business/Services/SistemServices/AiAsistan/AsistanPromptKurucu.cs` → `YardimAramaSonucu` overload
-- **Sil (Kural 4):** `Business/Contracts/SistemServices/AiAsistan/IYardimIcerikSaglayici.cs`
+- **SİLME (bu adımda):** `IYardimIcerikSaglayici.cs` **silinmez** — `FoundryAsistanSohbetService` onu kullanmayı bırakır ama dosya **Adım 2'ye kadar kalır** (aşağıdaki sıra notu).
 - **Test:** `YardimMarkdownCozumleyiciTests`, `RrfBirlestiriciTests`, `YardimBilgiTabaniTests` (temp-dir SQLite + sahte `IYardimVektorUretici`), `YardimSkorlayiciTests` güncelle
+
+> **SIRA NOTU (derleme güvenliği):** `YardimIcerikToplayici` (bende) `IYardimIcerikSaglayici`'yi implement eder. Bu yüzden arayüzü **Adım 1'de silmek derlemeyi kırar** (ders: `HATALAR` 277/278). Sıra: **Adım 1** (yardımcı) yeni KB'yi yazar + `FoundryAsistanSohbetService`'i çevirir, **eski arayüz/dosya KALIR**; **Adım 2** (ben) öz-testi `IYardimBilgiTabani`'na çevirir → sonra `YardimIcerikToplayici.cs` **+** `IYardimIcerikSaglayici.cs` **+** DI kaydı birlikte silinir.
 
 **Bende (içerik + UI/entegrasyon/doğrulama) — sözleşme dondurulduktan sonra:**
 - **İçerik:** `docs/yardim/*.md` — başlangıç seti (9 sayfa) Oturum 278'de yazıldı; gözden geçirme/genişletme bende (Kural 13/14/19)
-- **Sil (Kural 4):** `ViewModels/Services/YardimIcerikToplayici.cs` + `Tests/YardimIcerikToplayiciTests.cs`
+- **Sil (Kural 4 — Adım 2, birlikte):** `ViewModels/Services/YardimIcerikToplayici.cs` + `Tests/YardimIcerikToplayiciTests.cs` + `Business/Contracts/SistemServices/AiAsistan/IYardimIcerikSaglayici.cs` + DI kaydı (`AddSingleton<IYardimIcerikSaglayici, …>`) — öz-test `IYardimBilgiTabani`'na çevrildikten sonra
 - `ViewModels/ViewModels/Shell/GelistiriciAraclariViewModel.cs` → öz-test "RAG derlemi" satırı `IYardimBilgiTabani.TumKayitlar().Count`
 - `ViewModels/ViewModels/Shell/AsistanSohbetViewModel.cs` + `Views/MainShell/Components/AsistanSohbetPaneli.xaml` → **"Yardım dizini hazırlanıyor"** durumu/ilerlemesi (Kural 11/12)
 - `Views/DenetimMasasi/**` (Yapay Zeka paneli) → dizin durum satırı (madde sayısı + semantik indeks var/yok)
