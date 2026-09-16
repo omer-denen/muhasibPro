@@ -1,5 +1,6 @@
 using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
+using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.SistemServices.DevServices;
@@ -24,6 +25,8 @@ public enum AyarBolumu
     Veritabani,
     Donem,
     Guncelleme,
+    /// <summary>Yapay Zeka (Faz 6.92).</summary>
+    YapayZeka,
     /// <summary>Geliştirici Araçları (yalnız DEBUG; Faz 6.82).</summary>
     GelistiriciAraclari
 }
@@ -57,6 +60,9 @@ public class DenetimMasasiViewModel : ViewModelBase
     /// <summary>Dönem bölümü (M5 Tenant, global şablon).</summary>
     public DonemAyarlarViewModel Donem { get; }
 
+    /// <summary>Yapay Zeka bölümü (Faz 6.92).</summary>
+    public YapayZekaAyarlarViewModel YapayZeka { get; }
+
     /// <summary>Geliştirici Araçları bölümü (yalnız DEBUG; Faz 6.82).</summary>
     public GelistiriciAraclariViewModel GelistiriciAraclari { get; }
 
@@ -76,7 +82,10 @@ public class DenetimMasasiViewModel : ViewModelBase
         IYolAciciService yolAcici = null,
         IApplicationPaths appPaths = null,
         ISistemDiagnosticsService diagnosticsService = null,
-        IModulTestCalistirici modulTestleri = null) : base(commonServices)
+        IModulTestCalistirici modulTestleri = null,
+        IAiAsistanSettingsProvider aiSaglayici = null,
+        ISurumOzellikService surumService = null,
+        IAsistanSohbetService asistanSohbet = null) : base(commonServices)
     {
         _firmaService = firmaService;
         _auth = auth;
@@ -88,13 +97,14 @@ public class DenetimMasasiViewModel : ViewModelBase
         FirmaKayit = new FirmaKayitAyarlarViewModel(commonServices, kayitSaglayici, auth);
         Donem = new DonemAyarlarViewModel(commonServices, donemSaglayici, auth);
         GirisPaneli = new GirisDashboardViewModel(commonServices, firmaService, auth, sistemDb, updateService);
-        GelistiriciAraclari = new GelistiriciAraclariViewModel(commonServices, devMode, devAraclari, yolAcici, updateService, appPaths, sistemDb, diagnosticsService, modulTestleri);
+        YapayZeka = new YapayZekaAyarlarViewModel(commonServices, aiSaglayici, auth, surumService, asistanSohbet);
+        GelistiriciAraclari = new GelistiriciAraclariViewModel(commonServices, devMode, devAraclari, yolAcici, updateService, appPaths, sistemDb, diagnosticsService, modulTestleri, surumService, asistanSohbet);
         GirisPaneli.BolumAcildi += b => SeciliBolum = b;
         Menuler = new ObservableCollection<AyarlarNavigationMenu>(AyarlarNavigationMenu.VarsayilanMenuler());
         GorunurMenuleriTazele();
     }
 
-    /// <summary>Sol nav menü kataloğu (7 bölüm).</summary>
+    /// <summary>Sol nav menü kataloğu (9 bölüm).</summary>
     public ObservableCollection<AyarlarNavigationMenu> Menuler { get; }
 
     /// <summary>NavigationView kaynağı (kullanıcı-bazlı süzülmüş; demo yönetici ile tümü).</summary>

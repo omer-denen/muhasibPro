@@ -35,6 +35,23 @@ public class SemanticVersionTests
         SemanticVersion.Normalize(giris).Should().Be("0.0.0");
     }
 
+    [Theory]
+    [InlineData("1.1.4-beta", "1.1.4")]
+    [InlineData("1.1.4+build.2", "1.1.4")]
+    [InlineData("1.1.4-rc.1+exp.sha.5114f85", "1.1.4")]
+    public void Normalize_OnSurumVeMetadata_YokSayilir(string giris, string beklenen)
+    {
+        SemanticVersion.Normalize(giris).Should().Be(beklenen);
+    }
+
+    [Fact]
+    public void Karsilastirma_OnSurumEki_YokSayilir()
+    {
+        SemanticVersion.IsEqual("1.1.4-beta", "1.1.4").Should().BeTrue();
+        SemanticVersion.IsEqual("1.1.4+build", "1.1.4").Should().BeTrue();
+        SemanticVersion.IsValid("1.1.4-beta").Should().BeTrue();
+    }
+
     [Fact]
     public void Karsilastirma_Sayisaldir_StringDegil()
     {

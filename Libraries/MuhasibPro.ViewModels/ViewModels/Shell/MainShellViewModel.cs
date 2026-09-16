@@ -39,17 +39,23 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         public System.Windows.Input.ICommand YardimCommand =>
             _yardimCommand ??= new Infrastructure.Common.AsyncRelayCommand(YardimGoster);
 
+        internal const string YardimAnahtari = "MainShell";
+        internal const string YardimBasligi = "Çalışma Alanı — Yardım";
+
+        /// <summary>Kural 13 içeriği + Faz 6.92 RAG derlemi (tek kaynak burası; toplayıcı buradan okur).</summary>
+        internal static List<MuhasibPro.Business.DTOModel.SistemModel.YardimMaddesiDto> YardimMaddeleri() => new()
+        {
+            new() { Baslik = "Bu ekran nedir?", Aciklama = "Girişten sonra açılan ana çalışma alanıdır: solda modül menüsü, sağdaki panelde seçili modülün içeriği gösterilir." },
+            new() { Baslik = "Sol menü", Aciklama = "Cari, Stok, Fatura gibi modüller listelenir; seçili modül vurgulanır ve içerik paneli ona göre değişir." },
+            new() { Baslik = "Tenant kartı", Aciklama = "Bağlı olan firma ve mali dönem veritabanını, WAL (Write-Ahead Logging) durumunu gösterir. Bağlantı sorununda dönem seçimine dönüp yeniden bağlanın." },
+            new() { Baslik = "'Snapshot Yedek'", Aciklama = "Açık dönemin hızlı yedeğini alır. Bu buton Faz B ile etkinleşecek; şu an hazırlık yer tutucusudur." },
+            new() { Baslik = "Modül açılmıyorsa", Aciklama = "Henüz hazırlanmamış modüller bilgi mesajı gösterir; hazır olduklarında menüden açılır." },
+            new() { Baslik = "Durum çubuğu", Aciklama = "Pencerenin altındaki şerit solda anlık durumu ve süren işin ilerlemesini; sağda aktif firmayı ve mali dönemi, tenant (dönem) veritabanı bağlantısını, kullanıcı adını, sistem veritabanı göstergesini ve saati gösterir." },
+        };
+
         private async Task YardimGoster()
         {
-            await DialogService.ShowYardimAsync("Çalışma Alanı — Yardım", new List<MuhasibPro.Business.DTOModel.SistemModel.YardimMaddesiDto>
-            {
-                new() { Baslik = "Bu ekran nedir?", Aciklama = "Girişten sonra açılan ana çalışma alanıdır: solda modül menüsü, sağdaki panelde seçili modülün içeriği gösterilir." },
-                new() { Baslik = "Sol menü", Aciklama = "Cari, Stok, Fatura gibi modüller listelenir; seçili modül vurgulanır ve içerik paneli ona göre değişir." },
-                new() { Baslik = "Tenant kartı", Aciklama = "Bağlı olan firma ve mali dönem veritabanını, WAL (Write-Ahead Logging) durumunu gösterir. Bağlantı sorununda dönem seçimine dönüp yeniden bağlanın." },
-                new() { Baslik = "'Snapshot Yedek'", Aciklama = "Açık dönemin hızlı yedeğini alır. Bu buton Faz B ile etkinleşecek; şu an hazırlık yer tutucusudur." },
-                new() { Baslik = "Modül açılmıyorsa", Aciklama = "Henüz hazırlanmamış modüller bilgi mesajı gösterir; hazır olduklarında menüden açılır." },
-                new() { Baslik = "Durum çubuğu", Aciklama = "Pencerenin altındaki şerit solda anlık durumu ve süren işin ilerlemesini; sağda aktif firmayı ve mali dönemi, tenant (dönem) veritabanı bağlantısını, kullanıcı adını, sistem veritabanı göstergesini ve saati gösterir." },
-            });
+            await DialogService.ShowYardimAsync(YardimBasligi, YardimMaddeleri());
         }
 
         public override async Task LoadAsync(ShellArgs args)

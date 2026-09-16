@@ -217,6 +217,25 @@
             </controls:SettingsCard>
         </StackPanel>
 
+        <!-- AI Bağlantı Öz-testi (Faz 6.92) -->
+        <StackPanel Spacing="4">
+            <TextBlock Text="AI Yardım Asistanı" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />
+
+            <controls:SettingsCard Header="Bağlantı öz-testi"
+                                   Description="Sürüm hakkı + model durumu + RAG derlemi. Salt-okunur, model indirmez.">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconZap}" />
+                </controls:SettingsCard.HeaderIcon>
+                <Button Content="Öz-testi Çalıştır" Command="{Binding AiOzTestCommand}"
+                        AutomationProperties.AutomationId="AiOzTestButton"
+                        Style="{StaticResource SecondaryButtonStyle}" MinWidth="140" />
+            </controls:SettingsCard>
+
+            <TextBlock Text="{Binding AiOzTestDetayi}" Margin="2,4,0,0" FontSize="12" FontFamily="Consolas"
+                       TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       Visibility="{Binding AiOzTestVar, Converter={StaticResource TrueToVis}}" />
+        </StackPanel>
+
         <!-- Tanılama (çalışma-zamanı öz-test) -->
         <StackPanel Spacing="4">
             <TextBlock Text="Tanılama (çalışma-zamanı)" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="2,0,0,4" />

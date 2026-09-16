@@ -1,5 +1,6 @@
 using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
+using MuhasibPro.Business.Contracts.DatabaseServices.UpdateDogrulama;
 using MuhasibPro.Business.Contracts.Installation;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
@@ -20,6 +21,7 @@ namespace MuhasibPro.Business.Services.UIService
         private readonly ITenantSQLiteDatabaseService _tenantService;
         private readonly ITenantVersionReader _versionReader;
         private readonly IEventBus _eventBus;
+        private readonly IPostUpdateDogrulamaService _postUpdate;
 
         public SplashRoutingService(
             ISistemDatabaseService sistemDatabaseService,
@@ -27,7 +29,8 @@ namespace MuhasibPro.Business.Services.UIService
             IMakineKimligiProvider makineProvider,
             ITenantSQLiteDatabaseService tenantService,
             ITenantVersionReader versionReader,
-            IEventBus eventBus)
+            IEventBus eventBus,
+            IPostUpdateDogrulamaService postUpdate)
         {
             _sistemDatabaseService = sistemDatabaseService;
             _kurulumKayitService = kurulumKayitService;
@@ -35,6 +38,7 @@ namespace MuhasibPro.Business.Services.UIService
             _tenantService = tenantService;
             _versionReader = versionReader;
             _eventBus = eventBus;
+            _postUpdate = postUpdate;
         }
 
         public async Task<SplashRouteDecision> DecideRouteAsync(bool? startupDbReady)
@@ -55,12 +59,16 @@ namespace MuhasibPro.Business.Services.UIService
                 if (startupDbReady.HasValue)
                     ready = startupDbReady.Value;
 
+                // Faz 6.91-D: güncelleme sonrası doğrulama (kalıcı damga) — DB hazırlığından önce yönlendirir.
+                bool postUpdate = exists && await _postUpdate.GerekliMiAsync();
+
                 return new SplashRouteDecision
                 {
                     IsDatabaseExists = exists,
                     IsDatabaseReady = ready,
                     HasPendingMigrations = hasPending,
-                    PendingMigrationCount = state.PendingMigrations?.Count ?? 0
+                    PendingMigrationCount = state.PendingMigrations?.Count ?? 0,
+                    PostUpdateGerekli = postUpdate
                 };
             }
             catch

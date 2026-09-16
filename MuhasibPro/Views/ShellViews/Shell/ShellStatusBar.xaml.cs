@@ -2,6 +2,7 @@
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Domain.Enum;
 using MuhasibPro.HostBuilders;
+using MuhasibPro.ViewModels.ViewModels.Shell;
 
 namespace MuhasibPro.Views.ShellViews.Shell
 {
@@ -22,6 +23,8 @@ namespace MuhasibPro.Views.ShellViews.Shell
             _messageService.PropertyChanged += OnServicePropertyChanged;
 
             DataContext = this;
+            if (AsistanPaneli != null)
+                AsistanPaneli.GizleIstek += OnAsistanGizleIstek;
             InitializeTimer();
             Unloaded += (_, _) => Dispose();
         }
@@ -65,6 +68,56 @@ namespace MuhasibPro.Views.ShellViews.Shell
         public string MaliDonemAdi => BaglamGoster ? _statusBarService.MaliDonemAdi : string.Empty;
         public bool IsTenantDatabaseConnection => BaglamGoster && _statusBarService.IsTenantDatabaseConnection;
         public string TenantDatabaseMessage => _statusBarService.TenantDatabaseMessage;
+        #endregion
+
+        #region Faz 6.92: AI asistanı göster/gizle (drawer)
+        /// <summary>AI toggle yalnız workspace host'unda (MainShell) görünür.</summary>
+        private bool _asistanGorunur;
+        public bool AsistanGorunur
+        {
+            get => _asistanGorunur;
+            set
+            {
+                if (_asistanGorunur == value) return;
+                _asistanGorunur = value;
+                NotifyPropertyChanged(nameof(AsistanGorunur));
+            }
+        }
+
+        /// <summary>Çekmece açık mı — toggle görsel durumu (accent/temel).</summary>
+        private bool _asistanAcik;
+        public bool AsistanAcik
+        {
+            get => _asistanAcik;
+            set
+            {
+                if (_asistanAcik == value) return;
+                _asistanAcik = value;
+                NotifyPropertyChanged(nameof(AsistanAcik));
+            }
+        }
+
+        /// <summary>Asistan VM'i (MainShellView atar) — Flyout içeriğinin DataContext'i.</summary>
+        private AsistanSohbetViewModel? _asistanVm;
+        public AsistanSohbetViewModel? AsistanVm
+        {
+            get => _asistanVm;
+            set
+            {
+                _asistanVm = value;
+                if (AsistanPaneli != null)
+                    AsistanPaneli.DataContext = value;
+            }
+        }
+
+        private void OnAsistanFlyoutOpened(object sender, object e) => AsistanAcik = true;
+        private void OnAsistanFlyoutClosed(object sender, object e) => AsistanAcik = false;
+
+        /// <summary>Panel başlığındaki "gizle" düğmesi flyout'u kapatır.</summary>
+        private void OnAsistanGizleIstek(object sender, System.EventArgs e)
+        {
+            try { AsistanFlyout?.Hide(); } catch { }
+        }
         #endregion
 
         private void OnServicePropertyChanged(object sender, PropertyChangedEventArgs e)

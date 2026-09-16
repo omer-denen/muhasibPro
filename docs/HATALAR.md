@@ -2,6 +2,54 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
+## `SettingsExpander` varsayılan kapalı gelince liste/aksiyon görünmüyordu ("iğne araması") (ÇÖZÜLDÜ - 2026-09-16 - Oturum 278)
+- **Belirti:** Denetim "Model yönetimi" kartında `SettingsExpander` başlık + disk özetini gösteriyor, ama indirilmiş model satırı ve `Sil` butonu canlıda görünmüyordu (UIA'da `Sil` yok). Kullanıcı yönetim listesini görmek için expander'ı elle açmak zorundaydı.
+- **Sebep:** Toolkit `SettingsExpander.IsExpanded` varsayılanı **false**; `ItemsSource` satırları yalnız açılınca realize edilir (Kural 16: "kritik bölüm gömülü kalmaz / iğne araması tasarım bug'ı").
+- **Çözüm:** `IsExpanded="True"` verildi; liste ve satır aksiyonları ilk açılışta görünür. Ders: yönetim listesi taşıyan `SettingsExpander` varsayılan açık başlar; alt-ayar/ileri düzey expander'larda kapalı kalabilir.
+- Tarih: 2026-09-16
+
+## Canlı test betiğinde ContentDialog onayı sayfa butonuyla karıştı (isimle arama) (ÇÖZÜLDÜ - 2026-09-16 - Oturum 278)
+- **Belirti:** `Uygula` sonrası açılan `ShowConfirmationAsync` dialogu, betik `Name='Uygula'` eşleşmesiyle **sayfadaki** butonu tıkladığı için kapanmıyordu; işlem başlamamış gibi göründü.
+- **Sebep:** Dialog hem metniyle hem sayfa butonuyla aynı ada sahip; ağaçta ilk/Son eşleşme sayfa butonuna denk geldi.
+- **Çözüm:** ContentDialog butonları **AutomationId** ile seçilir: `PrimaryButton` (onay) / `SecondaryButton` (vazgeç) — dump ile doğrulandı. Ders: dialog etkileşiminde isim değil AutomationId kullan.
+- Tarih: 2026-09-16
+
+## Canlı test betiğinde Türkçe metin bozuk gitti (BOM'suz .ps1 → PS 5.1 ANSI okur) (ÇÖZÜLDÜ - 2026-09-16 - Oturum 277)
+- **Belirti:** UIA ile AI modeline sorulan soru ("mali dönem nasıl arşivlenir?") modele bozuk (mojibake) karakterlerle ulaştı; canlı streaming testinin girdisi geçersizdi (cevap değil, **girdi** bozuk).
+- **Sebep:** PowerShell 5.1, BOM'suz `.ps1` dosyalarını ANSI (Windows-1254) olarak okur; `write` aracı BOM'suz UTF-8 yazar → script içindeki Türkçe string sabitleri bozulur (`ValuePattern.SetValue("...")`).
+- **Çözüm:** Türkçe metni dosya kodlamasından bağımsız kur (`"mali d" + [char]0x00F6 + "nem nas" + [char]0x0131 + "l ar" + [char]0x015F + "ivlenir?"`), **veya** panoya yazıp (`Set-Clipboard`, UTF-16) kutuya Ctrl+V ile yapıştır, **veya** betiği UTF-8 **BOM'lu** kaydet. Element/ailesi adı eşleşmelerinde de Türkçe literal yerine ASCII/indeks kullan.
+- Tarih: 2026-09-16
+
+## `Progress<T>` kuyruğundaki geç bildirimler monotonik guard'a takılıp adım rozetleri terminal duruma gelmiyordu (ÇÖZÜLDÜ - 2026-09-16 - Oturum 277)
+- **Belirti:** Güncelleme sonrası doğrulamada Sistem.db adımı hatayla bitmesine rağmen adım rozeti dönmeye devam ediyor, ondan sonraki adım "Bekliyor" kalıyordu (hero doğruydu).
+- **Sebep:** `Progress<T>.Report` mesajı asenkron post eder; saga senkron ilerlediğinde bildirimler `CalistirAsync` dönene kadar kuyrukta bekler. VM `ApplyResult` içinde `ProgressValue = 100` yazınca kuyruktaki tüm bildirimler (`Yuzde < 100`) monotonik guard'a takılıp atılıyordu → adım görünümleri hiç terminal duruma geçmiyordu.
+- **Çözüm:** `ApplyResult`, adım rozetlerini `sonuc.Adimlar`'dan **doğrudan** yazar (canlı ilerleme yalnız çalışma sırasında); `ProgressValue=100` kuyruktaki geç bildirimleri güvenle etkisiz kılar. Ders: terminal durumu geç bildirime bırakma — sonucu kaynaktan yaz.
+- Tarih: 2026-09-16
+
+## Converter'da `Application.Current.Resources` tema-bağımsız brush çözüyordu (Light'ta koyu zemin) (ÇÖZÜLDÜ - 2026-09-16 - Oturum 277)
+- **Belirti:** Kırmızı/amber hero ve adım rozetleri Light temada da koyu kalıyor, koyu metin koyu zemin üstünde okunmuyordu (Dark doğruydu).
+- **Sebep:** Renk converter'ları brush'ı `Application.Current.Resources[...]` ile çözüyordu. Tema pencere kökünde `rootElement.RequestedTheme` ile uygulanıyor; `Application.Current.RequestedTheme` (sistem teması) değişmediğinden `ThemeDictionaries` **sistem** temasına göre çözülüyordu.
+- **Çözüm:** Renk converter'ları kaldırıldı (`PostUpdateAdimDurumuConverter`, `PostUpdateSonucTuruConverter`); durum renkleri View'da **tema-farkında `ThemeResource` overlay Border'ları** + bool görünürlüklerle seçiliyor. Ders: tema-bağımlı brush `ThemeResource` ile element üzerinde uygulanır; converter'da `Application.Current.Resources` ile çözülmez.
+- Tarih: 2026-09-16
+
+## Çok-modelli çalışma: eşzamanlı 6.92 dosyaları derlemeyi bloke ediyordu (ÇÖZÜLDÜ - 2026-09-16 - Oturum 277)
+- **Belirti:** 6.91 Revizyon 3 doğrulamasında build, başka modelin aktif yazdığı Faz 6.92 dosyalarındaki eksik `using`/API hatalarıyla (`ObservableObject`, `ISurumOzellikService`, `DataContextChangedEventArgs.OldValue`) düştü.
+- **Sebep:** Aynı çalışma kopyasında iki model paralel; 6.92 UI dosyaları yarım durumdaydı.
+- **Çözüm:** Kullanıcı onayıyla yalnızca build'i açan minimal dokunuş yapıldı (eksik using'ler + `DataContextChanged` abone takibi + yinelenen using temizliği); 6.92 tasarımına/akışına müdahale edilmedi. Ders: sahiplik sınırı korunur, yalnız derleme açacak asgari düzeltme yapılır ve LOG'a "çapraz-model build açma" olarak işlenir.
+- Tarih: 2026-09-16
+
+## `edit_file` çok-satırlı eşleşme CRLF dosyada tutmaz (ÇÖZÜLDÜ — 2026-09-16 — Oturum 276)
+- **Belirti:** `LoginViewModel.cs` (karışık CRLF/LF) üzerinde çok-satırlı `find` "no exact match" ile düştü; LF dosyalarda aynı desen çalıştı.
+- **Sebep:** Eşleşme bayt-bayttir; `\n` ile yazılan find, CRLF satır sonlarıyla eşleşmez.
+- **Çözüm:** CRLF/karışık dosyada tek-satır find kullan ya da dosyayı tümden oku+yaz (LF; `text=auto` + index LF olduğundan `git diff` temiz kalır) + BOM'u koru. Ders: düzenlemeden önce `file` + `git show HEAD:` ile satır-sonu/BOM karşılaştır.
+- Tarih: 2026-09-16
+
+## `Progress<T>` alt-ilerleme bildirimi terminal adım durumunu/mesajını eziyordu (ÇÖZÜLDÜ — 2026-09-16 — Oturum 275)
+- **Belirti:** Güncelleme sonrası doğrulama ekranında iş bitmiş olmasına rağmen durum satırı "Dönemler taranıyor..." olarak kalıyordu (adım rozetleri ise terminal/yeşil).
+- **Sebep:** `IProgress<T>.Report` (Progress<T>) mesajı **asenkron post** eder; tenant alt-ilerlemesi iç içe `Progress<double>` ile ikinci bir post turu oluşturuyordu → gecikmeli "devam ediyor" bildirimi, sonradan gelen terminal bildirimini **geçip** mesajı geriye sardı (sıra bozuldu).
+- **Çözüm:** (a) Alt-ilerleme için senkron `IlerlemeKopru : IProgress<double>` + `Mesaj = string.Empty` (yalnız çubuk beslenir; durum metni adım başı/başlangıç mesajında kalır), (b) VM'de monotonik guard: `adim.Yuzde < ProgressValue` ise stale rapor atlanır; terminal adım "DevamEdiyor"a dönmez. Canlıda doğrulandı (`ot275_b_08.png`). Ders: ilerleme bildirimini tek post turunda tut; terminal durumu geri saran geç bildirimlere karşı monotonik guard koy.
+- Tarih: 2026-09-16
+
 ## İleri-uyumluluk guard'ı özyineleme riski taşıyordu — sürüm okuması fallback'li metottan (ÇÖZÜLDÜ — 2026-09-16 — Oturum 274)
 - **Belirti:** 6.91-C guard'ı disk sürümünü `GetCurrentDatabaseVersionAsync()` ile okuyordu; bu metot kayıt yoksa `GetSistemDatabaseStateAsync()`'e düşüyor → guard tekrar çağrılıyor → **sonsuz özyineleme (yığın taşması)** riski. Canlıya çıkmadan, uygulama sırasında fark edildi.
 - **Sebep:** Ortak metot "kayıt yoksa state'e düş" fallback'i içeriyordu; guard bu metodu kullanınca çağrı yolunun içine geri döndü.

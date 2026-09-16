@@ -2,6 +2,7 @@ using FluentAssertions;
 using Moq;
 using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
+using MuhasibPro.Business.Contracts.DatabaseServices.UpdateDogrulama;
 using MuhasibPro.Business.Contracts.Installation;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
@@ -22,8 +23,9 @@ public class SplashRoutingTests
         IMakineKimligiProvider makine,
         ITenantSQLiteDatabaseService tenant,
         ITenantVersionReader reader,
-        IEventBus bus)
-        => new(sistem, kurulum, makine, tenant, reader, bus);
+        IEventBus bus,
+        IPostUpdateDogrulamaService? postUpdate = null)
+        => new(sistem, kurulum, makine, tenant, reader, bus, postUpdate ?? Mock.Of<IPostUpdateDogrulamaService>());
 
     private static ApiDataResponse<DatabaseConnectionAnalysis> DbState(
         bool exists, bool connect, bool hasError, bool valid, List<string>? pending = null)
@@ -160,6 +162,45 @@ public class SplashRoutingTests
         karar.IsDatabaseExists.Should().BeTrue();
         karar.HasPendingMigrations.Should().BeTrue();
         karar.Target.Should().Be(SplashTarget.MigrationRequired);
+    }
+
+    [Fact]
+    public async Task DecideRoute_GuncellemeSonrasi_PostUpdateVerification()
+    {
+        var sistem = new Mock<ISistemDatabaseService>();
+        sistem.Setup(s => s.GetSistemDatabaseStateAsync())
+            .ReturnsAsync(DbState(true, true, false, true));
+        var postUpdate = new Mock<IPostUpdateDogrulamaService>();
+        postUpdate.Setup(p => p.GerekliMiAsync()).ReturnsAsync(true);
+        var svc = BuildService(sistem.Object,
+            Mock.Of<IKurulumKayitService>(), Mock.Of<IMakineKimligiProvider>(),
+            Mock.Of<ITenantSQLiteDatabaseService>(), Mock.Of<ITenantVersionReader>(), Mock.Of<IEventBus>(),
+            postUpdate.Object);
+
+        var karar = await svc.DecideRouteAsync(null);
+
+        karar.IsDatabaseExists.Should().BeTrue();
+        karar.PostUpdateGerekli.Should().BeTrue();
+        karar.Target.Should().Be(SplashTarget.PostUpdateVerification);
+        karar.KararOzeti.Should().Contain("postUpdate=True");
+    }
+
+    [Fact]
+    public async Task DecideRoute_DbYok_PostUpdateSorgulanmaz()
+    {
+        var sistem = new Mock<ISistemDatabaseService>();
+        sistem.Setup(s => s.GetSistemDatabaseStateAsync())
+            .ReturnsAsync(DbState(exists: false, connect: false, hasError: false, valid: false));
+        var postUpdate = new Mock<IPostUpdateDogrulamaService>();
+        var svc = BuildService(sistem.Object,
+            Mock.Of<IKurulumKayitService>(), Mock.Of<IMakineKimligiProvider>(),
+            Mock.Of<ITenantSQLiteDatabaseService>(), Mock.Of<ITenantVersionReader>(), Mock.Of<IEventBus>(),
+            postUpdate.Object);
+
+        var karar = await svc.DecideRouteAsync(null);
+
+        karar.Target.Should().Be(SplashTarget.FirstSetup);
+        postUpdate.Verify(p => p.GerekliMiAsync(), Times.Never);
     }
 
     // === Transfer testleri ===

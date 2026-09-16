@@ -5,6 +5,9 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
     /// <summary>Kural 13: Veritabanı Güncelleme sayfasının yardım maddeleri (içerik sayfayla yaşar).</summary>
     internal static class TenantDatabaseUpdateYardim
     {
+        internal const string YardimAnahtari = "TenantDatabaseUpdate";
+        internal const string YardimBasligi = "Veritabanı Güncelleme — Yardım";
+
         public static List<YardimMaddesiDto> Maddeler() => new()
         {
             new() { Baslik = "Bu sayfa ne yapar?", Aciklama = "Seçili mali dönemin veritabanı şemasını yeni sürüme günceller. Akış üç adımdır: önce güvenlik yedeği alınır, sonra bekleyen göçler uygulanır, en son bağlantı ve şema doğrulanır." },

@@ -271,16 +271,22 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
         /// <summary>Kural 13: sayfa yardımı (içerik ViewModel'de, dialog chrome'u App'te).</summary>
         public ICommand YardimCommand => _yardimCommand ??= new AsyncRelayCommand(YardimGoster);
 
+        internal const string YardimAnahtari = "Update";
+        internal const string YardimBasligi = "Güncellemeler — Yardım";
+
+        /// <summary>Kural 13 içeriği + Faz 6.92 RAG derlemi (tek kaynak burası; toplayıcı buradan okur).</summary>
+        internal static List<MuhasibPro.Business.DTOModel.SistemModel.YardimMaddesiDto> YardimMaddeleri() => new()
+        {
+            new() { Baslik = "Bu sayfa ne yapar?", Aciklama = "Uygulamanın sürümünü ve güncelleme kaynağını yönetir: yeni sürüm arar, indirir ve kurar." },
+            new() { Baslik = "Güncelleme sekmesi", Aciklama = "Durum kartı son kontrolün sonucunu gösterir. Güncelleme bulunursa boyut ve yayın tarihi ile 'İndir ve Kur' butonu görünür; işlem boyunca ilerleme çubuğu çalışır." },
+            new() { Baslik = "'Şimdi Kontrol Et'", Aciklama = "Güncelleme kaynağına bağlanıp yeni sürüm arar. Sonuç ve kontrol saati butonun altında görünür; kaynak adresi boşsa uyarı verir." },
+            new() { Baslik = "Ayarlar sekmesi", Aciklama = "Güncelleme kaynağı adresi (GitHub repo veya Velopack feed) burada girilir. 'Açılışta otomatik kontrol', 'Bildirimleri göster' ve 'Beta sürümleri dahil et' seçenekleri uygulamanın güncelleme davranışını belirler." },
+            new() { Baslik = "Hata görürsem", Aciklama = "Kırmızı bantta neden yazar. Kaynak adresinin doğruluğunu ve internet bağlantısını kontrol edin; 'Bağlantıyı Dene' ile tekrar deneyin." },
+        };
+
         private async Task YardimGoster()
         {
-            await DialogService.ShowYardimAsync("Güncellemeler — Yardım", new List<MuhasibPro.Business.DTOModel.SistemModel.YardimMaddesiDto>
-            {
-                new() { Baslik = "Bu sayfa ne yapar?", Aciklama = "Uygulamanın sürümünü ve güncelleme kaynağını yönetir: yeni sürüm arar, indirir ve kurar." },
-                new() { Baslik = "Güncelleme sekmesi", Aciklama = "Durum kartı son kontrolün sonucunu gösterir. Güncelleme bulunursa boyut ve yayın tarihi ile 'İndir ve Kur' butonu görünür; işlem boyunca ilerleme çubuğu çalışır." },
-                new() { Baslik = "'Şimdi Kontrol Et'", Aciklama = "Güncelleme kaynağına bağlanıp yeni sürüm arar. Sonuç ve kontrol saati butonun altında görünür; kaynak adresi boşsa uyarı verir." },
-                new() { Baslik = "Ayarlar sekmesi", Aciklama = "Güncelleme kaynağı adresi (GitHub repo veya Velopack feed) burada girilir. 'Açılışta otomatik kontrol', 'Bildirimleri göster' ve 'Beta sürümleri dahil et' seçenekleri uygulamanın güncelleme davranışını belirler." },
-                new() { Baslik = "Hata görürsem", Aciklama = "Kırmızı bantta neden yazar. Kaynak adresinin doğruluğunu ve internet bağlantısını kontrol edin; 'Bağlantıyı Dene' ile tekrar deneyin." },
-            });
+            await DialogService.ShowYardimAsync(YardimBasligi, YardimMaddeleri());
         }
 
 

@@ -10,16 +10,22 @@ namespace MuhasibPro.Views.MainShell
         public MainShellView()
         {
             ViewModel = ServiceLocator.Current.GetService<MainShellViewModel>();
+            AsistanVm = ServiceLocator.Current.GetService<AsistanSohbetViewModel>();
             InitializeComponent();
             DataContext = ViewModel;
+            // AI asistanı statü çubuğundaki 🤖 flyout'unda host'lanır (MainShell yerleşiminde değil).
+            ShellStatusBarControl.AsistanVm = AsistanVm;
         }
 
         public MainShellViewModel ViewModel { get; }
+
+        public AsistanSohbetViewModel AsistanVm { get; }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
             await ViewModel.LoadAsync(e.Parameter as ShellArgs);
+            await AsistanVm.LoadAsync();
         }
 
         /// <summary>Kural 17 Katman 2: ana border gölgesi — receiver Loaded'da (ctor'da değil; Splash emsali).</summary>
@@ -27,6 +33,8 @@ namespace MuhasibPro.Views.MainShell
         {
             // Firma/dönem bağlamı yalnız workspace host'unda gösterilir (Ayarlar/Yeni Firma göstermez).
             ShellStatusBarControl.BaglamGoster = true;
+            // AI asistanı giriş noktası (🤖) yalnız workspace host'unda görünür.
+            ShellStatusBarControl.AsistanGorunur = true;
             try
             {
                 AnaBorderShadow.Receivers.Add(RootGrid);

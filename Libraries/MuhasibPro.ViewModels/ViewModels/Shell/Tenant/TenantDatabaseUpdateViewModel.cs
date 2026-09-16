@@ -123,7 +123,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell.Tenant
         public ICommand YardimCommand => _yardimCommand ??= new AsyncRelayCommand(YardimGoster);
 
         private async Task YardimGoster()
-            => await DialogService.ShowYardimAsync("Veritabanı Güncelleme — Yardım", TenantDatabaseUpdateYardim.Maddeler());
+            => await DialogService.ShowYardimAsync(TenantDatabaseUpdateYardim.YardimBasligi, TenantDatabaseUpdateYardim.Maddeler());
 
         public async Task LoadAsync(TenantDatabaseUpdateArgs args)
         {

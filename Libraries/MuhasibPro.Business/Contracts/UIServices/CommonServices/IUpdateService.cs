@@ -19,6 +19,5 @@ namespace MuhasibPro.Business.Contracts.UIServices.CommonServices
         // Veritabanı güncelleme işlemleri
 
         Task<bool> PrepareForUpdateAsync();
-        Task<bool> PostUpdateDatabaseSyncAsync();
     }
 }

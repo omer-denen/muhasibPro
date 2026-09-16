@@ -2,7 +2,6 @@
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Services.SistemServices.LogServices;
 using MuhasibPro.Data.Contracts.Database.SistemDatabase;
-using MuhasibPro.Data.Contracts.Database.SistemDatabase;
 using MuhasibPro.Data.Database.Extensions;
 using MuhasibPro.Domain.Enum.DatabaseEnum;
 using MuhasibPro.Domain.Models.DatabaseResultModel;

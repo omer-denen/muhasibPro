@@ -7,6 +7,8 @@ namespace MuhasibPro.Business.Contracts.UIServices
         FirstSetup,
         /// <summary>DB var ama migration/güncelleme gerekiyor (SistemDbYonetim ekranına yönlendir).</summary>
         MigrationRequired,
+        /// <summary>Uygulama güncellendi — açılışta güncelleme sonrası doğrulama sagası çalışmalı (GuncellemeSonrasiView).</summary>
+        PostUpdateVerification,
         /// <summary>DB hazır — doğrudan Login'e geç.</summary>
         Login
     }
@@ -18,12 +20,15 @@ namespace MuhasibPro.Business.Contracts.UIServices
         public bool IsDatabaseExists { get; set; }
         public bool HasPendingMigrations { get; set; }
         public int PendingMigrationCount { get; set; }
+        /// <summary>Güncelleme sonrası doğrulama gerekli mi (Faz 6.91-D — kalıcı damgadan).</summary>
+        public bool PostUpdateGerekli { get; set; }
 
         public SplashTarget Target
         {
             get
             {
                 if (!IsDatabaseExists) return SplashTarget.FirstSetup;
+                if (PostUpdateGerekli) return SplashTarget.PostUpdateVerification;
                 if (!IsDatabaseReady || HasPendingMigrations) return SplashTarget.MigrationRequired;
                 return SplashTarget.Login;
             }
@@ -31,7 +36,7 @@ namespace MuhasibPro.Business.Contracts.UIServices
 
         /// <summary>Karar izi: neden bu hedef seçildi (Adım 0 tanısı — sayfa günlüğüne düşer).</summary>
         public string KararOzeti =>
-            $"exists={IsDatabaseExists} ready={IsDatabaseReady} pending={PendingMigrationCount} target={Target}";
+            $"exists={IsDatabaseExists} ready={IsDatabaseReady} pending={PendingMigrationCount} postUpdate={PostUpdateGerekli} target={Target}";
     }
 
     /// <summary>Taşınmış-veri taraması sonucu — dialog gösterimi View'a aittir (Business dialog bilmez).

@@ -4,6 +4,8 @@ namespace MuhasibPro.Domain.Utilities;
 /// Semantik sürüm tek kaynağı — ayrıştırma/normalleştirme/karşılaştırma.
 /// Format: 3-parça sayısal <c>major.minor.patch</c> ("1.1.0"). Karşılaştırma sayısaldır
 /// ("1.10.0" &gt; "1.9.0"; string compare tuzağına düşülmez).
+/// Ön-sürüm/build metadatası (<c>1.1.4-beta</c>, <c>1.1.4+build</c>) yok sayılır;
+/// yalnız <c>major.minor.patch</c> karşılaştırılır (Revizyon 3 — sürüm kıyası sağlamlaştırma).
 /// Eski takvim şeması (1.yyyy.MMdd.HHmm) geriye-uyumlu okunur: 0.x bandına
 /// indirgenir, böylece her gerçek SemVer'den küçük sayılır ve kendi içinde sıralı kalır.
 /// </summary>
@@ -15,7 +17,7 @@ public static class SemanticVersion
         if (string.IsNullOrWhiteSpace(version))
             return "0.0.0";
 
-        var parts = version.Trim().Split('.');
+        var parts = MetadatayiAyikla(version.Trim()).Split('.');
         var numbers = new List<int>();
         foreach (var p in parts)
         {
@@ -37,8 +39,17 @@ public static class SemanticVersion
     {
         if (string.IsNullOrWhiteSpace(version))
             return false;
-        var parts = version.Trim().Split('.');
+        var parts = MetadatayiAyikla(version.Trim()).Split('.');
         return parts.Length == 3 && parts.All(p => int.TryParse(p, out var n) && n >= 0);
+    }
+
+    /// <summary>Ön-sürüm (<c>-beta</c>) ve build (<c>+build</c>) ekini atar; yalnız sayısal gövde kalır.</summary>
+    private static string MetadatayiAyikla(string version)
+    {
+        int tire = version.IndexOf('-');
+        int arti = version.IndexOf('+');
+        int kesim = tire < 0 ? arti : arti < 0 ? tire : Math.Min(tire, arti);
+        return kesim >= 0 ? version[..kesim] : version;
     }
 
     /// <summary>Sayısal karşılaştırma: -1 / 0 / +1. İkisi de çöpse ham stringe düşer.</summary>

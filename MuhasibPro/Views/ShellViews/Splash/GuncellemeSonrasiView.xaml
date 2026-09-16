@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="MuhasibPro.Views.ShellViews.Splash.GuncellemeSonrasiView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:MuhasibPro.Views.ShellViews.Splash"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sistem="using:MuhasibPro.ViewModels.ViewModels.Sistem"
+    Loaded="OnPageLoaded"
+    mc:Ignorable="d"
+    Background="Transparent">
+
+    <Page.Resources>
+        <Storyboard x:Name="CardEntranceStoryboard">
+            <DoubleAnimation
+                Storyboard.TargetName="SplashCard"
+                Storyboard.TargetProperty="Opacity"
+                From="0" To="1" Duration="0:0:0.4">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation
+                Storyboard.TargetName="CardTransform"
+                Storyboard.TargetProperty="Y"
+                From="12" To="0" Duration="0:0:0.4">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </Page.Resources>
+
+    <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + perde). -->
+    <Border x:Name="SplashOverlay" CornerRadius="0">
+        <Grid>
+            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
+
+            <!-- Kisa pencerede "Devam Et" erisilebilir kalsin (kaydirma); uzun pencerede kart dikey ortalanir. -->
+            <ScrollViewer
+                x:Name="CardScroll"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto"
+                Padding="24,20,24,44">
+                <Grid MinHeight="{x:Bind CardScroll.ViewportHeight, Mode=OneWay}">
+
+                    <!-- Kural 17 — Katman 2: icerik karti -->
+                    <Border
+                        x:Name="SplashCard"
+                        Width="560"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Translation="0,0,32"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}"
+                        BorderThickness="1.5"
+                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                        Padding="16">
+                        <Border.Shadow>
+                            <ThemeShadow x:Name="CardShadow" />
+                        </Border.Shadow>
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="CardTransform" />
+                        </Border.RenderTransform>
+
+                        <StackPanel Spacing="12">
+
+                            <!-- Ust bilgi: solda logo, yaninda baslik -->
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image
+                                    Grid.Column="0"
+                                    Width="44" Height="44"
+                                    VerticalAlignment="Center"
+                                    Source="ms-appx:///Assets/AppIcon.png"
+                                    Stretch="Uniform" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock
+                                        Style="{StaticResource SubtitleTextBlockStyle}"
+                                        Text="MuhasibPro" />
+                                    <TextBlock
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                        TextWrapping="Wrap"
+                                        Text="Güncelleme Sonrası Doğrulama" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Sonuc hero'su (ustte) — sonuc hazir olunca gorunur.
+                                 Renkler tema-farkinda ThemeResource overlay'leriyle secilir (Light/Dark guvenli).
+                                 Icerik Margin'i overlay cizgisinden ic boşluğu verir (padding dis katmanda kalirsa overlay da kayar). -->
+                            <Border
+                                Visibility="{x:Bind ViewModel.SonucHazir, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                CornerRadius="{StaticResource OverlayCornerRadius}">
+                                <Grid>
+                                    <Border
+                                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                                        BorderThickness="1"
+                                        Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                                        BorderBrush="{ThemeResource SystemFillColorSuccessBrush}"
+                                        Visibility="{x:Bind ViewModel.TemizMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    <Border
+                                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                                        BorderThickness="1"
+                                        Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                        BorderBrush="{ThemeResource SystemFillColorCautionBrush}"
+                                        Visibility="{x:Bind ViewModel.DikkatMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    <Border
+                                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                                        BorderThickness="1"
+                                        Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+                                        BorderBrush="{ThemeResource SystemFillColorCriticalBrush}"
+                                        Visibility="{x:Bind ViewModel.UygulamaBasarisizMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    <Border
+                                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                                        BorderThickness="1"
+                                        Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+                                        BorderBrush="{ThemeResource SystemFillColorCriticalBrush}"
+                                        Visibility="{x:Bind ViewModel.SistemBasarisizMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                                    <StackPanel Margin="20" Spacing="8">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <FontIcon
+                                                FontSize="18"
+                                                VerticalAlignment="Center"
+                                                Glyph="&#xE73E;"
+                                                Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                Visibility="{x:Bind ViewModel.TemizMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <FontIcon
+                                                FontSize="18"
+                                                VerticalAlignment="Center"
+                                                Glyph="&#xE7BA;"
+                                                Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                Visibility="{x:Bind ViewModel.DikkatMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <FontIcon
+                                                FontSize="18"
+                                                VerticalAlignment="Center"
+                                                Glyph="&#xE783;"
+                                                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                                Visibility="{x:Bind ViewModel.UygulamaBasarisizMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <FontIcon
+                                                FontSize="18"
+                                                VerticalAlignment="Center"
+                                                Glyph="&#xE783;"
+                                                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                                Visibility="{x:Bind ViewModel.SistemBasarisizMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <TextBlock
+                                                VerticalAlignment="Center"
+                                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                Text="{x:Bind ViewModel.SonucBaslik, Mode=OneWay}" />
+                                        </StackPanel>
+                                        <TextBlock
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            TextWrapping="Wrap"
+                                            Text="{x:Bind ViewModel.SonucAciklama, Mode=OneWay}" />
+
+                                        <!-- Dikkat gerektiren durumlar (yalniz uyari halinde) -->
+                                        <TextBlock
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                            TextWrapping="Wrap"
+                                            Text="Dikkat gerektiren durumlar:"
+                                            Visibility="{x:Bind ViewModel.UyariVar, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                        <ItemsControl
+                                            ItemsSource="{x:Bind ViewModel.RaporSatirlari, Mode=OneWay}"
+                                            Visibility="{x:Bind ViewModel.UyariVar, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="x:String">
+                                                    <TextBlock
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                        TextWrapping="Wrap"
+                                                        Text="{x:Bind}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <StackPanel
+                                            Orientation="Horizontal"
+                                            Spacing="8"
+                                            HorizontalAlignment="Right">
+                                            <Button
+                                                x:Name="ContinueButton"
+                                                Content="Devam Et"
+                                                Click="OnContinueClick"
+                                                Style="{StaticResource AccentButtonStyle}"
+                                                Visibility="{x:Bind ViewModel.DevamEtGorunur, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <Button
+                                                x:Name="CloseButton"
+                                                Content="Kapat"
+                                                Click="OnContinueClick"
+                                                Style="{StaticResource AccentButtonStyle}"
+                                                Visibility="{x:Bind ViewModel.UygulamaHatasiGorunur, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <Button
+                                                x:Name="ManageButton"
+                                                Content="Veritabanı Yönetimi"
+                                                Click="OnManageClick"
+                                                Style="{StaticResource AccentButtonStyle}"
+                                                Visibility="{x:Bind ViewModel.SistemHatasiGorunur, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Calisma durumu (sonuc hazir olana kadar) -->
+                            <local:SplashStatusControl
+                                x:Name="StatusControl"
+                                Visibility="{x:Bind ViewModel.SonucHazir, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+
+                            <!-- Adim gosterimi: soldan saga sirali adim seridi (Kural 12).
+                                 Aktif adimda donen ProgressRing; digerlerinde durum ikonu. -->
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.Adimlar, Mode=OneWay}" Margin="0,2,0,0">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="sistem:PostUpdateAdimGorunum">
+                                        <Grid Width="150">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="30" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <Grid Grid.Row="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border
+                                                    Grid.Column="0"
+                                                    Height="2"
+                                                    VerticalAlignment="Center"
+                                                    Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                                    Visibility="{x:Bind IlkMi, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                                                <Border
+                                                    Grid.Column="1"
+                                                    Width="30" Height="30"
+                                                    CornerRadius="{StaticResource MuhasibCircleCornerRadius}"
+                                                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                    BorderThickness="1.5">
+                                                    <Grid>
+                                                        <!-- Durum zeminleri (tema-farkinda) -->
+                                                        <Border
+                                                            CornerRadius="{StaticResource MuhasibCircleCornerRadius}"
+                                                            BorderThickness="1.5"
+                                                            Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                                                            BorderBrush="{ThemeResource SystemFillColorSuccessBrush}"
+                                                            Visibility="{x:Bind BasariliMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                        <Border
+                                                            CornerRadius="{StaticResource MuhasibCircleCornerRadius}"
+                                                            BorderThickness="1.5"
+                                                            Background="{ThemeResource SystemFillColorCautionBackgroundBrush}"
+                                                            BorderBrush="{ThemeResource SystemFillColorCautionBrush}"
+                                                            Visibility="{x:Bind UyariMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                        <Border
+                                                            CornerRadius="{StaticResource MuhasibCircleCornerRadius}"
+                                                            BorderThickness="1.5"
+                                                            Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+                                                            BorderBrush="{ThemeResource SystemFillColorCriticalBrush}"
+                                                            Visibility="{x:Bind HataMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                        <Border
+                                                            CornerRadius="{StaticResource MuhasibCircleCornerRadius}"
+                                                            BorderThickness="1.5"
+                                                            Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                                            BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                                                            Visibility="{x:Bind DevamEdiyorMu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                                                        <!-- Durum ikonlari (tema-farkinda) -->
+                                                        <FontIcon
+                                                            FontSize="13"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Glyph="&#xE946;"
+                                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                            Visibility="{x:Bind BekliyorMu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                        <FontIcon
+                                                            FontSize="13"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Glyph="&#xE73E;"
+                                                            Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                            Visibility="{x:Bind BasariliMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                        <FontIcon
+                                                            FontSize="13"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Glyph="&#xE7BA;"
+                                                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                            Visibility="{x:Bind UyariMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                        <FontIcon
+                                                            FontSize="13"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Glyph="&#xE72A;"
+                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                            Visibility="{x:Bind AtlandiMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                        <FontIcon
+                                                            FontSize="13"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Glyph="&#xE783;"
+                                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                                            Visibility="{x:Bind HataMi, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                        <ProgressRing
+                                                            Width="18" Height="18"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            IsActive="{x:Bind DevamEdiyorMu, Mode=OneWay}"
+                                                            Foreground="{ThemeResource AccentFillColorDefaultBrush}"
+                                                            Visibility="{x:Bind DevamEdiyorMu, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                    </Grid>
+                                                </Border>
+                                                <Border
+                                                    Grid.Column="2"
+                                                    Height="2"
+                                                    VerticalAlignment="Center"
+                                                    Background="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                                    Visibility="{x:Bind SonMu, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                                            </Grid>
+
+                                            <TextBlock
+                                                Grid.Row="1"
+                                                Margin="0,6,0,0"
+                                                Text="{x:Bind KisaAd}"
+                                                TextAlignment="Center"
+                                                MaxLines="1"
+                                                TextTrimming="CharacterEllipsis"
+                                                Style="{StaticResource CaptionTextBlockStyle}"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                ToolTipService.ToolTip="{x:Bind Aciklama}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </ScrollViewer>
+
+            <!-- Footer -->
+            <Grid Padding="24,0,24,14" VerticalAlignment="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                    Opacity="0.5"
+                    Text="{x:Bind Version}" />
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                    Opacity="0.5"
+                    Text="{x:Bind CopyrightText}" />
+            </Grid>
+        </Grid>
+    </Border>
+</Page>

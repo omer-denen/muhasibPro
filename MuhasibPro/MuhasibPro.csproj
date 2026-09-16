@@ -83,6 +83,10 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
     <PackageReference Include="WinUI.TableView" Version="1.4.1" />
+    <!-- Faz 6.92: AI asistan — Foundry Local süreç-içi çıkarım (Windows TFM ister, Business'a konamaz) -->
+    <PackageReference Include="Microsoft.AI.Foundry.Local.WinML" Version="1.2.4" />
+    <PackageReference Include="Betalgo.Ranul.OpenAI" Version="9.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
   </ItemGroup>
 
   <!--

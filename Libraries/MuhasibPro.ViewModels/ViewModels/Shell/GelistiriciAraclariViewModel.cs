@@ -1,5 +1,7 @@
 using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
+using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
+using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.SistemServices.DevServices;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices;
@@ -12,6 +14,7 @@ using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Models;
 using MuhasibPro.ViewModels.Infrastructure.Common;
 using MuhasibPro.ViewModels.Infrastructure.ViewModels;
+using MuhasibPro.ViewModels.Services;
 using MuhasibPro.ViewModels.ViewModels.Sistem;
 using MuhasibPro.ViewModels.ViewModels.Sistem.SistemDbYonetim;
 using System.Collections.ObjectModel;
@@ -31,6 +34,8 @@ public class GelistiriciAraclariViewModel : ViewModelBase
     private readonly IUpdateService _updateService;
     private readonly SistemDiagnosticsViewModel _diagnostics;
     private readonly IModulTestCalistirici _modulTestleri;
+    private readonly ISurumOzellikService _surumService;
+    private readonly IAsistanSohbetService _asistanSohbet;
 
     private DevAracDurumuModel _durum = new();
     private UpdateSettingsModel _guncellemeAyarlari;
@@ -45,13 +50,17 @@ public class GelistiriciAraclariViewModel : ViewModelBase
         IApplicationPaths appPaths = null,
         ISistemDatabaseService sistemDb = null,
         ISistemDiagnosticsService diagnosticsService = null,
-        IModulTestCalistirici modulTestleri = null) : base(commonServices)
+        IModulTestCalistirici modulTestleri = null,
+        ISurumOzellikService surumService = null,
+        IAsistanSohbetService asistanSohbet = null) : base(commonServices)
     {
         _devMode = devMode;
         _araclar = araclar;
         _yolAcici = yolAcici;
         _updateService = updateService;
         _modulTestleri = modulTestleri;
+        _surumService = surumService;
+        _asistanSohbet = asistanSohbet;
 
         // Sistem tanılama (7 test) dev-mode'a yeniden kullanım için bağlanır (Kural 4: kopya yok).
         if (appPaths != null && sistemDb != null && diagnosticsService != null)
@@ -65,6 +74,7 @@ public class GelistiriciAraclariViewModel : ViewModelBase
         VeriKlasoruAcCommand = new RelayCommand(() => YolAc(_durum.VeriKlasoru, "Veri klasörü"));
         VarsayilanaSifirlaCommand = new RelayCommand(VarsayilanaSifirla);
         KaynagiDogrulaCommand = new AsyncRelayCommand(KaynagiDogrulaAsync);
+        AiOzTestCommand = new AsyncRelayCommand(AiOzTestAsync);
         TanilamaCalistirCommand = new AsyncRelayCommand(TanilamaCalistirAsync, () => !_islemSuruyor);
         ModulTestCalistirCommand = new AsyncRelayCommand(ModulTestCalistirAsync, () => !_islemSuruyor);
         YardimCommand = new AsyncRelayCommand(YardimGosterAsync);
@@ -81,6 +91,7 @@ public class GelistiriciAraclariViewModel : ViewModelBase
     public ICommand VeriKlasoruAcCommand { get; }
     public ICommand VarsayilanaSifirlaCommand { get; }
     public ICommand KaynagiDogrulaCommand { get; }
+    public ICommand AiOzTestCommand { get; }
     public ICommand TanilamaCalistirCommand { get; }
     public ICommand YardimCommand { get; }
 
@@ -169,6 +180,20 @@ public class GelistiriciAraclariViewModel : ViewModelBase
 
     public bool DogrulamaVar => !string.IsNullOrWhiteSpace(_dogrulamaDetayi);
 
+    private string _aiOzTestDetayi = string.Empty;
+    /// <summary>"AI Öz-testi" sonucu — sürüm hakkı + model durumu + RAG derlemi satırları (Faz 6.92).</summary>
+    public string AiOzTestDetayi
+    {
+        get => _aiOzTestDetayi;
+        private set
+        {
+            if (Set(ref _aiOzTestDetayi, value))
+                NotifyPropertyChanged(nameof(AiOzTestVar));
+        }
+    }
+
+    public bool AiOzTestVar => !string.IsNullOrWhiteSpace(_aiOzTestDetayi);
+
     /// <summary>
     /// Dev-mode öz-testi: derlemede gömülü kaynağı + normalize sözleşmesini (birim testleriyle aynı örneklerle)
     /// doğrular; ardından kaynağa bağlanmayı dener. Testlerin dev-mode'a entegrasyonu.
@@ -204,6 +229,65 @@ public class GelistiriciAraclariViewModel : ViewModelBase
             ozTest.Basarili
                 ? $"Güncelleme kaynağı doğrulandı (öz-test {ozTest.Gecen}/{ozTest.Toplam})."
                 : "Güncelleme kaynağı öz-testi başarısız.");
+    }
+
+    /// <summary>
+    /// Dev-mode AI öz-testi (Faz 6.92): sürüm hakkı + model durumu + RAG derlemi.
+    /// Salt-okunur: model indirmez/yüklemez; eksik servis satırda raporlanır, fırlatılmaz.
+    /// </summary>
+    public async Task AiOzTestAsync()
+    {
+        var satirlar = new List<string>();
+        bool hak = false, hazir = false;
+
+        if (_surumService == null)
+            satirlar.Add("Sürüm hakkı: servis çözülemedi.");
+        else
+        {
+            try
+            {
+                var h = await _surumService.AiAsistanHakkiAsync();
+                hak = h.HakVarMi;
+                satirlar.Add(hak
+                    ? $"Sürüm hakkı: {h.Tur} — AI açık."
+                    : $"Sürüm hakkı: {h.Tur} — kapalı ({Metin(h.Gerekce)}).");
+            }
+            catch (Exception ex)
+            {
+                satirlar.Add("Sürüm hakkı: okunamadı — " + ex.Message);
+            }
+        }
+
+        if (_asistanSohbet == null)
+            satirlar.Add("Model durumu: servis çözülemedi.");
+        else
+        {
+            try
+            {
+                var durum = await _asistanSohbet.DurumuGetirAsync();
+                hazir = durum.HazirMi;
+                satirlar.Add($"Model durumu: {(hazir ? "Hazır" : "Hazır değil")} ({Metin(durum.Mesaj)}).");
+            }
+            catch (Exception ex)
+            {
+                satirlar.Add("Model durumu: okunamadı — " + ex.Message);
+            }
+        }
+
+        try
+        {
+            var sayfalar = new YardimIcerikToplayici().TumSayfalariGetir();
+            satirlar.Add($"RAG derlemi: {sayfalar.Count} sayfa, {sayfalar.Sum(s => s.Maddeler.Count)} madde.");
+        }
+        catch (Exception ex)
+        {
+            satirlar.Add("RAG derlemi: okunamadı — " + ex.Message);
+        }
+
+        AiOzTestDetayi = string.Join(Environment.NewLine, satirlar);
+        bool gecti = hak && hazir;
+        Sonuc(gecti ? StatusMessageType.Success : StatusMessageType.Warning,
+            gecti ? "AI öz-testi geçti." : "AI öz-testi tamamlandı — ayrıntı yukarıda.");
     }
 
     private static string Metin(string deger) => string.IsNullOrWhiteSpace(deger) ? "-" : deger;
@@ -483,21 +567,28 @@ public class GelistiriciAraclariViewModel : ViewModelBase
             StatusActionMessage(mesaj, tip);
     }
 
+    internal const string YardimAnahtari = "GelistiriciAraclari";
+    internal const string YardimBasligi = "Geliştirici Araçları — Yardım";
+
+    /// <summary>Kural 13 içeriği + Faz 6.92 RAG derlemi (tek kaynak burası; toplayıcı buradan okur).</summary>
+    internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
+    {
+        new() { Baslik = "Bu bölüm nedir?", Aciklama = "Yalnızca geliştirme (DEBUG) derlemesinde görünen iç araçlardır; normal kullanıcı akışının parçası değildir. Her aksiyon onay ister ve Sistem günlüğüne DEV kaynağıyla yazılır." },
+        new() { Baslik = "Kimlik durumu", Aciklama = "Kurulum kimliği bu uygulamanın kurulumunu, makine kimliği ise cihazı tanımlar. Listede her dönem veritabanının damgası (şema sürümü + kimlik) ve güncel kimlikle eşleşip eşleşmediği görünür." },
+        new() { Baslik = "\"Kimliği Onar\"", Aciklama = "Makinesi aynı olan dönemlerin damgasını güncel kurulum kimliğine eşitler. Farklı makineye ait dönemlere dokunmaz." },
+        new() { Baslik = "\"Kimliği Sıfırla\"", Aciklama = "Yeni kurulum kimliği üretir ve bu makinedeki tüm dönemleri yeni kimlikle damgalar. Yıkıcıdır; yalnızca kontrollü test/kimlik yenileme senaryosunda kullanılır." },
+        new() { Baslik = "\"Transfer Taraması\"", Aciklama = "Açılışta çalışan taşınmış-veri taramasını elle tetikler; sonuçta farklı kuruluma ait dönem sayısını veya sessiz onarılan kimlik sayısını gösterir." },
+        new() { Baslik = "Ayrıntılı log", Aciklama = "Dosya günlüğünün seviyesini Debug'a indirir; teşhis için daha ayrıntılı kayıt tutulur. Kapatınca Information seviyesine döner." },
+        new() { Baslik = "Güncelleme kaynağı", Aciklama = "Uygulamanın yeni sürüm arayacağı adres (GitHub repo veya Velopack feed). Değişiklik anında kaydedilir. Boş bırakılırsa derlemede gömülü varsayılan (mevcut git repo adresi) kullanılır; \"Varsayılana sıfırla\" bu adrese döndürür." },
+        new() { Baslik = "\"Kaynağı Doğrula\"", Aciklama = "Üretim birim testleriyle aynı normalize örneklerini çalıştırır (git@/ssh/.git biçimleri → https) ve ardından kaynağa bağlanmayı dener. Gömülü varsayılan ve girilen adresin normalize çıktısı sonuç satırlarında gösterilir." },
+        new() { Baslik = "AI Bağlantı Öz-testi", Aciklama = "\"Öz-testi Çalıştır\" sürüm hakkını, model durumunu ve RAG derlemini (sayfa/madde sayısı) tek listede gösterir. Salt-okunurdur, model indirmez. Model hazır değilse Denetim Masası → Yapay Zeka → \"Modeli Hazırla\" ile indirilir." },
+        new() { Baslik = "Tanılama (çalışma-zamanı)", Aciklama = "\"Çalıştır\" sistem sınıfı testlerini (dosya/bağlantı/migration/veri/yetki — 7 test), güncelleme kaynağı normalize öz-testini ve kimlik/damga özetini tek listede toplar. Her satır PASS/FAIL ve mesaj gösterir; bir sorunda hangi alanda olduğunu buradan görürsünüz. Not: bu, CI'daki xUnit paketi değil uygulama içi çalışma-zamanı kontrolleridir." },
+        new() { Baslik = "Modül Entegrasyon Testleri", Aciklama = "\"Tümünü test et\" her modülü (çekirdek, log, sistem/tenant veritabanı, yedekleme, kimlik, firma/dönem, lisans/yetki, güncelleme, ayar sağlayıcıları, dev araçları) iki yönden kontrol eder: (1) DI'da kayıtlı ve çözülebiliyor mu, (2) kritik akışı salt-okunur çalışıyor mu. Donanım POST gibi; hangi modülün koptuğunu gösterir. Yalnız geliştirme derlemesinde görünür." },
+        new() { Baslik = "Klasör açma", Aciklama = "\"Log klasörünü aç\" ve \"Veri klasörünü aç\" düğmeleri ilgili yolları varsayılan dosya gezgininde açar. Yollar salt-okunur gösterilir." },
+    };
+
     private async Task YardimGosterAsync()
     {
-        await DialogService.ShowYardimAsync("Geliştirici Araçları — Yardım", new List<YardimMaddesiDto>
-        {
-            new() { Baslik = "Bu bölüm nedir?", Aciklama = "Yalnızca geliştirme (DEBUG) derlemesinde görünen iç araçlardır; normal kullanıcı akışının parçası değildir. Her aksiyon onay ister ve Sistem günlüğüne DEV kaynağıyla yazılır." },
-            new() { Baslik = "Kimlik durumu", Aciklama = "Kurulum kimliği bu uygulamanın kurulumunu, makine kimliği ise cihazı tanımlar. Listede her dönem veritabanının damgası (şema sürümü + kimlik) ve güncel kimlikle eşleşip eşleşmediği görünür." },
-            new() { Baslik = "\"Kimliği Onar\"", Aciklama = "Makinesi aynı olan dönemlerin damgasını güncel kurulum kimliğine eşitler. Farklı makineye ait dönemlere dokunmaz." },
-            new() { Baslik = "\"Kimliği Sıfırla\"", Aciklama = "Yeni kurulum kimliği üretir ve bu makinedeki tüm dönemleri yeni kimlikle damgalar. Yıkıcıdır; yalnızca kontrollü test/kimlik yenileme senaryosunda kullanılır." },
-            new() { Baslik = "\"Transfer Taraması\"", Aciklama = "Açılışta çalışan taşınmış-veri taramasını elle tetikler; sonuçta farklı kuruluma ait dönem sayısını veya sessiz onarılan kimlik sayısını gösterir." },
-            new() { Baslik = "Ayrıntılı log", Aciklama = "Dosya günlüğünün seviyesini Debug'a indirir; teşhis için daha ayrıntılı kayıt tutulur. Kapatınca Information seviyesine döner." },
-            new() { Baslik = "Güncelleme kaynağı", Aciklama = "Uygulamanın yeni sürüm arayacağı adres (GitHub repo veya Velopack feed). Değişiklik anında kaydedilir. Boş bırakılırsa derlemede gömülü varsayılan (mevcut git repo adresi) kullanılır; \"Varsayılana sıfırla\" bu adrese döndürür." },
-            new() { Baslik = "\"Kaynağı Doğrula\"", Aciklama = "Üretim birim testleriyle aynı normalize örneklerini çalıştırır (git@/ssh/.git biçimleri → https) ve ardından kaynağa bağlanmayı dener. Gömülü varsayılan ve girilen adresin normalize çıktısı sonuç satırlarında gösterilir." },
-            new() { Baslik = "Tanılama (çalışma-zamanı)", Aciklama = "\"Çalıştır\" sistem sınıfı testlerini (dosya/bağlantı/migration/veri/yetki — 7 test), güncelleme kaynağı normalize öz-testini ve kimlik/damga özetini tek listede toplar. Her satır PASS/FAIL ve mesaj gösterir; bir sorunda hangi alanda olduğunu buradan görürsünüz. Not: bu, CI'daki xUnit paketi değil uygulama içi çalışma-zamanı kontrolleridir." },
-            new() { Baslik = "Modül Entegrasyon Testleri", Aciklama = "\"Tümünü test et\" her modülü (çekirdek, log, sistem/tenant veritabanı, yedekleme, kimlik, firma/dönem, lisans/yetki, güncelleme, ayar sağlayıcıları, dev araçları) iki yönden kontrol eder: (1) DI'da kayıtlı ve çözülebiliyor mu, (2) kritik akışı salt-okunur çalışıyor mu. Donanım POST gibi; hangi modülün koptuğunu gösterir. Yalnız geliştirme derlemesinde görünür." },
-            new() { Baslik = "Klasör açma", Aciklama = "\"Log klasörünü aç\" ve \"Veri klasörünü aç\" düğmeleri ilgili yolları varsayılan dosya gezgininde açar. Yollar salt-okunur gösterilir." },
-        });
+        await DialogService.ShowYardimAsync(YardimBasligi, YardimMaddeleri());
     }
 }

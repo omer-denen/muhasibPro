@@ -2,7 +2,9 @@
 using Microsoft.Extensions.Hosting;
 using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
+using MuhasibPro.Business.Contracts.DatabaseServices.UpdateDogrulama;
 using MuhasibPro.Business.Contracts.Installation;
+using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.SistemServices.DevServices;
@@ -11,7 +13,9 @@ using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.DTOModel;
 using MuhasibPro.Business.Services.DatabaseServices.SistemDatabaseService;
 using MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService;
+using MuhasibPro.Business.Services.DatabaseServices.UpdateDogrulama;
 using MuhasibPro.Business.Services.Installation;
+using MuhasibPro.Business.Services.SistemServices.AiAsistan;
 using MuhasibPro.Business.Services.SistemServices.AppServices;
 using MuhasibPro.Business.Services.SistemServices.Authentication;
 using MuhasibPro.Business.Services.SistemServices.DevServices;
@@ -52,12 +56,21 @@ namespace MuhasibPro.Business.HostBuilder
                 services.AddScoped<IModuleLicenseService, ModuleLicenseService>();
                 services.AddScoped<IKullaniciService, KullaniciService>();
                 services.AddScoped<ILisansService, LisansService>();
+                // Faz 6.92: sürüm→özellik kapısı (Scoped — ILisansService Scoped'a yaslanır).
+                services.AddScoped<ISurumOzellikService, SurumOzellikService>();
                 // Singleton bağımlılarına (ThemeSelector) sızmasın diye Singleton: sadece Singleton'lara yaslanır.
                 services.AddSingleton<IAppPlatformSettingsProvider, AppPlatformSettingsProvider>();
+                // Faz 6.92: AI asistan ayarları (Singleton — yalnız Singleton'lara yaslanır).
+                services.AddSingleton<IAiAsistanSettingsProvider, AiAsistanSettingsProvider>();
                 // Faz 6.79: yaşam-döngüsü servisi Singleton — yalnız Singleton'lara yaslanır (manager/operasyon/ayarlar/log).
                 services.AddSingleton<ISistemYasamDongusuService, SistemYasamDongusuService>();
                 // Faz 6.78 Adım 3: sistem restore tek-kapı analizi (Singleton — manager/snapshot/yol Singleton'larına yaslanır).
                 services.AddSingleton<ISistemRestoreAnalizService, SistemRestoreAnalizService>();
+                // Faz 6.91-D: güncelleme sonrası doğrulama sagası (Singleton — yalnız Singleton yönetici/servislere yaslanır).
+                services.AddSingleton<IUygulamaDosyaDogrulayici, UygulamaDosyaDogrulayici>();
+                services.AddSingleton<ISistemDbGocDogrulayici, SistemDbGocDogrulayici>();
+                services.AddSingleton<ITenantTaramaDogrulayici, TenantTaramaDogrulayici>();
+                services.AddSingleton<IPostUpdateDogrulamaService, PostUpdateDogrulamaService>();
                 services.AddScoped<ITenantDatabaseUpdateService, TenantDatabaseUpdateService>();
                 services.AddScoped<IGlobalAyarlarService, GlobalAyarlarService>();
                 services.AddScoped<IKurulumKayitService, KurulumKayitService>();

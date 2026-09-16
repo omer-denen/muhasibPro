@@ -317,6 +317,10 @@
 | 272 | 2026-09-15 | Faz 6.86: durum çubuğu ana pencereye (MainShellView) + aktif firma/mali dönem/tenant bağlamı | ✅🧪 | C14 |
 | 273 | 2026-09-15 | 6.87 v1 reddi + Faz 6.90: Velopack git güncelleme akışı (dinamik repo + gömülü varsayılan FeedUrl + admin/dev-mode) | ✅🧪 | C14 |
 | 274 | 2026-09-16 | Güncelleme altyapısı: derin sektörel araştırma + 6.91-A/B/C (veri yolu `%AppData%`, zorunlu ön-yedek, ileri-uyumluluk guard) | ✅🧪 | C14 |
+| 275 | 2026-09-16 | Faz 6.91-D: güncelleme sonrası doğrulama sagası + `GuncellemeSonrasiView` (soldan sağa adım şeridi) | ✅🧪 | C14 |
+| 276 | 2026-09-16 | AI Yardım Asistanı Faz 6.92 Adım 1-6 ✅🧪 (UI drawer'a taşınıyor — 277'ye devir) | 📋 devir | C14 |
+| 277 | 2026-09-16 | Faz 6.91-D Revizyon 3: hero + 3 adım + Atlandı + B1/B2 (`PostUpdatePending`) + Light/Dark `ThemeResource` düzeltmesi + çapraz-model build açma | ✅🧪 | C14 |
+| 278 | 2026-09-16 | Faz 6.92 Adım 5c: servis→UI bağlama (Denetim "Model yönetimi" liste+disk+Sil+onay, alias Uygula, indirme yönergeleri, sohbet alias uyuşmazlığı düzeltmesi) | ✅🧪 | C14 |
 
 ---
 

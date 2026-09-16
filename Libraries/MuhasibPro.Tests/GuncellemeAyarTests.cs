@@ -64,7 +64,6 @@ public class GuncellemeAyarTests
         public void ApplyUpdatesAndRestartWithDatabaseSync(params string[] restartArgs) { }
         public Task<bool> IsUpdatePendingRestartAsync() => Task.FromResult(_bekleyenYenidenBaslatma);
         public Task<bool> PrepareForUpdateAsync() => Task.FromResult(true);
-        public Task<bool> PostUpdateDatabaseSyncAsync() => Task.FromResult(true);
     }
 
     [Fact]

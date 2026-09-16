@@ -51,6 +51,8 @@
             <!--  statusBar için  -->
             <converters:SagaStepStatusToBrushConverter x:Key="SagaStepStatusToBrush" />
 
+            <!--  Faz 6.91-D: güncelleme sonrası doğrulama — renkler View'da tema-farkında ThemeResource (converter yok)  -->
+
 
 
         </ResourceDictionary>

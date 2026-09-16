@@ -70,6 +70,7 @@ namespace MuhasibPro.Configurations
             NavigationService.Register<FirmaKayitAyarlarViewModel, FirmaKayitAyarSayfasi>();
             NavigationService.Register<DonemAyarlarViewModel, DonemAyarSayfasi>();
             NavigationService.Register<GirisDashboardViewModel, GirisDashboardSayfasi>();
+            NavigationService.Register<YapayZekaAyarlarViewModel, YapayZekaAyarSayfasi>();
             NavigationService.Register<GelistiriciAraclariViewModel, GelistiriciAraclariSayfasi>();
         }
         

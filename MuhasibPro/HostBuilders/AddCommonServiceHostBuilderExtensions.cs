@@ -1,12 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.Services.SistemServices.LogServices;
 using MuhasibPro.Contracts.UIService;
+using MuhasibPro.Services.AiAsistan;
 using MuhasibPro.Services.CommonServices;
 using MuhasibPro.Services.UIService;
+using MuhasibPro.ViewModels.Services;
 
 namespace MuhasibPro.HostBuilders
 {
@@ -37,6 +40,9 @@ namespace MuhasibPro.HostBuilders
                 services.AddScoped<IInAppMessageService, InAppMessageService>();
                 // Faz 6.82: yol açıcı (OS kabuğu — App katmanı implementasyonu).
                 services.AddSingleton<IYolAciciService, YolAciciService>();
+                // Faz 6.92: AI asistan (sözleşme Business, impl App — DialogService emsali).
+                services.AddSingleton<IAsistanSohbetService, FoundryAsistanSohbetService>();
+                services.AddSingleton<IYardimIcerikSaglayici, YardimIcerikToplayici>();
 
 
 

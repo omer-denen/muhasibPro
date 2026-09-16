@@ -109,6 +109,7 @@
                         </Grid>
                     </Frame>
                 </Grid>
+                    <!-- (Faz 6.92 AI paneli artık AnaBorder içinde değil; statü çubuğu üstü çekmecede.) -->
                     </Grid>
                 </Border>
 
@@ -122,7 +123,8 @@
             </Grid>
         </Grid>
 
-        <!-- Kural 17/footer: ana pencere durum çubuğu (tam genişlik) -->
+        <!-- Kural 17/footer: ana pencere durum çubuğu (tam genişlik). AI asistanı bu çubuktaki
+             🤖 düğmesine bağlı Flyout olarak pencerenin ÜSTÜNDE açılır (MainShell yerleşimine girmez). -->
         <shell:ShellStatusBar x:Name="ShellStatusBarControl" Grid.Row="1" Grid.ColumnSpan="2" />
 
         <!-- Faz 6.86: uygulama içi bildirim host'u (OS toast yerine) — içerik alanı üstünde -->

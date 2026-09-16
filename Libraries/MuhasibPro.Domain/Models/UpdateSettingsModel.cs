@@ -24,5 +24,14 @@
         public string? LastUpdateBackupPath { get; set; }
         /// <summary>Güncelleme hazırlığının başladığı an.</summary>
         public DateTime? LastUpdateStartTime { get; set; }
+
+        // ---- Faz 6.91-D: güncelleme sonrası doğrulama damgası ----
+        /// <summary>Uygulama yeni sürüme geçtikten sonra post-update doğrulaması başarıyla tamamlandığı an.</summary>
+        public DateTime? LastUpdateVerifiedAt { get; set; }
+
+        /// <summary>Faz 6.91-D Revizyon 3 (B2): güncelleme ön-yedeği başarıyla alındıktan sonra yazılan tetik bayrağı.
+        /// Açılışta doğrulama sagası yalnız bu bayrak true iken çalışır; iptal/başarısız hazırlıkta false'a döner,
+        /// böylece iptal edilen bir güncelleme sonraki açılışta yanlış doğrulama ekranı açmaz.</summary>
+        public bool PostUpdatePending { get; set; }
     }
 }

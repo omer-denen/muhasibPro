@@ -44,6 +44,13 @@ public static class SplashNavigator
                 targetView = typeof(Views.SistemDbYonetim.SistemDbYonetimView);
                 targetArgs = new ShellArgs { ViewModel = typeof(ViewModels.ViewModels.Sistem.SistemDbYonetimViewModel), Parameter = decision.KararOzeti };
             }
+            else if (decision.Target == SplashTarget.PostUpdateVerification)
+            {
+                // Faz 6.91-D: uygulama güncellendi — açılışta doğrulama sagası (view kendi akışını yürütür).
+                Debug.WriteLine($"Splash karar: {decision.KararOzeti}");
+                targetView = typeof(Views.ShellViews.Splash.GuncellemeSonrasiView);
+                targetArgs = new ShellArgs { ViewModel = typeof(ViewModels.ViewModels.Sistem.GuncellemeSonrasiViewModel) };
+            }
             else
             {
                 // D1: taşınmış veri kontrolü (best-effort, engellemez)

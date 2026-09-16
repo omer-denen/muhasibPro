@@ -12,18 +12,15 @@ namespace MuhasibPro.Services.UIService;
 public class UpdateService : IUpdateService
 {
     private readonly ILocalSettingsService _localSettings;
-    private readonly ISistemDatabaseService _sistemDatabaseService;
     private readonly ISistemYasamDongusuService _yasamDongusu;
     private readonly ILogger<UpdateService> _logger;
 
     public UpdateService(
         ILocalSettingsService localSettings,
-        ISistemDatabaseService sistemDatabaseService,
         ISistemYasamDongusuService yasamDongusu,
         ILogger<UpdateService> logger)
     {
         _localSettings = localSettings;
-        _sistemDatabaseService = sistemDatabaseService;
         _yasamDongusu = yasamDongusu;
         _logger = logger;
     }
@@ -154,10 +151,14 @@ public class UpdateService : IUpdateService
             var fromVersion = TryGetCurrentVersion();
             var toVersion = _lastUpdate?.TargetFullRelease?.Version?.ToString();
 
+            // Revizyon 3 (B1/B2): yeni tur — önceki damga/bekleyen bayrak temizlenir; yalnız
+            // başarılı ön-yedek sonrası PostUpdatePending yazılır (iptal edilen güncelleme ekran açmaz).
             settings.LastUpdateFromVersion = fromVersion;
             settings.LastUpdateToVersion = toVersion;
             settings.LastUpdateStartTime = DateTime.Now;
             settings.LastUpdateBackupPath = null;
+            settings.LastUpdateVerifiedAt = null;
+            settings.PostUpdatePending = false;
 
             _logger.LogInformation("PrepareForUpdate: {From} -> {To} — güncelleme öncesi yedek alınıyor", fromVersion, toVersion);
 
@@ -166,11 +167,14 @@ public class UpdateService : IUpdateService
             if (!basarili)
             {
                 _logger.LogError("PrepareForUpdate durduruldu: {Mesaj}", mesaj);
+                settings.LastUpdateToVersion = null;   // iptal: sonraki açılışta yanlış doğrulama tetiklenmez
+                settings.PostUpdatePending = false;
                 await SaveSettingsAsync(settings);
                 return false;
             }
 
             settings.LastUpdateBackupPath = yedekYolu;
+            settings.PostUpdatePending = true;       // başarılı hazırlık → yeniden başlatma sonrası doğrulama tetiklenir
             await SaveSettingsAsync(settings);
             _logger.LogInformation("PrepareForUpdate tamam: {From} -> {To}, yedek={Yedek}", fromVersion, toVersion, yedekYolu ?? "(gerekmedi)");
             return true;
@@ -199,22 +203,6 @@ public class UpdateService : IUpdateService
             return asm?.ToString(3);
         }
         catch { return null; }
-    }
-
-    public async Task<bool> PostUpdateDatabaseSyncAsync()
-    {
-        try
-        {
-            _logger.LogInformation("PostUpdateDatabaseSyncAsync: running SistemMigrationManager via SistemDatabaseService");
-            var (success, message) = await _sistemDatabaseService.InitializeSistemDatabaseAsync();
-            _logger.LogInformation("PostUpdateDatabaseSync result: {Success} — {Msg}", success, message);
-            return success;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "PostUpdateDatabaseSyncAsync failed");
-            return false;
-        }
     }
 
     // Kaynak: Ayarlar sayfasındaki manuel FeedUrl (GitHub repo URL veya Velopack feed URL).

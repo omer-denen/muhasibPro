@@ -1,0 +1,104 @@
+<UserControl
+    x:Class="MuhasibPro.Views.MainShell.Components.AsistanSohbetPaneli"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:MuhasibPro.Converters">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
+        <converters:BoolToVisibilityConverter x:Key="FalseToVis" TrueValue="Collapsed" FalseValue="Visible" />
+        <converters:StringToVisibilityConverter x:Key="MetinVarsaGoster" />
+    </UserControl.Resources>
+
+    <!-- Faz 6.92: AI yardım asistanı içeriği (statü çubuğu flyout'u içinde host'lanır; kart yüzeyi FlyoutPresenter'dır). -->
+    <Border Padding="0">
+        <StackPanel Spacing="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <FontIcon Glyph="{StaticResource IconZap}" FontSize="14" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                    <TextBlock Text="AI Yardım Asistanı" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBlock Text="{Binding ModelDurumMetni}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+                <Button
+                    Grid.Column="1"
+                    AutomationProperties.AutomationId="AsistanGizleButton"
+                    Click="OnGizleClick"
+                    Style="{StaticResource CircleIconButtonStyle}"
+                    Width="32"
+                    Height="32"
+                    ToolTipService.ToolTip="Asistanı gizle">
+                    <FontIcon Glyph="{StaticResource IconChevronDown}" FontSize="13" />
+                </Button>
+            </Grid>
+
+            <!-- Sürüm kilidi -->
+            <Border Background="{ThemeResource SystemFillColorCautionBackgroundBrush}" CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,10" Visibility="{Binding KilitliMi, Converter={StaticResource TrueToVis}}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="{StaticResource IconLock}" FontSize="14" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding KilitMetni}" TextWrapping="WrapWholeWords" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <!-- Sohbet -->
+            <StackPanel Spacing="10" Visibility="{Binding KilitliMi, Converter={StaticResource FalseToVis}}">
+                <ScrollViewer x:Name="SohbetKaydirici" MaxHeight="220" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Mesajlar}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,6">
+                                    <Border HorizontalAlignment="Right" MaxWidth="480" Margin="60,0,0,0"
+                                            Background="{ThemeResource SystemFillColorAttentionBackgroundBrush}"
+                                            CornerRadius="{StaticResource ControlCornerRadius}" Padding="10,8"
+                                            Visibility="{Binding KullaniciMi, Converter={StaticResource TrueToVis}}">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding Icerik}" TextWrapping="WrapWholeWords" />
+                                            <TextBlock Text="{Binding Zaman}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Right" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border HorizontalAlignment="Left" MaxWidth="480" Margin="0,0,60,0"
+                                            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                            CornerRadius="{StaticResource ControlCornerRadius}" Padding="10,8"
+                                            Visibility="{Binding AsistanMi, Converter={StaticResource TrueToVis}}">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding Icerik}" TextWrapping="WrapWholeWords" />
+                                            <TextBlock Text="{Binding Zaman}" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- Model hazırlığı -->
+                <StackPanel Spacing="6" Visibility="{Binding IsHazirlaniyor, Converter={StaticResource TrueToVis}}">
+                    <TextBlock Text="{Binding HazirlikAsamasi}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <ProgressBar Value="{Binding HazirlikYuzde}" Maximum="100" />
+                </StackPanel>
+
+                <!-- Hata -->
+                <Border Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}" CornerRadius="{StaticResource ControlCornerRadius}" Padding="12,8" Visibility="{Binding HataMetni, Converter={StaticResource MetinVarsaGoster}}">
+                    <TextBlock Text="{Binding HataMetni}" TextWrapping="WrapWholeWords" FontSize="12" />
+                </Border>
+
+                <!-- Soru girişi -->
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="SoruKutusu" Text="{Binding SoruMetni, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Sorunu yaz ve Enter'a bas..." KeyDown="OnSoruKeyDown" />
+                    <Button Grid.Column="1" Content="Gönder" Command="{Binding GonderCommand}" Style="{StaticResource MuhasibPrimaryButtonStyle}" MinWidth="120" />
+                    <Button Grid.Column="2" Content="Durdur" Command="{Binding DurdurCommand}" Visibility="{Binding IsGonderiliyor, Converter={StaticResource TrueToVis}}" />
+                    <ProgressRing Grid.Column="3" IsActive="{Binding IsGonderiliyor}" Width="24" Height="24" />
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

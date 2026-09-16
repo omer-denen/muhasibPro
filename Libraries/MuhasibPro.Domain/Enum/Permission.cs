@@ -117,5 +117,8 @@ public enum Permission
 
     // ── Log / Audit ─────────────────────────────────────────
     Log_Goruntule = 2200,
-    Log_Sil = 2201
+    Log_Sil = 2201,
+
+    // ── AI Yardım Asistanı (Faz 6.92) ──────────────────────────
+    AiAsistan_Kullan = 2300
 }

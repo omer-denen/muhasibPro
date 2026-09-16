@@ -64,18 +64,20 @@ public class DenetimMasasiTests
     }
 
     [Fact]
-    public void Menuler_SekizBolum_VarsayilanGirisSecili()
+    public void Menuler_DokuzBolum_VarsayilanGirisSecili()
     {
         var vm = new DenetimMasasiViewModel(OrtakServisler().Object, FirmaServisi().Object);
 
-        vm.Menuler.Should().HaveCount(8);
+        vm.Menuler.Should().HaveCount(9);
         vm.Menuler.Select(m => m.Bolum).Should().ContainInOrder(
             AyarBolumu.GirisPaneli, AyarBolumu.Gorunum, AyarBolumu.Giris, AyarBolumu.Firma,
-            AyarBolumu.Veritabani, AyarBolumu.Donem, AyarBolumu.Guncelleme, AyarBolumu.GelistiriciAraclari);
+            AyarBolumu.Veritabani, AyarBolumu.Donem, AyarBolumu.Guncelleme, AyarBolumu.YapayZeka, AyarBolumu.GelistiriciAraclari);
         var veritabani = vm.Menuler.Single(m => m.Bolum == AyarBolumu.Veritabani);
         veritabani.AltMenuler.Should().BeEmpty("Veritabanı tek view: Sistem + Dönem grupları sayfa içindedir");
-        vm.GorunurMenuler.Should().HaveCount(7, "dev-mode sağlayıcısı yokken Geliştirici Araçları gizlidir");
+        vm.YapayZeka.Should().NotBeNull();
+        vm.GorunurMenuler.Should().HaveCount(8, "dev-mode sağlayıcısı yokken Geliştirici Araçları gizlidir");
         vm.GorunurMenuler.Should().NotContain(m => m.Bolum == AyarBolumu.GelistiriciAraclari);
+        vm.GorunurMenuler.Should().Contain(m => m.Bolum == AyarBolumu.YapayZeka);
         vm.SeciliMenu.Should().NotBeNull();
         vm.SeciliMenu.Bolum.Should().Be(AyarBolumu.GirisPaneli);
     }
@@ -89,7 +91,7 @@ public class DenetimMasasiTests
 
         var vm = new DenetimMasasiViewModel(OrtakServisler().Object, FirmaServisi().Object, devMode: devMode.Object);
 
-        vm.GorunurMenuler.Should().HaveCount(8);
+        vm.GorunurMenuler.Should().HaveCount(9);
         vm.GorunurMenuler.Should().Contain(m => m.Bolum == AyarBolumu.GelistiriciAraclari);
     }
 
@@ -116,7 +118,7 @@ public class DenetimMasasiTests
 
         await vm.LoadAsync();
 
-        vm.GorunurMenuler.Should().HaveCount(7);
+        vm.GorunurMenuler.Should().HaveCount(8);
         vm.SeciliBolum.Should().Be(AyarBolumu.Veritabani);
         vm.SeciliMenu.Bolum.Should().Be(AyarBolumu.Veritabani);
     }
@@ -133,7 +135,7 @@ public class DenetimMasasiTests
 
         vm.AramaMetni = string.Empty;
 
-        vm.GorunurMenuler.Should().HaveCount(7);
+        vm.GorunurMenuler.Should().HaveCount(8);
     }
 
     [Fact]
