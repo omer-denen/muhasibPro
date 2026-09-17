@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="MuhasibPro.Views.KullaniciYonetimi.KullaniciYonetimiView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:components="using:MuhasibPro.Views.KullaniciYonetimi.Components"
+    xmlns:controls="using:MuhasibPro.Controls"
+    xmlns:converters="using:MuhasibPro.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:model="using:MuhasibPro.Business.DTOModel.SistemModel"
+    Loaded="OnPageLoaded"
+    mc:Ignorable="d"
+    Background="Transparent">
+
+    <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
+        <converters:BoolToVisibilityConverter x:Key="FalseToVis" TrueValue="Collapsed" FalseValue="Visible" />
+    </Page.Resources>
+
+    <!-- Kural 17 — Katman 1: kök Border (tema-resimli zemin + perde). Statik. -->
+    <Border x:Name="KokZemin" CornerRadius="0">
+        <Grid>
+            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
+
+            <Grid x:Name="RootLayout" RowSpacing="12" Padding="20,16,20,16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <controls:WindowTitle Title="Kullanıcı Yönetimi" />
+
+                <!-- Kural 17 — Katman 2: ana border paneli -->
+                <Grid x:Name="PanelWrap" Grid.Row="0" Grid.RowSpan="2">
+                    <Border
+                        x:Name="AnaBorder"
+                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}"
+                        BorderThickness="1.5"
+                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                        Padding="24"
+                        Translation="0,0,32">
+                        <Border.Shadow>
+                            <ThemeShadow x:Name="AnaBorderShadow" />
+                        </Border.Shadow>
+
+                        <Grid RowSpacing="14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Başlık + firma + birincil aksiyon (sağda) -->
+                            <Grid Grid.Row="0" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    FontSize="20"
+                                    Glyph="&#xE716;"
+                                    Foreground="{ThemeResource MuhasibPrimaryBrush}" />
+                                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock
+                                        FontSize="20"
+                                        FontWeight="Bold"
+                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                        Text="Kullanıcı Yönetimi" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                        <TextBlock
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="Kullanıcıları yönetin ve firma rolünü atayın." />
+                                        <Border
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="{StaticResource MuhasibControlCornerRadius}"
+                                            Padding="8,2">
+                                            <TextBlock
+                                                FontSize="11"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Text="{x:Bind ViewModel.FirmaAdi, Mode=OneWay}" />
+                                        </Border>
+                                        <ProgressRing
+                                            Width="14"
+                                            Height="14"
+                                            Foreground="{ThemeResource MuhasibPrimaryBrush}"
+                                            IsActive="{x:Bind ViewModel.IsYukleniyor, Mode=OneWay}"
+                                            Visibility="{x:Bind ViewModel.IsYukleniyor, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button Command="{x:Bind ViewModel.YenileCommand}" ToolTipService.ToolTip="Yenile">
+                                        <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                                    </Button>
+                                    <Button
+                                        MinWidth="130"
+                                        AutomationProperties.AutomationId="YeniKullaniciButton"
+                                        Command="{x:Bind ViewModel.YeniCommand}"
+                                        Content="Yeni Kullanıcı"
+                                        Style="{StaticResource AccentButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Durum bantları (Kural 11/12) -->
+                            <StackPanel Grid.Row="1" Spacing="8">
+                                <InfoBar
+                                    IsClosable="False"
+                                    IsOpen="{x:Bind ViewModel.HataVar, Mode=OneWay}"
+                                    Message="{x:Bind ViewModel.HataMetni, Mode=OneWay}"
+                                    Severity="Error" />
+                                <InfoBar
+                                    IsClosable="False"
+                                    IsOpen="{x:Bind ViewModel.BasariVar, Mode=OneWay}"
+                                    Message="{x:Bind ViewModel.BasariMetni, Mode=OneWay}"
+                                    Severity="Success" />
+                            </StackPanel>
+
+                            <!-- Master-detail: solda liste, sağda form/detay -->
+                            <Grid Grid.Row="2" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="380" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Katman 3: liste kartı -->
+                                <Border
+                                    Grid.Column="0"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource ControlCornerRadius}"
+                                    Padding="12">
+                                    <Grid RowSpacing="8">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                                            Text="Kullanıcılar" />
+                                        <ListView
+                                            x:Name="KullaniciListesi"
+                                            Grid.Row="1"
+                                            AutomationProperties.AutomationId="KullaniciListesi"
+                                            ItemsSource="{x:Bind ViewModel.Kullanicilar, Mode=OneWay}"
+                                            SelectedItem="{x:Bind ViewModel.SeciliKullanici, Mode=TwoWay}"
+                                            SelectionMode="Single">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate x:DataType="model:KullaniciModel">
+                                                    <Grid ColumnSpacing="8" Padding="0,6">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border
+                                                            Grid.Column="0"
+                                                            Width="34"
+                                                            Height="34"
+                                                            VerticalAlignment="Center"
+                                                            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{StaticResource MuhasibCircleCornerRadius}">
+                                                            <TextBlock
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"
+                                                                FontSize="12"
+                                                                FontWeight="Bold"
+                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                Text="{x:Bind Initials}" />
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                                            <TextBlock
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                                Text="{x:Bind AdiSoyadi}"
+                                                                TextTrimming="CharacterEllipsis" />
+                                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                <TextBlock
+                                                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                                    Text="{x:Bind KullaniciAdi}" />
+                                                                <Border
+                                                                    Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                    BorderThickness="1"
+                                                                    CornerRadius="{StaticResource MuhasibControlCornerRadius}"
+                                                                    Padding="6,0,6,1">
+                                                                    <TextBlock
+                                                                        FontSize="10"
+                                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                        Text="{x:Bind Rol.RolAdi, Mode=OneWay}" />
+                                                                </Border>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                                                            <Button
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                Click="OnDuzenleClick"
+                                                                ToolTipService.ToolTip="Düzenle">
+                                                                <FontIcon FontSize="13" Glyph="&#xE70F;" />
+                                                            </Button>
+                                                            <Button
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                Click="OnAktifClick"
+                                                                ToolTipService.ToolTip="Aktif/Pasif">
+                                                                <FontIcon FontSize="13" Glyph="&#xE8D8;" />
+                                                            </Button>
+                                                            <Button
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                Click="OnSifreClick"
+                                                                ToolTipService.ToolTip="Şifre belirle">
+                                                                <FontIcon FontSize="13" Glyph="&#xE72E;" />
+                                                            </Button>
+                                                            <Button
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                Click="OnSilClick"
+                                                                ToolTipService.ToolTip="Sil">
+                                                                <FontIcon FontSize="13" Glyph="&#xE74D;" />
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Katman 3: form / boş-durum kartı -->
+                                <Border
+                                    Grid.Column="1"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource ControlCornerRadius}"
+                                    Padding="16">
+                                    <Grid>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Text="Bir kullanıcı seçin veya yeni kullanıcı ekleyin."
+                                            Visibility="{x:Bind ViewModel.Duzenle.Gorunur, Mode=OneWay, Converter={StaticResource FalseToVis}}" />
+
+                                        <ScrollViewer
+                                            HorizontalScrollBarVisibility="Disabled"
+                                            VerticalScrollBarVisibility="Auto"
+                                            Visibility="{x:Bind ViewModel.Duzenle.Gorunur, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                                            <StackPanel Spacing="12">
+                                                <components:KullaniciDuzenlePanel DataContext="{x:Bind ViewModel.Duzenle, Mode=OneWay}" />
+                                                <StackPanel
+                                                    HorizontalAlignment="Right"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <Button
+                                                        MinWidth="120"
+                                                        AutomationProperties.AutomationId="VazgecButton"
+                                                        Command="{x:Bind ViewModel.VazgecCommand}"
+                                                        Content="Vazgeç" />
+                                                    <Button
+                                                        MinWidth="120"
+                                                        AutomationProperties.AutomationId="KaydetButton"
+                                                        Command="{x:Bind ViewModel.KaydetCommand}"
+                                                        Content="Kaydet"
+                                                        Style="{StaticResource AccentButtonStyle}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </ScrollViewer>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Page>

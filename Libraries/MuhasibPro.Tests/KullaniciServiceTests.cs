@@ -6,8 +6,10 @@ using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.Services.SistemServices.Authentication;
 using MuhasibPro.Data.Contracts.Repository.SistemRepos.Authentication;
+using MuhasibPro.Data.Contracts.Repository.SistemRepos;
 using MuhasibPro.Data.Contracts.Repository.Common.BaseRepo;
 using MuhasibPro.Data.DataContext;
+using MuhasibPro.Domain.Entities;
 using MuhasibPro.Domain.Entities.SistemEntity;
 using MuhasibPro.Domain.Models;
 
@@ -62,12 +64,17 @@ public class KullaniciServiceTests
     private static KullaniciService KurServis(
         Mock<IUserRepository> repo,
         IAuthenticationService auth,
-        IIdentitySettingsProvider kimlikAyar = null!)
+        IIdentitySettingsProvider kimlikAyar = null!,
+        Mock<IKullaniciFirmaRolRepository> kfr = null!,
+        Mock<IKullaniciRolRepository> rol = null!)
     {
         var uow = new Mock<IUnitOfWork<SistemDbContext>>();
         uow.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
         return new KullaniciService(
-            repo.Object, uow.Object, auth,
+            repo.Object,
+            (kfr ?? new Mock<IKullaniciFirmaRolRepository>()).Object,
+            (rol ?? new Mock<IKullaniciRolRepository>()).Object,
+            uow.Object, auth,
             new PasswordHasher<Kullanici>(), kimlikAyar);
     }
 
@@ -161,6 +168,76 @@ public class KullaniciServiceTests
         (await svc.DeleteKullaniciAsync(10)).Success.Should().BeFalse();
         (await svc.DeleteKullaniciAsync(MuhasibPro.Domain.Entities.KullaniciSabitleri.SeedYoneticiId)).Success.Should().BeFalse();
         repo.Verify(r => r.DeleteAsync(It.IsAny<Kullanici>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Create_NormalKullanici_Reddedilir_Yonetici_Olusturur()
+    {
+        var repo = new Mock<IUserRepository>();
+        repo.Setup(r => r.GetByUsernameAsync("yeni")).ReturnsAsync((Kullanici)null!);
+        var kfr = new Mock<IKullaniciFirmaRolRepository>();
+        kfr.Setup(r => r.FindAsync(It.IsAny<long>(), 7)).ReturnsAsync((KullaniciFirmaRol)null!);
+        var rol = new Mock<IKullaniciRolRepository>();
+        rol.Setup(r => r.GetByIdAsync(It.IsAny<long>()))
+            .ReturnsAsync(new KullaniciRol { Id = KullaniciRolSabitleri.YoneticiRolId, RolTip = KullaniciRolTip.Yönetici });
+
+        var normal = KurServis(repo, Kimlik(11, KullaniciRolTip.Kullanici), null!, kfr, rol);
+        (await normal.CreateKullaniciAsync(new KullaniciModel { KullaniciAdi = "yeni", Adi = "Y" },
+            "gizli-123", 7, KullaniciRolSabitleri.KullaniciRolId)).Success.Should().BeFalse();
+        repo.Verify(r => r.AddAsync(It.IsAny<Kullanici>()), Times.Never);
+
+        var yonetici = KurServis(repo, Kimlik(5, KullaniciRolTip.Yönetici), null!, kfr, rol);
+        var sonuc = await yonetici.CreateKullaniciAsync(
+            new KullaniciModel { KullaniciAdi = "yeni", Adi = "Y", Soyadi = "K" },
+            "gizli-123", 7, KullaniciRolSabitleri.YoneticiRolId);
+
+        sonuc.Success.Should().BeTrue();
+        var dogrulayici = new PasswordHasher<Kullanici>();
+        repo.Verify(r => r.AddAsync(It.Is<Kullanici>(k =>
+            k.KullaniciAdi == "yeni" && k.Adi == "Y" && k.KaydedenId == 5 && k.AktifMi
+            && dogrulayici.VerifyHashedPassword(k, k.ParolaHash, "gizli-123") == PasswordVerificationResult.Success)), Times.Once);
+        kfr.Verify(r => r.AddAsync(It.Is<KullaniciFirmaRol>(x =>
+            x.FirmaId == 7 && x.RolId == KullaniciRolSabitleri.YoneticiRolId)), Times.Once);
+    }
+
+    [Fact]
+    public async Task Create_Duplicate_KullaniciAdi_Ve_KisaSifre_Reddedilir()
+    {
+        var repo = new Mock<IUserRepository>();
+        repo.Setup(r => r.GetByUsernameAsync("testci")).ReturnsAsync(Kayit());
+        var svc = KurServis(repo, Kimlik(5, KullaniciRolTip.Yönetici));
+
+        (await svc.CreateKullaniciAsync(new KullaniciModel { KullaniciAdi = "testci", Adi = "A" },
+            "gizli-123", 7, KullaniciRolSabitleri.KullaniciRolId)).Success.Should().BeFalse();
+
+        var repo2 = new Mock<IUserRepository>();
+        repo2.Setup(r => r.GetByUsernameAsync("yeni")).ReturnsAsync((Kullanici)null!);
+        var svc2 = KurServis(repo2, Kimlik(5, KullaniciRolTip.Yönetici));
+        (await svc2.CreateKullaniciAsync(new KullaniciModel { KullaniciAdi = "yeni", Adi = "A" },
+            "123", 7, KullaniciRolSabitleri.KullaniciRolId)).Success.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task RolAta_Guard_Ve_Kfr_Gunceller()
+    {
+        var repo = new Mock<IUserRepository>();
+        repo.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(Kayit());
+        var rol = new Mock<IKullaniciRolRepository>();
+        rol.Setup(r => r.GetByIdAsync(KullaniciRolSabitleri.YoneticiRolId))
+            .ReturnsAsync(new KullaniciRol { Id = KullaniciRolSabitleri.YoneticiRolId, RolTip = KullaniciRolTip.Yönetici });
+        var mevcutKfr = new KullaniciFirmaRol { KullaniciId = 10, FirmaId = 7, RolId = KullaniciRolSabitleri.KullaniciRolId };
+        var kfr = new Mock<IKullaniciFirmaRolRepository>();
+        kfr.Setup(r => r.FindAsync(10, 7)).ReturnsAsync(mevcutKfr);
+
+        var normal = KurServis(repo, Kimlik(11, KullaniciRolTip.Kullanici), null!, kfr, rol);
+        (await normal.RolAtaAsync(10, 7, KullaniciRolSabitleri.YoneticiRolId)).Success.Should().BeFalse();
+
+        var yonetici = KurServis(repo, Kimlik(5, KullaniciRolTip.Yönetici), null!, kfr, rol);
+        (await yonetici.RolAtaAsync(10, 7, KullaniciRolSabitleri.YoneticiRolId)).Success.Should().BeTrue();
+        mevcutKfr.RolId.Should().Be(KullaniciRolSabitleri.YoneticiRolId);
+        kfr.Verify(r => r.AddAsync(It.IsAny<KullaniciFirmaRol>()), Times.Never);
+
+        (await yonetici.RolAtaAsync(10, 7, 999999)).Success.Should().BeFalse();
     }
 
     [Fact]

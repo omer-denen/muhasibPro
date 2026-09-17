@@ -41,6 +41,8 @@ public class PolitikaTests
             "Libraries/MuhasibPro.Business/HostBuilder/AddRepositoryHostBuilderExtensions.cs"));
         src.Should().Contain("AddScoped<IKullaniciFirmaRolRepository, KullaniciFirmaRolRepository>");
         src.Should().Contain("AddScoped<IRolPermissionRepository, RolPermissionRepository>");
+        // Faz 6.85 K2: DbContext tutan IUserRepository, pencere-başına scope ile aynı context'i paylaşmalı (Singleton = FK ihlali).
+        src.Should().Contain("AddScoped<IUserRepository, UserRepository>");
     }
 
     private static PermissionService KurServis(

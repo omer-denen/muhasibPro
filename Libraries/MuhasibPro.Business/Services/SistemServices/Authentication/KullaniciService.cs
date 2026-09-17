@@ -2,17 +2,21 @@ using Microsoft.AspNetCore.Identity;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Data.Contracts.Repository.Common.BaseRepo;
+using MuhasibPro.Data.Contracts.Repository.SistemRepos;
 using MuhasibPro.Data.Contracts.Repository.SistemRepos.Authentication;
 using MuhasibPro.Data.DataContext;
 using MuhasibPro.Domain.Entities;
 using MuhasibPro.Domain.Entities.SistemEntity;
 using MuhasibPro.Domain.Utilities.Responses;
+using MuhasibPro.Domain.Utilities.UIDGenerator;
 
 namespace MuhasibPro.Business.Services.SistemServices.Authentication
 {
     public class KullaniciService : IKullaniciService
     {
         private readonly IUserRepository _kullaniciRepository;
+        private readonly IKullaniciFirmaRolRepository _kfrRepository;
+        private readonly IKullaniciRolRepository _rolRepository;
         private readonly IUnitOfWork<SistemDbContext> _unitOfWork;
         private readonly IAuthenticationService _authenticationService;
         private readonly IPasswordHasher<Kullanici> _passwordHasher;
@@ -20,12 +24,16 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
 
         public KullaniciService(
             IUserRepository kullaniciRepository,
+            IKullaniciFirmaRolRepository kfrRepository,
+            IKullaniciRolRepository rolRepository,
             IUnitOfWork<SistemDbContext> unitOfWork,
             IAuthenticationService authenticationService,
             IPasswordHasher<Kullanici> passwordHasher,
             IIdentitySettingsProvider identitySettings = null!)
         {
             _kullaniciRepository = kullaniciRepository;
+            _kfrRepository = kfrRepository;
+            _rolRepository = rolRepository;
             _unitOfWork = unitOfWork;
             _authenticationService = authenticationService;
             _passwordHasher = passwordHasher;
@@ -56,6 +64,110 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
             var liste = entities.Select(ToModel).ToList();
             return new SuccessApiDataResponse<List<KullaniciModel>>(liste, $"{liste.Count} kullanıcı listelendi.");
         }
+
+        public async Task<ApiDataResponse<List<KullaniciModel>>> GetKullanicilarWithRolAsync(long firmaId)
+        {
+            var entities = await _kullaniciRepository.GetAllAsync();
+            var kfrler = firmaId > 0 ? await _kfrRepository.GetByFirmaIdAsync(firmaId) : new List<KullaniciFirmaRol>();
+
+            var liste = new List<KullaniciModel>(entities.Count);
+            foreach (var entity in entities)
+            {
+                var model = ToModel(entity);
+                var kfr = kfrler.FirstOrDefault(x => x.KullaniciId == entity.Id);
+                if (kfr?.Rol != null)
+                    model.Rol = ToRolModel(kfr.Rol);
+                liste.Add(model);
+            }
+            return new SuccessApiDataResponse<List<KullaniciModel>>(liste, $"{liste.Count} kullanıcı listelendi.");
+        }
+
+        public async Task<ApiDataResponse<List<KullaniciRolModel>>> GetRollerAsync()
+        {
+            var roller = await _rolRepository.GetAllAsync();
+            var liste = roller.Select(ToRolModel).ToList();
+            return new SuccessApiDataResponse<List<KullaniciRolModel>>(liste, $"{liste.Count} rol bulundu.");
+        }
+
+        public async Task<ApiDataResponse<int>> CreateKullaniciAsync(KullaniciModel model, string sifre, long firmaId, long rolId)
+        {
+            if (!AyarYetkiDenetimi.KullaniciYoneticiMi(_authenticationService))
+                return new ErrorApiDataResponse<int>(0, "Kullanıcı oluşturmak için yönetici olmalısınız.");
+            if (model == null)
+                return new ErrorApiDataResponse<int>(0, "Kullanıcı bilgisi boş olamaz!");
+            if (string.IsNullOrWhiteSpace(model.KullaniciAdi))
+                return new ErrorApiDataResponse<int>(0, "Kullanıcı adı boş olamaz.");
+            if (string.IsNullOrWhiteSpace(model.Adi))
+                return new ErrorApiDataResponse<int>(0, "Ad boş olamaz.");
+            if (await _kullaniciRepository.GetByUsernameAsync(model.KullaniciAdi.Trim()) != null)
+                return new ErrorApiDataResponse<int>(0, "Bu kullanıcı adı zaten kullanılıyor.");
+
+            int minUzunluk = 6;
+            try { minUzunluk = (await _identitySettings?.GetAsync())?.MinPasswordLength ?? 6; } catch { }
+            if (string.IsNullOrEmpty(sifre) || sifre.Length < minUzunluk)
+                return new ErrorApiDataResponse<int>(0, $"Şifre en az {minUzunluk} karakter olmalı.");
+
+            var kullanici = new Kullanici
+            {
+                Id = UIDGenerator.GenerateModuleId(UIDModuleType.Sistem),
+                KullaniciAdi = model.KullaniciAdi.Trim(),
+                Adi = model.Adi.Trim(),
+                Soyadi = model.Soyadi?.Trim() ?? string.Empty,
+                Eposta = model.Eposta?.Trim() ?? string.Empty,
+                Telefon = model.Telefon?.Trim() ?? string.Empty,
+                AktifMi = true,
+                ParolaHash = string.Empty,
+                KayitTarihi = DateTime.UtcNow,
+                KaydedenId = _authenticationService.GetCurrentUserId
+            };
+            kullanici.ParolaHash = _passwordHasher.HashPassword(kullanici, sifre);
+            await _kullaniciRepository.AddAsync(kullanici);
+
+            if (firmaId > 0)
+                await KfrYazAsync(kullanici.Id, firmaId, rolId > 0 ? rolId : KullaniciRolSabitleri.KullaniciRolId);
+
+            var sonuc = await _unitOfWork.SaveChangesAsync();
+            return new SuccessApiDataResponse<int>(sonuc, "Kullanıcı oluşturuldu.");
+        }
+
+        public async Task<ApiDataResponse<int>> RolAtaAsync(long kullaniciId, long firmaId, long rolId)
+        {
+            if (!AyarYetkiDenetimi.KullaniciYoneticiMi(_authenticationService))
+                return new ErrorApiDataResponse<int>(0, "Rol atamak için yönetici olmalısınız.");
+            if (kullaniciId <= 0 || firmaId <= 0 || rolId <= 0)
+                return new ErrorApiDataResponse<int>(0, "Kullanıcı, firma ve rol bilgisi zorunludur.");
+            if (await _kullaniciRepository.GetByIdAsync(kullaniciId) == null)
+                return new ErrorApiDataResponse<int>(0, "Kullanıcı bulunamadı.");
+            if (await _rolRepository.GetByIdAsync(rolId) == null)
+                return new ErrorApiDataResponse<int>(0, "Rol bulunamadı.");
+
+            await KfrYazAsync(kullaniciId, firmaId, rolId);
+            var sonuc = await _unitOfWork.SaveChangesAsync();
+            return new SuccessApiDataResponse<int>(sonuc, "Rol atandı.");
+        }
+
+        /// <summary>KFR upsert (kaydetmez) — çağıran tek <c>SaveChangesAsync</c> ile yazar.</summary>
+        private async Task KfrYazAsync(long kullaniciId, long firmaId, long rolId)
+        {
+            var mevcut = await _kfrRepository.FindAsync(kullaniciId, firmaId);
+            if (mevcut == null)
+                await _kfrRepository.AddAsync(new KullaniciFirmaRol
+                {
+                    KullaniciId = kullaniciId,
+                    FirmaId = firmaId,
+                    RolId = rolId
+                });
+            else
+                mevcut.RolId = rolId;
+        }
+
+        private static KullaniciRolModel ToRolModel(KullaniciRol rol) => new()
+        {
+            Id = rol.Id,
+            RolAdi = rol.RolAdi,
+            Aciklama = rol.Aciklama,
+            RolTip = rol.RolTip
+        };
 
         public async Task<ApiDataResponse<int>> UpdateKullaniciAsync(KullaniciModel model)
         {

@@ -1,5 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using MuhasibPro.Domain.Entities.SistemEntity;
+using MuhasibPro.ViewModels.ViewModels.KullaniciYonetimi;
 using MuhasibPro.ViewModels.ViewModels.Shell;
 
 namespace MuhasibPro.Views.ShellViews.Shell.Components;
@@ -27,7 +29,18 @@ public sealed partial class UserInfoControl : UserControl
                 NameText.Text = name;
                 InitialsText.Text = GetInitials(name);
             }
+
+            // Faz 6.85 K2: Kullanıcı Yönetimi girişi yalnız yöneticiye görünür.
+            var yoneticiMi = vm.ViewModelArgs?.UserInfo?.KullaniciModel?.Rol?.RolTip == KullaniciRolTip.Yönetici;
+            YonetimMenuItem.Visibility = yoneticiMi ? Visibility.Visible : Visibility.Collapsed;
+            YonetimAyrac.Visibility = yoneticiMi ? Visibility.Visible : Visibility.Collapsed;
         }
+    }
+
+    private async void OnKullaniciYonetimiClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is FirmaShellViewModel vm)
+            await vm.NavigationService.CreateNewViewAsync<KullaniciYonetimiViewModel>(null, "Kullanıcı Yönetimi");
     }
 
     private static string GetInitials(string name)

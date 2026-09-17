@@ -2,6 +2,13 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
+## Singleton repo + pencere-başına DI scope: kullanıcı ve KFR farklı DbContext'e yazıldı (FK constraint failed) (ÇÖZÜLDÜ — 2026-09-17 — Oturum 285)
+- **Belirti:** Kullanıcı Yönetimi'nde "Kaydet" → `SQLite Error 19: 'FOREIGN KEY constraint failed.'`; kullanıcı oluşmuyor (liste değişmiyor). Hata mesajı kök nedeni gizliyordu.
+- **Sebep:** `ServiceLocator.Current` **pencere başına ayrı `IServiceScope`** açar. `IUserRepository` **Singleton** olduğundan ilk çözüldüğü pencerenin `SistemDbContext`'ini tutuyordu; `IUnitOfWork`/`IKullaniciFirmaRolRepository` ise **Scoped** olup K2 penceresinin context'ini kullanıyordu. `_kullaniciRepository.AddAsync(kullanici)` A context'ine, `_kfrRepository.AddAsync(kfr)` B context'ine gitti; `SaveChangesAsync` (B) yalnız KFR'ı yazınca henüz yazılmamış `KullaniciId`'ye FK verdi.
+- **Kanıt (izole iki-scope testi):** Singleton repo `SaveChanges=0`, Scoped repo `SaveChanges=1`.
+- **Çözüm:** `AddRepositoryHostBuilderExtensions` → `IUserRepository` **Singleton→Scoped** (kodun kendi kuralı: "DbContext tutan repolar Scoped olur (Singleton = captive)"). Regresyon: `PolitikaTests` kaynak-assert'i. Ayrıca `KullaniciDuzenleViewModel` gerçek hatayı `ex.GetBaseException().Message` ile gösterir (Kural 12). Ders: **DbContext tutan her repo Scoped olmalı**; pencere-başına scope varken Singleton repo, işlemi iki context'e böler.
+- Tarih: 2026-09-17
+
 ## RBAC seed migration'ı mevcut `RolPermission` satırıyla çakışıp uygulamayı başlatamazdı (ÇÖZÜLDÜ — 2026-09-17 — Oturum 285)
 - **Belirti:** K1 `RolPermission` seed migration'ı EF `InsertData` ile üretildi; dev `Sistem.db`'de Oturum 284'ten kalma **geçici** satır `RolPermission (RolId=241341, PermissionId=2300)` vardı. `SeedData`'daki aynı çift → **UNIQUE PK ihlali** → `Database.MigrateAsync` patlar, uygulama açılmaz.
 - **Sebep:** EF `InsertData` düz `INSERT` üretir; seed yalnız **boş** tabloya uygulanabilir. Gerçek/uzun ömürlü veritabanlarında elle eklenmiş/geçici satır bulunabilir (K1 seed'inden önce rol-izin testi için eklenmişti).

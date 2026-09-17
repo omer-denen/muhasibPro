@@ -4,12 +4,14 @@ using MuhasibPro.Data.Contracts.Database.SistemDatabase;
 using MuhasibPro.HostBuilders;
 using MuhasibPro.Services.CommonServices;
 using MuhasibPro.ViewModels.ViewModels.Settings;
+using MuhasibPro.ViewModels.ViewModels.KullaniciYonetimi;
 using MuhasibPro.ViewModels.ViewModels.Shell;
 using MuhasibPro.ViewModels.ViewModels.Shell.Tenant;
 using MuhasibPro.ViewModels.ViewModels.Sistem;
 using MuhasibPro.ViewModels.ViewModels.Sistem.Firmalar;
 using MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler;
 using MuhasibPro.Views.Firma;
+using MuhasibPro.Views.KullaniciYonetimi;
 using MuhasibPro.Views.Firmalar;
 using MuhasibPro.Views.Login;
 using MuhasibPro.Views.MainShell;
@@ -49,6 +51,7 @@ namespace MuhasibPro.Configurations
             NavigationService.Register<MainShellViewModel, MainShellView>();
             NavigationService.Register<FirmaShellViewModel,FirmaShellView>();
             NavigationService.Register<DenetimMasasiViewModel, DenetimMasasiView>();
+            NavigationService.Register<KullaniciYonetimiViewModel, KullaniciYonetimiView>();
             
             
 

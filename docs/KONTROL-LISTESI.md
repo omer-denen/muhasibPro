@@ -349,14 +349,17 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] Testler: gerçek seed ile `PermissionService` integration + KFR yazımı + backfill (`RbacK1Tests`, 6 test)
 
 
-### K2 — Kullanıcı Yönetimi modal penceresi ⬜
-- [ ] `KullaniciYonetimiViewModel` + `KullaniciYonetimiView` (ayrı `Views/KullaniciYonetimi/`; `DenetimMasasi` modal/boyut deseni; `CreateNewViewAsync`)
-- [ ] Liste + yeni kullanıcı (`Adi/Soyadi` dahil; `Register` duplicate kontrolü) + düzenle + aktif/pasif + şifre belirle + sil (guard'lı). Kapı: yönetici (`AyarYetkiDenetimi.KullaniciYoneticiMi` + `Permission`)
-- [ ] `IKullaniciService`'e eksik create/rol metotları (Kural 5 zinciri: VM → Contracts → Services → Data)
+### K2 — Kullanıcı Yönetimi modal penceresi ✅🧪 (Oturum 285) — Kural 8 sınıf onaylı
+- [x] `KullaniciYonetimiViewModel` + `KullaniciDuzenleViewModel` + `KullaniciYonetimiView` + `KullaniciDuzenlePanel` (ayrı `Views/KullaniciYonetimi/`; `CreateNewViewAsync` ayrı pencere; Kural 17)
+- [x] Liste + yeni kullanıcı (`Adi/Soyadi` dahil; kullanıcı adı benzersiz) + düzenle + aktif/pasif + şifre belirle + sil (guard'lı). Kapı: yönetici (`AyarYetkiDenetimi.KullaniciYoneticiMi`)
+- [x] `IKullaniciService`'e create/rol metotları + yeni `IKullaniciRolRepository` (Scoped) (Kural 5 zinciri)
+- [x] `UserInfoControl` menüsüne admin "Kullanıcı Yönetimi" girişi
+- [x] **Bug fix:** `IUserRepository` Scoped (pencere-scope context birliği; FK ihlali giderildi; Kural 8 ✅)
+- [x] Testler (`KullaniciYonetimiTests` 6 + `KullaniciServiceTests` +3 + DI regresyon) · **Kural 18 canlı ✅** (`ot285_s_kayit`), ⏳ onay
 
 ### K3 — İzin matrisi + rol atama (iki rol) ⬜
+- [x] Kullanıcıya firma-bazlı **rol atama** (KFR; form rol seçici + `RolAtaAsync`) — K2'de teslim
 - [ ] **İzin matrisi UI** (71 izin, kategori başlıklı): `Yönetici` sabit (tüm izinler), **`Kullanıcı` düzenlenebilir** → modül/aksiyon erişimi buradan
-- [ ] Kullanıcıya **firma-bazlı rol atama** (KFR yazımı; Yönetici/Kullanıcı)
 - [ ] **Özel rol oluşturma YOK** (kullanıcı kararı Oturum 284)
 
 ### K4 — Modül/alan erişim kapısı ⬜

@@ -8,6 +8,8 @@
 
     <Button
         x:Name="UserButton"
+        AutomationProperties.AutomationId="UserInfoButton"
+        AutomationProperties.Name="Kullanıcı Menüsü"
         CornerRadius="{StaticResource MuhasibCardCornerRadius}"
         Padding="0"
         Background="Transparent"
@@ -15,6 +17,17 @@
         VerticalAlignment="Center">
         <Button.Flyout>
             <MenuFlyout Placement="Bottom">
+                <MenuFlyoutItem
+                    x:Name="YonetimMenuItem"
+                    AutomationProperties.AutomationId="KullaniciYonetimiMenuItem"
+                    Click="OnKullaniciYonetimiClick"
+                    Text="Kullanıcı Yönetimi"
+                    Visibility="Collapsed">
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="&#xE716;" FontSize="12"/>
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator x:Name="YonetimAyrac" Visibility="Collapsed"/>
                 <MenuFlyoutItem Text="Oturumu Kapat" Click="OnLogoutClick">
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource IconLogOut}" FontSize="12"/>

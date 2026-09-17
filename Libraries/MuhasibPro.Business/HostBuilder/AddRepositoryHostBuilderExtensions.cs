@@ -37,15 +37,19 @@ namespace MuhasibPro.Business.HostBuilder
                 //services.AddScoped<IGenericRepository<Kullanici>, GenericRepository<Kullanici>>();
                 services.AddSingleton<ISistemLogRepository, SistemLogRepository>();
                 services.AddSingleton<IAppLogRepository, AppLogRepository>();
-                services.AddSingleton<IUserRepository, UserRepository>();
                 services.AddSingleton<IAuthenticationRepository, AuthenticationRepository>();
                 services.AddSingleton<IAccountStore, AccountStore>();
                 services.AddSingleton<IAuthenticator, Authenticator>();
                 services.AddSingleton<IFirmaRepository, FirmaRepository>();
                 services.AddSingleton<IMaliDonemRepository, MaliDonemRepository>();
                 // Faz 5 M2-politika: DbContext tutan repolar Scoped olur (Singleton = captive).
+                // Faz 6.85 K2: IUserRepository de DbContext tutar ve ServiceLocator pencere-başına scope
+                // açar; Singleton kalırsa başka pencerenin context'ine yazar (KFR FK ihlali) → Scoped.
+                services.AddScoped<IUserRepository, UserRepository>();
                 services.AddScoped<IKullaniciFirmaRolRepository, KullaniciFirmaRolRepository>();
                 services.AddScoped<IRolPermissionRepository, RolPermissionRepository>();
+                // Faz 6.85 K2: rol kataloğu (rol seçici/listeleme) — DbContext tutar, Scoped.
+                services.AddScoped<IKullaniciRolRepository, KullaniciRolRepository>();
 
 
 

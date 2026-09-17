@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MuhasibPro.ViewModels.ViewModels.Loggings.SistemLogs;
+using MuhasibPro.ViewModels.ViewModels.KullaniciYonetimi;
 using MuhasibPro.ViewModels.ViewModels.Settings;
 using MuhasibPro.ViewModels.ViewModels.Shell;
 using MuhasibPro.ViewModels.ViewModels.Shell.Tenant;
@@ -21,6 +22,7 @@ public static class AddAppViewModelHostBuilderExtensions
             services.AddSingleton<QuickLoginAccountsViewModel>();
             services.AddTransient<FirmaShellViewModel>();
             services.AddTransient<DenetimMasasiViewModel>();
+            services.AddTransient<KullaniciYonetimiViewModel>();
             services.AddTransient<AsistanSohbetViewModel>();
             services.AddTransient<YapayZekaAyarlarViewModel>();
             services.AddTransient<GelistiriciAraclariViewModel>();

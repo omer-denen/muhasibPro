@@ -1,7 +1,7 @@
 # MuhasibPro — Faz 6.85: Kullanıcı Yönetimi + RBAC (kullanıcı → modül/alan erişimi) Planı
 
 > **Faz 6.85 (genişletildi).** Kullanıcı bazlı yapı çekirdeğin sonuna bırakıldı; **kim hangi modülü/alanı kullanabilir, nereye girebilir, yetkisiz alan nasıl engellenir** eksik kaldı. Bu faz onu kapatır.
-> **Durum:** **K1 ✅🧪 (Oturum 285)** · K2-K6 📋 plan (Oturum 284). **Öncelikli faz** (kullanıcı kararı: "eksik işleri tamamladıktan sonra öncelikli faz").
+> **Durum:** **K1 ✅🧪 (Oturum 285) · K2 ✅🧪 (Oturum 285, canlı onay bekliyor)** · K3-K6 📋 plan (Oturum 284). **Öncelikli faz** (kullanıcı kararı: "eksik işleri tamamladıktan sonra öncelikli faz").
 > **Sahiplik:** RBAC `Data`+`Business` (motor) · UI `Views`/`ViewModels` · migration (Kural 8) — sınıf bazlı onay.
 
 ## Kullanıcı sözü / kapsam
@@ -75,15 +75,19 @@ Kullanici ──(KullaniciFirmaRol)──► Firma  (firma-başına rol)
 
 > **Oturum 285 notu:** varsayılan `Kullanıcı` seti = 15 modül `*_Goruntule` + `AiAsistan_Kullan` (default-deny; `Veritabani_*`/`Log_*` ve tüm yazma kapalı; K3'te düzenlenir). Dev DB'de Oturum 284'ten kalan geçici `RolPermission` satırı migration'ı UNIQUE ihlaliyle durduracaktı → migration idempotent yapıldı ve gerçek dev DB kopyasıyla doğrulandı.
 
-### K2 — Kullanıcı Yönetimi modal penceresi ⬜
-- [ ] `KullaniciYonetimiViewModel` + `KullaniciYonetimiView` (ayrı `Views/KullaniciYonetimi/`, DenetimMasası modal deseni).
-- [ ] Liste + yeni kullanıcı (`Adi/Soyadi` dahil) + düzenle + aktif/pasif + şifre belirle + sil (guard'lı).
-- [ ] Kapı: yalnız yönetici (`AyarYetkiDenetimi.KullaniciYoneticiMi` + `Permission`).
-- [ ] `IKullaniciService`'e eksik create/rol metotları (sözleşme → Business → Data zinciri, Kural 5).
+### K2 — Kullanıcı Yönetimi modal penceresi ✅🧪 (Oturum 285) — Kural 8 sınıf onayı ✅
+- [x] `KullaniciYonetimiViewModel` + `KullaniciDuzenleViewModel` (composition) + `KullaniciYonetimiView` + `KullaniciDuzenlePanel` (ayrı `Views/KullaniciYonetimi/`, ayrı pencere deseni).
+- [x] Liste + yeni kullanıcı (`Adi/Soyadi` dahil; kullanıcı adı benzersiz) + düzenle + aktif/pasif + şifre belirle + sil (guard'lı).
+- [x] Kapı: yalnız yönetici (`AyarYetkiDenetimi.KullaniciYoneticiMi`). (İnce `Permission` kapısı K4.)
+- [x] `IKullaniciService`'e eksik create/rol metotları (`CreateKullaniciAsync`, `RolAtaAsync`, `GetKullanicilarWithRolAsync`, `GetRollerAsync`) + yeni `IKullaniciRolRepository` (Scoped) (sözleşme → Business → Data zinciri, Kural 5).
+- [x] **Giriş noktası:** `UserInfoControl` menüsüne yalnız yöneticiye görünen **"Kullanıcı Yönetimi"** maddesi (K5 menü işinin bu kısmı K2'ye çekildi).
+- [x] **Bug fix (canlı):** `IUserRepository` Singleton→**Scoped** (pencere-başına DI scope → aynı `SistemDbContext`; FK ihlali giderildi; Kural 8 ✅ onaylı).
+- [x] Testler: `KullaniciYonetimiTests` (6) + `KullaniciServiceTests` create/rol (3) + DI-scoped regresyon (`PolitikaTests`).
+- [x] **Kural 18 canlı (`ot285_*`):** FirmaShell → kullanıcı menüsü → "Kullanıcı Yönetimi" → pencere açıldı (Kural 17 katmanlı); liste **Ömer Korkut/Yönetici**; yeni kullanıcı kaydı → **"Kullanıcı oluşturuldu."** + liste **Test Kullanici/Kullanıcı** (`ot285_s_kayit`) — RBAC rol ataması KFR ile çalışıyor. **Onay bekliyor.**
 
 ### K3 — İzin matrisi + rol atama (iki rol) ⬜
+- [x] Kullanıcıya firma-bazlı **rol atama** (KFR yazımı; `Yönetici`/`Kullanıcı`) — K2'de kullanıcı formundaki rol seçici + `RolAtaAsync` ile teslim edildi.
 - [ ] **İzin matrisi UI** (kategori başlıklarıyla 71 izin): `Yönetici` sabit (tüm izinler/bypass), **`Kullanıcı` rolü düzenlenebilir** → modül/aksiyon erişimi buradan yönetilir.
-- [ ] Kullanıcıya firma-bazlı **rol atama** (KFR yazımı; `Yönetici`/`Kullanıcı`).
 - [ ] **Özel rol oluşturma YOK** (kullanıcı kararı Oturum 284); `KullaniciRolTip` iki rol kalır.
 
 ### K4 — Modül/alan erişim kapısı ⬜
@@ -94,7 +98,8 @@ Kullanici ──(KullaniciFirmaRol)──► Firma  (firma-başına rol)
 
 ### K5 — Hesabım + UserInfoControl menüsü ⬜
 - [ ] "Hesabım" yüzeyi: profil (ad/iletişim/avatar) + şifre değiştir (mevcut şifre doğrulamalı).
-- [ ] `UserInfoControl` menüsü: Hesabım / Yönetim[admin] / Oturumu Kapat; **rol rozeti gerçek** (hardcoded "Admin" kaldırılır); sahte madde yok.
+- [x] `UserInfoControl` menüsü: **"Kullanıcı Yönetimi" (yalnız admin)** maddesi eklendi (K2).
+- [ ] **Rol rozeti gerçek** (hardcoded "Admin" kaldırılır, aktif rol adı gösterilir); "Hesabım" maddesi.
 
 ### K6 — Doğrulama + doküman ⬜
 - [ ] build 0/0 + test (yeni: seed, KFR, PermissionService, Kullanıcı Yönetimi).

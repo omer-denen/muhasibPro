@@ -73,8 +73,9 @@ namespace MuhasibPro.Helpers.WindowHelpers
                 return viewId;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"CreateNewWindowAsync error ({viewModelType?.FullName}): {ex}");
                 return viewId;
             }
         }
