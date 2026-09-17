@@ -7,7 +7,7 @@
 ---
 
 ## ⭐ SIRADAKİ ADIM (yeni oturum buradan başlar)
-1. **6.85 — Kullanıcı Yönetimi + RBAC: ÖNCELİKLİ FAZ, PLAN HAZIR (Oturum 284).** Kullanıcı bazlı yapı yarım kaldı: **hangi kullanıcı hangi modülü/alanı kullanır, nereye girebilir, yetkisiz alan nasıl engellenir** eksik. Bugün RBAC fiilen **çalışmıyor** (kod doğrulaması): `KullaniciFirmaRol` hiç yazılmıyor + `RolPermission` hiç seed edilmiyor + UI'da yetki kapısı yok (tek kullanım AI paneli). Plan: **`docs/KULLANICI-YONETIMI-PLAN.md`** (K1 seed/atama temeli → K2 kullanıcı yönetimi modal → K3 izin matrisi → K4 modül/alan kapısı → K5 Hesabım/menü → K6 doğrulama). **K1 migration = Kural 8 ✅ ONAYLI.** Sıra: **önce hızlı eksikler → 6.85 K1 → 6.95 A1/A2.**
+1. **6.85 — Kullanıcı Yönetimi + RBAC: ÖNCELİKLİ FAZ.** **K1 ✅🧪 (Oturum 285):** RBAC motoru çalışır hâle geldi — `RolPermission` seed (Yönetici 76/Kullanıcı 16) + firma oluşturana Yönetici KFR + açılış backfill + `PermissionService` Yönetici bypass. Migration `RbacRolPermissionSeed` (idempotent) gerçek dev DB kopyasına uygulandı. **Sıradaki: K2** (Kullanıcı Yönetimi modal; Kural 8 sınıf onayı) **veya** kullanıcı tercihiyle hızlı eksikler. Plan: **`docs/KULLANICI-YONETIMI-PLAN.md`** (K2 izin matrisi/K3 modül kapısı/K4-6). **Not:** K1'in UI'ı yok → Kural 18 UI canlı testi **K4**'te.
 2. **6.95 — Aktivasyon & Modül Kilidi (KEY) + İlk Giriş: PLAN HAZIR + KARARLAR ✅ (Oturum 284).** Akış: Splash → Login (üretici atadığı ilk kullanıcı) → **zorunlu şifre değişikliği** → **Modül Seçici** → **KEY** → onaylı key sonrası **Sistem.db modül erişimi** → FirmaShell. **Kararlar:** lisans kapsamı **kurulum-geneli (global)** · KEY **çevrimdışı imza/checksum** · deneme **anahtarsız 30 gün + kısıtlı set** · ek modül **tüm açık dönemler + erişimde onay/inline göç** · **tenant DB etkin modül şemasıyla**. Plan: `docs/AKTIVASYON-MODUL-PLAN.md` (A1-A6).
 3. **6.96 — Çoklu DB Provider Desteği (SQLite varsayılan): PLAN HAZIR (Oturum 284).** Karar: **SQLite varsayılan kalır + PostgreSQL/SQL Server** eklenebilir (provider-soyut Data katmanı). Kod haritası: PRAGMA/`UseSqlite`/ham ADO/dosya-başına-tenant/migration tipleri/yedek=dosya-kopya. Plan: `docs/DB-PROVIDER-PLAN.md` (D1-D8). **Açık kararlar:** sunucu tenant modeli (ayrı catalog vs TenantId) · bağlantı saklama · yedek anlayışı · `AsistanBilgi.db` SQLite-only mu · hangi sağlayıcılar. Öneri: 6.85/6.95 sonrası D1-D3.
 4. **Hızlı kapatılabilir eksikler (onay/canlı):** 6.93 Adım 3 onayı (iş bitti, 640/640) · 6.92 Adım 7 onayı · 6.90 uçtan uca canlı (Setup→pack/upload→update) · 6.91-F (UX + dev-mode Tanılama) · 6.69/6.70 "canlı (kullanıcıda)" maddeleri.
@@ -18,20 +18,20 @@
 
 ## 📋 Açık iş envanteri (temiz — Oturum 284)
 > Kaynak: `KONTROL-LISTESI` + `ROADMAP` taraması. Kategoriler: (A) öncelikli, (B) gerçekten yarım, (C) onay/canlı bekleyen, (D) plan, (E) bayat/kapandı.
-- **A) Öncelikli:** **6.85 Kullanıcı Yönetimi + RBAC** (K1-K6) + **6.95 Aktivasyon & Modül Kilidi (KEY) + İlk Giriş** (A1-A6) — birlikte yürür (modül erişimi = lisans seti ∩ kullanıcı izinleri).
+- **A) Öncelikli:** **6.85 Kullanıcı Yönetimi + RBAC** (K1 ✅🧪 → K2-K6) + **6.95 Aktivasyon & Modül Kilidi (KEY) + İlk Giriş** (A1-A6) — birlikte yürür (modül erişimi = lisans seti ∩ kullanıcı izinleri).
 - **B) Gerçekten yarım (kod eksik):** 6.72 Dalga 1-3 · 6.74 · 6.75 (Login→FirmaShell) · 6.76 (smoke/Fluent kalan) · 6.77 canlı tur · 6.78 Adım 4 · 6.86 Chunk-2b · ÇEKİRDEK Faz 2/Faz 4/E2E.
 - **C) İş bitti — onay/canlı:** 6.93 Adım 3 · 6.92 Adım 7 · 6.90 uçtan uca · 6.69/6.70 canlı · 6.91-F.
 - **D) Plan (başlanmadı):** 6.94 · **6.96 (çoklu DB provider)** · 6.88 · 6.89.
 - **E) Bayat/kapandı (doküman temizliği):** **6.73** kapandı (test fix, 280) · **6.83** ❌ (278) · **6.87** ❌ (278) · **"Sıradaki iş kuyruğu (Oturum 180)"** eski backlog (kapanmadı/aktarılmadı) · **6.71 kapı** maddesi · **6.93 "1. Motor"** ana satırı (alt maddeler ✅).
 
 ## ⚠️ Blokaj
-- **Kural 8 ✅ ONAYLI (Oturum 284):** 6.85 K1 (RBAC seed + KFR + backfill) **ve** `Kullanici.SifreDegistirmeliMi` migration'ı yeni context'te kodlanabilir.
-- **Kararlaşanlar (Oturum 284):** firma erişimi = **KFR**; firma oluşturan/giriş yapan sahip = o firmanın **Yöneticisi**; mevcut/dev firmalar **önemsiz** (sıfırlanıp yeniden oluşturulur); **rol matrisi = iki rol** (`Yönetici` tüm izinler + `Kullanıcı` düzenlenebilir set; özel rol yok). Tek kalan: **K1 migration Kural 8 onayı**.
+- **Kural 8 ✅ ONAYLI (Oturum 284):** 6.85 K1 (RBAC seed + KFR + backfill) **✅ kodlandı (Oturum 285)**; `Kullanici.SifreDegistirmeliMi` migration'ı (6.95 A1) hâlâ onaylı ve bekliyor. **K2+ (View/VM) için sınıf bazlı Kural 8 onayı gerekir.**
+- **Kararlaşanlar (Oturum 284):** firma erişimi = **KFR**; firma oluşturan/giriş yapan sahip = o firmanın **Yöneticisi**; mevcut/dev firmalar **önemsiz** (sıfırlanıp yeniden oluşturulur); **rol matrisi = iki rol** (`Yönetici` tüm izinler + `Kullanıcı` düzenlenebilir set; özel rol yok). **K1 tamam → sıra K2-K6.**
 - **6.95 kararları ✅ (Oturum 284):** lisans kapsamı = **kurulum-geneli (Sistem.db global)** · KEY doğrulama = **çevrimdışı imza/checksum** · deneme = **anahtarsız 30 gün + kısıtlı modül seti** · ek modül = **tüm açık dönemler, erişimde onay + inline göç**.
 - **Çakışma kuralı:** yardımcı `Data`/`Business`/test dosyalarında; ben `Views`/`ViewModels`/DI/docs/yardim'de. Aynı anda aynı dosyaya yazım yok (ders: `HATALAR` 277/278).
 
 ## Aktif iş (özet)
-- **Faz 6.85 — Kullanıcı Yönetimi + RBAC (ÖNCELİKLİ):** 📋 plan ✅ (`docs/KULLANICI-YONETIMI-PLAN.md`, Oturum 284) — mevcut durum kod doğrulamalı + hedef mimari + K1-K6 + riskler. **Kod başlamadı** (K1 Kural 8 onayı bekliyor).
+- **Faz 6.85 — Kullanıcı Yönetimi + RBAC (ÖNCELİKLİ):** **K1 ✅🧪 (Oturum 285)** — RBAC motoru canlı: `RolPermission` seed (Yönetici 76/Kullanıcı 16) + firma oluşturana Yönetici KFR + açılış backfill + `PermissionService` Yönetici bypass; migration `RbacRolPermissionSeed` (idempotent) dev DB kopyasında doğrulandı; build 0 + 646/646. **K2-K6 📋** (`docs/KULLANICI-YONETIMI-PLAN.md`) — K2 için sınıf bazlı Kural 8 onayı gerekir.
 - **Faz 6.95 — Aktivasyon & Modül Kilidi (KEY) + İlk Giriş:** 📋 plan ✅ + **kararlar ✅** (`docs/AKTIVASYON-MODUL-PLAN.md`, Oturum 284) — kullanıcı akışı (Login → zorunlu şifre → Modül Seçici → KEY → Sistem.db modül erişimi → FirmaShell) + sektör bulguları (`REFERANSLAR` 284) + A1-A6. Kararlar: kurulum-geneli lisans · çevrimdışı imza · 30 gün deneme · ek modül tüm açık dönemlere. A1 migration = Kural 8 ✅.
 - **Faz 6.96 — Çoklu DB Provider (SQLite varsayılan):** 📋 plan ✅ (`docs/DB-PROVIDER-PLAN.md`, Oturum 284) — SQLite bağımlılık haritası (kod ref'li) + soyutlama mimarisi + D1-D8. **Açık kararlar:** sunucu tenant modeli (ayrı catalog vs TenantId) · bağlantı saklama · yedek anlayışı · hangi sağlayıcılar · `AsistanBilgi.db` SQLite-only mu.
 - **Faz 6.94 — Tek Yardım Yüzeyi (AI Asistanı):** 📋 plan ✅ (`docs/YARDIM-TEK-YUZEY-PLAN.md`, Oturum 283). View `?` yardım listeleri/dialogu kaldırılır; tek kaynak `docs/yardim/*.md` (tüm uygulama) → `AsistanBilgi.db` → asistan; giriş F1 + statü çubuğu; AI yoksa yalnız kilit gerekçesi. H1-H5 maddeleri `KONTROL-LISTESI`'nde. **6.85 sonrası** (H2 paralel).
@@ -45,6 +45,15 @@
 1. **Ayarlar rozeti:** FirmaShell güncelleme bildirimi kapatılınca Ayarlar butonuna güncelleme ikonu; giriş yeri (Ayarlar içi güncelleme yüzeyi mi / Mali Dönem Yönetimi'ne yönlendirme mi).
 2. **6.92 Adım 7 kapanışı:** onay verilsin mi (iş bitti sayılsın).
 3. **Doküman maddeleri:** (a) `docs/VIEW-BAGIMLILIK.md` dursun/arşive? (b) `KONTROL-LISTESI` kapanan yakın fazlar arşive alınsın mı?
+
+## Son oturum (285, 2026-09-17)
+**Faz 6.85 K1 — RBAC temeli (kod + migration):**
+- **Domain:** `KullaniciRolSabitleri` (rol Id sabitleri) + `PermissionVarsayilanlari` (`TumIzinler`; Yönetici=76; Kullanıcı=15 `*_Goruntule` + `AiAsistan_Kullan`=16; default-deny). `Permission.cs:5` yorumu → Sistem.db.
+- **Data:** `SeedDataRolPermission` `HasData` + `SistemDbContext` wiring; `SistemRbacBackfill` (KFR'siz firmaya seed yönetici Yönetici KFR, idempotent) + `SistemMigrationManager` hook (oluşturma + göç sonrası, fail-soft); migration **`20260917181544_RbacRolPermissionSeed`** — dev DB'deki geçici satırla UNIQUE çakışmasın diye **`INSERT OR IGNORE`**; `DbSchemaVersions` haritasına satır.
+- **Business:** `PermissionService` cache → `RolCozumu(Yonetici, Yetkiler)`; **Yönetici bypass** (RolPermission sorgulanmaz); negatif sonuç cache'lenmez. `FirmaKayitService` yeni firmada **oluşturana Yönetici KFR**.
+- **Doğrulama:** build 0 hata; **646/646** (6 yeni `RbacK1Tests`); gerçek `MuhasibPro\Databases\Sistem.db` **kopyasına** migration uygulandı → `RolPermission 92 (76+16)`, backfill 0 (KFR zaten var), applied listesi doğru. **Kural 18 UI notu:** K1'in UI'ı yok → canlı UI testi K4'te.
+- **Bulgu (HATALAR):** dev DB'de Oturum 284 geçici `RolPermission` satırı → `InsertData` migration'ı durdururdu; idempotent SQL ile çözüldü. **Ayrıca:** K1'de `ClearCache()` çağrı yeri yok (giriş sonrası rol/izin mutasyonu yok) → K2/K3'e bırakıldı; mekanizma hazır.
+- Detay: `docs/LOG/LOG-261-280.md` Oturum 285.
 
 ## Son oturum (284, 2026-09-17)
 **Temiz yapı + Kullanıcı Yönetimi/RBAC planı (kod yok):**
@@ -79,15 +88,15 @@
 - **Test:** `dotnet test Libraries/MuhasibPro.Tests/MuhasibPro.Tests.csproj -c Debug --no-build`
 - **Canlı (Kural 18):** Debug exe `MuhasibPro\bin\x64\Debug\net8.0-windows10.0.19041.0\win-x64\MuhasibPro.exe`; giriş `korkutomer` / `Ok241341`; **veri kökü (dev) `MuhasibPro\Databases`**; Foundry model önbelleği `C:\Users\Code\.MuhasibPro\cache\models`; UIA betikleri `C:\Users\Code\AppData\Local\Temp\opencode\` (`ot279_adim2.ps1`, `ot277f_drawer.ps1`).
 - **Velopack:** tag push → `.github/workflows/release.yml` (dinamik repo) → GitHub Release; test için `*-Setup.exe` ile kurmak şart.
-- **Beklenen test:** **640/640** (6.93 Adım 3 + Denetim wiring + panel durum sonrası; 634/636 üzerine +4). Blokajsız yeşil.
+- **Beklenen test:** **646/646** (6.85 K1 `RbacK1Tests` +6 üzerine; blokajsız yeşil).
 - **Canlı test dersi:** Türkçe metni betikte literal yazma (BOM'suz `.ps1` → PS 5.1 ANSI); ContentDialog butonları `PrimaryButton`/`SecondaryButton` AutomationId ile (`HATALAR` 277/278). Model hazırlığı başarısızsa artık hata bandında gerçek sebep görünür (`HATALAR` 280).
 
 ## Son commit'ler
-`262a37b` (DURUM sadeleştirme) → **`825f078` (Oturum 280)** → Oturum 281 (motor fix + yetki araştırma) / Oturum 282 (canlı S2-S4 + Denetim fix + panel durum/tema) **henüz commit edilmedi** (kullanıcı onayı sonrası).
+`262a37b` (DURUM sadeleştirme) → **`825f078` (Oturum 280)** → `7979a7e` (Oturum 281-284: canlı S2-S4 + panel durum/tema + 6.85/6.95/6.96 planları) → **Oturum 285 (6.85 K1: RBAC seed migration + KFR + backfill + bypass) commit edilmedi** (kullanıcı onayı sonrası).
 
 ## Bilinen açık uçlar / notlar
 - **6.93 motor bug'ı:** **KAPANDI** (281 fix + 282 canlı S2-S4 ✅).
-- **RBAC / Kullanıcı Yönetimi eksikleri (AÇIK → 6.85):** (1) `RolPermission` seed yok (ne `HasData` ne runtime) → izin kümesi boş; (2) `KullaniciFirmaRol` yazıcısı yok → firma erişimi `Firma.KaydedenId` ile (KFR değil); (3) seed yöneticiye KFR atanmıyor; (4) `PermissionService` yönetici bypass'ı yok + `ClearCache()` prod'da çağrılmıyor; (5) UI yetki kapısı yok (modül menüsü statik, "Ayarlar" kapısız, Denetim nav yalnız DEBUG filtreli); (6) `IModuleLicenseService` nav'a bağlı değil + `ModuleLicenseViewModel` hardcoded `firmaId=1`; (7) `KullaniciYonetimiView/VM` yok, rol rozeti hardcoded "Admin". Detay: `docs/KULLANICI-YONETIMI-PLAN.md`. Dev DB'ye **geçici** satır eklendi. Küçük borç: `Permission.cs:5` yorumu (`Global.db`) yanlış.
+- **RBAC / Kullanıcı Yönetimi (K1 ✅ → K2-K6 AÇIK):** (1) `RolPermission` seed ✅ (285; Yönetici 76/Kullanıcı 16); (2) KFR yazıcısı ✅ (firma oluşturma + backfill); (3) seed yönetici KFR ✅ (backfill); (4) `PermissionService` Yönetici bypass ✅ (`ClearCache` çağrı yerleri K2/K3); (11) `Permission.cs:5` yorum ✅. **Açık:** (5) UI yetki kapısı yok (modül menüsü statik, "Ayarlar" kapısız, Denetim nav yalnız DEBUG) → K4; (6) `IModuleLicenseService` nav'a bağlı değil + `ModuleLicenseViewModel` hardcoded `firmaId=1` → K4; (7) `KullaniciYonetimiView/VM` yok, rol rozeti hardcoded "Admin" → K2/K5. Detay: `docs/KULLANICI-YONETIMI-PLAN.md`.
 - **6.91-F kalanı:** UX ince işi + dev-mode Tanılama + yardım; `App.VelopackYenidenBaslatildi` bayrağı değerlendirilecek.
 - **6.91-C UI ince işi (6.88'e devir):** `SistemDbYonetimView` gelecek şemada hâlâ "Geçerli/Güncel" gösteriyor + "Giriş Ekranına Devam Et" görünür (giriş `DbIsReady=false`).
 - **`GetCurrentDatabaseVersionAsync` public fallback'i:** yeni guard'lar `ReadStoredSistemVersionAsync`'i kullanmalı (özyineleme dersi — `HATALAR` 274).

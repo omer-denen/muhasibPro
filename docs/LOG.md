@@ -328,6 +328,7 @@
 | 282 | 2026-09-17 | Faz 6.93 Adım 3 canlı S2-S4 (anlamsal retrieval + embedding'siz fallback + içerik güncelle→yeniden indeks) + Denetim "Yardım dizini" DI wiring fix + sohbet paneli dürüst model durumu/flyout ön-yükleme + popup Kural 17 tema hizalaması — build 0 + 640/640; popup onayı ✅ | ⏳ onay | C14 |
 | 283 | 2026-09-17 | Faz 6.94 planı (Tek Yardım Yüzeyi = AI Asistanı): view `?` yardım kaldırılır, tek kaynak `docs/yardim` → `AsistanBilgi.db` → asistan (F1 + statü çubuğu) + H1-H5 maddeleri — **kod yok** | 📋 plan | C14 |
 | 284 | 2026-09-17 | Temiz yapı + 3 plan (kod yok): **6.85** Kullanıcı Yönetimi+RBAC (`KULLANICI-YONETIMI-PLAN.md` K1-K6) · **6.95** Aktivasyon&Modül Kilidi+tenant şema (`AKTIVASYON-MODUL-PLAN.md` A1-A6) · **6.96** Çoklu DB Provider/SQLite varsayılan (`DB-PROVIDER-PLAN.md` D1-D8) + DURUM açık iş envanteri + ROADMAP bayat fix (6.73/6.83/6.87) + kararlar + **Kural 8 onayı** | 📋 plan | C14 |
+| 285 | 2026-09-17 | Faz 6.85 **K1** (RBAC temeli): `RolPermission` HasData (Yönetici 76 + Kullanıcı 16) + idempotent migration `RbacRolPermissionSeed` + `KullaniciRolSabitleri`/`PermissionVarsayilanlari` · firma oluşturana Yönetici KFR + açılış backfill (`SistemRbacBackfill`) · `PermissionService` Yönetici bypass · `Permission.cs` yorum fix — build 0 + **646/646**; dev DB kopyasına migration kanıtı | ✅🧪 | C14 |
 
 ---
 

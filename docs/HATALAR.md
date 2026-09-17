@@ -2,6 +2,12 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
+## RBAC seed migration'ı mevcut `RolPermission` satırıyla çakışıp uygulamayı başlatamazdı (ÇÖZÜLDÜ — 2026-09-17 — Oturum 285)
+- **Belirti:** K1 `RolPermission` seed migration'ı EF `InsertData` ile üretildi; dev `Sistem.db`'de Oturum 284'ten kalma **geçici** satır `RolPermission (RolId=241341, PermissionId=2300)` vardı. `SeedData`'daki aynı çift → **UNIQUE PK ihlali** → `Database.MigrateAsync` patlar, uygulama açılmaz.
+- **Sebep:** EF `InsertData` düz `INSERT` üretir; seed yalnız **boş** tabloya uygulanabilir. Gerçek/uzun ömürlü veritabanlarında elle eklenmiş/geçici satır bulunabilir (K1 seed'inden önce rol-izin testi için eklenmişti).
+- **Çözüm:** Migration `Up` → **`INSERT OR IGNORE`** (PK: RolId+PermissionId; mevcut satırı atlar, migration idempotent). `HasData` modelde kaldı (snapshot/Ef diff tutarlı). Gerçek dev DB **kopyasına** `MigrateAsync` ile doğrulandı (92 satır, backfill 0). Ders: **veri seed migration'larını mevcut DB'ye karşı idempotent tasarla**; migration'ı yalnız boş in-memory DB'de test etmek yeterli değil.
+- Tarih: 2026-09-17
+
 ## Sohbet paneli "Model hazır değil" yazıp yine de cevap veriyordu (durum/aksiyon çelişkisi) (ÇÖZÜLDÜ — 2026-09-17 — Oturum 282)
 - **Belirti:** `AsistanSohbetPaneli` başlığında **"Model hazır değil — ilk soruda indirilir"** yazıyor, ama kullanıcı soru sorunca model yüklenip cevap geliyordu → "hazırsa cevaplar, değilse cevaplayamaz" ilkesine aykırı, dürüst olmayan durum metni.
 - **Sebep:** `IAsistanSohbetService.DurumuGetirAsync().HazirMi` = modelin **belleğe yüklü** olması (yalnız `HazirlaAsync`/ilk sorudan sonra `true`). Panel açılışında (`LoadAsync`→`KapiyiDenetleAsync`) yüklü olmadığı için metin "hazır değil" basılıyor; ilk soru `HazirlaIcAsync` ile yükleyip cevaplıyordu. Ayrıca gömülü metinler sabit ("hazır değil") ve aksiyon durumunu yansıtmıyordu.

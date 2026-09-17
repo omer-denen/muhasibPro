@@ -2,7 +2,7 @@ namespace MuhasibPro.Domain.Enum;
 
 /// <summary>
 /// Aksiyon bazlı yetki tanımları (modül bazlı değil, aksiyon bazlı).
-/// Rol → Permission eşlemesi Global.db'deki RolPermission tablosunda tutulur.
+/// Rol → Permission eşlemesi Sistem.db'deki RolPermission tablosunda tutulur.
 /// </summary>
 public enum Permission
 {

@@ -340,13 +340,14 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 
 **Araştırma (Kural 14/19 → REFERANSLAR):** QuickBooks Desktop "Users & Roles" (yalnız admin kullanıcı oluşturur/yönetir; kullanıcı + rol + aktive; self hesap ayrı) · MYOB "Manage Users/Roles" (rol bazlı yetki; kullanıcı yönetimi rol yönetiminden ayrı) · MS InfoBar + mevcut DenetimMasasi modal pencere deseni · (RBAC seed: `REFERANSLAR` 281 — EF seeding + sektör admin deseni).
 
-### K1 — Seed/atama temeli (RBAC çalışır hâle gelir) ⬜ — **Kural 8 (migration)**
-- [ ] `RolPermission` statik matrisi (Yönetici=tüm izinler, Kullanıcı=temel görüntüleme) → migration `HasData`/idempotent seed
-- [ ] Firma oluşturmada oluşturana **Yönetici KFR** (idempotent)
-- [ ] Açılışta **idempotent backfill** (Yöneticisiz firmaya seed yönetici KFR)
-- [ ] `PermissionService`: **Yönetici bypass'ı** + rol/izin değişiminde **`ClearCache()`**
-- [ ] `Permission.cs:5` yorum düzeltmesi
-- [ ] Testler: gerçek seed ile `PermissionService` integration + KFR yazımı + backfill
+### K1 — Seed/atama temeli (RBAC çalışır hâle gelir) ✅🧪 (Oturum 285) — **Kural 8 (migration) ✅ onaylı**
+- [x] `RolPermission` statik matrisi (Yönetici=tüm izinler 76, Kullanıcı=temel görüntüleme 16) → migration `RbacRolPermissionSeed` (`HasData` + **idempotent `INSERT OR IGNORE`**)
+- [x] Firma oluşturmada oluşturana **Yönetici KFR** (idempotent) — `FirmaKayitService`
+- [x] Açılışta **idempotent backfill** (KFR'siz firmaya seed yönetici Yönetici KFR) — `SistemRbacBackfill` + `SistemMigrationManager`
+- [x] `PermissionService`: **Yönetici bypass'ı** ✅ (RolTip=Yönetici → tüm izinler; RolPermission sorgulanmaz) · `ClearCache()` **mekanizma hazır**; K1'de giriş sonrası rol/izin yazımı yok (KFR firma oluşturmada, backfill açılışta) → çağrı yerleri **K2/K3**'te (negatif sonuç cache'lenmez)
+- [x] `Permission.cs:5` yorum düzeltmesi (Global.db → Sistem.db)
+- [x] Testler: gerçek seed ile `PermissionService` integration + KFR yazımı + backfill (`RbacK1Tests`, 6 test)
+
 
 ### K2 — Kullanıcı Yönetimi modal penceresi ⬜
 - [ ] `KullaniciYonetimiViewModel` + `KullaniciYonetimiView` (ayrı `Views/KullaniciYonetimi/`; `DenetimMasasi` modal/boyut deseni; `CreateNewViewAsync`)

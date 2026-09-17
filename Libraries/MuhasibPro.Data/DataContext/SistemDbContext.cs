@@ -91,6 +91,7 @@ public class SistemDbContext : DbContext
         };
         modelBuilder.Entity<Kullanici>().HasData(kullanici);
         SeedDataKullaniciRol.SeedKullaniciRoller(modelBuilder);
+        SeedDataRolPermission.SeedRolPermissionlar(modelBuilder);
     }
 
     private void SeedInitialVersion(ModelBuilder modelBuilder)

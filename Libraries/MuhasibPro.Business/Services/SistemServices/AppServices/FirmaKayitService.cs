@@ -8,6 +8,7 @@ using MuhasibPro.Business.Services.SistemServices.LogServices;
 using MuhasibPro.Data.Contracts.Repository.Common.BaseRepo;
 using MuhasibPro.Data.Contracts.Repository.SistemRepos;
 using MuhasibPro.Data.DataContext;
+using MuhasibPro.Domain.Entities;
 using MuhasibPro.Domain.Entities.SistemEntity;
 using MuhasibPro.Domain.Utilities.Responses;
 
@@ -17,6 +18,7 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
     public class FirmaKayitService : IFirmaKayitService
     {
         private readonly IFirmaRepository _firmaRepository;
+        private readonly IKullaniciFirmaRolRepository _kullaniciFirmaRolRepository;
         private readonly IUnitOfWork<SistemDbContext> _unitOfWork;
         private readonly ILogService _logService;
         private readonly IAuthenticationService _authenticationService;
@@ -25,6 +27,7 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
 
         public FirmaKayitService(
             IFirmaRepository firmaRepository,
+            IKullaniciFirmaRolRepository kullaniciFirmaRolRepository,
             IUnitOfWork<SistemDbContext> unitOfWork,
             ILogService logService,
             IAuthenticationService authenticationService,
@@ -32,6 +35,7 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
             IEntityRegistrySettingsProvider ayarlar)
         {
             _firmaRepository = firmaRepository;
+            _kullaniciFirmaRolRepository = kullaniciFirmaRolRepository;
             _unitOfWork = unitOfWork;
             _logService = logService;
             _authenticationService = authenticationService;
@@ -63,6 +67,10 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
                 FirmaServiceExtensions.UpdateFirmaModel(firma, model);
                 await _firmaRepository.UpdateFirmaAsync(firma);
 
+                // Faz 6.85 K1: firmayı oluşturan = o firmanın Yöneticisi (KFR).
+                if (firmaId == 0)
+                    await YoneticiKfrYazAsync(firma.Id, _authenticationService.GetCurrentUserId);
+
                 var result = await _unitOfWork.SaveChangesAsync();
                 if (result > 0)
                 {
@@ -84,6 +92,20 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
                 await LogException(nameof(UpdateFirmaAsync), ex);
                 return new ErrorApiDataResponse<int>(data: 0, message: $"[HATA] ❌ Firma ekleme/güncelleme işlemi başarız oldu! => {ex.Message}");
             }
+        }
+
+        /// <summary>Faz 6.85 K1: firmayı oluşturana firma-başına Yönetici rolü (KFR) yazar; idempotenttir.</summary>
+        private async Task YoneticiKfrYazAsync(long firmaId, long kullaniciId)
+        {
+            if (firmaId <= 0 || kullaniciId <= 0) return;
+            if (await _kullaniciFirmaRolRepository.FindAsync(kullaniciId, firmaId) != null) return;
+
+            await _kullaniciFirmaRolRepository.AddAsync(new KullaniciFirmaRol
+            {
+                KullaniciId = kullaniciId,
+                FirmaId = firmaId,
+                RolId = KullaniciRolSabitleri.YoneticiRolId
+            });
         }
 
         private async Task LogException(string methodName, Exception ex)

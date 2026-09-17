@@ -10,7 +10,7 @@ namespace MuhasibPro.Data.DataContext.SeedDataSistem
         {
             modelBuilder.Entity<KullaniciRol>().HasData(new KullaniciRol
             {
-                Id = 241341,
+                Id = KullaniciRolSabitleri.YoneticiRolId,
                 RolAdi = "Yönetici",
                 Aciklama = "Sistemi yönetme yetkisine sahip kullanıcı rolü",
                 RolTip = KullaniciRolTip.Yönetici,
@@ -21,7 +21,7 @@ namespace MuhasibPro.Data.DataContext.SeedDataSistem
             },
             new KullaniciRol
             {
-                Id = 241342,
+                Id = KullaniciRolSabitleri.KullaniciRolId,
                 RolAdi = "Kullanıcı",
                 Aciklama = "Sistemi sınırlı şekilde kullanma yetkisine sahip kullanıcı rolü",
                 RolTip = KullaniciRolTip.Kullanici,

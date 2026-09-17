@@ -65,6 +65,7 @@ namespace MuhasibPro.Data.Database.SistemDatabase
                     if (createResult.IsCreatedSuccess)
                     {
                         await DatabaseVersionFromMigrationsAsync(_dbContext);
+                        await BackfillRbacAsync();
                         return (initializeState: true, message: createResult.Message);
                     }
 
@@ -136,6 +137,7 @@ namespace MuhasibPro.Data.Database.SistemDatabase
                     if (migrationResult.IsSuccess)
                     {
                         await DatabaseVersionFromMigrationsAsync(_dbContext).ConfigureAwait(false);
+                        await BackfillRbacAsync().ConfigureAwait(false);
                     }
 
                     // ✅ DETAYLI LOG
@@ -374,6 +376,24 @@ namespace MuhasibPro.Data.Database.SistemDatabase
             catch
             {
                 // Dispose etmiyoruz
+            }
+        }
+
+        /// <summary>
+        /// Faz 6.85 K1: KFR'siz firmalara seed yönetici Yönetici KFR'sini yazar (idempotent).
+        /// Başarısızlık başlatmayı düşürmez; sonraki açılışta yeniden denenir.
+        /// </summary>
+        private async Task BackfillRbacAsync()
+        {
+            try
+            {
+                var eklenen = await SistemRbacBackfill.EnsureAsync(_dbContext).ConfigureAwait(false);
+                if (eklenen > 0)
+                    _logger.LogInformation("RBAC backfill: {Count} firmaya Yönetici KFR eklendi", eklenen);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "RBAC backfill başarısız — sonraki açılışta yeniden denenecek");
             }
         }
 

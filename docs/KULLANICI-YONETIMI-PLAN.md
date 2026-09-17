@@ -1,7 +1,7 @@
 # MuhasibPro — Faz 6.85: Kullanıcı Yönetimi + RBAC (kullanıcı → modül/alan erişimi) Planı
 
 > **Faz 6.85 (genişletildi).** Kullanıcı bazlı yapı çekirdeğin sonuna bırakıldı; **kim hangi modülü/alanı kullanabilir, nereye girebilir, yetkisiz alan nasıl engellenir** eksik kaldı. Bu faz onu kapatır.
-> **Durum:** 📋 Plan (Oturum 284, kod yok). **Öncelikli faz** (kullanıcı kararı: "eksik işleri tamamladıktan sonra öncelikli faz").
+> **Durum:** **K1 ✅🧪 (Oturum 285)** · K2-K6 📋 plan (Oturum 284). **Öncelikli faz** (kullanıcı kararı: "eksik işleri tamamladıktan sonra öncelikli faz").
 > **Sahiplik:** RBAC `Data`+`Business` (motor) · UI `Views`/`ViewModels` · migration (Kural 8) — sınıf bazlı onay.
 
 ## Kullanıcı sözü / kapsam
@@ -65,13 +65,15 @@ Kullanici ──(KullaniciFirmaRol)──► Firma  (firma-başına rol)
 
 ## Faz adımları
 
-### K1 — Seed/atama temeli (RBAC çalışır hâle gelir) ⬜ — **Kural 8 ✅ onaylı**
-- [ ] `RolPermission` statik matrisi (Yönetici=tüm `Permission`; Kullanıcı=temel görüntüleme) → migration `HasData` veya idempotent seed.
-- [ ] Firma oluşturmada (`FirmaKayitService`) oluşturana **Yönetici KFR** (idempotent).
-- [ ] Açılışta **idempotent backfill**: KFR'siz firmalara seed yönetici Yönetici KFR.
-- [ ] `PermissionService`: **Yönetici bypass'ı** + rol/izin değişiminde **`ClearCache()`**.
-- [ ] `Permission.cs:5` yorum düzeltmesi.
-- [ ] Testler: gerçek seed ile `PermissionService` integration (KFR+RolPermission), KFR yazımı, backfill.
+### K1 — Seed/atama temeli (RBAC çalışır hâle gelir) ✅🧪 — **Kural 8 ✅ onaylı (Oturum 284)**
+- [x] `RolPermission` statik matrisi (Yönetici=tüm `Permission`=76; Kullanıcı=temel görüntüleme=16) → `SeedDataRolPermission` `HasData` + migration `RbacRolPermissionSeed` (**idempotent `INSERT OR IGNORE`**; mevcut/geçici satırlarla çakışmaz).
+- [x] Firma oluşturmada (`FirmaKayitService`) oluşturana **Yönetici KFR** (idempotent).
+- [x] Açılışta **idempotent backfill**: KFR'siz firmalara seed yönetici Yönetici KFR (`SistemRbacBackfill` + `SistemMigrationManager`).
+- [x] `PermissionService`: **Yönetici bypass'ı** ✅ · `ClearCache()` mekanizma hazır; çağrı yerleri **K2/K3** (K1'de giriş sonrası rol/izin yazımı yok; negatif sonuç cache'lenmez).
+- [x] `Permission.cs:5` yorum düzeltmesi (Sistem.db).
+- [x] Testler: gerçek seed ile `PermissionService` integration (KFR+RolPermission; Yönetici bypass RolPermission sorgulamaz), KFR yazımı, backfill (`RbacK1Tests`, 6 test) — build 0 + **646/646**.
+
+> **Oturum 285 notu:** varsayılan `Kullanıcı` seti = 15 modül `*_Goruntule` + `AiAsistan_Kullan` (default-deny; `Veritabani_*`/`Log_*` ve tüm yazma kapalı; K3'te düzenlenir). Dev DB'de Oturum 284'ten kalan geçici `RolPermission` satırı migration'ı UNIQUE ihlaliyle durduracaktı → migration idempotent yapıldı ve gerçek dev DB kopyasıyla doğrulandı.
 
 ### K2 — Kullanıcı Yönetimi modal penceresi ⬜
 - [ ] `KullaniciYonetimiViewModel` + `KullaniciYonetimiView` (ayrı `Views/KullaniciYonetimi/`, DenetimMasası modal deseni).

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MuhasibPro.Data.DataContext;
 
@@ -10,9 +11,11 @@ using MuhasibPro.Data.DataContext;
 namespace MuhasibPro.Data.Migrations
 {
     [DbContext(typeof(SistemDbContext))]
-    partial class SistemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260917181544_RbacRolPermissionSeed")]
+    partial class RbacRolPermissionSeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");

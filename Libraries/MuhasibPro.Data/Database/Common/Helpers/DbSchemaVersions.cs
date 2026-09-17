@@ -21,6 +21,8 @@ public static class DbSchemaVersions
         ["20260828170905_Initial"] = "1.0.0",
         ["20260828170927_InitialApp"] = "1.0.0",
         ["20260908_AddTenantIdentity"] = "1.1.0",
+        ["20260911181337_SeedHashDuzeltme"] = "1.0.0",
+        ["20260917181544_RbacRolPermissionSeed"] = "1.1.0",
     };
 
     /// <summary>Migration kimliğinden SemVer üretir; bilinmeyende ilk şemaya düşer.</summary>
