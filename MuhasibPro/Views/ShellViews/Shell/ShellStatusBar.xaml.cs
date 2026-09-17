@@ -110,7 +110,18 @@ namespace MuhasibPro.Views.ShellViews.Shell
             }
         }
 
-        private void OnAsistanFlyoutOpened(object sender, object e) => AsistanAcik = true;
+        private async void OnAsistanFlyoutOpened(object sender, object e)
+        {
+            AsistanAcik = true;
+            // Model durumu "hazır" ⇔ cevaplayabilir olsun: panel açılışında model yüklüyse tazelenir,
+            // indirilmişse ön-yüklenir (PanelAcildiAsync fırlatmaz; hata durumu kendi içinde yönetir).
+            if (AsistanVm != null)
+            {
+                try { await AsistanVm.PanelAcildiAsync(); }
+                catch { /* durum metni VM içinde yönetilir */ }
+            }
+        }
+
         private void OnAsistanFlyoutClosed(object sender, object e) => AsistanAcik = false;
 
         /// <summary>Panel başlığındaki "gizle" düğmesi flyout'u kapatır.</summary>

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
@@ -197,6 +198,31 @@ public class DenetimMasasiTests
         vm.KullaniciInitials.Should().Be("KO");
         vm.ProfilResmi.Should().BeNull("foto yoksa varsayılan avatar");
         vm.FirmaSayisi.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task YapayZeka_YardimDizini_KbServisinden_Okunur()
+    {
+        var kb = new Mock<IYardimBilgiTabani>();
+        kb.Setup(k => k.DurumGetirAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new YardimIndexDurumu { HazirMi = true, MaddeSayisi = 60, VektorVarMi = true });
+
+        var vm = new DenetimMasasiViewModel(OrtakServisler().Object, FirmaServisi().Object, yardimBilgiTabani: kb.Object);
+
+        await vm.YapayZeka.LoadAsync();
+
+        vm.YapayZeka.DizinDurumMetni.Should().Be("60 madde • anlamsal arama açık");
+        kb.Verify(k => k.DurumGetirAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task YapayZeka_YardimDizini_ServisYoksa_Bilinmiyor()
+    {
+        var vm = new DenetimMasasiViewModel(OrtakServisler().Object, FirmaServisi().Object);
+
+        await vm.YapayZeka.LoadAsync();
+
+        vm.YapayZeka.DizinDurumMetni.Should().Be("Bilinmiyor.");
     }
 
     [Fact]

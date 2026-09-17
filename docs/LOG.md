@@ -323,7 +323,11 @@
 | 278 | 2026-09-16 | Faz 6.92 Adım 5c (Model yönetimi UI) + Faz 6.91-E (dönem güncelleme sayfası silindi → erişimde onay+inline göç, manuel Güncelle butonları kaldırıldı) + Faz 6.93 plan/sözleşme devri | ✅🧪 | C14 |
 | 278b | 2026-09-16 | Faz 6.93 plan/sözleşme (AI yardım bilgi tabanı `AsistanBilgi.db` + hibrit RAG): araştırma 5 satır + `YARDIM-DB-PLAN.md` frozen + motor/veri diğer modele devir (`📨`) | 📋 plan | C14 |
 | 279 | 2026-09-16 | Faz 6.93 Adım 1 motor (sözleşme birebir: KB + RRF + depo + Foundry embedding + retrieval swap) — build 0 + 33/33 + full 640/641 (tek kırmızı 6.73'ün, dokunulmadı) | ✅🧪 | C14 |
+| 281 | 2026-09-17 | Görev devri (280): A) 6.93 motor fix (izin kapısı + tek Foundry kurulumu) build 0 + 634/634; B) yetki bug araştırması + 3-katman yaklaşım onayı (kod yok) | ✅🧪 | C14 |
 | 280 | 2026-09-17 | Faz 6.93 Adım 2 (eski RAG v1 sökümü + DI + panel dizin durumu + Denetim kartı + öz-test) · 6.91-G (saga 4. adım `AI Yardım Dizini` + 4 adımlı şerit) · 6.73 testi düzeltildi (641/641) — canlı S1 ✅, S2 motor bug'ına takıldı (devir) | ✅🧪 | C14 |
+| 282 | 2026-09-17 | Faz 6.93 Adım 3 canlı S2-S4 (anlamsal retrieval + embedding'siz fallback + içerik güncelle→yeniden indeks) + Denetim "Yardım dizini" DI wiring fix + sohbet paneli dürüst model durumu/flyout ön-yükleme + popup Kural 17 tema hizalaması — build 0 + 640/640; popup onayı ✅ | ⏳ onay | C14 |
+| 283 | 2026-09-17 | Faz 6.94 planı (Tek Yardım Yüzeyi = AI Asistanı): view `?` yardım kaldırılır, tek kaynak `docs/yardim` → `AsistanBilgi.db` → asistan (F1 + statü çubuğu) + H1-H5 maddeleri — **kod yok** | 📋 plan | C14 |
+| 284 | 2026-09-17 | Temiz yapı + 3 plan (kod yok): **6.85** Kullanıcı Yönetimi+RBAC (`KULLANICI-YONETIMI-PLAN.md` K1-K6) · **6.95** Aktivasyon&Modül Kilidi+tenant şema (`AKTIVASYON-MODUL-PLAN.md` A1-A6) · **6.96** Çoklu DB Provider/SQLite varsayılan (`DB-PROVIDER-PLAN.md` D1-D8) + DURUM açık iş envanteri + ROADMAP bayat fix (6.73/6.83/6.87) + kararlar + **Kural 8 onayı** | 📋 plan | C14 |
 
 ---
 

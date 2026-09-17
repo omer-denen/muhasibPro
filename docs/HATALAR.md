@@ -2,7 +2,13 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
-## Bilgi tabanı `HazirlaAsync(modelIndirmeyeIzin:true)` embedding modelini indirmiyordu (AÇIK — devredildi, 2026-09-17 — Oturum 280)
+## Sohbet paneli "Model hazır değil" yazıp yine de cevap veriyordu (durum/aksiyon çelişkisi) (ÇÖZÜLDÜ — 2026-09-17 — Oturum 282)
+- **Belirti:** `AsistanSohbetPaneli` başlığında **"Model hazır değil — ilk soruda indirilir"** yazıyor, ama kullanıcı soru sorunca model yüklenip cevap geliyordu → "hazırsa cevaplar, değilse cevaplayamaz" ilkesine aykırı, dürüst olmayan durum metni.
+- **Sebep:** `IAsistanSohbetService.DurumuGetirAsync().HazirMi` = modelin **belleğe yüklü** olması (yalnız `HazirlaAsync`/ilk sorudan sonra `true`). Panel açılışında (`LoadAsync`→`KapiyiDenetleAsync`) yüklü olmadığı için metin "hazır değil" basılıyor; ilk soru `HazirlaIcAsync` ile yükleyip cevaplıyordu. Ayrıca gömülü metinler sabit ("hazır değil") ve aksiyon durumunu yansıtmıyordu.
+- **Çözüm:** `AsistanSohbetViewModel.PanelAcildiAsync()` (flyout açılışında `ShellStatusBar.OnAsistanFlyoutOpened`) — yüklüyse durum tazelenir; **indirilmişse (`ModelleriGetirAsync().IndirildiMi`) ön-yüklenir → "Model hazır"**; indirilmemişse nötr **"Model ilk soruda indirilecek"**; hata → **"Model hazırlanamadı: {sebep}"**. `KapiyiDenetleAsync`'ten "hazır değil" ifadesi kaldırıldı. Hazırlanırken `Gönder` pasif + determinate bar (aksiyon-durum). Ders: **gömülü metin serbest ama durum/aksiyon gerçeği yansıtmalı**; bir metin "yapamaz" diyorsa akış onu yapmamalı, "yapabilir" durumu ayrı gösterilmeli.
+- Tarih: 2026-09-17
+
+## Bilgi tabanı `HazirlaAsync(modelIndirmeyeIzin:true)` embedding modelini indirmiyordu (ÇÖZÜLDÜ — 2026-09-17 — Oturum 281)
 - **Belirti:** Asistan panelinde dizin kuruluyor ama `Yardım dizini hazır: 60 madde • yalnız anahtar kelime` kalıyor; soru sorulunca "Asistan hazır değil. Önce HazirlaAsync çağırın." (canlı `ot279b_*`).
 - **Sebep:** `YardimBilgiTabaniService.cs:142-149` — `modelIndirmeyeIzin:true` dalında dahi `_vektorUretici.OnbellekteMiAsync()` ile kapı kapatılmış; model önbellekte değilse `UretAsync` hiç çağrılmıyor (oysa indirme `UretAsync` içinde). Sözleşme: `OnbellekteMiAsync` yalnız `modelIndirmeyeIzin:false` (6.91-G) kapısıdır.
 - **Çözüm (istenen):** `true` iken doğrudan `UretAsync` (indirir); `false` iken önbellek kapısı + lexical-only. Ek şüphe: iki servisin ayrı `FoundryLocalManager.CreateAsync` çağırması (doğrulanacak). **Sahiplik: motor diğer modelde** — brief `KONTROL-LISTESI` "Görev devri A".

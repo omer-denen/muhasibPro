@@ -86,7 +86,7 @@ public class YardimBilgiTabaniTests : IDisposable
     {
         var svc = Servis(new SabitKaynak(), new SahteVektor { Onbellekte = false });
 
-        await svc.HazirlaAsync();
+        await svc.HazirlaAsync(modelIndirmeyeIzin: false);
         var durum = await svc.DurumGetirAsync();
 
         durum.HazirMi.Should().BeTrue();
@@ -96,10 +96,22 @@ public class YardimBilgiTabaniTests : IDisposable
     }
 
     [Fact]
+    public async Task Hazirla_IzinTrue_OnbellekYoksa_IndiripGomer()
+    {
+        var vektor = new SahteVektor { Onbellekte = false };
+        var svc = Servis(new SabitKaynak(), vektor);
+
+        await svc.HazirlaAsync(modelIndirmeyeIzin: true);
+
+        vektor.UretCagrisi.Should().BeGreaterThan(0);
+        (await svc.DurumGetirAsync()).VektorVarMi.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task Ara_LexicalOnly_DogruMadde_YontemLexical()
     {
         var svc = Servis(new SabitKaynak(), new SahteVektor { Onbellekte = false });
-        await svc.HazirlaAsync();
+        await svc.HazirlaAsync(modelIndirmeyeIzin: false);
 
         var sonuc = await svc.AraAsync("arşivleme nasıl yapılır", 6);
 
@@ -131,7 +143,8 @@ public class YardimBilgiTabaniTests : IDisposable
     [Fact]
     public async Task Hazirla_ModelIndirmeyeIzinFalse_VektorAtlar()
     {
-        var vektor = new SahteVektor();
+        // 6.91-G senaryosu: izin yok + model önbellekte yok → vektör adımı atlanır.
+        var vektor = new SahteVektor { Onbellekte = false };
         var svc = Servis(new SabitKaynak(), vektor);
 
         await svc.HazirlaAsync(modelIndirmeyeIzin: false);

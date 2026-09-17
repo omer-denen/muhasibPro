@@ -23,6 +23,8 @@ public class AsistanSohbetViewModelTests
         var ortak = new Mock<ICommonServices>();
         ortak.SetupGet(o => o.ContextService).Returns(baglam.Object);
         ortak.SetupGet(o => o.MessageService).Returns(Mock.Of<IMessageService>());
+        ortak.SetupGet(o => o.StatusMessageService).Returns(Mock.Of<IStatusMessageService>());
+        ortak.SetupGet(o => o.NotificationService).Returns(Mock.Of<INotificationService>());
         return ortak;
     }
 
@@ -162,5 +164,73 @@ public class AsistanSohbetViewModelTests
 
         kur.Sohbet.Verify(s => s.HazirlaAsync(It.IsAny<IProgress<AsistanDurumDto>>(), It.IsAny<CancellationToken>()), Times.Once);
         kur.Sohbet.Verify(s => s.SorStreamingAsync(It.IsAny<AsistanSoruDto>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task PanelAcildi_ModelIndirilmisse_OnYukler_Hazir()
+    {
+        var kur = new Kurulum();
+        bool hazir = false;
+        kur.Sohbet.Setup(s => s.DurumuGetirAsync())
+            .ReturnsAsync(() => new AsistanDurumDto { HazirMi = hazir, Mesaj = hazir ? "qwen2.5-0.5b" : "" });
+        kur.Sohbet.Setup(s => s.HazirlaAsync(It.IsAny<IProgress<AsistanDurumDto>>(), It.IsAny<CancellationToken>()))
+            .Callback(() => hazir = true).Returns(Task.CompletedTask);
+        kur.Sohbet.Setup(s => s.ModelleriGetirAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<AsistanModelDto> { new() { Alias = "qwen2.5-0.5b", IndirildiMi = true } });
+        var vm = kur.Vm();
+        await vm.LoadAsync();
+
+        await vm.PanelAcildiAsync();
+
+        kur.Sohbet.Verify(s => s.HazirlaAsync(It.IsAny<IProgress<AsistanDurumDto>>(), It.IsAny<CancellationToken>()), Times.Once);
+        vm.ModelDurumMetni.Should().StartWith("Model hazır");
+    }
+
+    [Fact]
+    public async Task PanelAcildi_ModelIndirilmemisse_Indirilecek()
+    {
+        var kur = new Kurulum();
+        kur.Sohbet.Setup(s => s.DurumuGetirAsync()).ReturnsAsync(new AsistanDurumDto { HazirMi = false });
+        kur.Sohbet.Setup(s => s.ModelleriGetirAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<AsistanModelDto> { new() { Alias = "qwen2.5-0.5b", IndirildiMi = false } });
+        var vm = kur.Vm();
+        await vm.LoadAsync();
+
+        await vm.PanelAcildiAsync();
+
+        kur.Sohbet.Verify(s => s.HazirlaAsync(It.IsAny<IProgress<AsistanDurumDto>>(), It.IsAny<CancellationToken>()), Times.Never);
+        vm.ModelDurumMetni.Should().Contain("indirilecek");
+        vm.ModelDurumMetni.Should().NotContain("hazır değil");
+    }
+
+    [Fact]
+    public async Task PanelAcildi_ModelHazirsa_YenidenYuklemez()
+    {
+        var kur = new Kurulum();
+        var vm = kur.Vm();
+        await vm.LoadAsync();
+
+        await vm.PanelAcildiAsync();
+
+        kur.Sohbet.Verify(s => s.HazirlaAsync(It.IsAny<IProgress<AsistanDurumDto>>(), It.IsAny<CancellationToken>()), Times.Never);
+        kur.Sohbet.Verify(s => s.ModelleriGetirAsync(It.IsAny<CancellationToken>()), Times.Never);
+        vm.ModelDurumMetni.Should().StartWith("Model hazır");
+    }
+
+    [Fact]
+    public async Task PanelAcildi_OnYukleme_Hata_Sebep_Yazilir()
+    {
+        var kur = new Kurulum();
+        kur.Sohbet.Setup(s => s.DurumuGetirAsync()).ReturnsAsync(new AsistanDurumDto { HazirMi = false });
+        kur.Sohbet.Setup(s => s.ModelleriGetirAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<AsistanModelDto> { new() { Alias = "qwen2.5-0.5b", IndirildiMi = true } });
+        kur.Sohbet.Setup(s => s.HazirlaAsync(It.IsAny<IProgress<AsistanDurumDto>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("disk hatası"));
+        var vm = kur.Vm();
+        await vm.LoadAsync();
+
+        await vm.PanelAcildiAsync();
+
+        vm.ModelDurumMetni.Should().Contain("hazırlanamadı").And.Contain("disk hatası");
     }
 }

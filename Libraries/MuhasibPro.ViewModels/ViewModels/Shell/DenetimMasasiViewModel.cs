@@ -85,7 +85,8 @@ public class DenetimMasasiViewModel : ViewModelBase
         IModulTestCalistirici modulTestleri = null,
         IAiAsistanSettingsProvider aiSaglayici = null,
         ISurumOzellikService surumService = null,
-        IAsistanSohbetService asistanSohbet = null) : base(commonServices)
+        IAsistanSohbetService asistanSohbet = null,
+        IYardimBilgiTabani yardimBilgiTabani = null) : base(commonServices)
     {
         _firmaService = firmaService;
         _auth = auth;
@@ -97,8 +98,8 @@ public class DenetimMasasiViewModel : ViewModelBase
         FirmaKayit = new FirmaKayitAyarlarViewModel(commonServices, kayitSaglayici, auth);
         Donem = new DonemAyarlarViewModel(commonServices, donemSaglayici, auth);
         GirisPaneli = new GirisDashboardViewModel(commonServices, firmaService, auth, sistemDb, updateService);
-        YapayZeka = new YapayZekaAyarlarViewModel(commonServices, aiSaglayici, auth, surumService, asistanSohbet);
-        GelistiriciAraclari = new GelistiriciAraclariViewModel(commonServices, devMode, devAraclari, yolAcici, updateService, appPaths, sistemDb, diagnosticsService, modulTestleri, surumService, asistanSohbet);
+        YapayZeka = new YapayZekaAyarlarViewModel(commonServices, aiSaglayici, auth, surumService, asistanSohbet, yardimBilgiTabani);
+        GelistiriciAraclari = new GelistiriciAraclariViewModel(commonServices, devMode, devAraclari, yolAcici, updateService, appPaths, sistemDb, diagnosticsService, modulTestleri, surumService, asistanSohbet, yardimBilgiTabani);
         GirisPaneli.BolumAcildi += b => SeciliBolum = b;
         Menuler = new ObservableCollection<AyarlarNavigationMenu>(AyarlarNavigationMenu.VarsayilanMenuler());
         GorunurMenuleriTazele();

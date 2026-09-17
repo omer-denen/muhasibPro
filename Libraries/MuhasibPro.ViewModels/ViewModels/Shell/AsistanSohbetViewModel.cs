@@ -23,6 +23,7 @@ public class AsistanSohbetViewModel : ViewModelBase
     private readonly IFirmaWithMaliDonemSelectedService _secim;
     private readonly IYardimBilgiTabani? _yardimTabani;
     private CancellationTokenSource? _gonderCts;
+    private bool _panelHazirlikCalisiyor;
 
     public AsistanSohbetViewModel(
         ICommonServices commonServices,
@@ -193,7 +194,9 @@ public class AsistanSohbetViewModel : ViewModelBase
             if (durum.HazirMi && !ModelAliasUyusuyorMu(durum, ayar))
                 ModelDurumMetni = "Model ayarı değişti — ilk soruda yeniden hazırlanır";
             else
-                ModelDurumMetni = durum.HazirMi ? $"Model hazır ({durum.Mesaj})" : "Model hazır değil — ilk soruda indirilir";
+                // "Hazır" ⇔ cevaplayabilir. Yüklü değilken nötr durum yazılır; gerçek hâl
+                // panel açılışında (PanelAcildiAsync) önbellek denetimiyle netleşir.
+                ModelDurumMetni = durum.HazirMi ? $"Model hazır ({durum.Mesaj})" : "Model ilk soruda hazırlanır";
         }
         catch (Exception ex)
         {
@@ -207,6 +210,60 @@ public class AsistanSohbetViewModel : ViewModelBase
         KilitliMi = true;
         KilitMetni = gerekce;
         ModelDurumMetni = string.Empty;
+    }
+
+    /// <summary>Asistan paneli (flyout) açıldığında çağrılır. "Hazır" her zaman "cevaplayabilir" demektir:
+    /// model zaten yüklüyse durum tazelenir; indirilmişse (cached) ön-yüklenir → "Model hazır";
+    /// indirilmemişse nötr "ilk soruda indirilecek" yazılır (asla "hazır değil" çelişkisi doğmaz). Fırlatmaz.</summary>
+    public async Task PanelAcildiAsync()
+    {
+        if (_panelHazirlikCalisiyor)
+            return;
+        _panelHazirlikCalisiyor = true;
+        try
+        {
+            await KapiyiDenetleAsync();
+            if (KilitliMi)
+                return;
+
+            var durum = await _sohbet.DurumuGetirAsync();
+            if (durum.HazirMi)
+            {
+                ModelDurumMetni = $"Model hazır ({durum.Mesaj})";
+                return;
+            }
+
+            var ayar = await _ayarlar.GetAsync();
+            if (!await ModelIndirilmisMiAsync(ayar.GetModelAlias()))
+            {
+                ModelDurumMetni = "Model ilk soruda indirilecek";
+                return;
+            }
+
+            await HazirlaIcAsync();
+        }
+        catch (Exception ex)
+        {
+            ModelDurumMetni = "Model hazırlanamadı: " + ex.Message;
+        }
+        finally
+        {
+            _panelHazirlikCalisiyor = false;
+        }
+    }
+
+    /// <summary>Aktif model diskte indirilmiş mi (indirme yapmaz; katalog denetimi). Hata → false.</summary>
+    private async Task<bool> ModelIndirilmisMiAsync(string alias)
+    {
+        try
+        {
+            var modeller = await _sohbet.ModelleriGetirAsync();
+            return modeller.Any(m => m.IndirildiMi && string.Equals(m.Alias, alias, StringComparison.OrdinalIgnoreCase));
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public async Task GonderAsync()
@@ -303,6 +360,7 @@ public class AsistanSohbetViewModel : ViewModelBase
         catch (Exception ex)
         {
             HataMetni = ex.Message;
+            ModelDurumMetni = "Model hazırlanamadı: " + ex.Message;
             StatusError(ex.Message);
         }
         finally

@@ -333,16 +333,47 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 
 **Oturum 268 seçim animasyonu (kod ✅, ONAYLI "gayet başarılı"):** orbit **kaldırıldı** (kuyruk hub'ı geçiyordu + `StrokeDashOffset` bağımlı → takılma); `SelectionWaveControl` nabzı denendi, **kullanıcı reddetti** → **animasyon sınıfları tümüyle silindi** (Kural 4). NİHAİ: **seçili dönem/firma satırı ana kart rengini alır** (`CardBackgroundFillColorSecondaryBrush` → panel üstüne binince içeride/çukur), **seçimsiz saydam**, seçim yalnız sol accent hub; **seçili firma kartı** (sol panel) da aynı; **hover tema-farkında token** `MuhasibHoverOverlayBrush` (Light `#14000000` / Dark `#1AFFFFFF`) ile iki temada görünür (eski `ControlFillColorSecondaryBrush` Light'ta etkisizdi — HATALAR). Ayrıca **ana border `1→1.5`** (10 Katman-2 view; mühür revizyonu — AGENTS Kural 17 + TASARIM-KURALLARI). Kural 14/19: MS Motion → REFERANSLAR güncel. x64 **0 hata + 492/492**; canlı Dark/Light kanıt (`ot275_*`/`ot276_*`: Light panel 250/seçili 248/hover 251→231; Dark panel 76/seçili 82/hover 77→95). Commit yapıldı.
 
-## Faz 6.85 — Kullanıcı Yönetimi modülü (ayrı MODAL pencere; Oturum 256 kullanıcı kararı — 📋 plan, 6.84'ten sonra)
+## Faz 6.85 — Kullanıcı Yönetimi + RBAC (kullanıcı → modül/alan erişimi) — **ÖNCELİKLİ FAZ** (Oturum 284 plan 📋; Oturum 256 ilk karar)
 
-**Araştırma (Kural 14/19 → REFERANSLAR):** QuickBooks Desktop "Users & Roles" (yalnız admin kullanıcı oluşturur/yönetir; kullanıcı + rol + aktive; self hesap ayrı) · MYOB "Manage Users/Roles" (rol bazlı yetki; kullanıcı yönetimi rol yönetiminden ayrı) · MS InfoBar (bildirim) + mevcut DenetimMasasi modal pencere deseni.
+> **Plan:** `docs/KULLANICI-YONETIMI-PLAN.md` (kod doğrulamalı mevcut durum + hedef mimari + K1-K6 + riskler).
+> **Kullanıcı talebi (Oturum 284):** "Eksik iş kalmasın, temiz bir yapıyla devam"; kullanıcı bazlı yapı çekirdeğin sonuna bırakıldı → **kim hangi modülü/alanı kullanır, nereye girer, yetkisiz alan nasıl engellenir** eksik. **Sahiplik:** RBAC `Data`+`Business`, UI `Views`/`ViewModels`; migration **Kural 8**.
 
-- [ ] **Modal pencere:** `KullaniciYonetimiViewModel` + `KullaniciYonetimiView` (ayrı `Views/KullaniciYonetimi/`), `Startup` + DI kaydı, `CreateNewViewAsync<KullaniciYonetimiViewModel>(null, "Kullanıcı Yönetimi")` ile açılır (`DenetimMasasi` boyut/yardım deseni); FirmaShell/Ayarlar içine gömülmez.
-- [ ] **Kullanıcı listesi + işlemler (admin):** `IKullaniciService` ile liste; **yeni kullanıcı** (`AuthenticationService.Register` — ek kullanıcıya izinli; duplicate kontrolü var), düzenle (`UpdateKullaniciAsync`), aktif/pasif (`SetAktifAsync`; seed yönetici koruması hazır), şifre belirle (`SifreBelirleAsync`), silme (guard'lı). Kapı: `AyarYetkiDenetimi.KullaniciYoneticiMi`.
-- [ ] **Hesabım (kullanıcıya has — ayrı yüzey, karışmaz):** Kullanıcı Bilgilerim (ad/iletişim/avatar) + Şifre Değiştir (mevcut şifre doğrulamalı) — küçük ayrı dialog; `UserInfoControl` menüsünden açılır.
-- [ ] **UserInfoControl menüsü:** iki grup (Hesabım / Yönetim[admin]) + Oturumu Kapat; **sahte madde yok** (madde ancak yüzey hazır olunca eklenir).
-- [ ] **Rol atama notu:** roller KFR (firma-bağımlı) — bu fazda gösterim; atama iyileştirmesi ayrı iş.
-- [ ] **Kapı:** Kural 8 sınıf onayları + Kural 14 araştırma + build 0/0 + test + Kural 18 canlı + Kural 13 yardım + onay.
+**Araştırma (Kural 14/19 → REFERANSLAR):** QuickBooks Desktop "Users & Roles" (yalnız admin kullanıcı oluşturur/yönetir; kullanıcı + rol + aktive; self hesap ayrı) · MYOB "Manage Users/Roles" (rol bazlı yetki; kullanıcı yönetimi rol yönetiminden ayrı) · MS InfoBar + mevcut DenetimMasasi modal pencere deseni · (RBAC seed: `REFERANSLAR` 281 — EF seeding + sektör admin deseni).
+
+### K1 — Seed/atama temeli (RBAC çalışır hâle gelir) ⬜ — **Kural 8 (migration)**
+- [ ] `RolPermission` statik matrisi (Yönetici=tüm izinler, Kullanıcı=temel görüntüleme) → migration `HasData`/idempotent seed
+- [ ] Firma oluşturmada oluşturana **Yönetici KFR** (idempotent)
+- [ ] Açılışta **idempotent backfill** (Yöneticisiz firmaya seed yönetici KFR)
+- [ ] `PermissionService`: **Yönetici bypass'ı** + rol/izin değişiminde **`ClearCache()`**
+- [ ] `Permission.cs:5` yorum düzeltmesi
+- [ ] Testler: gerçek seed ile `PermissionService` integration + KFR yazımı + backfill
+
+### K2 — Kullanıcı Yönetimi modal penceresi ⬜
+- [ ] `KullaniciYonetimiViewModel` + `KullaniciYonetimiView` (ayrı `Views/KullaniciYonetimi/`; `DenetimMasasi` modal/boyut deseni; `CreateNewViewAsync`)
+- [ ] Liste + yeni kullanıcı (`Adi/Soyadi` dahil; `Register` duplicate kontrolü) + düzenle + aktif/pasif + şifre belirle + sil (guard'lı). Kapı: yönetici (`AyarYetkiDenetimi.KullaniciYoneticiMi` + `Permission`)
+- [ ] `IKullaniciService`'e eksik create/rol metotları (Kural 5 zinciri: VM → Contracts → Services → Data)
+
+### K3 — İzin matrisi + rol atama (iki rol) ⬜
+- [ ] **İzin matrisi UI** (71 izin, kategori başlıklı): `Yönetici` sabit (tüm izinler), **`Kullanıcı` düzenlenebilir** → modül/aksiyon erişimi buradan
+- [ ] Kullanıcıya **firma-bazlı rol atama** (KFR yazımı; Yönetici/Kullanıcı)
+- [ ] **Özel rol oluşturma YOK** (kullanıcı kararı Oturum 284)
+
+### K4 — Modül/alan erişim kapısı ⬜
+- [ ] `MainShell` modül menüsü: yetkisiz modül **gizli/pasif + gerekçe** (`MainMenuViewModel` + `Permission`)
+- [ ] Denetim Masası bölümleri: yetkisiz bölüm gizli (`DenetimMasasiViewModel.MenuGorunurMu`)
+- [ ] Sayfa/buton guard'ları (yıkıcı işlemler: sil/güncelle/geri yükle)
+- [ ] `IModuleLicenseService` modül lisans kapısı nav'a; `ModuleLicenseViewModel` hardcoded `firmaId` düzeltmesi
+
+### K5 — Hesabım + UserInfoControl menüsü ⬜
+- [ ] "Hesabım": profil (ad/iletişim/avatar) + şifre değiştir (mevcut şifre doğrulamalı)
+- [ ] `UserInfoControl` menüsü: Hesabım / Yönetim[admin] / Oturumu Kapat; **rol rozeti gerçek** (hardcoded "Admin" kaldırılır)
+
+### K6 — Doğrulama + doküman ⬜
+- [ ] build 0/0 + test (seed, KFR, PermissionService, Kullanıcı Yönetimi)
+- [ ] Kural 18 canlı: yönetici + kısıtlı kullanıcı ile **alan erişim matrisi**; kanıt + onay
+- [ ] Kural 13 yardım + dokümanlar
+
+**Kapı:** Kural 8 (migration/K1) + Kural 14 araştırma + Kural 4 (ölü kod yok) + build 0/0 + test + Kural 18 canlı + onay.
 
 ---
 
@@ -603,19 +634,144 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 
 - [x] **0. Araştırma + sözleşme ✅ (Oturum 278):** `REFERANSLAR` 278 (5 satır: Foundry RAG/embedding, BM25↔vektör/hibrit, FTS5 Türkçe sınırı, vstash RRF, on-device Türkçe karakterizasyon) + `docs/YARDIM-DB-PLAN.md` (frozen) ✅
 - [x] **0b. İçerik başlangıç seti ✅ (Oturum 278, bende):** `docs/yardim/*.md` **9 sayfa / 60 madde** (giriş, firma-dönem seçimi, çalışma alanı, mali dönem yönetimi, veritabanı/yedekleme, uygulama güncelleme, dönem şema göçü, AI asistanı, geliştirici araçları) — format `#` sayfa / `##` madde / `Etiket:` ✅
-- [ ] **1. Motor (diğer model):** `IYardimBilgiTabani` + DTO'lar, `YardimMarkdownCozumleyici`, `RrfBirlestirici`, `YardimSkorlayici` (TR normalizasyon), `YardimVektorDeposu` (SQLite), `YardimBilgiTabaniService`, `GomuluYardimIcerikKaynagi`, `FoundryYardimVektorUretici`, `AiAsistanSettings.EmbeddingModelAlias`, `docs/yardim/*.md`, retrieval'ı `FoundryAsistanSohbetService`/`AsistanPromptKurucu`'ya bağlama, `IYardimIcerikSaglayici` silme + testler ⬜
+- [x] **1. Motor ✅🧪 (Oturum 279 + fix 281):** `IYardimBilgiTabani` + DTO'lar, `YardimMarkdownCozumleyici`, `RrfBirlestirici`, `YardimSkorlayici` (TR normalizasyon), `YardimVektorDeposu` (SQLite), `YardimBilgiTabaniService`, `GomuluYardimIcerikKaynagi`, `FoundryYardimVektorUretici`, `AiAsistanSettings.EmbeddingModelAlias`, `docs/yardim/*.md`, retrieval `FoundryAsistanSohbetService`/`AsistanPromptKurucu`. Üstteki "1a" + "1b" alt maddeleri teslim (motor fix 281; canlı S2-S4 282).
   - [x] **1a. Motor Adım 1 ✅🧪 (Oturum 279):** sözleşme DTO/interface'leri + `YardimMarkdownCozumleyici` + `RrfBirlestirici` + `YardimSkorlayici` TR ext + `YardimVektorDeposu` + `YardimBilgiTabaniService` + `GomuluYardimIcerikKaynagi` + `FoundryYardimVektorUretici` + `EmbeddingModelAlias` + csproj `EmbeddedResource` + retrieval swap (`BilgiTabani` nullable property + fallback, `AramaSonuclariylaKur`). Build 0 hata (solution x64) + yeni dosyalardan uyarı yok + `Yardim*|Rrf` **33/33** ✅. `IYardimIcerikSaglayici` SİLİNMEDİ (sıra notu) ✅. **Kalan (Adım 2, bende):** DI kaydı + eski yolun ctor'a taşınması + `IYardimIcerikSaglayici`/`YardimIcerikToplayici` silme.
 - [x] **2. UI/entegrasyon ✅🧪 (Oturum 280, bende):** DI (`IYardimIcerikKaynagi`/`IYardimVektorUretici`/`IYardimBilgiTabani` Singleton) + `FoundryAsistanSohbetService` ctor injection + eski RAG v1 yolu söküldü (`YardimIcerikToplayici` + `IYardimIcerikSaglayici` + `YardimliSayfaDto` + `MesajlariKur`/`IlgiliMaddeleriBul` silindi, Kural 4) + asistan paneli dizin durumu/ilerlemesi (Kural 11/12) + Denetim "Yapay Zeka" `Yardım dizini` kartı + `GelistiriciAraclari` öz-test sayımı + Kural 13 metinleri + `REFERANSLAR` 278 `Durum=✅`. Build 0 hata + **633/633** ✅
-- [~] **3. Doğrulama (bende):** build 0/0 ✅ + test ✅. **Kural 18 canlı (ot279*):** **S1 ✅** (panel açıldı + `Yardım dizini hazır: 60 madde`); **S2 ❌** → motor bug'ı ("Asistan hazır değil"); S3/S4 motor fix'i sonrası ⬜ · onay ⬜
+- [x] **3. Doğrulama ✅🧪 (bende, Oturum 282):** build 0 hata + **640/640**. **Kural 18 canlı:** **S1 ✅** (60 madde) · **S3 ✅** (embedding alias geçersiz → "yalnız anahtar kelime"; cevap geldi, çökme yok) · **S2 ✅** (embedding 495 MB + 60×1024 vektör; bağımsız prob doğru madde cosine **#2**; canlı cevap doğru maddeye dayandı) · **S4 ✅** (içerik +1 → panel açılışında **61 madde** + yeni vektör; geri al → **60 madde** + orphan 0). **Ek fix (canlı bulgu):** Denetim "Yardım dizini" DI wiring (çocuk VM'lere `IYardimBilgiTabani` iletimi, +2 test) · sohbet paneli **dürüst model durumu** + flyout ön-yükleme (çelişki giderildi, +4 test) · popup Kural 17 tema (onay ✅). **Kalan: kullanıcı onayı (6.93 kapanış) ⬜**
 - [x] **4. Güncelleme modülü entegrasyonu ✅🧪 (Oturum 280, bende — Faz 6.91-G):** post-update saga 4. adım **`AI Yardım Dizini`** (`HazirlaAsync(modelIndirmeyeIzin:false)`, embedding indirilmez; bloklamaz, eksik semide → `Uyari`/Dikkat) + yüzde dağılımı (Dönem 60-88, Dizin 90-98) + `GuncellemeSonrasiView` 4 adımlı şerit (150→120px); 2 yeni test. Build 0 + 633/633
-- [ ] **1b. Motor fix (diğer model — devir, Oturum 280):** `modelIndirmeyeIzin:true` iken embedding **indirilsin** (`YardimBilgiTabaniService.cs:142-149` `OnbellekteMiAsync` kapısı yalnız `false` dalında kalsın) + Foundry yöneticisi tek kez kurulsun (çift `FoundryLocalManager.CreateAsync` doğrula/çöz) + testler ⬜
+- [x] **1b. Motor fix ✅🧪 (Oturum 281):** kapı restructure (`true`→doğrudan `UretAsync`, `false`→`OnbellekteMiAsync`) + `FoundryYoneticiKurulum` tek kapı (ikiz bayraklar silindi) + testler. Build 0 + `Yardim*|Rrf` 24/24 + **634/634**; canlı S2-S4 (Oturum 282) ✅
 
-**Kapı:** build 0/0 ✅ + test ✅ + Kural 18 canlı (S2-S4, motor fix sonrası) + `REFERANSLAR`/doküman güncel ✅ + kullanıcı onayı ⬜
+**Kapı:** build 0/0 ✅ + test ✅ (640/640) + Kural 18 canlı (S1-S4) ✅ + `REFERANSLAR`/doküman güncel ✅ + kullanıcı onayı ⬜ (popup ✅)
+
+---
+
+## Faz 6.94 — Tek Yardım Yüzeyi (AI Asistanı) (Oturum 283 plan 📋 → kullanıcının ek soruları sonrası başlar)
+
+> **Plan:** `docs/YARDIM-TEK-YUZEY-PLAN.md` (kilitli kararlar + envanter + H1-H5 + riskler).
+> **Sahiplik:** içerik `docs/yardim/*.md` + UI sadeleştirme (Views/ViewModels) **ana modelde**; motor/prompt/retrieval **diğer modelde**.
+> **Karar özeti:** yardım kitabı ❌ iptal · view `?` yardım listeleri/dialogu ❌ kaldırılır · tek kaynak `docs/yardim/*.md` → `AsistanBilgi.db` → asistan · giriş **F1 + statü çubuğu "Asistan"** · AI erişilemezse yalnız kilit gerekçesi · eski altyapı silinir (Kural 4) · kapsam tüm yapı.
+
+### H1 — Karar / sözleşme (ben) ⬜
+- [ ] `AGENTS.md` Kural 13 revizyonu: `?` yardım dialogu → **tek yüzey AI asistanı**; "yardım sayfayla yaşar" → "`docs/yardim` güncellenir"
+- [ ] `AGENTS.md` okuma listesine `YARDIM-TEK-YUZEY-PLAN.md` eklenir
+- [ ] `docs/YARDIM-DB-PLAN.md` sözleşme revizyonu (v1.2): "yalnız AI" → "tek yardım kaynağı = tüm uygulama; UI `?` kaldırıldı"
+- [ ] `REFERANSLAR.md`: MS F1/help + uygulama-içi AI yardım araştırması (kaynak + karar)
+- [ ] Kullanıcı onayı (Kural 8/15)
+
+### H2 — İçerik genişletme (ben) ⬜
+- [ ] 78 XAML view + ~81 mevcut yardım metni taraması (ekran/buton envanteri)
+- [ ] Mevcut 9 sayfa/60 madde buton/işlem düzeyinde derinleştirme (projeye özgü; genel anlatım yasak)
+- [ ] Yeni sayfalar: `10-denetim-masasi` · `11-sistem-veritabani-yonetimi` · `12-guncelleme-sonrasi` · `13-diyaloglar` · `14-acilis-kurulum`
+- [ ] Yazım standardı: ekran → buton → adım → sonuç/onay/hata; `Etiket:` ekran+buton adlarıyla
+- [ ] Kaynak: gerçek XAML/VM + mevcut yardım maddeleri (uydurma yok)
+- [ ] İçerik gözden geçirme (kullanıcı); DB otomatik tazelenir
+
+### H3 — UI sadeleştirme (ben, Kural 8) ⬜
+- [ ] `?` butonları kaldırılır (Login, MainShell, FirmaShell, MaliDonemYonetim, DatabaseSettings, Update, SistemDbYonetim, DenetimMasasi, GelistiriciAraclariPaneli, YapayZekaAyarPaneli)
+- [ ] `YardimMaddeleri()`/`YardimGoster`/`YardimCommand` + `YardimAnahtari`/`YardimBasligi` silinir (~81 madde)
+- [ ] `YardimDialog` + `YardimMaddesi` (view) + `YardimMaddesiDto` + `ShowYardimAsync` (interface+impl) silinir
+- [ ] Global **F1** → asistan paneli (statü çubuğu düğmesiyle aynı yol); kilitliyse gerekçe
+- [ ] `TenantDatabaseUpdateView` ölü kod doğrulaması (Kural 4)
+- [ ] Build 0/0 + test yeşil
+
+### H4 — Motor (diğer model) ⬜
+- [ ] Geniş derlem için retrieval ayarı (top-k / etiket ağırlığı)
+- [ ] Prompt sertleştirme (yalnız maddelere dayan; genel tavsiye verme; "yardım maddesi yok" fallback)
+- [ ] Değerlendirme seti: "soru → beklenen madde" (offline) + canlı ölçüm
+- [ ] Sözleşme değişikliği gerekirse Kural 15 + onay + `YARDIM-DB-PLAN` revizyonu
+
+### H5 — Doğrulama + doküman (ben) ⬜
+- [ ] Build 0/0 + test (silinen yardım testleri temizliği)
+- [ ] Kural 18 canlı: F1 → asistan; her ekrandan projeye özgü cevap; kilit senaryosu; kanıt + onay
+- [ ] LOG/DURUM/ROADMAP/KONTROL/REFERANSLAR güncel
+
+**Kapı:** H1 onayı → H2 içerik → H3 Kural 8 onayları + build/test → H4 motor → H5 canlı + onay.
+
+---
+
+## Faz 6.95 — Aktivasyon & Modül Kilidi (KEY) + İlk Giriş (Oturum 284 plan 📋)
+
+> **Plan:** `docs/AKTIVASYON-MODUL-PLAN.md` (A1-A6). **Sektör araştırması:** `REFERANSLAR` 284.
+> **Akış:** Splash → Login (üretici atadığı ilk kullanıcı) → **zorunlu şifre değişikliği** → **Modül Seçici** → seçilen modüller için **KEY** → onaylı key sonrası **Sistem.db modül erişimi güncellenir** → FirmaShell.
+> **İki katman:** **6.95** = modül kilidi (lisans/KEY) · **6.85** = kullanıcı hakkı (RBAC). Modül erişimi = lisans seti ∩ kullanıcı izinleri.
+
+### A1 — Model/sözleşme (kararlar ✅ — kod ⬜)
+- [x] **Lisans kapsamı = kurulum-geneli (Sistem.db global)** ✅
+- [x] **KEY doğrulama = çevrimdışı imza/checksum** ✅
+- [x] **Deneme = anahtarsız 30 gün + kısıtlı modül seti** ✅
+- [x] **Ek modül = tüm açık dönemler + erişimde onay/inline göç** ✅
+- [ ] `Kullanici.SifreDegistirmeliMi` (+ gerekirse `Lisans` alanları) → migration **Kural 8 ✅ onaylı**
+- [ ] `REFERANSLAR` derinleştirme (imza/checksum deseni — kod öncesi, Kural 14)
+
+### A2 — Aktivasyon/KEY altyapısı (Data+Business) ⬜
+- [ ] `ILisansService`/`IModuleLicenseService` genişletme: `AktivasyonAnahtariDogrula`, `ModulleriEtkinlestir`
+- [ ] Anahtar → modül seti eşlemesi (ürün sabiti)
+- [ ] Seed varsayılanları + doğrulama testleri
+
+### A3 — Modül Seçici + KEY ekranı (UI) ⬜
+- [ ] Login sonrası **Modül Seçici** + **KEY girişi** ekranı (Kural 17 + Kural 11/12 durum/ilerleme)
+- [ ] Onaylı key → Sistem.db modül erişimi güncellenir → FirmaShell
+
+### A4 — Zorunlu şifre değişikliği + yeni kullanıcı ⬜
+- [ ] İlk girişte şifre değiştirme ekranı (mevcut şifre doğrulamalı; güç kuralı `IIdentitySettingsProvider`)
+- [ ] Yeni kullanıcı oluşturma (admin) + atanan şifreyle ilk girişte zorunlu değişiklik
+
+### A5 — Modül erişim kapısı + tenant şeması ⬜
+- [ ] `MainShell` modül menüsü `IModuleLicenseService.IsModuleActiveAsync` ile (yetkisiz modül gizli/pasif + gerekçe)
+- [ ] `ModuleLicenseViewModel` hardcoded `firmaId=1` → aktif firma
+- [ ] **Modül → tenant migration eşlemesi** (ürün sabiti)
+- [ ] **Yeni dönem oluşturma:** etkin modül setinin şemasıyla
+- [ ] **Ek modül (yeni KEY):** mevcut dönem DB'lerine göç (ön-yedek → göç → doğrulama; hangi dönemler kararı ⬜)
+
+### A6 — Doğrulama + doküman ⬜
+- [ ] build 0/0 + test + Kural 18 canlı (aktivasyon→FirmaShell, zorunlu şifre, modül kapısı)
+- [ ] Kural 13 yardım + dokümanlar
+
+**Kapı:** lisans kapsamı + KEY doğrulama kararı ✅ → A1 migration (Kural 8 ✅) → A2-A5 → A6 canlı + onay.
+
+---
+
+## Faz 6.96 — Çoklu Veritabanı Sağlayıcı Desteği (SQLite varsayılan) (Oturum 284 plan 📋)
+
+> **Plan:** `docs/DB-PROVIDER-PLAN.md` (D1-D8) + kod doğrulamalı SQLite bağımlılık haritası.
+> **Karar:** SQLite **varsayılan** kalır; PostgreSQL/SQL Server eklenebilir (provider-soyut Data katmanı).
+
+### D1 — Kararlar + sürüm/paket hizalama ⬜
+- [ ] Açık kararlar: sunucu tenant modeli (ayrı catalog vs `TenantId`) · bağlantı bilgisi saklama · yedek anlayışı · hangi sağlayıcılar · `AsistanBilgi.db` SQLite-only mu
+- [ ] Paket sürümlerini hizala (Data EFCore 9.0.11 + `Sqlite.Core 10.0.2`; UI `EFCore.Design 9.0.12`; `SQLitePCLRaw` 2.1.12 vs 3.53.3); SQLite paketlerini tek noktaya topla; server paketleri ekle
+
+### D2 — Provider soyutlaması (Data) ⬜
+- [ ] `IDatabaseProvider` + `DbContextOptions` factory (tek `UseSqlite` noktası)
+- [ ] PRAGMA kancasını interceptor'a taşı (`SistemDbContext` ctor'dan çıkar)
+- [ ] `IConnectionFactory` (Sistem+Tenant); `ITenantSQLite*` adlarını provider-nötr yap
+
+### D3 — Tenant depolama soyutlaması ⬜
+- [ ] `ITenantStore` (exists/create/delete/checkpoint/scan); dosya-başına-tenant varsayımını izole et
+- [ ] Kimlik damgası kontrolünü `File.Exists`'ten bağımsızlaştır
+
+### D4 — Migration seti (provider başına) ⬜
+- [ ] `MigrationsAssembly` + `Migrations/Sqlite|PostgreSql|SqlServer`; mevcutlar SQLite seti; diğerleri yeniden üretilir
+
+### D5 — Diagnostics + yedek stratejisi ⬜
+- [ ] `IDatabaseDiagnostics` (integrity/tablo/row)
+- [ ] `IBackupStrategy` (SQLite: kopya+WAL; server: native backup/restore)
+
+### D6 — Ayar/UI ⬜
+- [ ] Ayar modeline `Provider` + bağlantı alanları; Denetim → Veritabanı'nda seçim + bağlantı testi; varsayılan SQLite
+
+### D7 — Test altyapısı ⬜
+- [ ] Provider-agnostic fixture (SQLite temp / PostgreSQL testcontainer / SQL Server LocalDB); mimari teste provider sızıntı denetimi
+
+### D8 — Doğrulama + doküman ⬜
+- [ ] build 0/0 + test + Kural 18 canlı (SQLite varsayılan; opsiyonel server smoke) + dokümanlar
+
+**Kapı:** D1 kararları (özellikle tenant modeli) netleşmeden D2+ kodlanmaz.
 
 ---
 
 ## Görev devri — diğer model (Oturum 280)
 > **Çakışma kuralı:** bu görevler `Data`/`Business`/test dosyalarında; **`Views/**`, `ViewModels/**`, DI kayıtları, `docs/yardim/*.md` bu oturumda bende — dokunulmaz.**
+> **Sonuç (Oturum 281):** A ✅ (aşağıda) · B araştırma + yaklaşım onayı ✅ (kod yok — kod onayı ayrı).
 
 ### A) 6.93 motor fix (blokaj — canlı S2-S4'ü açıyor)
 - **Belirti (canlı):** AI panelinde soru → "Asistan hazır değil. Önce HazirlaAsync çağırın."; dizin `60 madde • yalnız anahtar kelime` (semantik indeks hiç oluşmuyor).
@@ -624,6 +780,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - **Kapsam:** `Business/Services|Contracts/SistemServices/AiAsistan` + `MuhasibPro/Services/AiAsistan` + testler. Arayüz/DTO **değişmez**.
 - **Test:** "önbellek yok → `UretAsync` çağrılmaz" davranışını doğrulayan test varsa düzelt (sözleşme: `true` iken çağrılır, `false` iken çağrılmaz); KB sonrası chat hazırlığının başarılı olduğunu doğrulayan test ekle. `Yardim*|Rrf` yeşil + build 0 hata.
 - **Teslim sonrası bende:** canlı S2/S3/S4 + onay.
+- **✅ Sonuç (Oturum 281):** kapı restructure edildi (`true`→direkt `Uret`, `false`→`OnbellekteMi` kapısı) + `FoundryYoneticiKurulum` tek kapı (ikiz bayraklar silindi) + testler güncellendi (yeni: `Hazirla_IzinTrue_OnbellekYoksa_IndiripGomer`). Build 0 + `Yardim*|Rrf` 24/24 + full **634/634**. Sende: canlı S2/S3/S4.
 
 ### B) Seed yönetici yetki bug'ı (DURUM açık ucu — bağımsız)
 - **Belirti:** `PermissionService` yöneticide bile tüm yetkileri `false` döner (AI paneli kilitli); canlı testte ancak dev DB'ye **geçici** KFR + `RolPermission(2300)` satırı eklenerek açılabiliyor.
@@ -632,3 +789,4 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - **Sıra (Kural 13/14/15):** araştır (rol→izin tohumlama + firma oluşturmada rol atama deseni; `REFERANSLAR`'a yaz) → yaklaşımı (seed migration / idempotent onarım / firma-oluşturmada KFR) sun, onay al, sonra kodla (migration = kritik yapı → Kural 8). Mevcut DB'ler için **idempotent backfill** şart.
 - **Test:** gerçek seed/DB ile integration testi (mevcut `PolitikaTests` mock'lu olduğu için bug'ı yakalamıyor) + firma→KFR + yönetici izni.
 - **Not (küçük borç):** `Permission.cs:5` yorumu "eşleme Global.db'de" diyor; tablo `SistemDbContext` (Sistem.db) içinde → yorum düzeltilmeli.
+- **✅ Sonuç (Oturum 281):** araştırma yapıldı (`REFERANSLAR` 281, 2 satır) + **yaklaşım onaylandı (kullanıcı): 3 katman** — (1) migration'da statik `RolPermission` seed, (2) firma oluşturmada oluşturana Yönetici KFR (idempotent), (3) açılışta idempotent backfill (**kural: Yöneticisiz firmaya seed yönetici atanır**). Kod yok — migration (Kural 8) + backfill + integration testi için kod onayı ayrı.

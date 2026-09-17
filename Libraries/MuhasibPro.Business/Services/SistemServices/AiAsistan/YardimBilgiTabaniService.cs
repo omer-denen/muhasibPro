@@ -139,16 +139,14 @@ public sealed class YardimBilgiTabaniService : IYardimBilgiTabani
                 if (cozulmus.Count > 0 && sakli.Count == 0)
                     vektorMesaj = "semantik indeks yok";
             }
-            else if (!modelIndirmeyeIzin)
+            else if (!modelIndirmeyeIzin && !await _vektorUretici.OnbellekteMiAsync(ct).ConfigureAwait(false))
             {
-                vektorMesaj = "Model indirmeye izin verilmedi — lexical-only.";
-            }
-            else if (!await _vektorUretici.OnbellekteMiAsync(ct).ConfigureAwait(false))
-            {
-                vektorMesaj = "Embedding modeli önbellekte değil — lexical-only.";
+                // 6.91-G kapısı: indirme yasak ve model önbellekte değil → vektör adımı atlanır.
+                vektorMesaj = "Embedding modeli önbellekte değil ve indirmeye izin verilmedi — lexical-only.";
             }
             else
             {
+                // modelIndirmeyeIzin=true iken UretAsync indirip yükler (sözleşme); hatası dış catch'te lexical'e düşer.
                 Bildir(ilerleme, false, 55, "Semantik indeks yazılıyor", "Semantik indeks yazılıyor");
                 int boyut = await _vektorUretici.VektorBoyutuAsync(ct).ConfigureAwait(false);
                 int uretilen = 0;

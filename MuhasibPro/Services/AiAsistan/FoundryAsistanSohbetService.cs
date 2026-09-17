@@ -3,10 +3,8 @@ using System.Runtime.CompilerServices;
 using Betalgo.Ranul.OpenAI.ObjectModels.RequestModels;
 using Microsoft.AI.Foundry.Local;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Services.SistemServices.AiAsistan;
-using FoundryLogLevel = Microsoft.AI.Foundry.Local.LogLevel;
 
 namespace MuhasibPro.Services.AiAsistan;
 
@@ -18,13 +16,10 @@ namespace MuhasibPro.Services.AiAsistan;
 /// </summary>
 public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
 {
-    private const string UygulamaAdi = "MuhasibPro";
-
     private readonly IAiAsistanSettingsProvider _ayarlar;
     private readonly IYardimBilgiTabani _bilgiTabani;
     private readonly ILogger<FoundryAsistanSohbetService>? _logger;
     private readonly SemaphoreSlim _kapi = new(1, 1);
-    private bool _yoneticiOlustu;
     private bool _hazir;
     private string _hazirAlias = string.Empty;
 
@@ -73,7 +68,7 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
             await ModeliKapatIcAsync(_hazirAlias).ConfigureAwait(false);
 
         ct.ThrowIfCancellationRequested();
-        await YoneticiyiKurAsync().ConfigureAwait(false);
+        await FoundryYoneticiKurulum.KurAsync().ConfigureAwait(false);
 
         var yonetici = FoundryLocalManager.Instance;
         Bildir(ilerleme, false, "Yürütücü hazırlanıyor", 2, alias);
@@ -104,17 +99,6 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
         _hazirAlias = alias;
         _hazir = true;
         Bildir(ilerleme, true, "Hazır", 100, alias);
-    }
-
-    /// <summary>Foundry yöneticisini bir kez kurar (kapı çağırandadır).</summary>
-    private async Task YoneticiyiKurAsync()
-    {
-        if (_yoneticiOlustu)
-            return;
-        await FoundryLocalManager.CreateAsync(
-            new Configuration { AppName = UygulamaAdi, LogLevel = FoundryLogLevel.Information },
-            NullLogger.Instance).ConfigureAwait(false);
-        _yoneticiOlustu = true;
     }
 
     public async IAsyncEnumerable<string> SorStreamingAsync(
@@ -159,7 +143,7 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
         await _kapi.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            await YoneticiyiKurAsync().ConfigureAwait(false);
+            await FoundryYoneticiKurulum.KurAsync().ConfigureAwait(false);
             var katalog = await FoundryLocalManager.Instance.GetCatalogAsync(ct).ConfigureAwait(false);
             var yukluler = await katalog.GetLoadedModelsAsync(ct).ConfigureAwait(false);
             var yukluAliaslar = yukluler.Select(m => m.Alias ?? string.Empty).ToList();
@@ -199,7 +183,7 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
         await _kapi.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            await YoneticiyiKurAsync().ConfigureAwait(false);
+            await FoundryYoneticiKurulum.KurAsync().ConfigureAwait(false);
             var katalog = await FoundryLocalManager.Instance.GetCatalogAsync(ct).ConfigureAwait(false);
             var indirilenler = await katalog.GetCachedModelsAsync(ct).ConfigureAwait(false);
             long toplam = 0;
@@ -225,7 +209,7 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
         await _kapi.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            await YoneticiyiKurAsync().ConfigureAwait(false);
+            await FoundryYoneticiKurulum.KurAsync().ConfigureAwait(false);
             var katalog = await FoundryLocalManager.Instance.GetCatalogAsync(ct).ConfigureAwait(false);
             var model = await katalog.GetModelAsync(hedef, ct).ConfigureAwait(false);
             if (model is null)
@@ -294,7 +278,7 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
 
     private async Task ModeliKapatIcAsync(string alias)
     {
-        if (!_yoneticiOlustu)
+        if (!FoundryYoneticiKurulum.Kuruldu)
             return;
         var katalog = await FoundryLocalManager.Instance.GetCatalogAsync().ConfigureAwait(false);
         var model = await katalog.GetModelAsync(alias).ConfigureAwait(false);

@@ -228,11 +228,12 @@
                             Opened="OnAsistanFlyoutOpened"
                             Closed="OnAsistanFlyoutClosed">
                             <Flyout.FlyoutPresenterStyle>
+                                <!--  Kural 17 (ana border kimliği): geçici yüzey → in-app acrylic; ana border hairline 1.5px + Padding 24.  -->
                                 <Style TargetType="FlyoutPresenter">
-                                    <Setter Property="Padding" Value="16" />
-                                    <Setter Property="Background" Value="{ThemeResource SolidBackgroundFillColorBaseBrush}" />
-                                    <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
-                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="Padding" Value="24" />
+                                    <Setter Property="Background" Value="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
+                                    <Setter Property="BorderBrush" Value="{ThemeResource MuhasibAnaBorderCizgiBrush}" />
+                                    <Setter Property="BorderThickness" Value="1.5" />
                                     <Setter Property="CornerRadius" Value="{StaticResource OverlayCornerRadius}" />
                                     <Setter Property="MinWidth" Value="720" />
                                     <Setter Property="MaxWidth" Value="1020" />

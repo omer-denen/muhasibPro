@@ -1,8 +1,6 @@
 using Microsoft.AI.Foundry.Local;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
-using FoundryLogLevel = Microsoft.AI.Foundry.Local.LogLevel;
 
 namespace MuhasibPro.Services.AiAsistan;
 
@@ -13,12 +11,9 @@ namespace MuhasibPro.Services.AiAsistan;
 /// </summary>
 public sealed class FoundryYardimVektorUretici : IYardimVektorUretici
 {
-    private const string UygulamaAdi = "MuhasibPro";
-
     private readonly IAiAsistanSettingsProvider _ayarlar;
     private readonly ILogger<FoundryYardimVektorUretici>? _logger;
     private readonly SemaphoreSlim _kapi = new(1, 1);
-    private bool _yoneticiOlustu;
     private string _hazirAlias = string.Empty;
     private int _boyut;
 
@@ -51,7 +46,7 @@ public sealed class FoundryYardimVektorUretici : IYardimVektorUretici
             await _kapi.WaitAsync(ct).ConfigureAwait(false);
             try
             {
-                await YoneticiyiKurAsync().ConfigureAwait(false);
+                await FoundryYoneticiKurulum.KurAsync().ConfigureAwait(false);
                 var katalog = await FoundryLocalManager.Instance.GetCatalogAsync(ct).ConfigureAwait(false);
                 var model = await katalog.GetModelAsync(alias, ct).ConfigureAwait(false);
                 return model is not null && await model.IsCachedAsync(ct).ConfigureAwait(false);
@@ -117,7 +112,7 @@ public sealed class FoundryYardimVektorUretici : IYardimVektorUretici
             return;
 
         ct.ThrowIfCancellationRequested();
-        await YoneticiyiKurAsync().ConfigureAwait(false);
+        await FoundryYoneticiKurulum.KurAsync().ConfigureAwait(false);
 
         var yonetici = FoundryLocalManager.Instance;
         var eps = yonetici.DiscoverEps();
@@ -137,15 +132,5 @@ public sealed class FoundryYardimVektorUretici : IYardimVektorUretici
 
         _hazirAlias = alias;
         _logger?.LogInformation("Embedding modeli hazır: {Alias}", alias);
-    }
-
-    private async Task YoneticiyiKurAsync()
-    {
-        if (_yoneticiOlustu)
-            return;
-        await FoundryLocalManager.CreateAsync(
-            new Configuration { AppName = UygulamaAdi, LogLevel = FoundryLogLevel.Information },
-            NullLogger.Instance).ConfigureAwait(false);
-        _yoneticiOlustu = true;
     }
 }
