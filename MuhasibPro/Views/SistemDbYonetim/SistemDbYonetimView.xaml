@@ -1,4 +1,4 @@
-<Page
+﻿<Page
     x:Class="MuhasibPro.Views.SistemDbYonetim.SistemDbYonetimView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -157,13 +157,6 @@
             </Grid>
             </Border>
 
-                <!-- Kural 13: sayfa yardimi — ana border'in sag ust kosesinde -->
-                <Button x:Name="YardimButton" AutomationProperties.AutomationId="YardimButton" Width="36" Height="36" Padding="0" Margin="0,-10,-10,0"
-                        HorizontalAlignment="Right" VerticalAlignment="Top"
-                        Style="{StaticResource CircleIconButtonStyle}" Click="OnYardimClick"
-                        ToolTipService.ToolTip="Bu sayfa hakkında yardım">
-                    <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="15" />
-                </Button>
                 </Grid>
             </Grid>
         </Grid>

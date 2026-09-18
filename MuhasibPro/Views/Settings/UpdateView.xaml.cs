@@ -22,7 +22,6 @@ namespace MuhasibPro.Views.Settings
             ZeminGorseli.Visibility = Visibility.Collapsed;
             ZeminPerdesi.Visibility = Visibility.Collapsed;
             PanelWrap.Margin = new Thickness(0, 8, 0, 0);
-            YardimButton.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>Kural 17 Katman 2: ana border gölgesi — receiver Loaded'da (ctor'da değil; Splash emsali).</summary>

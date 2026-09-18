@@ -1,4 +1,4 @@
-using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
+﻿using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.DTOModel.SistemModel;
@@ -15,9 +15,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell;
 /// Tek cümle: AI ayar modelini (sabit model + davranış eşikleri) panele bağlar; disk/model yönetimini sunar.</summary>
 public class YapayZekaAyarlarViewModel : ViewModelBase
 {
-    internal const string YardimAnahtari = "YapayZeka";
-    internal const string YardimBasligi = "Yapay Zeka — Yardım";
-
     private readonly IAiAsistanSettingsProvider? _saglayici;
     private readonly ISurumOzellikService? _surum;
     private readonly IAsistanSohbetService? _sohbet;
@@ -189,9 +186,6 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
         get => _isModelIslemde;
         private set { if (Set(ref _isModelIslemde, value)) ModelKomutlariniTazele(); }
     }
-
-    private AsyncRelayCommand? _yardim;
-    public ICommand YardimCommand => _yardim ??= new AsyncRelayCommand(YardimGoster);
 
     private AsyncRelayCommand? _modelleriYenile;
     public ICommand ModelleriYenileCommand => _modelleriYenile ??= new AsyncRelayCommand(ModelleriYukleAsync);
@@ -373,19 +367,4 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
         }
     }
 
-    private async Task YardimGoster() =>
-        await DialogService.ShowYardimAsync(YardimBasligi, YardimMaddeleri());
-
-    /// <summary>Kural 13 içeriği (AI öz-yardımı bilgi tabanı dışındadır — meta içerik).</summary>
-    internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
-    {
-        new() { Baslik = "Bu bölüm ne yapar?", Aciklama = "AI yardım asistanının ayarlarını ve model durumunu yönetir: sürüm hakkı, model bilgisi ve davranış eşikleri." },
-        new() { Baslik = "Sürüm hakkı", Aciklama = "Asistan Profesyonel ve Kurumsal sürümlerde (Deneme'de açık) çalışır. Hakkınız yoksa gerekçesi burada yazar; sohbet paneli kilitli görünür." },
-        new() { Baslik = "Model", Aciklama = "Sohbet modeli ürün tarafından sabitlenmiştir (değiştirilemez). Modelin adı bu bölümde görünür; kurulum ve yönetim otomatiktir." },
-        new() { Baslik = "Model yönetimi", Aciklama = "İndirilmiş modeller boyutu ve 'Yüklü' rozetiyle listelenir; üstteki 'Yenile' listeyi ve disk kullanımını tazeler. 'Sil' modeli diskten kalıcı olarak kaldırır: önce onay ister, yüklü modeli silmeden önce bellekten bırakır. Silme geri alınamaz." },
-        new() { Baslik = "Model indirme", Aciklama = "Model/yürütücü indirme bu bölümde değil, çalışma alanındaki AI Yardım Asistanı panelinden yapılır (statü çubuğu → Asistan; ilk soruda otomatik indirilir). İlerleme panelde görünür." },
-        new() { Baslik = "Yardım dizini", Aciklama = "Asistanın dayandığı yardım maddeleri uygulamaya gömülü Markdown içerikten gelir ve AsistanBilgi.db dizininde tutulur. İlk soruda kurulur; model indirilemezse yalnız anahtar kelimeyle arama yapılır ve asistan çalışmaya devam eder." },
-        new() { Baslik = "Davranış eşikleri", Aciklama = "Geçmiş turu (soruya eklenen konuşma), madde sayısı (prompt'a giren yardım maddesi) ve soru zaman aşımı buradan ayarlanır." },
-        new() { Baslik = "Etkin / kapalı", Aciklama = "Kapalıysa sohbet paneli kilitli görünür ve soru alınmaz. Model diskte kalır, yeniden açınca hazırlanır." },
-    };
 }

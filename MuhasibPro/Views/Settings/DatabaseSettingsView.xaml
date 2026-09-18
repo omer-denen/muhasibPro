@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="MuhasibPro.Views.Settings.DatabaseSettingsView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -87,13 +87,6 @@
         </StackPanel>
         </Border>
 
-            <!-- Kural 13: sayfa yardimi (VM command) — ana border'in sag ust kosesinde -->
-            <Button x:Name="YardimButton" AutomationProperties.AutomationId="YardimButton" Width="36" Height="36" Padding="0" Margin="0,-10,-10,0"
-                    HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Style="{StaticResource CircleIconButtonStyle}" Command="{x:Bind ViewModel.YardimCommand}"
-                    ToolTipService.ToolTip="Veritabanı ayarları hakkında yardım">
-                <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="15" />
-            </Button>
         </Grid>
     </ScrollViewer>
         </Grid>

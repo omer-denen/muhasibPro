@@ -285,29 +285,6 @@ public class LoginViewModel : ViewModelBase
             new ShellArgs { ViewModel = vmTip });
     }
 
-    private ICommand _yardimCommand;
-
-    /// <summary>Kural 13: sayfa yardımı (içerik ViewModel'de, dialog chrome'u App'te).</summary>
-    public ICommand YardimCommand => _yardimCommand ??= new AsyncRelayCommand(YardimGoster);
-
-    internal const string YardimAnahtari = "Login";
-    internal const string YardimBasligi = "Giriş — Yardım";
-
-    /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
-    internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
-    {
-        new() { Baslik = "Nasıl giriş yaparım?", Aciklama = "Kullanıcı adı ve şifrenizi girip 'Sisteme Giriş Yap' butonuna basın (Enter da çalışır). Bilgiler doğruysa firma seçim ekranına geçilir." },
-        new() { Baslik = "Sistem Durumu", Aciklama = "Kart, Sistem.db'nin hazır olup olmadığını gösterir. 'Hazır' değilse giriş kapalıdır. 'Teşhis' bağlantısı veritabanı teşhis ve onarım sayfasını açar." },
-        new() { Baslik = "Hızlı Giriş", Aciklama = "'Beni hatırla' işaretli başarılı girişlerde hesap bu listeye eklenir. Bir satıra tıklamak kullanıcı adı/şifreyi doldurur; satırdaki × hesabı listeden kaldırır." },
-        new() { Baslik = "İlk kez mi kullanıyorum?", Aciklama = "Sistem veritabanı henüz kurulmadıysa girişten önce Kurulum ekranı görünür; kurulum tamamlanınca bu ekrana dönülür." },
-        new() { Baslik = "Giriş yapamıyorum", Aciklama = "Hatalı kullanıcı adı/şifrede satır içi kırmızı uyarı çıkar. Şifrenizi bilmiyorsanız yöneticinizden sıfırlamasını isteyin." },
-    };
-
-    private async Task YardimGoster()
-    {
-        await DialogService.ShowYardimAsync(YardimBasligi, YardimMaddeleri());
-    }
-
     private async Task EnterApplication()
     {
         try

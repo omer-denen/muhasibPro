@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <UserControl
     x:Class="MuhasibPro.Views.DenetimMasasi.Bolumler.GelistiriciAraclariPaneli"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -33,11 +33,6 @@
                           Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Top" />
                 <TextBlock Grid.Column="1" TextWrapping="Wrap" Style="{StaticResource CaptionTextBlockStyle}"
                            Text="Bu bölüm yalnızca geliştirme (DEBUG) derlemesinde görünür ve üretim sürümünde yer almaz. Her işlem onay ister ve Sistem günlüğüne DEV kaynağıyla yazılır." />
-                <Button Grid.Column="2" Command="{Binding YardimCommand}" AutomationProperties.AutomationId="GelistiriciAraclariYardim"
-                        Style="{StaticResource CircleIconButtonStyle}"
-                        ToolTipService.ToolTip="Geliştirici Araçları — Yardım">
-                    <FontIcon Glyph="{StaticResource IconHelpCircle}" FontSize="14" />
-                </Button>
             </Grid>
         </Border>
 

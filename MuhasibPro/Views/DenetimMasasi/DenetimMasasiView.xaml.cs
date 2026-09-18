@@ -130,22 +130,5 @@ namespace MuhasibPro.Views.DenetimMasasi
             IcerikFrame.ForwardStack.Clear();
         }
 
-        private async void OnYardimClick(object sender, RoutedEventArgs e)
-        {
-            var dialog = new Views.Components.YardimDialog();
-            dialog.IcerikAta("Ayarlar — Yardım", new List<Views.Components.YardimMaddesi>
-            {
-                new() { Baslik = "Bu pencere ne işe yarar?", Aciklama = "Firma ve dönem seçiminden bağımsız, tüm uygulama ayarlarının tek yönetim penceresi. Firma seçiminden ayrı açılır; arkadaki seçim ekranı bu pencere açıkken kilitlidir." },
-                new() { Baslik = "Giriş sayfası", Aciklama = "Üstte üç durum düğmesi: MuhasibPro (sürüm ve dağıtım bilgisi), Sistem Veritabanı (bağlantı durumu + dosya boyutu; tıklayınca Veritabanı bölümü açılır) ve Uygulama Güncelleme (son kontrol zamanı; tıklayınca Güncelleme bölümü açılır). Altında 'Kullanıcıya Ait Firmalar' bölümü yer alır." },
-                new() { Baslik = "Firmalar ve mali dönemler", Aciklama = "Sağdaki 'Kullanıcıya Ait Firmalar' kartında her firmayı genişlettiğinizde o firmanın açık mali dönemleri (yıl + veritabanı adı) görünür. 'Gelişmiş Yönetim' ilgili firmanın Mali Dönem Yönetimi penceresini açar; 'Yeni Firma' yeni firma tanımlama formunu başlatır." },
-                new() { Baslik = "Bölümler", Aciklama = "Sol menüde: Giriş (hesap, firma ve dönem özeti), Görünüm, Güvenlik, Firma, Veritabanı (Sistem Veritabanı + Mali Dönem Veritabanları grupları), Mali Dönem, Güncelleme ve Yapay Zeka. Her bölüm kendi sayfasında açılır." },
-                new() { Baslik = "Kapsam: kullanıcı ve firma", Aciklama = "Görünüm, Yedekleme ve Saklama ayarları kullanıcı bazlıdır (her kullanıcı kendi ayarını görür). Firma ve Mali Dönem ayarları global şablondur. Güvenlik ayarları yöneticiye özeldir." },
-                new() { Baslik = "Kaydetme", Aciklama = "Ayar değişiklikleri seçildiği anda ilgili sağlayıcı üzerinden otomatik kaydedilir. Kritik ayarları yalnızca yönetici değiştirebilir; yetki yoksa değişiklik reddedilir ve uyarı gösterilir." },
-                new() { Baslik = "Arama", Aciklama = "'Bir ayar bulun' kutusu bölüm menüsünü başlığa göre süzer; aramanın temizlenmesiyle tüm bölümler geri gelir." },
-                new() { Baslik = "Geliştirici Araçları (yalnız geliştirme)", Aciklama = "Yalnız DEBUG derlemesinde görünen bölüm: kurulum kimliği onarım/sıfırlama, transfer taramasını elle tetikleme, dönem şema damgalarını görüntüleme, ayrıntılı log seviyesi ve log/veri klasörlerini açma. Üretim sürümünde bu bölüm yer almaz." },
-                new() { Baslik = "Yapay Zeka", Aciklama = "AI yardım asistanının ayarları ve model durumu: sürüm hakkı, model seçimi (yalnız yönetici), davranış eşikleri ve model hazırlığı. Asistan Profesyonel/Kurumsal sürümlerde çalışır; Deneme'de açıktır." },
-            });
-            await Helpers.DialogHelper.ShowCenteredAsync(dialog);
-        }
     }
 }

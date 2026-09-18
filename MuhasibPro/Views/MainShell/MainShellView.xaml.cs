@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using MuhasibPro.HostBuilders;
 using MuhasibPro.ViewModels.ViewModels.Shell;
@@ -40,6 +41,13 @@ namespace MuhasibPro.Views.MainShell
                 AnaBorderShadow.Receivers.Add(RootGrid);
             }
             catch { }
+        }
+
+        /// <summary>Kural 13: F1 → AI yardım paneli (statü çubuğu "Asistan" ile aynı yol).</summary>
+        private void OnF1Yardim(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            args.Handled = true;
+            ShellStatusBarControl.AsistanPaneliAc();
         }
     }
 }

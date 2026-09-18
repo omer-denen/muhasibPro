@@ -1,4 +1,4 @@
-using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
+﻿using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
@@ -190,33 +190,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
                 await LogSistemExceptionAsync("FirmaShell", "FirmaYonetimiYetki", ex);
             }
             (_firmaYonetimiCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
-        }
-
-        private ICommand _yardimCommand;
-
-        /// <summary>Kural 13: sayfa yardımı (içerik ViewModel'de, dialog chrome'u App'te).</summary>
-        public ICommand YardimCommand => _yardimCommand ??= new AsyncRelayCommand(YardimGoster);
-
-        internal const string YardimAnahtari = "FirmaShell";
-        internal const string YardimBasligi = "Firma & Mali Dönem Seçimi — Yardım";
-
-        /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
-        internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
-        {
-            new() { Baslik = "Firma nasıl seçerim?", Aciklama = "Yukarıdaki firma seçiciye tıklayın; açılan listede firma kodu, ünvan veya şehir yazarak arayabilirsiniz. Bir firmaya tıkladığınızda seçilir ve liste kapanır; firma bilgileri alttaki kartta görünür." },
-            new() { Baslik = "Mali dönem nasıl seçerim?", Aciklama = "Sağdaki mali dönem listesinden bir satıra tıklayın; seçilen satır genişleyip dönemin veritabanı, boyut, durum ve son yedek bilgilerini gösterir. Seçim sonrası 'Çalışma Alanına Geç' butonu etkinleşir." },
-            new() { Baslik = "Yeni firma eklemek", Aciklama = "FİRMA başlığının sağındaki 'Yeni Firma' butonu firma tanımlama penceresini açar; kayıt sonrası liste tazelenir. Seçili firma kartındaki 'Düzenle' ile mevcut firma bilgileri açılır." },
-            new() { Baslik = "Yeni mali dönem açmak", Aciklama = "Mali dönem listesi başlığındaki 'Yeni Mali Dönem Aç' butonu yeni dönem penceresini açar; veritabanı oluşturma adımları sırayla gösterilir. Dönem yoksa boş-durum kartındaki 'Yeni mali dönem aç' bağlantısı da aynı pencereyi açar." },
-            new() { Baslik = "Mali Dönem İşlemleri", Aciklama = "Seçili firma kartındaki 'Mali Dönem İşlemleri' butonu yedekleme, arşivleme ve kurtarma işlemlerini içeren yönetim penceresini açar." },
-            new() { Baslik = "Güncelleme bildirimi", Aciklama = "Bir dönemin veritabanı şema güncellemesi bekliyorsa listenin üstünde sarı bilgi çubuğu görünür. Tek dönemde 'Güncelle' doğrudan güncelleme sayfasını açar; birden çok dönemde 'İncele' listesinden istediğiniz dönemi seçin." },
-            new() { Baslik = "Son çalışılan rozeti", Aciklama = "En son giriş yapılan dönemin satırında 'Son çalışılan' rozeti görünür; liste sırası değişmez. Açılışta bu dönem otomatik seçilir (kapalıysa ilk açık döneme düşülür)." },
-            new() { Baslik = "Çalışma alanına geçiş", Aciklama = "Firma ve açık bir dönem seçiliyken alttaki 'Çalışma Alanına Geç' ile ana panele geçilir. Buton pasifse nedenini üzerine gelerek görebilirsiniz (dönem kapalı ya da veritabanı dosyası yok)." },
-            new() { Baslik = "Ayarlar", Aciklama = "Sağ üstteki 'Ayarlar' butonu tüm uygulama ayarlarını ayrı bir pencerede açar." },
-        };
-
-        private async Task YardimGoster()
-        {
-            await DialogService.ShowYardimAsync(YardimBasligi, YardimMaddeleri());
         }
 
         private bool CanExecuteDevamEt()

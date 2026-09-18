@@ -129,6 +129,14 @@ namespace MuhasibPro.Views.ShellViews.Shell
         {
             try { AsistanFlyout?.Hide(); } catch { }
         }
+
+        /// <summary>F1 / statü çubuğu "Asistan": AI yardım panelini açar (tek yardım yüzeyi — Kural 13).</summary>
+        public void AsistanPaneliAc()
+        {
+            if (!AsistanGorunur || AsistanFlyout == null || AsistanButton == null)
+                return;
+            try { AsistanFlyout.ShowAt(AsistanButton); } catch { }
+        }
         #endregion
 
         private void OnServicePropertyChanged(object sender, PropertyChangedEventArgs e)

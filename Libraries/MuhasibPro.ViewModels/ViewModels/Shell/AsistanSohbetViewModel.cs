@@ -307,7 +307,7 @@ public class AsistanSohbetViewModel : ViewModelBase
             var istek = new AsistanSoruDto
             {
                 Soru = soru,
-                SayfaAnahtari = MainShellViewModel.YardimAnahtari,
+                SayfaAnahtari = "MainShell",
                 FirmaAdi = FirmaAdi(),
                 DonemAdi = DonemAdi(),
                 Gecmis = gecmis

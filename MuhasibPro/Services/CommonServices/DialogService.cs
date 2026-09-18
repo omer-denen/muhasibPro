@@ -165,15 +165,5 @@ namespace MuhasibPro.Services.CommonServices
             await DialogHelper.ShowCenteredAsync(dialog);
             return dialog.GeriYukleOnaylandi;
         }
-
-        public async Task ShowYardimAsync(string baslik, IReadOnlyList<YardimMaddesiDto> maddeler)
-        {
-            var dialog = new Views.Components.YardimDialog();
-            var icerik = new List<Views.Components.YardimMaddesi>();
-            foreach (var m in maddeler)
-                icerik.Add(new Views.Components.YardimMaddesi { Baslik = m.Baslik, Aciklama = m.Aciklama });
-            dialog.IcerikAta(baslik, icerik);
-            await DialogHelper.ShowCenteredAsync(dialog);
-        }
     }
 }

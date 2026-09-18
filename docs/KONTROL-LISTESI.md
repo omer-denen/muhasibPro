@@ -716,13 +716,14 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [ ] İçerik gözden geçirme (kullanıcı); DB otomatik tazelenir
 - [x] **İçerik taramasında bulunan Kural 21 ihlalleri temizlendi (Oturum 293, onaylı — View/Kural 8):** `MainShellView` "Snapshot Yedek" (Command'siz) + statik tenant header ("Tenant bağlantısı başarılı / WAL Aktif") + placeholder ContentFrame metinleri ("Faz B modülleri...") kaldırıldı; `NamePasswordControl` "Şifremi Unuttum?" (işlevsiz) kaldırıldı; `MainShellViewModel.YardimMaddeleri` gerçeğe çekildi (gerçek 3 menü + durum çubuğu + Asistan). `docs/yardim` içeriğinden de bu sahte yüzeyler çıkarıldı.
 
-### H3 — UI sadeleştirme (ben, Kural 8) ⬜
-- [ ] `?` butonları kaldırılır (Login, MainShell, FirmaShell, MaliDonemYonetim, DatabaseSettings, Update, SistemDbYonetim, DenetimMasasi, GelistiriciAraclariPaneli, YapayZekaAyarPaneli)
-- [ ] `YardimMaddeleri()`/`YardimGoster`/`YardimCommand` + `YardimAnahtari`/`YardimBasligi` silinir (~81 madde)
-- [ ] `YardimDialog` + `YardimMaddesi` (view) + `YardimMaddesiDto` + `ShowYardimAsync` (interface+impl) silinir
-- [ ] Global **F1** → asistan paneli (statü çubuğu düğmesiyle aynı yol); kilitliyse gerekçe
-- [ ] `TenantDatabaseUpdateView` ölü kod doğrulaması (Kural 4)
-- [ ] Build 0/0 + test yeşil
+### H3 — UI sadeleştirme (ben, Kural 8 — onaylı, Oturum 293) ✅ (canlı H5'te)
+- [x] `?` butonları kaldırıldı (LoginView, MainShellView, FirmaShellView, MaliDonemYonetimView, DatabaseSettingsView, UpdateView, SistemDbYonetimView, DenetimMasasiView, GelistiriciAraclariPaneli, YapayZekaAyarPaneli)
+- [x] `YardimMaddeleri()`/`YardimGoster`/`YardimCommand` + `YardimAnahtari`/`YardimBasligi` silindi (8 VM: Login, MainShell, FirmaShell, MaliDonemYonetim, DatabaseSettings, Update, YapayZeka, GelistiriciAraclari)
+- [x] `YardimDialog` (xaml+cs) + `YardimMaddesi` + `YardimMaddesiDto` + `IDialogService`/`DialogService.ShowYardimAsync` silindi (Kural 4)
+- [x] Global **F1** → `ShellStatusBar.AsistanPaneliAc()` (statü çubuğu "Asistan" ile aynı yol; kilitliyse panel kendi gerekçesini gösterir) — `MainShellView` `KeyboardAccelerator`
+- [x] `TenantDatabaseUpdateView` ölü kod doğrulaması: **yok** (6.91-E'de silinmiş; yalnız kullanımdaki `TenantDatabaseUpdateDialog` var)
+- [x] Build 0 hata + test **685/685**
+- [ ] **Kalan:** H5 Kural 18 canlı (uygulamayı aç → `?` yok; F1 → asistan paneli; kilit senaryosu) + kanıt/onay
 
 ### H4 — Motor (Muse Spark) ⬜
 - [ ] Geniş derlem için retrieval ayarı (top-k / etiket ağırlığı)

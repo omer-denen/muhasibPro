@@ -23,6 +23,4 @@ public interface IDialogService
     Task<bool> ShowBackupDeleteGuardAsync(string backupFileName, int kalanSayi, int altSinir);
     /// <summary>Sistem.db geri-yükleme tek-kapı hüküm dialogu (hüküm + fark + gerekirse 6-haneli kod).</summary>
     Task<bool> ShowSistemRestoreVerifyAsync(SistemRestoreAnalizSonuc analiz);
-    /// <summary>Kural 13 ortak yardım dialogu (ViewModels içeriği DTO ile taşır; View chrome'u App'te).</summary>
-    Task ShowYardimAsync(string baslik, IReadOnlyList<YardimMaddesiDto> maddeler);
 }

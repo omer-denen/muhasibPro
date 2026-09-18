@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
     x:Class="MuhasibPro.Views.DenetimMasasi.Bolumler.YapayZekaAyarPaneli"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -34,9 +34,8 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon Glyph="{StaticResource IconInfo}" FontSize="14" VerticalAlignment="Center" />
-                    <TextBlock Text="Asistan yerel çalışır: veri makineden çıkmaz, kayıt yazmaz. Ayrıntı için ? düğmesine bas." TextWrapping="WrapWholeWords" VerticalAlignment="Center" />
+                    <TextBlock Text="Asistan yerel çalışır: veri makineden çıkmaz, kayıt yazmaz." TextWrapping="WrapWholeWords" VerticalAlignment="Center" />
                 </StackPanel>
-                <Button Grid.Column="1" Content="?" Command="{Binding YardimCommand}" Style="{StaticResource CircleIconButtonStyle}" Width="32" Height="32" FontSize="12" ToolTipService.ToolTip="Yardım" />
             </Grid>
         </Border>
 

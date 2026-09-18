@@ -1,4 +1,4 @@
-using MuhasibPro.Business.Contracts.SistemServices.Authentication;
+﻿using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
@@ -91,30 +91,6 @@ namespace MuhasibPro.ViewModels.ViewModels.Settings
         }
 
         public string YedekKlasoruYolu => "%LocalAppData%\\MuhasibPro\\Yedekler (DEBUG: Databases\\Yedekler)";
-
-        private System.Windows.Input.ICommand _yardimCommand;
-
-        /// <summary>Kural 13: sayfa yardımı (içerik ViewModel'de, dialog chrome'u App'te).</summary>
-        public System.Windows.Input.ICommand YardimCommand =>
-            _yardimCommand ??= new Infrastructure.Common.AsyncRelayCommand(YardimGoster);
-
-        internal const string YardimAnahtari = "DatabaseSettings";
-        internal const string YardimBasligi = "Veritabanı Ayarları — Yardım";
-
-        /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
-        internal static List<Business.DTOModel.SistemModel.YardimMaddesiDto> YardimMaddeleri() => new()
-        {
-            new() { Baslik = "Manuel yedek saklama limiti", Aciklama = "Her dönem için saklanacak en fazla manuel yedek sayısıdır (1-20). Limit aşılınca en eski yedek otomatik silinir (FIFO)." },
-            new() { Baslik = "Otomatik temizleme", Aciklama = "Kapalıysa limit aşılsa bile yedekler silinmez; temizliği elle yaparsınız." },
-            new() { Baslik = "Kapanışta otomatik yedek", Aciklama = "Uygulama kapatılırken açık dönemin ve Sistem.db'nin yedeği alınır. Uzun kapanış istemiyorsanız kapalı tutun." },
-            new() { Baslik = "Haftalık bütünlük hatırlatması", Aciklama = "PRAGMA integrity_check 7 günden eskiyse uyarı gösterilir; kontrolü erteleyebilirsiniz." },
-            new() { Baslik = "Yedek klasörü", Aciklama = "Tüm manuel yedekler bu klasörde saklanır. Dosyaları elle silmeyin; uygulama üzerinden yönetin." },
-        };
-
-        private async Task YardimGoster()
-        {
-            await DialogService.ShowYardimAsync(YardimBasligi, YardimMaddeleri());
-        }
 
         public async Task LoadAsync()
         {

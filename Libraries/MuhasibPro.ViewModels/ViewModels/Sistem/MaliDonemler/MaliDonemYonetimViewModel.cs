@@ -1,4 +1,4 @@
-using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
+﻿using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices;
 using MuhasibPro.Business.Contracts.DatabaseServices.TenantDatabaseServices.Common;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
@@ -585,31 +585,6 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
             SelectedDonem = pick;
         else
             NotifyPropertyChanged(nameof(SelectedDonem));
-    }
-
-    private System.Windows.Input.ICommand _yardimCommand;
-
-    /// <summary>Kural 13: sayfa yardımı (içerik ViewModel'de, dialog chrome'u App'te).</summary>
-    public System.Windows.Input.ICommand YardimCommand => _yardimCommand ??= new AsyncRelayCommand(YardimGoster);
-
-    internal const string YardimAnahtari = "MaliDonemYonetim";
-    internal const string YardimBasligi = "Mali Dönem Yönetimi — Yardım";
-
-    /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
-    internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
-    {
-        new() { Baslik = "Bu pencere ne işe yarar?", Aciklama = "Seçili firmanın mali dönemlerini yönetir: yedekleme, bakım, analiz, arşivleme ve silme. Soldan dönem seçin; sağdaki kartlar ve yedek listesi o döneme bağlanır." },
-        new() { Baslik = "Sol liste — dönem seçimi", Aciklama = "Açık dönemler listelenir; arşivli dönemler varsa ayrı bölümde görünür. Bir döneme tıklamak sağ içeriği tamamen o döneme geçirir." },
-        new() { Baslik = "Özet ve toplu işlemler", Aciklama = "'Şimdi Yedekle' seçili dönemin yedeğini alır. Toplu Yedekle/Test/Bakım butonları tüm dönemlere sırayla uygulanır; sonuç özet bildirimle gelir." },
-        new() { Baslik = "Yedekler", Aciklama = "Yedek listesi en yeniden eskiye sıralanır. 'Geri Yükle' tek kapıdan geçer: yedek önce analiz edilir (bozuk dosya / yeni sürüm / kayıp kayıt) ve kayıp varsa 6 haneli onay kodu istenir. Geri yükleme sonrası mevcut veri değişir." },
-        new() { Baslik = "Bakım ve analiz", Aciklama = "VACUUM/REINDEX/WAL seçili döneme uygulanır. 'Derin Analiz Çalıştır' tablo bazlı sağlık ve anomali raporu üretir." },
-        new() { Baslik = "Arşiv ve silme", Aciklama = "Arşivle dönemi kapatır (girişe kapanır, veri korunur; Arşivden Çıkar ile geri açılır). Silme kalıcıdır ve yazılı onay ister — yedek alınmadan yapılmaz." },
-        new() { Baslik = "Ayarlar", Aciklama = "Bu firmaya özel liste sayfası boyutu ve yedek saklama sayısı buradan değiştirilir." },
-    };
-
-    private async Task YardimGoster()
-    {
-        await DialogService.ShowYardimAsync(YardimBasligi, YardimMaddeleri());
     }
 
     public void Subscribe()
