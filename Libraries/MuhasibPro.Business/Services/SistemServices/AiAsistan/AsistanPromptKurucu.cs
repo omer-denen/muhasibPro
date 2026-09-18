@@ -9,6 +9,9 @@ public static class AsistanPromptKurucu
     /// <summary>Sohbet mesajı. Rol: "system" / "user" / "assistant" (model sözleşmesi).</summary>
     public record SohbetMesaji(string Rol, string Icerik);
 
+    /// <summary>Tek yardım maddesi gövdesinin prompt'a giren en fazla karakteri (bağlam bütçesi, H4).</summary>
+    public const int MaddeIcerikSinir = 400;
+
     /// <summary>Bilgi tabanı arama sonuçlarıyla kurar (uyarı-strip, bağlam, geçmiş kırpma aynı).</summary>
     public static IReadOnlyList<SohbetMesaji> AramaSonuclariylaKur(
         IReadOnlyList<YardimAramaSonucu>? bulunanlar,
@@ -21,8 +24,10 @@ public static class AsistanPromptKurucu
             throw new ArgumentException("Soru boş olamaz.", nameof(soru));
 
         var sistem = new StringBuilder();
-        sistem.Append("MuhasibPro uygulama yardım asistanısın. Yalnız aşağıdaki yardım maddelerine dayanarak cevap ver; ");
-        sistem.Append("maddelerde yoksa 'Bu konuda yardım maddesi yok.' de ve uydurma. Kısa ve işlem odaklı cevap ver, Türkçe yaz.");
+        sistem.Append("Sen MuhasibPro adlı ön muhasebe uygulamasının yardım asistanısın. ");
+        sistem.Append("Yalnız aşağıda verilen yardım maddelerini kullan; maddelerde olmayan hiçbir bilgiyi ekleme, tahmin etme, genel muhasebe tavsiyesi verme. ");
+        sistem.Append("Türkçe, kısa (en çok 3 cümle) ve işlem odaklı cevap ver; gerekiyorsa adımları '1) 2)' diye yaz. ");
+        sistem.Append("Cevabını dayandırdığın maddeyi köşeli parantezle belirt (ör. [1]). ");
 
         var baglam = new List<string>();
         if (!string.IsNullOrWhiteSpace(soru.SayfaAnahtari))
@@ -32,17 +37,25 @@ public static class AsistanPromptKurucu
         if (!string.IsNullOrWhiteSpace(soru.DonemAdi))
             baglam.Add($"Mali dönem: {soru.DonemAdi.Trim()}");
         if (baglam.Count > 0)
-            sistem.Append(' ').Append(string.Join(" ", baglam));
+            sistem.Append(string.Join(" ", baglam)).Append(' ');
 
         if (bulunanlar is { Count: > 0 })
         {
-            sistem.Append(" Yardım maddeleri:");
+            sistem.Append("Yardım maddeleri:");
             int sira = 1;
             foreach (var sonuc in bulunanlar)
             {
-                sistem.Append($" {sira}. [{sonuc.Sayfa}] {sonuc.Baslik} — {sonuc.Icerik}");
+                var icerik = (sonuc.Icerik ?? string.Empty).Trim();
+                if (icerik.Length > MaddeIcerikSinir)
+                    icerik = icerik[..MaddeIcerikSinir].TrimEnd() + "…";
+                sistem.Append($" [{sira}] ({sonuc.Sayfa}) {sonuc.Baslik}: {icerik}");
                 sira++;
             }
+            sistem.Append(" Sorunun cevabı bu maddelerde yoksa yalnız şu cümleyi yaz: 'Bu konuda yardım maddesi yok.'");
+        }
+        else
+        {
+            sistem.Append("Hiç uygun yardım maddesi bulunamadı. Yalnız şu cümleyi yaz: 'Bu konuda yardım maddesi yok.'");
         }
 
         var mesajlar = new List<SohbetMesaji> { new("system", sistem.ToString()) };

@@ -12,6 +12,12 @@ public sealed class YardimBilgiTabaniService : IYardimBilgiTabani
     private const string DbDosyaAdi = "AsistanBilgi.db";
     private const int GomuluTopluBoyut = 16;
 
+    /// <summary>H4 ilgi eşiği: lexical en yüksek skor bunun altındaysa kalem ilgisiz sayılır (başlık=3/etiket=2/gövde=1).</summary>
+    public const double LexicalEsik = 3;
+
+    /// <summary>H4 ilgi eşiği: kosinüs benzerliği bunun altındaki vektör adayları elenir (0-1).</summary>
+    public const double VektorEsik = 0.35;
+
     private readonly IYardimIcerikKaynagi _kaynak;
     private readonly IYardimVektorUretici _vektorUretici;
     private readonly IApplicationPaths _paths;
@@ -223,6 +229,12 @@ public sealed class YardimBilgiTabaniService : IYardimBilgiTabani
                 }
             }
 
+            // H4 ilgi eşiği: semantik indeks yoksa ve lexical skor zayıfsa yardım maddesi döndürme
+            // (aksi halde alakasız maddeler prompt'a girer ve küçük model uydurmaya itilir).
+            if ((vektorSira is null || vektorSira.Count == 0)
+                && (lexical.Count == 0 || lexical[0].Skor < LexicalEsik))
+                return [];
+
             IReadOnlyList<(string Anahtar, double Skor)> birlesik;
             string yontem;
             if (vektorSira is { Count: > 0 })
@@ -284,7 +296,9 @@ public sealed class YardimBilgiTabaniService : IYardimBilgiTabani
             var vektor = YardimVektorDeposu.VektorAc(blob, sorgu.Length);
             skorlar.Add((anahtar, Kosinus(sorgu, vektor)));
         }
-        return skorlar.OrderByDescending(e => e.Skor).Select(e => e.Anahtar).ToList();
+        // H4 ilgi eşiği: düşük benzerlikli vektör adayları elenir (gürültüyü azaltır).
+        return skorlar.Where(e => e.Skor >= VektorEsik)
+            .OrderByDescending(e => e.Skor).Select(e => e.Anahtar).ToList();
     }
 
     internal static double Kosinus(float[] a, float[] b)

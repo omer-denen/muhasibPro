@@ -13,6 +13,7 @@ Bu projede çalışmaya başlamadan ÖNCE şu dosyaları oku:
 - `docs/AYARLAR-PANEL-PLAN.md` — per-view ayar panelleri haritası (varsa; her view kendi ayarını yapar)
 - `docs/YARDIM-DB-PLAN.md` — Faz 6.93 AI Yardım Bilgi Tabanı (`AsistanBilgi.db` + hibrit RAG) **dondurulmuş sözleşmesi** + motor/UI dosya sahipliği
 - `docs/YARDIM-TEK-YUZEY-PLAN.md` — Faz 6.94 Tek Yardım Yüzeyi (AI asistanı) planı: view `?` yardım kaldırılır, tek kaynak `docs/yardim/*.md` → `AsistanBilgi.db` → asistan (F1 + statü çubuğu)
+- `docs/AI-ASISTAN-MODUL-PLAN.md` — Faz 6.97 AI Yardımcı Modülü Geliştirme (tek sahip: ana model): motor/prompt/retrieval + donanım kapısı + UI/DI; A1-A8
 - `docs/KULLANICI-YONETIMI-PLAN.md` — Faz 6.85 Kullanıcı Yönetimi + RBAC planı (kullanıcı → firma rolü → izin + modül/alan erişim kapısı) **ÖNCELİKLİ FAZ**; mevcut durum kod doğrulamalı + K1-K6
 - `docs/AKTIVASYON-MODUL-PLAN.md` — Faz 6.95 Aktivasyon & Modül Kilidi (KEY) + ilk giriş; tenant (mali dönem) DB'si etkin modül şemasıyla + ek modülde göç; A1-A6
 - `docs/DB-PROVIDER-PLAN.md` — Faz 6.96 Çoklu DB Provider (SQLite varsayılan + PostgreSQL/SQL Server); SQLite bağımlılık haritası + D1-D8

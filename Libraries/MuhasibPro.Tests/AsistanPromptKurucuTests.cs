@@ -20,9 +20,31 @@ public class AsistanPromptKurucuTests
 
         mesajlar[0].Rol.Should().Be("system");
         mesajlar[0].Icerik.Should().Contain("Arşivleme");
-        mesajlar[0].Icerik.Should().Contain("uydurma");
+        mesajlar[0].Icerik.Should().Contain("tahmin etme");
+        mesajlar[0].Icerik.Should().Contain("[1]");
         mesajlar[^1].Rol.Should().Be("user");
         mesajlar[^1].Icerik.Should().Be("nasıl arşivlerim?");
+    }
+
+    [Fact]
+    public void Madde_Yoksa_Yok_Cumlesi_Talimatlanir()
+    {
+        var mesajlar = AsistanPromptKurucu.AramaSonuclariylaKur([], new AsistanSoruDto { Soru = "soru" }, 0);
+
+        mesajlar[0].Icerik.Should().Contain("yardım maddesi bulunamadı");
+        mesajlar[0].Icerik.Should().Contain("Bu konuda yardım maddesi yok.");
+    }
+
+    [Fact]
+    public void Uzun_Madde_Icerigi_Kirpilir()
+    {
+        var uzun = new string('a', AsistanPromptKurucu.MaddeIcerikSinir + 200);
+        var sonuc = new YardimAramaSonucu { Anahtar = "K", Sayfa = "P", Baslik = "B", Icerik = uzun };
+
+        var mesajlar = AsistanPromptKurucu.AramaSonuclariylaKur(new[] { sonuc }, new AsistanSoruDto { Soru = "soru" }, 0);
+
+        mesajlar[0].Icerik.Should().Contain("…");
+        mesajlar[0].Icerik.Should().NotContain(uzun);
     }
 
     [Fact]

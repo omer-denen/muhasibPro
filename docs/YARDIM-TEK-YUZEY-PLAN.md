@@ -1,8 +1,8 @@
-# MuhasibPro — Faz 6.94: Tek Yardım Yüzeyi (AI Asistanı) Planı
+﻿# MuhasibPro — Faz 6.94: Tek Yardım Yüzeyi (AI Asistanı) Planı
 
 > **Faz 6.94** — Yardımı view'lere dağıtan `?` yardım dialogu/listeleri kaldırılır; **tek yardım kaynağı** `docs/yardim/*.md` olur ve **tek yardım yüzeyi** AI asistanıdır (F1 + durum çubuğu düğmesi).
 > **Durum:** 📋 Plan oluşturuldu (Oturum 283). **Kod başlamadı** — kullanıcının ek soruları sonrası başlanacak.
-> **Sahiplik (Oturum 291 — katman ayrımı):** **AI motor/veri/model + prompt/retrieval (H4) = yardımcı model**; **içerik (H2) + UI sadeleştirme (H1/H3) + doğrulama (H5) = ana model.**
+> **Sahiplik (Oturum 293 — tek sahip):** motor/veri/model + prompt/retrieval (H4) + içerik (H2) + UI sadeleştirme (H1/H3) + doğrulama (H5) = **ana model** (yardımcı-model dönemi kapandı).
 
 ## Kullanıcı kararları (Oturum 283 — kilitli)
 | Konu | Karar |
@@ -89,7 +89,7 @@ F1 / durum çubuğu "Asistan"  →  AsistanSohbetPaneli  →  cevap
 - [ ] `TenantDatabaseUpdateView` ölü kod doğrulaması (varsa sil).
 - **Kapı:** build 0/0 + test yeşil; Kural 8 onayları.
 
-### H4 — Motor (Muse Spark) — ⬜
+### H4 — Motor (Faz 6.97) — 🔨
 - [ ] Genişleyen derlem için retrieval ayarı (top-k / etiket ağırlığı).
 - [ ] Prompt sertleştirme: yalnız yardım maddelerine dayan, genel tavsiye verme, "yardım maddesi yok" fallback'i korunur.
 - [ ] Değerlendirme seti: örnek "soru → beklenen madde" (offline) + canlı ölçüm.

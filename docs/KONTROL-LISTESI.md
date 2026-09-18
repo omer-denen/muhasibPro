@@ -638,7 +638,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 
 ## Faz 6.92 — AI Yardım Asistanı (sürüm-paketli, yerel Foundry) (Oturum 276+277 — Adım 1-6 ✅🧪; UI revizyonu ✅ (277); **sahiplik (Oturum 291): katman ayrımı**; **Adım 7 ✅ (291)**)
 
-> **Sahiplik (Oturum 291 — katman ayrımı):** AI **motor/veri/model** (sohbet servisi, model yönetimi motoru, KB motoru, prompt/retrieval, ölçüm/hardware kapısı) = yardımcı model; **UI/VM/XAML/DI/içerik/doğrulama** = ana model.
+> **Sahiplik (Oturum 293 — tek sahip):** AI asistanın tamamı (motor/veri/model + UI/DI/içerik/doğrulama) **ana modelde**. Yardımcı-model ayrımı kapandı (`docs/Arsiv/YARDIMCI-MODEL-ARSIV.md`); işler **Faz 6.97** (`docs/AI-ASISTAN-MODUL-PLAN.md`).
 
 - [x] **1. Araştırma + REFERANSLAR ✅ (kod öncesi):** Foundry .NET SDK akışı (CreateAsync→EP→katalog→indir/yükle→streaming→unload) + NuGet TFM bulgusu (WinML=windows-TFM → impl App'te) + MEAI ret (öz sözleşme) + Xero JAX salt-okunur ilkesi + katalog (alias ayardan, varsayılan `qwen2.5-0.5b` geçici) + Phi Silica ret — `REFERANSLAR` 276 (6 satır) ✅
 - [x] **2. Sürüm katmanı ✅ (kod):** `SurumKatalogu.AiAsistanIcerirMi` (Domain ürün sabiti) + `ISurumOzellikService`/`SurumOzellikService` (Scoped, fail-closed) + `Permission.AiAsistan_Kullan=2300` + DI + `SurumOzellikServiceTests` (6 fact: 4 tür × geçerli/geçersiz + fail) ✅🧪
@@ -650,7 +650,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] **5c. Servis/contract ✅ (diğer model, Adım 8) + UI bağlantısı ✅ (Oturum 278):** model **listele + disk**, **sil** (+unload), **alias-değişimi uygulama** bitti. UI: Denetim "Model yönetimi" (`SettingsExpander` liste + disk özeti + `Yenile` + `Sil` onay dialogu) + "Model → Uygula" (`AliasDegisiminiUygulaAsync` + determinate ilerleme) + indirme yönergeleri; sohbet panelinde alias uyuşmazlığı yeniden-hazırlama. Canlı S1/S2/S3 + restore (`ot278*`), test **617/617** ✅🧪
 - [x] **7. Kapanış ✅ (kullanıcı onayı, Oturum 291):** build 0/0 + test 665/665 + Kural 18 canlı (model liste/sil/alias-uygula ✅; Standart=kilit + streaming) → **onay verildi.**
 - [x] **8. Model yönetimi servisi ✅🧪 (kod + Windows/canlış, 277 isteği):** contract +4 metot (`ModelleriGetir`/`DiskKullanimi`/`ModelSil`/`AliasDegisiminiUygula`) + 3 DTO + Foundry impl (SDK imzaları DLL metaverisinden doğrulandı) + `ModelKlasorOlcer` + 4 fact; UI 278 bağladı, canlı S1-S4 ✅, test 617/617 ✅
-- [ ] **9. Kalıcı model seçimi (6.92-D, Muse Spark — Oturum 288 ölçü):** varsayılan `qwen2.5-0.5b` Türkçe kalitesi zayıf (282 notu) → 8 GB RAM CPU-only hedef için aday ölçümü (`Temp/opencode/modeltest`, 6 soru; Q6 RAG-simülasyonlu):
+- [ ] **9. Kalıcı model seçimi (6.92-D — Oturum 288 ölçü; şu an Faz 6.97):** varsayılan `qwen2.5-0.5b` Türkçe kalitesi zayıf (282 notu) → 8 GB RAM CPU-only hedef için aday ölçümü (`Temp/opencode/modeltest`, 6 soru; Q6 RAG-simülasyonlu):
   - [x] `qwen3-1.7b-generic-cpu` ❌ ELENDİ (1355 MB · +1827 MB RAM · `<think>` sızıntısı + tekrar döngüsü + "kısa" dinlemiyor)
   - [x] `qwen2.5-1.5b-instruct-generic-cpu` ❌ ELENDİ (1842 MB · +1369 MB RAM · Türkçe halüsinasyon: "arşivlenmez", 1120×2=660)
   - [x] `phi-3.5-mini` ❌ İPTAL (Oturum 289, kullanıcı kısıtı: **max 1.5B parametre** — fan/CPU/RAM yükü; indirme başlatıldı, ölçüm koşulamadan durduruldu, 2648 MB önbellek silindi)
@@ -677,7 +677,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 ## Faz 6.93 — AI Yardım Bilgi Tabanı (AsistanBilgi.db + Hibrit RAG) (Oturum 278 plan ✅ → Oturum 279 motor ✅ → Oturum 280 Adım 2 + 6.91-G ✅)
 
 > **Plan/sözleşme:** `docs/YARDIM-DB-PLAN.md` (dondurulmuş kontrat + veri modeli + davranış + dosya sahipliği).
-> **Sahiplik (Oturum 291 — katman ayrımı):** **motor/veri/model = yardımcı model**; **UI/entegrasyon/doğrulama/içerik = ana model**.
+> **Sahiplik (Oturum 293 — tek sahip):** motor/veri/model + UI/entegrasyon/doğrulama/içerik = **ana model**.
 > **Kararlar:** yalnız AI kapsamı · içerik repoda `docs/yardim/*.md` · **hibrit** (lexical + Foundry embedding + RRF; FTS5 yok) · ayrı `%AppData%\MuhasibPro\AsistanBilgi.db`.
 
 - [x] **0. Araştırma + sözleşme ✅ (Oturum 278):** `REFERANSLAR` 278 (5 satır: Foundry RAG/embedding, BM25↔vektör/hibrit, FTS5 Türkçe sınırı, vstash RRF, on-device Türkçe karakterizasyon) + `docs/YARDIM-DB-PLAN.md` (frozen) ✅
@@ -696,7 +696,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 ## Faz 6.94 — Tek Yardım Yüzeyi (AI Asistanı) (Oturum 283 plan 📋 → kullanıcının ek soruları sonrası başlar)
 
 > **Plan:** `docs/YARDIM-TEK-YUZEY-PLAN.md` (kilitli kararlar + envanter + H1-H5 + riskler).
-> **Sahiplik (Oturum 291 — katman ayrımı):** **motor/prompt/retrieval (H4) = yardımcı model**; **içerik (H2) + UI/entegrasyon (H1/H3) + doğrulama (H5) = ana model.**
+> **Sahiplik (Oturum 293 — tek sahip):** motor/prompt/retrieval (H4) + içerik (H2) + UI/entegrasyon (H1/H3) + doğrulama (H5) = **ana model**.
 > **Karar özeti:** yardım kitabı ❌ iptal · view `?` yardım listeleri/dialogu ❌ kaldırılır · tek kaynak `docs/yardim/*.md` → `AsistanBilgi.db` → asistan · giriş **F1 + statü çubuğu "Asistan"** · AI erişilemezse yalnız kilit gerekçesi · eski altyapı silinir (Kural 4) · kapsam tüm yapı.
 
 ### H1 — Karar / sözleşme (ben) 🔨 (Oturum 293 — onay bekliyor)
@@ -725,11 +725,14 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] Build 0 hata + test **685/685**
 - [ ] **Kalan:** H5 Kural 18 canlı (uygulamayı aç → `?` yok; F1 → asistan paneli; kilit senaryosu) + kanıt/onay
 
-### H4 — Motor (Muse Spark) ⬜
-- [ ] Geniş derlem için retrieval ayarı (top-k / etiket ağırlığı)
-- [ ] Prompt sertleştirme (yalnız maddelere dayan; genel tavsiye verme; "yardım maddesi yok" fallback)
-- [ ] Değerlendirme seti: "soru → beklenen madde" (offline) + canlı ölçüm
+### H4 — Motor (Faz 6.97) 🔨
+- [x] **A1 prompt sertleştirme (Oturum 293):** sadakat ("yalnız maddeleri kullan; ekleme/tahmin yok"), ≤3 cümle, `[n]` atıf, yoksa "Bu konuda yardım maddesi yok."; madde gövdesi 400 karaktere kırpılır
+- [x] **A1 ilgi eşiği:** lexical `<3` + vektör kosinüs `<0.35` elenir; lexical-only + zayıf → boş döner (alakasız madde enjekte edilmez)
+- [x] Testler: `AsistanPromptKurucuTests` +2 (yok-cümlesi, kırpma) → **687/687**
+- [ ] **A2** RRF ağırlık/K/top-k ayarı + offline değerlendirme seti ("soru → beklenen madde", ~15-20)
+- [ ] **A3** D2/D3 DI + panel uyarı bandı (D4) · **A4** Denetim "Bu bilgisayar" (D5) · **A5** S3 · **A6** S4 regresyon kapısı · **A7** model araştırması (gerekirse)
 - [ ] Sözleşme değişikliği gerekirse Kural 15 + onay + `YARDIM-DB-PLAN` revizyonu
+- **Plan:** `docs/AI-ASISTAN-MODUL-PLAN.md` (Faz 6.97)
 
 ### H5 — Doğrulama + doküman (ben) 🔨 (Oturum 293 — canlı tur yapıldı)
 - [x] Build 0 hata + test **685/685** (silinen yardım altyapısı testlerde referanslı değildi)
@@ -741,6 +744,20 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 **Kapı:** H1 onayı → H2 içerik → H3 Kural 8 onayları + build/test → H4 motor → H5 canlı + onay.
 
 ---
+
+## Faz 6.97 — AI Yardımcı Modülü Geliştirme (Oturum 293 🔨 — tek sahip)
+
+> **Plan:** `docs/AI-ASISTAN-MODUL-PLAN.md`. > **Sahiplik (Oturum 293):** tüm AI asistan işi **ana modelde** (yardımcı-model dönemi kapandı; `docs/Arsiv/YARDIMCI-MODEL-ARSIV.md`).
+
+- [x] **A1** prompt sertleştirme + ilgi eşiği (lexical<3 / vektör<0.35) + madde kırpma — +2 test → **687/687**
+- [ ] **A2** RRF ağırlık/K/top-k + offline değerlendirme seti (S4)
+- [ ] **A3** D2/D3 DI + D4 panel uyarı bandı + indirme öncesi onay
+- [ ] **A4** D5 Denetim "Bu bilgisayar" kartı
+- [ ] **A5** S3 (öğretme=RAG, sadakat) · **A6** S4 regresyon kapısı · **A7** model araştırması (gerekirse)
+- [ ] **A8** 6.94 kalan canlı (kilit senaryosu) + doğrulama
+
+**Kapı:** Kural 8 (View/DI) + build 0/0 + test + Kural 18 canlı + onay.
+
 
 ## Faz 6.95 — Aktivasyon & Modül Kilidi (KEY) + İlk Giriş (Oturum 284 plan 📋)
 
