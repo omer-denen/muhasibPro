@@ -4,6 +4,7 @@ using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
 using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
+using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.Services.SistemServices.AppServices;
@@ -16,6 +17,7 @@ using MuhasibPro.Domain.Entities.SistemEntity;
 using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Models;
 using MuhasibPro.ViewModels.ViewModels.Shell;
+using MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler;
 
 namespace MuhasibPro.Tests;
 
@@ -31,6 +33,7 @@ public class RbacK4Tests
         var ortak = new Mock<ICommonServices>();
         ortak.SetupGet(o => o.ContextService).Returns(baglam.Object);
         ortak.SetupGet(o => o.MessageService).Returns(Mock.Of<IMessageService>());
+        ortak.SetupGet(o => o.NotificationService).Returns(Mock.Of<INotificationService>());
         return ortak;
     }
 
@@ -181,6 +184,47 @@ public class RbacK4Tests
         sonuc.Success.Should().BeFalse();
         sonuc.Message.Should().Contain("yetkiniz yok");
         repo.Verify(r => r.GetByFirmaIdAsync(It.IsAny<long>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task MaliDonemSilme_Yetkisiz_Reddedilir_RepoDokunulmaz()
+    {
+        var repo = new Mock<IMaliDonemRepository>();
+        var auth = new Mock<IAuthenticationService>();
+        auth.SetupGet(a => a.GetCurrentUserId).Returns(1);
+        var yetki = new Mock<IPermissionService>();
+        yetki.Setup(p => p.KullaniciYetkisiVarMiAsync(Permission.MaliDonem_Yonet)).ReturnsAsync(false);
+
+        var svc = new MaliDonemService(
+            repo.Object,
+            new Mock<ILogService>().Object,
+            new Mock<IUnitOfWork<SistemDbContext>>().Object,
+            auth.Object,
+            new Mock<IFirmaService>().Object,
+            new Mock<IBitmapToolsService>().Object,
+            null,
+            yetki.Object);
+
+        var sonuc = await svc.DeleteMaliDonemAsync(42);
+
+        sonuc.Success.Should().BeFalse();
+        sonuc.Message.Should().Contain("yetkiniz yok");
+        repo.Verify(r => r.GetByMaliDonemIdAsync(It.IsAny<long>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Arsiv_DonemKapatma_Yetkisiz_Engellenir()
+    {
+        var donem = new Mock<IMaliDonemService>();
+        var yetki = new Mock<IPermissionService>();
+        yetki.Setup(p => p.KullaniciYetkisiVarMiAsync(Permission.MaliDonem_Yonet)).ReturnsAsync(false);
+
+        var vm = new ArsivDonemlerViewModel(OrtakServisler().Object, donem.Object, null, null, yetki.Object);
+
+        var sonuc = await vm.ArsivleAsync(new MaliDonemModel { Id = 5, MaliYil = 2026 });
+
+        sonuc.Should().BeFalse();
+        donem.Verify(d => d.UpdateMaliDonemAsync(It.IsAny<MaliDonemModel>()), Times.Never);
     }
 
     [Fact]

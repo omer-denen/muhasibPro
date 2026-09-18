@@ -1,4 +1,5 @@
-﻿using MuhasibPro.Business.Contracts.UIServices.CommonServices;
+﻿using MuhasibPro.Business.Contracts.SistemServices.AppServices;
+using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Domain.Enum;
@@ -17,9 +18,12 @@ namespace MuhasibPro.ViewModels.ViewModels.Loggings.SistemLogs
 
     public class SistemLogDetailsViewModel : GenericDetailsViewModel<SistemLogModel>
     {
-        public SistemLogDetailsViewModel(ICommonServices commonServices) : base(commonServices)
+        public SistemLogDetailsViewModel(ICommonServices commonServices, IPermissionService permissionService = null) : base(commonServices)
         {
+            _yetki = permissionService;
         }
+
+        private readonly IPermissionService _yetki;
         public override string Title => "Sistem Günlüğü";
 
         private string Header => "Sistem Günlüğü";
@@ -73,6 +77,11 @@ namespace MuhasibPro.ViewModels.ViewModels.Loggings.SistemLogs
 
         protected override async Task<bool> DeleteItemAsync(SistemLogModel model)
         {
+            if (_yetki != null && !await _yetki.KullaniciYetkisiVarMiAsync(Permission.Log_Sil))
+            {
+                StatusError("🔒 Günlük silme yetkiniz yok (Log Silme izni gerekir).");
+                return false;
+            }
             try
             {               
                 await LogService.SistemLogService.DeleteSistemLogAsync(model);                

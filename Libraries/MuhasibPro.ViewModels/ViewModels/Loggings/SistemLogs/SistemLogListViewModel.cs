@@ -1,4 +1,5 @@
-﻿using MuhasibPro.Business.Contracts.SistemServices.LogServices;
+﻿using MuhasibPro.Business.Contracts.SistemServices.AppServices;
+using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
 using MuhasibPro.Business.DTOModel.SistemModel;
@@ -32,8 +33,11 @@ namespace MuhasibPro.ViewModels.ViewModels.Loggings.SistemLogs
 
     public class SistemLogListViewModel : GenericListViewModel<SistemLogModel>
     {
-        public SistemLogListViewModel(ICommonServices commonServices) : base(commonServices)
+        private readonly IPermissionService _yetki;
+
+        public SistemLogListViewModel(ICommonServices commonServices, IPermissionService permissionService = null) : base(commonServices)
         {
+            _yetki = permissionService;
         }
 
         private string Header => "Günlük";
@@ -201,6 +205,11 @@ namespace MuhasibPro.ViewModels.ViewModels.Loggings.SistemLogs
 
         private async Task DeleteItemsAsync(IEnumerable<SistemLogModel> models)
         {
+            if (_yetki != null && !await _yetki.KullaniciYetkisiVarMiAsync(Permission.Log_Sil))
+            {
+                StatusError("🔒 Günlük silme yetkiniz yok (Log Silme izni gerekir).");
+                return;
+            }
             var itemList = models.ToList();
             foreach(var model in itemList)
             {
@@ -210,6 +219,11 @@ namespace MuhasibPro.ViewModels.ViewModels.Loggings.SistemLogs
 
         private async Task DeleteRangesAsync(IEnumerable<IndexRange> ranges)
         {
+            if (_yetki != null && !await _yetki.KullaniciYetkisiVarMiAsync(Permission.Log_Sil))
+            {
+                StatusError("🔒 Günlük silme yetkiniz yok (Log Silme izni gerekir).");
+                return;
+            }
             DataRequest<SistemLog> request = BuildDataRequest();
             foreach (var range in ranges)
             {

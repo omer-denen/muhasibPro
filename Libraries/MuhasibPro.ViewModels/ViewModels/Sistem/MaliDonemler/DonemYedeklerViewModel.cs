@@ -7,6 +7,7 @@ using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.Contracts.UIServices;
 using MuhasibPro.Business.ResultModels.TenantResultModels;
 using MuhasibPro.Business.Services.CommonServices;
+using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Models;
 using MuhasibPro.Domain.Models.DatabaseResultModel;
 using MuhasibPro.ViewModels.Infrastructure.Common;
@@ -18,6 +19,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Sistem.MaliDonemler;
 public class DonemYedeklerViewModel : ViewModelBase
 {
     private readonly IEventBus _eventBus;
+    private readonly IPermissionService _yetki;
 
     public DonemYedeklerViewModel(
         ICommonServices commonServices,
@@ -26,7 +28,8 @@ public class DonemYedeklerViewModel : ViewModelBase
         IMaliDonemService maliDonemService,
         ILocalSettingsService localSettingsService = null,
         IEventBus eventBus = null,
-        ITenantSettingsProvider tenantAyarlari = null) : base(commonServices)
+        ITenantSettingsProvider tenantAyarlari = null,
+        IPermissionService permissionService = null) : base(commonServices)
     {
         OperationService = operationService;
         BackupService = backupService;
@@ -34,6 +37,7 @@ public class DonemYedeklerViewModel : ViewModelBase
         LocalSettingsService = localSettingsService;
         TenantAyarlari = tenantAyarlari;
         _eventBus = eventBus;
+        _yetki = permissionService;
     }
 
     public ITenantSQLiteDatabaseOperationService OperationService { get; }
@@ -239,6 +243,12 @@ public class DonemYedeklerViewModel : ViewModelBase
         var yedek = SelectedYedek;
         if (yedek == null || string.IsNullOrWhiteSpace(_databaseName))
             return;
+        if (_yetki != null && !await _yetki.KullaniciYetkisiVarMiAsync(Permission.Veritabani_GeriYukle))
+        {
+            NotificationService.ShowTagged("Yetki Yok", "Yedekten geri yükleme yetkiniz yok (Veritabanı Geri Yükleme izni gerekir).",
+                NotificationType.Warning, "GeriYukle", NotificationGroups.Yedek);
+            return;
+        }
         try
         {
             bool onay = await DialogService.ShowConfirmationAsync(
@@ -282,6 +292,12 @@ public class DonemYedeklerViewModel : ViewModelBase
     public async Task YedekSilAsync()    {        var yedek = SelectedYedek;
         if (yedek == null)
             return;
+        if (_yetki != null && !await _yetki.KullaniciYetkisiVarMiAsync(Permission.Veritabani_Sil))
+        {
+            NotificationService.ShowTagged("Yetki Yok", "Yedek silme yetkiniz yok (Veritabanı Silme izni gerekir).",
+                NotificationType.Warning, "YedekSil", NotificationGroups.Yedek);
+            return;
+        }
         try
         {
             // Saklama alt-sınır koruması: silme sonrası sayı Denetim Masası'ndaki

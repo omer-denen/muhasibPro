@@ -7,6 +7,7 @@ using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.Installation;
 using MuhasibPro.Business.Contracts.UIServices;
+using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Models;
 using MuhasibPro.Business.ResultModels.TenantResultModels;
 using MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService.Common;
@@ -37,6 +38,7 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
         private readonly IAppDbContextFactory _appDbContextFactory;
         private readonly ILocalSettingsService _localSettings;
         private readonly ITenantSettingsProvider _settingsProvider;
+        private readonly IPermissionService _permissionService;
 
         public TenantSQLiteDatabaseService(
             ILogService logService,
@@ -54,7 +56,8 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
             IMakineKimligiProvider makineProvider,
             IKurulumKayitService kurulumService,
             IAppDbContextFactory appDbContextFactory,
-            ITenantSettingsProvider settingsProvider = null)
+            ITenantSettingsProvider settingsProvider = null,
+            IPermissionService permissionService = null)
         {
             _logService = logService;
             _maliDonemService = maliDonemService;
@@ -73,6 +76,7 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
             _appDbContextFactory = appDbContextFactory;
             _localSettings = localSettings;
             _settingsProvider = settingsProvider;
+            _permissionService = permissionService;
         }
 
         public async Task<ApiDataResponse<TenantCreationResult>> CreateNewTenantDatabaseAsync(
@@ -450,6 +454,13 @@ namespace MuhasibPro.Business.Services.DatabaseServices.TenantDatabaseService
             };
             result.StartStep(TenantDeletionStep.IslemBaslatildi);
             var saga = new TenantOperationSaga(_logger);
+            if (_permissionService != null && !await _permissionService.KullaniciYetkisiVarMiAsync(Permission.MaliDonem_Yonet))
+            {
+                var yetkiMesaji = "🔒 Mali Dönem silme yetkiniz yok (Mali Dönem Yönetimi izni gerekir).";
+                result.CompleteStep(DeletionStepStatus.Hata, yetkiMesaji);
+                result.MarkAsError(yetkiMesaji);
+                return ApiDataExtensions.ErrorResponse(result, yetkiMesaji);
+            }
             if (request.MaliDonemId <= 0)
             {
                 result.CompleteStep(DeletionStepStatus.Hata, maliDonemIDNull);

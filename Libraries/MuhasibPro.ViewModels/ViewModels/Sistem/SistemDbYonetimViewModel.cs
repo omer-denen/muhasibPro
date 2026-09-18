@@ -42,13 +42,14 @@ public class SistemDbYonetimViewModel : ViewModelBase
         ISistemDiagnosticsService diagnosticsService,
         IKurulumKayitService kurulumService,
         IMakineKimligiProvider makineProvider,
-        ISistemRestoreAnalizService restoreAnalizService) : base(commonServices)
+        ISistemRestoreAnalizService restoreAnalizService,
+        IPermissionService permissionService = null) : base(commonServices)
     {
         _status = new SistemDatabaseStatusViewModel(appPaths, sistemDatabaseService, diagnosticsService, commonServices);
         _creation = new SistemDatabaseCreationViewModel(sistemDatabaseService, commonServices);
         _diagnostics = new SistemDiagnosticsViewModel(appPaths, sistemDatabaseService, diagnosticsService, commonServices);
         _kurulum = new KurulumKayitViewModel(commonServices, kurulumService, makineProvider);
-        _yedek = new SistemYedekViewModel(commonServices, operasyonService, ayarSaglayici, restoreAnalizService);
+        _yedek = new SistemYedekViewModel(commonServices, operasyonService, ayarSaglayici, restoreAnalizService, permissionService);
         _guncelleme = new SistemGuncellemeViewModel(commonServices, sistemDatabaseService);
         _yedek.LogEkle = AddLog;
         _guncelleme.LogEkle = AddLog;

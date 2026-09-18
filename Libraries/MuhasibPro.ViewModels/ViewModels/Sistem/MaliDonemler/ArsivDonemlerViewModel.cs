@@ -16,16 +16,20 @@ public class ArsivDonemlerViewModel : ViewModelBase
         ICommonServices commonServices,
         IMaliDonemService maliDonemService,
         ILocalSettingsService localSettingsService = null,
-        IEntityRegistrySettingsProvider entityAyarlari = null) : base(commonServices)
+        IEntityRegistrySettingsProvider entityAyarlari = null,
+        IPermissionService permissionService = null) : base(commonServices)
     {
         MaliDonemService = maliDonemService;
         LocalSettingsService = localSettingsService;
         EntityAyarlari = entityAyarlari;
+        _yetki = permissionService;
     }
 
     public IMaliDonemService MaliDonemService { get; }
     public ILocalSettingsService LocalSettingsService { get; }
     public IEntityRegistrySettingsProvider EntityAyarlari { get; }
+
+    private readonly IPermissionService _yetki;
 
     /// <summary>Sayfa VM'inin açtığı firma (sayfa boyutu firma anahtarından okunur).</summary>
     public long FirmaId { get; set; }
@@ -153,6 +157,8 @@ public class ArsivDonemlerViewModel : ViewModelBase
     {
         if (model == null)
             return false;
+        if (!await YetkiliMiAsync("kapatma"))
+            return false;
         bool onay = await DialogService.ShowConfirmationAsync(
             "Mali Dönemi Kapat",
             $"{model.MaliYil} dönemi kapatılacak. Giriş yapılamaz, kayıtlar korunur; daha sonra geri açılabilir.\n\nDevam edilsin mi?",
@@ -166,6 +172,8 @@ public class ArsivDonemlerViewModel : ViewModelBase
     {
         if (model == null)
             return false;
+        if (!await YetkiliMiAsync("yeniden açma"))
+            return false;
         bool onay = await DialogService.ShowConfirmationAsync(
             "Arşivden Çıkar",
             $"{model.MaliYil} dönemi yeniden açılacak.\n\nDevam edilsin mi?",
@@ -173,6 +181,16 @@ public class ArsivDonemlerViewModel : ViewModelBase
         if (!onay)
             return false;
         return await DurumGuncelleAsync(model, DonemDurum.Acik, false, "yeniden açıldı");
+    }
+
+    /// <summary>K4: dönem kapatma/açma için Mali Dönem Yönetimi izni gerekir (gerekçeli uyarı).</summary>
+    private async Task<bool> YetkiliMiAsync(string eylem)
+    {
+        if (_yetki == null || await _yetki.KullaniciYetkisiVarMiAsync(Permission.MaliDonem_Yonet))
+            return true;
+        NotificationService.ShowTagged("Yetki Yok", $"Mali dönemi {eylem} yetkiniz yok (Mali Dönem Yönetimi izni gerekir).",
+            NotificationType.Warning, "ArsivDurum", NotificationGroups.DonemIslemleri);
+        return false;
     }
 
     private async Task<bool> DurumGuncelleAsync(MaliDonemModel model, DonemDurum durum, bool arsivlendiMi, string eylem)

@@ -11,6 +11,7 @@ using MuhasibPro.Data.Contracts.Repository.SistemRepos;
 using MuhasibPro.Data.DataContext;
 using MuhasibPro.Domain.Common;
 using MuhasibPro.Domain.Entities.SistemEntity;
+using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Models;
 using MuhasibPro.Domain.Utilities.Responses;
 
@@ -25,6 +26,7 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
         private readonly IFirmaService _firmaService;
         private readonly IBitmapToolsService _bitmapToolsService;
         private readonly IEntityRegistrySettingsProvider _entityAyarlar;
+        private readonly IPermissionService _permissionService;
 
         public MaliDonemService(
             IMaliDonemRepository maliDonemRepository,
@@ -33,7 +35,8 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
             IAuthenticationService authenticationService,
             IFirmaService firmaService,
             IBitmapToolsService bitmapToolsService,
-            IEntityRegistrySettingsProvider entityAyarlar = null)
+            IEntityRegistrySettingsProvider entityAyarlar = null,
+            IPermissionService permissionService = null)
         {
             _maliDonemRepository = maliDonemRepository;
             _logService = logService;
@@ -42,6 +45,7 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
             _firmaService = firmaService;
             _bitmapToolsService = bitmapToolsService;
             _entityAyarlar = entityAyarlar;
+            _permissionService = permissionService;
         }
 
         public async Task<ApiDataResponse<MaliDonemModel>> GetByMaliDonemIdAsync(long malidonemId)
@@ -293,6 +297,8 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
         {
             if(_authenticationService.GetCurrentUserId <= 0)
                 return new ErrorApiDataResponse<int>(data: 0, message: "⚠️ İşlem yapan kullanıcı bilgisi alınamadı!");
+            if(_permissionService != null && !await _permissionService.KullaniciYetkisiVarMiAsync(Permission.MaliDonem_Yonet))
+                return new ErrorApiDataResponse<int>(data: 0, message: "🔒 Mali Dönem silme yetkiniz yok (Mali Dönem Yönetimi izni gerekir).");
             if(maliDonemId <= 0)
                 return new ErrorApiDataResponse<int>(data: 0, message: "⚠️ Silinecek mali dönem bilgisi boş olamaz!");
             try

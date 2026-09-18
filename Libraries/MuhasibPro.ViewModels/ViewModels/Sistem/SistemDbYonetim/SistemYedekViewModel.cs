@@ -1,5 +1,7 @@
 using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
+using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
+using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Enum.DatabaseEnum;
 using MuhasibPro.Domain.Models.DatabaseResultModel;
 using MuhasibPro.ViewModels.Infrastructure.Common;
@@ -15,6 +17,7 @@ public class SistemYedekViewModel : ViewModelBase
     private readonly ISistemDatabaseOperationService _operasyon;
     private readonly IDatabaseSettingsProvider _ayarlar;
     private readonly ISistemRestoreAnalizService _analiz;
+    private readonly IPermissionService _yetki;
 
     /// <summary>Sayfa işlem günlüğüne yazar (orkestratör bağlar; dialogda boş kalır).</summary>
     public Action<string>? LogEkle;
@@ -23,11 +26,13 @@ public class SistemYedekViewModel : ViewModelBase
         ICommonServices commonServices,
         ISistemDatabaseOperationService operasyon,
         IDatabaseSettingsProvider ayarlar,
-        ISistemRestoreAnalizService analiz) : base(commonServices)
+        ISistemRestoreAnalizService analiz,
+        IPermissionService permissionService = null) : base(commonServices)
     {
         _operasyon = operasyon;
         _ayarlar = ayarlar;
         _analiz = analiz;
+        _yetki = permissionService;
         Yedekler = new ObservableCollection<DatabaseBackupResult>();
         YedekAlCommand = new RelayCommand(async () => await YedekAlAsync());
         YenileCommand = new RelayCommand(async () => await YukleAsync());
@@ -157,6 +162,13 @@ public class SistemYedekViewModel : ViewModelBase
     public async Task GeriYukleAsync(DatabaseBackupResult? yedek)
     {
         if (IsBusy || yedek == null) return;
+        if (_yetki != null && !await _yetki.KullaniciYetkisiVarMiAsync(Permission.Veritabani_GeriYukle))
+        {
+            DurumMetni = "🔒 Geri yükleme yetkiniz yok (Veritabanı Geri Yükleme izni gerekir).";
+            IsHata = true;
+            LogEkle?.Invoke($"[YETKİ] {DurumMetni}");
+            return;
+        }
         IsBusy = true;
         IsHata = false;
         DurumMetni = "Yedek analiz ediliyor...";

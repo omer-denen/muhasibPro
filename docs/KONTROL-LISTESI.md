@@ -391,8 +391,9 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] **`MainShell` menüsü:** yalnız **gerçek** hedefler (Kural 21; `NavSidebarControl` statik sahteleri kaldırıldı) + yetkisiz öğe **gizli** (`MainMenuViewModel.GorunurNavigationItems`; standart hibrit: menüde gizle, butonda pasif+gerekçe) + 2 test · canlı `ot297_*`
 - [x] **Denetim Masası bölümleri:** yetkisiz bölüm gizli (`DenetimMasasiViewModel.MenuGorunurMu` izin kapıları) + test
 - [x] **FirmaShell "Firma Yönetimi"** butonu: `Firma_Yonet` → pasif + gerekçe tooltip
-- [ ] Sayfa/buton guard'ları (yıkıcı işlemler) — **kısmi (Oturum 291):** servis katmanında **Firma sil** (`FirmaSilmeService` → `Firma_Yonet`) + **Kullanıcı sil** (`KullaniciService` → `Kullanici_Yonet`) + test. **Kalan:** DB geri-yükle/arşiv/kalıcı-sil, log sil, mali dönem sil.
-- [ ] `IModuleLicenseService` modül lisans kapısı; `ModuleLicenseViewModel` hardcoded `firmaId` düzeltmesi (gerçek modül gelince)
+- [x] Sayfa/buton guard'ları (yıkıcı işlemler) — **servis katmanı:** Firma sil (`FirmaSilmeService`→`Firma_Yonet`) · Kullanıcı sil (`KullaniciService`→`Kullanici_Yonet`) · **Mali dönem sil** (`MaliDonemService.DeleteMaliDonemAsync` + `TenantSQLiteDatabaseService.DeleteTenantDatabaseAsync`→`MaliDonem_Yonet`, Oturum 293) — **VM katmanı (Oturum 293):** yedekten **geri yükle** (`DonemYedeklerViewModel`, `SistemYedekViewModel`→`Veritabani_GeriYukle`) · **arşiv/kapat** (`ArsivDonemlerViewModel`→`MaliDonem_Yonet`) · **yedek sil** (`DonemYedeklerViewModel`→`Veritabani_Sil`) · **log sil** (`SistemLogListViewModel`/`SistemLogDetailsViewModel`→`Log_Sil`). Gerekçe bildirimle gösterilir. +2 test · **685/685**
+  - [ ] **Kalan (görsel):** yıkıcı butonların **pasif** (IsEnabled) durumu + tooltip gerekçesi (şu an aksiyon engellenir + gerekçe bildirimi; buton görsel olarak pasif değil)
+- [ ] `IModuleLicenseService` modül lisans kapısı; `ModuleLicenseViewModel` hardcoded `firmaId` düzeltmesi — **6.95'e devir** (`ModuleLicenseViewModel`/`View` nav'a kayıtlı değil → Kural 21 gereği görünmez; modül kilidi 6.95 Aktivasyon fazı).
 
 ### K5 — Hesabım + UserInfoControl menüsü ⬜
 - [ ] "Hesabım": profil (ad/iletişim/avatar) + şifre değiştir (mevcut şifre doğrulamalı)

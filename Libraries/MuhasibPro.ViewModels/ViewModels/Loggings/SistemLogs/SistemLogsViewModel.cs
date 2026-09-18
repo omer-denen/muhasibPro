@@ -1,4 +1,5 @@
-﻿using MuhasibPro.Business.Contracts.UIServices.CommonServices;
+﻿using MuhasibPro.Business.Contracts.SistemServices.AppServices;
+using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices.Events;
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Business.Services.SistemServices.LogServices;
@@ -8,10 +9,10 @@ namespace MuhasibPro.ViewModels.ViewModels.Loggings.SistemLogs
 {
     public class SistemLogsViewModel : ViewModelBase
     {
-        public SistemLogsViewModel(ICommonServices commonServices) : base(commonServices)
+        public SistemLogsViewModel(ICommonServices commonServices, IPermissionService permissionService = null) : base(commonServices)
         {
-            SistemLogList = new SistemLogListViewModel(commonServices);
-            SistemLogDetails = new SistemLogDetailsViewModel(commonServices);
+            SistemLogList = new SistemLogListViewModel(commonServices, permissionService);
+            SistemLogDetails = new SistemLogDetailsViewModel(commonServices, permissionService);
         }
         public SistemLogListViewModel SistemLogList { get; }
         public SistemLogDetailsViewModel SistemLogDetails { get; }

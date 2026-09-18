@@ -38,14 +38,15 @@ public class MaliDonemYonetimViewModel : ViewModelBase, IMaliDonemListHost
         IEntityRegistrySettingsProvider entityAyarlari = null,
         IAuthenticationService auth = null,
         IFirmaService firmaService = null,
-        IKullaniciService kullaniciService = null) : base(commonServices)
+        IKullaniciService kullaniciService = null,
+        IPermissionService permissionService = null) : base(commonServices)
     {
         LocalSettingsService = localSettingsService;
         TenantAyarlari = tenantAyarlari;
         EntityAyarlari = entityAyarlari;
         MaliDonemList = new MaliDonemListViewModel(commonServices, maliDonemService, tenantDatabaseService);
-        YedeklerVM = new DonemYedeklerViewModel(commonServices, operationService, backupService, maliDonemService, localSettingsService, eventBus, tenantAyarlari);
-        ArsivVM = new ArsivDonemlerViewModel(commonServices, maliDonemService, localSettingsService, entityAyarlari);
+        YedeklerVM = new DonemYedeklerViewModel(commonServices, operationService, backupService, maliDonemService, localSettingsService, eventBus, tenantAyarlari, permissionService);
+        ArsivVM = new ArsivDonemlerViewModel(commonServices, maliDonemService, localSettingsService, entityAyarlari, permissionService);
         BilinmeyenVM = new BilinmeyenYedekViewModel(commonServices, operationService, backupService, maliDonemService, localSettingsService, eventBus, tenantAyarlari);
         GenelBakisVM = new DonemGenelBakisViewModel(commonServices, MaliDonemList, operationService);
         AyarlarVM = new YonetimAyarlarViewModel(commonServices, localSettingsService, tenantAyarlari, entityAyarlari, auth, eventBus, firmaService, kullaniciService);
