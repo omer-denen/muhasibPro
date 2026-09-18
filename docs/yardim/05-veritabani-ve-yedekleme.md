@@ -1,25 +1,33 @@
 # Veritabanı ve Yedekleme Ayarları
 
-## Manuel yedek saklama limiti nedir?
-Her dönem için saklanacak en fazla manuel yedek sayısıdır (1-20). Limit aşılınca en eski yedek otomatik silinir (FIFO).
-Etiket: yedek limiti, saklama, fifo
+## Bu ekran ne yapar?
+"Veritabanı Ayarları" yedek saklama ve otomatik temizleme davranışını yönetir. Kaydet butonu yoktur; yaptığınız değişiklikler otomatik kaydedilir ve anında etkili olur.
+Etiket: veritabanı ayarları, yedek saklama, otomatik kayıt
 
-## Otomatik temizleme ne yapar?
-Kapalıysa, limit aşılsa bile yedekler silinmez; temizliği elle yaparsınız. Açıkken limit aşımında en eski yedekler otomatik kaldırılır.
-Etiket: otomatik temizleme, yedek silme
+## Manuel yedek saklama limiti nedir?
+Her dönem için saklanacak en fazla manuel yedek sayısıdır (1-20, varsayılan 5). Limit aşılınca en eski yedek otomatik silinir (eskiden yeniye FIFO). Örnek: 5 seçiliyse 6. yedek alındığında 1. (en eski) yedek silinir.
+Etiket: yedek limiti, saklama, fifo, varsayılan 5
+
+## Otomatik silme anahtarı ne yapar?
+"Limit aşılınca en eski yedek otomatik silinsin" açıkken limit aşımında temizlik otomatik yapılır. Kapalıysa limit aşılsa bile yedekler silinmez; temizliği elle yaparsınız.
+Etiket: otomatik silme, yedek temizleme, limit
 
 ## Kapanışta otomatik yedek
-Uygulama kapatılırken açık dönemin ve Sistem.db'nin yedeği alınır. Uzun kapanış süresi istemiyorsanız bu seçeneği kapalı tutun.
-Etiket: kapanış yedeği, otomatik yedek
+"Kapanışta açık dönem + sistem yedeğini otomatik al" açıkken uygulama kapanırken açık dönemin ve Sistem.db'nin yedeği alınır. Uzun kapanış süresi istemiyorsanız kapalı tutabilirsiniz.
+Etiket: kapanış yedeği, otomatik yedek, sistem yedeği
 
-## Haftalık bütünlük hatırlatması
-Veritabanı bütünlük kontrolü (PRAGMA integrity_check) 7 günden eskiyse uyarı gösterilir; kontrolü erteleyebilirsiniz.
+## Haftalık bütünlük kontrolü hatırlatması
+"PRAGMA integrity_check 7 günden eski ise uyarı gösterilir." Bu hatırlatma açıkken, veritabanı bütünlük kontrolü 7 günü geçtiğinde uyarı çıkar; kontrolü erteleyebilirsiniz.
 Etiket: bütünlük kontrolü, integrity_check, hatırlatma
 
 ## Yedek klasörü nerede?
-Tüm manuel yedekler yedek klasöründe saklanır. Dosyaları elle silmeyin; uygulama üzerinden yönetin.
-Etiket: yedek klasörü, yedek dosyası
+Yedeklerin tutulduğu yol ekranda gösterilir (geliştirme derlemesinde Databases\Yedekler, normalde LocalAppData altındaki MuhasibPro\Yedekler). Dosyaları elle silmeyin; uygulama üzerinden yönetin.
+Etiket: yedek klasörü, yedek dosyası, yol
 
-## Sistem veritabanı nedir?
-Uygulamanın ortak verisini (kullanıcılar, firmalar, mali dönem kayıtları, ayarlar) tutan sistem.db'dir. Her mali dönemin ayrı bir veritabanı dosyası vardır.
-Etiket: sistem veritabanı, sistem.db, dönem veritabanı
+## Bilgi kutusu ne anlatır?
+Otomatik temizlemenin yalnızca manuel yedekler için uygulandığını, geçici/otomatik yedeklerin bu temizlikten etkilenmediğini ve limitin 1-20 aralığında olduğunu belirtir.
+Etiket: yedek bilgisi, manuel yedek, geçici yedek
+
+## Sistem veritabanı ile dönem veritabanı farkı nedir?
+Sistem.db (sistem veritabanı) uygulamanın ortak verisini (kullanıcılar, firmalar, mali dönem kayıtları, ayarlar) tutar. Her mali dönemin ayrı bir veritabanı dosyası vardır. Sistem.db'ye özel ayarlar (sistem yedeği sayısı, journal modu, disk senkronizasyonu, yedek öncesi VACUUM) Denetim Masası > Veritabanı bölümündedir.
+Etiket: sistem veritabanı, sistem.db, dönem veritabanı, journal modu

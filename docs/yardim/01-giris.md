@@ -1,21 +1,37 @@
 # Giriş ve Oturum
 
 ## Sisteme nasıl giriş yaparım?
-Kullanıcı adınızı ve şifrenizi girip "Sisteme Giriş Yap" butonuna basın; Enter da çalışır. Bilgiler doğruysa firma ve mali dönem seçim ekranına geçilir.
-Etiket: giriş, oturum, şifre, kullanıcı adı
+"Kullanıcı Adı" ve "Şifre" alanlarını doldurup "Sisteme Giriş Yap" butonuna basın; Enter tuşu da girişi tetikler. Doğrulama sırasında buton "Doğrulanıyor..." olur ve bir halka döner. Bilgiler doğruysa "Firma Seçimi" adımına geçilir.
+Etiket: giriş, oturum, kullanıcı adı, şifre, enter
+
+## Ekranın üstündeki adım göstergesi ne demek?
+Üstteki şerit akıştaki konumu gösterir: Kurulum → **Giriş** → Firma Seçimi → Çalışma Alanı. Bulunduğunuz adım vurgulanır; böylece nerede olduğunuzu ve sıradaki adımı görürsünüz.
+Etiket: adım göstergesi, akış, giriş adımı
 
 ## Giriş yapamıyorum, ne yapmalıyım?
-Hatalı kullanıcı adı veya şifrede satır içi kırmızı uyarı çıkar. Şifrenizi bilmiyorsanız yöneticinizden sıfırlamasını isteyin. Sistem veritabanı hazır değilse giriş kapalıdır; "Teşhis" bağlantısıyla veritabanı durumunu kontrol edin.
-Etiket: giriş hatası, şifre sıfırlama, teşhis
+Alanlardan biri boşsa "Kullanıcı adı alanı boş geçilemez!" veya "Şifre alanı boş geçilemez!" uyarısı çıkar. Bilgiler hatalıysa satır içi kırmızı blokta "Kullanıcı adı veya şifre hatalı!" yazar. Şifrenizi bilmiyorsanız yöneticinizden sıfırlama isteyin.
+Etiket: giriş hatası, boş alan, hatalı şifre
 
 ## Sistem Durumu kartı ne gösterir?
-Kart, Sistem.db'nin (sistem veritabanının) hazır olup olmadığını gösterir. "Hazır" değilse giriş kapalıdır. Karttaki "Teşhis" bağlantısı veritabanı teşhis ve onarım sayfasını açar.
-Etiket: sistem veritabanı, durum, teşhis
+Sistem.db'nin hazır olup olmadığını gösterir: durum hapı "Hazır" veya "Kontrol" olur. Altında "Sistem.db • SQLite • {boyut} • WAL/N bekleyen" gibi ayrıntı yazar. Sistem veritabanı kurulmadıysa "Sistem Veritabanı — Kurulum Gerekli" görünür ve giriş kapalıdır.
+Etiket: sistem veritabanı, durum, hazır, kurulum gerekli
+
+## Teşhis bağlantısı ne yapar?
+Karttaki "Teşhis" butonu Sistem Veritabanı Yönetimi ekranını açar; oradan sistemi analiz edebilir, onarabilir veya kurabilirsiniz.
+Etiket: teşhis, sistem veritabanı yönetimi, analiz
+
+## Şifreyi göster/gizle ve Beni hatırla
+Şifre alanındaki göz simgesi şifreyi gösterip gizler. "Beni hatırla" işaretliyse başarılı girişten sonra hesap Hızlı Giriş listesine eklenir.
+Etiket: şifre göster, beni hatırla, hızlı giriş
 
 ## Hızlı Giriş nasıl çalışır?
-"Beni hatırla" işaretli başarılı girişlerde hesap bu listeye eklenir. Bir satıra tıklamak kullanıcı adı ve şifreyi doldurur; satırdaki çarpı işareti hesabı listeden kaldırır.
-Etiket: hızlı giriş, beni hatırla, kayıtlı hesap
+"Beni hatırla" ile kaydedilen hesaplar "HIZLI GİRİŞ" listesinde görünür. Bir satıra tıklamak kullanıcı adını ve şifreyi doldurur; satırdaki çarpı işareti hesabı listeden kaldırır. Liste boşsa "Henüz hatırlanan hesap yok. 'Beni hatırla' ile ekleyin." yazar.
+Etiket: hızlı giriş, kayıtlı hesap, hesap kaldır
 
 ## İlk kez mi kullanıyorum?
-Sistem veritabanı henüz kurulmadıysa girişten önce Kurulum ekranı görünür. Kurulum tamamlanınca giriş ekranına dönülür.
-Etiket: kurulum, ilk kullanım, sistem veritabanı
+Sistem veritabanı henüz kurulmadıysa girişten önce "İlk Kurulum" ekranı çıkar. Kurulum tamamlanınca giriş ekranına dönülür. (Bkz. Açılış ve Kurulum Ekranları.)
+Etiket: ilk kullanım, kurulum, sistem veritabanı
+
+## "Şifremi Unuttum?" bağlantısı
+Giriş formundaki "Şifremi Unuttum?" metni şu an herhangi bir işlem başlatmaz (yalnız etikettir). Şifre sıfırlama için yöneticinize başvurun.
+Etiket: şifremi unuttum, şifre sıfırlama, yönetici

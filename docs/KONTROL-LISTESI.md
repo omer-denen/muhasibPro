@@ -706,13 +706,15 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [ ] `REFERANSLAR.md`: MS F1/help + uygulama-içi AI yardım araştırması (kaynak + karar)
 - [ ] Kullanıcı onayı (Kural 8/15)
 
-### H2 — İçerik genişletme (ben) 🔨 (Oturum 293 başladı)
-- [x] Ekran/buton envanteri (Denetim Masası 9 bölüm, SistemDbYonetim, Güncelleme Sonrası 4 adım, Splash/Kurulum/Şema, 13 diyalog) — XAML/VM kaynak-doğrulanmış (explore, dosya:satır)
-- [ ] Mevcut 9 sayfa/60 madde buton/işlem düzeyinde derinleştirme (projeye özgü; genel anlatım yasak) — **sıradaki**
-- [x] Yeni sayfalar eklendi: `10-denetim-masasi` · `11-sistem-veritabani-yonetimi` · `12-guncelleme-sonrasi` · `13-diyaloglar` · `14-acilis-kurulum` (gerçek etiketlerle; `docs/yardim` 14 sayfa)
+### H2 — İçerik genişletme (ben) 🔨 (Oturum 293 tamamlandı — onay bekliyor)
+- [x] Ekran/buton envanteri (Denetim Masası 9 bölüm, SistemDbYonetim, Güncelleme Sonrası 4 adım, Splash/Kurulum/Şema, 13 diyalog, Login/FirmaShell/MainShell/DatabaseSettings) — XAML/VM kaynak-doğrulanmış (explore, dosya:satır)
+- [x] Mevcut 9 sayfa buton/işlem düzeyinde derinleştirildi + **güncel olmayan içerik düzeltildi** (03: sahte modüller/Snapshot kaldırıldı → gerçek 3 menü + durum çubuğu; 08: model değiştirme kaldırıldı → sabit model)
+- [x] Yeni sayfalar eklendi: `10-denetim-masasi` · `11-sistem-veritabani-yonetimi` · `12-guncelleme-sonrasi` · `13-diyaloglar` · `14-acilis-kurulum`
 - [x] Yazım standardı: ekran → buton → adım → sonuç/onay/hata; `Etiket:` ekran+buton adlarıyla
 - [x] Kaynak: gerçek XAML/VM (uydurma yok)
+- [x] **Sonuç:** `docs/yardim` **14 sayfa / 119 madde** (60 → 119); build 0 + 685/685
 - [ ] İçerik gözden geçirme (kullanıcı); DB otomatik tazelenir
+- [ ] **İçerik taramasında bulunan Kural 21 ihlalleri (ayrı iş — View/Kural 8):** MainShell "Snapshot Yedek" (Command yok) + statik tenant header/ContentFrame yer tutucu metinleri ("Faz B modülleri...") + Login "Şifremi Unuttum?" (işlevsiz etiket)
 
 ### H3 — UI sadeleştirme (ben, Kural 8) ⬜
 - [ ] `?` butonları kaldırılır (Login, MainShell, FirmaShell, MaliDonemYonetim, DatabaseSettings, Update, SistemDbYonetim, DenetimMasasi, GelistiriciAraclariPaneli, YapayZekaAyarPaneli)

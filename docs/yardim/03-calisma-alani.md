@@ -1,21 +1,25 @@
 # Çalışma Alanı (Ana Ekran)
 
 ## Bu ekran nedir?
-Girişten sonra açılan ana çalışma alanıdır: solda modül menüsü, sağdaki panelde seçili modülün içeriği gösterilir.
+Girişten ve firma/dönem seçiminden sonra açılan ana çalışma alanıdır. Solda modül menüsü, ortada seçili modülün içeriği, altta durum çubuğu yer alır.
 Etiket: çalışma alanı, ana ekran, modül
 
-## Sol menü nasıl çalışır?
-Cari, Stok, Fatura gibi modüller listelenir; seçili modül vurgulanır ve sağdaki içerik paneli ona göre değişir. Henüz hazırlanmamış modüller bilgi mesajı gösterir; hazır olduklarında menüden açılır.
-Etiket: sol menü, modüller, gezinme
+## Sol menüde hangi bölümler var?
+Sol menüde yalnızca gerçekten var olan üç hedef listelenir: "Genel Bakış", "Firma Yönetimi" (Firma Yönetimi izni gerekir) ve "Sistem Kayıtları" (Log görüntüleme izni gerekir). Yetkiniz olmayan öğe menüde gizlenir. Menünün altında aktif oturum kullanıcınız (ad soyad + rol) ve "Oturumu Kapat" bulunur.
+Etiket: sol menü, genel bakış, firma yönetimi, sistem kayıtları, oturumu kapat
 
-## Tenant kartı ne gösterir?
-Bağlı olan firma ve mali dönem veritabanını ve WAL (Write-Ahead Logging) durumunu gösterir. Bağlantı sorununda dönem seçimine dönüp yeniden bağlanın.
-Etiket: tenant, veritabanı bağlantısı, WAL
+## Genel Bakış ne gösterir?
+Açılışta gelen özet ekranıdır. Sol menüden "Genel Bakış" seçildiğinde görüntülenir; diğer modüller gerçek hedeflere bağlıdır ve seçildiğinde sağdaki içerik o modüle geçer.
+Etiket: genel bakış, özet, modül içeriği
 
 ## Durum çubuğu ne gösterir?
-Pencerenin altındaki şerit solda anlık durumu ve süren işin ilerlemesini; sağda aktif firmayı ve mali dönemi, dönem veritabanı bağlantısını, kullanıcı adını, sistem veritabanı göstergesini ve saati gösterir. En sağdaki Asistan düğmesi AI yardım panelini açar.
-Etiket: durum çubuğu, bağlam, asistan
+Pencerenin altındaki çubuk solda anlık mesajı (bilgi/başarı/uyarı/hata simgeleri) ve süren işin ilerlemesini (halka veya yüzde çubuğu) gösterir. Sağda sırasıyla: sistem veritabanı göstergesi, aktif firma ve mali dönem (dönem veritabanı göstergesi), kullanıcı adı ve saat bulunur.
+Etiket: durum çubuğu, bildirim, ilerleme, firma, mali dönem, saat
 
-## Snapshot Yedek butonu
-Açık dönemin hızlı yedeğini alır. Bu buton sonraki fazlarda etkinleşecek; şu an hazırlık yer tutucusudur.
-Etiket: snapshot, hızlı yedek
+## Asistan düğmesi ne yapar?
+Durum çubuğunun en sağındaki "Asistan" düğmesi AI yardım panelini açar (yukarı hizalı flyout). Panelde soru yazıp yanıt alırsınız. Ayrıntı için "Yapay Zeka Yardım Asistanı" sayfasına bakın.
+Etiket: asistan, yapay zeka, durum çubuğu, f1
+
+## Firma Yönetimi ve Sistem Kayıtları
+"Firma Yönetimi" (izin varsa) firma listesi/detay yönetimini açar. "Sistem Kayıtları" sistem günlüğünü listeler ve detayını gösterir. Bu öğeler yetkinize göre görünür/gizlenir.
+Etiket: firma yönetimi, sistem kayıtları, günlük, yetki

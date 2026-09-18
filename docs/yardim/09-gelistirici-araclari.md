@@ -1,25 +1,33 @@
 # Geliştirici Araçları
 
 ## Bu bölüm nedir?
-Yalnızca geliştirme (DEBUG) derlemesinde görünen iç araçlardır; normal kullanıcı akışının parçası değildir. Her aksiyon onay ister ve Sistem günlüğüne DEV kaynağıyla yazılır.
+Yalnızca geliştirme (DEBUG) derlemesinde görünen iç araçlardır; normal kullanıcı akışının parçası değildir. Sarı uyarı bandı bunu belirtir. Her aksiyon onay ister ve Sistem günlüğüne DEV kaynağıyla yazılır.
 Etiket: geliştirici araçları, debug, iç araç
 
-## Kimlik durumu ve damga ne demek?
-Kurulum kimliği bu uygulamanın kurulumunu, makine kimliği ise cihazı tanımlar. Listede her dönem veritabanının damgası (şema sürümü + kimlik) ve güncel kimlikle eşleşip eşleşmediği görünür. "Kimliği Onar" makinesi aynı olan dönemlerin damgasını eşitler; "Kimliği Sıfırla" yıkıcıdır ve yalnız kontrollü senaryoda kullanılır.
-Etiket: kimlik, damga, onar, sıfırla
+## Modül Entegrasyon Testleri
+"Tümünü test et" butonu her modülün DI'da çözülebildiğini ve kritik akışının salt-okunur çalıştığını kontrol eder; hangi modülün koptuğunu PASS/FAIL listesiyle gösterir.
+Etiket: modül entegrasyon testleri, tümünü test et, di, pass fail
+
+## Kurulum Kimliği ve Dönem Şema Damgaları
+"Kurulum kimliği" bu uygulamanın kurulumunu, "Makine kimliği" cihazı tanımlar. "Onar" damgaları onarır, "Tara" transfer taramasını çalıştırır, "Sıfırla" yıkıcıdır ve yalnız kontrollü senaryoda kullanılır (onaylı). "Dönem Şema Damgaları" tablosunda her veritabanının şema/kimlik bilgisi listelenir.
+Etiket: kurulum kimliği, makine kimliği, onar, tara, sıfırla, şema damgası
 
 ## Transfer taraması ne yapar?
-Açılışta çalışan taşınmış-veri taramasını elle tetikler; sonuçta farklı kuruluma ait dönem sayısını veya sessiz onarılan kimlik sayısını gösterir.
+Açılışta çalışan taşınmış-veri taramasını elle tetikler; sonuçta farklı kuruluma ait dönem sayısını veya sessiz onarım yapılan kimlik sayısını gösterir.
 Etiket: transfer taraması, taşınmış veri
+
+## Güncelleme Kaynağı doğrulama
+Geliştirici bölümündeki güncelleme kaynağı alanında adres girilir; "Varsayılana sıfırla" ve "Kaynağı Doğrula" butonları kaynağın erişilebilirliğini denetler.
+Etiket: güncelleme kaynağı, kaynağı doğrula, varsayılana sıfırla
 
 ## AI bağlantı öz-testi
 "Öz-testi Çalıştır" sürüm hakkını, model durumunu ve yardım derlemini (sayfa/madde sayısı) tek listede gösterir. Salt-okunurdur, model indirmez.
-Etiket: ai öz-testi, tanılama, model durumu
+Etiket: ai öz-testi, tanılama, model durumu, sürüm hakkı
 
-## Tanılama ve modül entegrasyon testleri
-Tanılama, sistem testlerini (dosya/bağlantı/migration/veri/yetki) ve güncelleme kaynağı öz-testini tek listede PASS/FAIL olarak gösterir. "Modül Entegrasyon Testleri" her modülün DI'da çözülebildiğini ve kritik akışının salt-okunur çalıştığını kontrol eder; hangi modülün koptuğunu gösterir.
-Etiket: tanılama, modül testi, di, pass fail
+## Tanılama (çalışma-zamanı)
+"Çalıştır" sistem testlerini (dosya/bağlantı/migration/veri/yetki) ve güncelleme kaynağı öz-testini tek listede PASS/FAIL olarak gösterir.
+Etiket: tanılama, çalışma zamanı testi, pass fail
 
-## Log ve veri klasörleri
-"Log klasörünü aç" ve "Veri klasörünü aç" düğmeleri ilgili yolları dosya gezgininde açar. Yollar salt-okunur gösterilir. "Ayrıntılı log" dosya günlüğünü Debug seviyesine indirir.
-Etiket: log, veri klasörü, ayrıntılı log
+## Günlük ve klasörler
+"Log klasörünü aç" ve "Veri klasörünü aç" ilgili yolları dosya gezgininde açar; yollar salt-okunur gösterilir. "Ayrıntılı log" anahtarı dosya günlüğünü Debug seviyesine indirir.
+Etiket: log, veri klasörü, ayrıntılı log, klasör aç
