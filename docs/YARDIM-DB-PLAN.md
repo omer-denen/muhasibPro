@@ -1,4 +1,4 @@
-# MuhasibPro — AI Yardım Bilgi Tabanı (AsistanBilgi.db + Hibrit RAG) Planı
+﻿# MuhasibPro — AI Yardım Bilgi Tabanı (AsistanBilgi.db + Hibrit RAG) Planı
 
 > **Faz 6.93** — AI asistanının yardım kaynağını view statiklerinden ayırıp tek bir **yardım bilgi tabanına** taşır.
 > **Sahiplik (kullanıcı kararı, Oturum 288 — devir):** AI asistanın **tamamı Muse Spark'ta** — motor + veri + UI/entegrasyon/doğrulama. (Önceki: motor+veri diğer modelde, UI/entegrasyon/doğrulama ana modelde — Oturum 278 düzeni Oturum 288'de kapatıldı.)
@@ -9,7 +9,7 @@
 ## Kararlar (kullanıcı onayı — Oturum 278)
 | Konu | Karar |
 |---|---|
-| Kapsam | **Yalnız AI** — view'lardaki `?` yardım dialogları mevcut halinde kalır (bu faz UI yardımını taşımaz) |
+| Kapsam (v1.2 — Oturum 293) | **Tek yardım kaynağı = tüm uygulama.** `docs/yardim/*.md` uygulamanın tamamını kapsar; UI'daki ayrı `?` yardım dialogları **kaldırılır** (tek yüzey AI asistanı: F1 + statü çubuğu). Bkz. `YARDIM-TEK-YUZEY-PLAN.md`. |
 | İçerik kaynağı | **Repoda Markdown** (`docs/yardim/*.md`), build'de uygulamaya gömülür (EmbeddedResource) |
 | Arama | **Hibrit:** lexical (FTS'siz, in-memory) + **embedding (Foundry)** → **RRF** füzyon |
 | Embedding modeli | **Evet** — `qwen3-embedding-0.6b` (~495 MB, bir kez iner; Foundry katalog) |

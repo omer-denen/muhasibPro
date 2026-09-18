@@ -133,11 +133,11 @@ Veritabanından/diskten veri çeken **her** dinamik yüzey (sayfa, panel, kart, 
 - **Hata durumu** görselle taşınır (`ShowError`/danger stili); sessiz `catch` + çıplak `return` ile işlem yutulamaz.
 - **Bilinmeyen işlemde tasarım yasağı:** yapısı bilinmeyen veya yaptığı işlem tam anlaşılmayan operasyonun tasarımı ezberden çıkarılmaz — **önce internette aratılır, bulunamazsa kullanıcıya sorulur**, ona göre tasarım çıkarılır. Araştırma kaynağı + karar LOG'a işlenir.
 
-### 13. Araştır-önce + yardım sayfası
+### 13. Araştır-önce + tek yardım yüzeyi
 - **Kritik yapıya başlanmadan veya refactoring yapılmadan ÖNCE** ilgili işlem internette araştırılır (resmi docs/kaynak öncelikli); bulgu + karar LOG'a işlenir, **ondan sonra** işleme başlanır. Bulunamazsa kullanıcıya sorulur (Kural 12).
-- **İş bitiminde**, ilgili View'e UI kullanımı için **yardım sayfası** eklenir (nerede ne yapılır, hangi sonuç beklenir, hata ne demek). Yardım içeriği saf Fluent ile, Kural 11/12 görsel disipliniyle yazılır. Yardım sayfası olmadan faz kapanmaz.
-- **Desen (Oturum 236 presedanı):** yardım = sayfa başlığındaki **? butonu → yardım dialogu** (ortak `Views/Components/YardimDialog`, sayfa içeriği maddeler halinde). **Kapsam:** yalnız fonksiyon içeren view'ler (buton/işlem/liste olan); Splash/KurulumSplash gibi fonksiyonsuz açılış ekranları muaftır. Her fonksiyonlu view'in ? butonu yoksa o faz kapanmaz.
-- **Yardım sayfayla birlikte yaşar:** sayfanın içeriği/fonksiyonu değişen her iş, aynı işin içinde yardım maddelerini de günceller (sonraya/ayrı faza bırakılmaz; güncellenmemiş yardım = eski bilgi = bug hükmündedir).
+- **Tek yardım yüzeyi = AI asistanıdır (Oturum 293 revizyonu).** Ayrı view `?` yardım dialogu/sayfaları **yoktur/kaldırılır**; yardım girişi **F1** ve statü çubuğundaki **"Asistan"** düğmesidir (aynı panel). İçerik tek kaynaktan gelir: `docs/yardim/*.md` → `AsistanBilgi.db` → asistan. AI erişilemezse (lisans/yetki/kapalı/model yok) yalnız **kilit gerekçesi** gösterilir; statik yardım yok. Kararlar/ayrıntı: `docs/YARDIM-TEK-YUZEY-PLAN.md` (Oturum 283).
+- **Eski yardım altyapısı silinir (Kural 4):** `YardimMaddeleri()`/`YardimGoster`/`YardimCommand` + `YardimAnahtari`/`YardimBasligi`, `YardimDialog`/`YardimMaddesi`, `YardimMaddesiDto`, `ShowYardimAsync` ve view `?` butonları.
+- **İçerik ekranla birlikte yaşar:** bir ekranın içeriği/fonksiyonu değişen her iş, aynı işin içinde `docs/yardim` ilgili sayfasını da günceller (sonraya/ayrı faza bırakılmaz; güncellenmemiş içerik = eski bilgi = bug hükmündedir). İçerik değişiminde `AsistanBilgi.db` otomatik tazelenir.
 
 ### 14. View-öncesi içerik + tasarım araştırması
 - **Bir view'e dokunulmadan ÖNCE**, o view iki yönüyle internette araştırılır (Oturum 159 presedanı): **içerik** (bu işlemde ne olmalı/olmamalı — MS kılavuzu + sektör) + **tasarım** (nasıl görünmeli — MS Fluent rehberi + Toolkit galerisi öncelikli); kaynak + karar LOG'a işlenir, **ondan sonra** uygulamaya geçilir. Bulunamazsa kullanıcıya sorulur (Kural 12).

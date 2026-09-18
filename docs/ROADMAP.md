@@ -127,5 +127,7 @@ Her modül çekirdek üzerine bağımsız eklenir: **Cari (B1) → Stok (B2) →
 
 | 2026-09-18 | **S1 model kilidi UI (Oturum 293):** servis modeli sabitledi (S1-servis, yardımcı 292) → Denetim model seçici (`ModelAlias` TextBox + `Uygula`/`Varsayılan` + uygulama ilerlemesi) kaldırıldı; salt-okunur "Model" gösterimi; ilgili komut/bayrak/`IsYonetici` silindi (Kural 4). 2 kırmızı test kapandı, **683/683**. Kalan: D2/D3 DI + D4/D5 UI | Kullanıcı onayı (Kural 8, Oturum 293 — "S1 UI → commit → K4") |
 
+| 2026-09-18 | **6.94 H1 sözleşme revizyonu — tek yardım yüzeyi (Oturum 293):** AGENTS Kural 13 "? yardım dialogu" → "tek yüzey AI asistanı (F1 + statü çubuğu); içerik `docs/yardim` güncellenir"; `YARDIM-DB-PLAN` kapsam v1.2 (tek kaynak = tüm uygulama, UI `?` kaldırılır); REFERANSLAR 293 (MS in-app help + Windows F1/Shift+F1 + Sage 50 F1/Assistant + QuickBooks AI). H2 içerik 14 sayfa/119 madde tamamlandı | Kullanıcı kararı (Oturum 283 + "sırayla başla" 293) |
+
 ## 5. Referanslar
 - `docs/DURUM.md`, `docs/LOG.md`, `docs/AKIS-PLANI.md`, `docs/WINUI-MIMARISI.md`, `docs/TASARIM-KURALLARI.md`, `docs/REFERANSLAR.md`

@@ -699,11 +699,11 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 > **Sahiplik (Oturum 291 — katman ayrımı):** **motor/prompt/retrieval (H4) = yardımcı model**; **içerik (H2) + UI/entegrasyon (H1/H3) + doğrulama (H5) = ana model.**
 > **Karar özeti:** yardım kitabı ❌ iptal · view `?` yardım listeleri/dialogu ❌ kaldırılır · tek kaynak `docs/yardim/*.md` → `AsistanBilgi.db` → asistan · giriş **F1 + statü çubuğu "Asistan"** · AI erişilemezse yalnız kilit gerekçesi · eski altyapı silinir (Kural 4) · kapsam tüm yapı.
 
-### H1 — Karar / sözleşme (ben) ⬜
-- [ ] `AGENTS.md` Kural 13 revizyonu: `?` yardım dialogu → **tek yüzey AI asistanı**; "yardım sayfayla yaşar" → "`docs/yardim` güncellenir"
-- [ ] `AGENTS.md` okuma listesine `YARDIM-TEK-YUZEY-PLAN.md` eklenir
-- [ ] `docs/YARDIM-DB-PLAN.md` sözleşme revizyonu (v1.2): "yalnız AI" → "tek yardım kaynağı = tüm uygulama; UI `?` kaldırıldı"
-- [ ] `REFERANSLAR.md`: MS F1/help + uygulama-içi AI yardım araştırması (kaynak + karar)
+### H1 — Karar / sözleşme (ben) 🔨 (Oturum 293 — onay bekliyor)
+- [x] `AGENTS.md` Kural 13 revizyonu: `?` yardım dialogu → **tek yüzey AI asistanı (F1 + statü çubuğu)**; "yardım sayfayla yaşar" → "`docs/yardim` içeriği güncellenir"; eski altyapı silinir (Kural 4)
+- [x] `AGENTS.md` okuma listesine `YARDIM-TEK-YUZEY-PLAN.md` eklenir (mevcut)
+- [x] `docs/YARDIM-DB-PLAN.md` sözleşme revizyonu (v1.2): "yalnız AI" → "tek yardım kaynağı = tüm uygulama; UI `?` kaldırıldı"
+- [x] `REFERANSLAR.md` 293: MS in-app help kılavuzu + Windows F1/Shift+F1 + Sage 50 (F1/Assistant) + QuickBooks AI (4 satır)
 - [ ] Kullanıcı onayı (Kural 8/15)
 
 ### H2 — İçerik genişletme (ben) 🔨 (Oturum 293 tamamlandı — onay bekliyor)
