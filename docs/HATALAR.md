@@ -2,6 +2,25 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
+## ≤1B sohbet modeli RAG bağlamını bile kullanamaz (DERS — 2026-09-18 — Oturum 291)
+- **Belirti:** `qwen3-0.6b` (her cevapta `<think>` + "bir yıl" ×~250 tekrar, 6292 karakter) ve `qwen3.5-0.8b` (46 adımlı uydurma liste; "ekonomiye yıkım" saçmalığı) elendi. Kritik: **Q6'da bağlam açıkça "Arşivden Çıkar ile dönem yeniden açılır" derken 0.8B "Hayır, mümkün değildir" dedi — RAG bağlamını aktif inkâr.**
+- **Sebep:** Bu kapasitede model komut takibi + bağlam sadakatini sürdüremiyor; RAG (doğru maddeyi önüne koymak) yetmiyor — sorun retrieval'de değil, üretimde.
+- **Çözüm/Ders:** ≤1.5B bandında taban `qwen2.5-0.5b`'de kalır (canlıda RAG cevabı üretebilmişti, 277/282); stabilite S2 (temperature ~0) + S3 (içerik) + S4 (regresyon kapısı) ile kovalanır. Ölçüm yöntemi (6 soru, Q6 RAG-simülasyonlu) karar kapısı olarak korunur.
+- Tarih: 2026-09-18
+
+## Reasoning (`<think>`) modeli ham bağlanırsa iç monolog kullanıcıya sızar (DERS — 2026-09-18 — Oturum 288)
+- **Belirti:** `qwen3-1.7b` ölçümünde (`Temp/opencode/modeltest`, ham prompt) cevaplar `<think>...</think>` İngilizce iç monolog + etiketlerle geldi; ayrıca tekrar döngüsü + "kısa cevap" dinlememe.
+- **Sebep:** qwen3 ailesi hibrit reasoning modeldir; pipeline (`FoundryAsistanSohbetService` → panel) **reasoning çıktısını ayıklamaz/strip etmez** — ham `Choices[0].Message.Content` olduğu gibi basılır.
+- **Çözüm/Ders:** Reasoning modeli kalıcı seçilirse **iki iş zorunlu:** (1) panel/servis katmanında `<think>...</think>` strip (saf yardımcı + test), (2) "kısa cevap" gibi komutların reasoning'i de kapsaması için prompt sertleştirme (6.94 H4). Küçük Qwen'lerde ek bulgu: **Türkçe halüsinasyon** (`qwen2.5-1.5b`: "arşivlenmez", 1120×2=660) → RAG bağlamı olmadan bu sınıf model asistana konmaz; seçim kriteri **bağlama sadakat + komut takibi + temiz çıktı**. Ders: **üretici (MS) ≠ proje bilgisi** — bilgi RAG'den gelir.
+- Tarih: 2026-09-18
+
+## Kullanıcı Yönetimi sayfası açılırken uygulama çöküyor (ÇÖZÜLDÜ — 2026-09-18 — Oturum 291)
+- **Belirti:** K2-REDESIGN/K3 (Oturum 286-287) sonrası **Kullanıcı Yönetimi sayfası açıldığında uygulama çöküyordu** (kullanıcı bildirimi). Daha net tetik: **"Roller & İzinler" sekmesine geçince** WinUI stowed exception (`0xc000027b`, `Microsoft.UI.Xaml.dll`, HRESULT `E_POINTER 0x80004003`).
+- **Kök neden (kanıt: geçici `FirstChanceException` logu):** `FormComboBox.UpdateVisualState()` (satır 120) `_backgroundBorder` **null** iken erişiyordu → `NullReferenceException`; çağrı zinciri `FormComboBox.OnApplyTemplate()` → `FluidGrid.MeasureOverride()`. Oturum 287'de `Themes/Controls/FormComboBox.xaml` içindeki **özel şablon kaldırıldı** (WinUI varsayılanına geçildi) ama `Background` adlı şablon parçasını bekleyen kod kaldı; `GetTemplateChild("Background")` artık null dönüyor. Sekme realize edilirken ölçüm sırasında patlıyordu.
+- **Çözüm:** `UpdateVisualState` null-güvenli yapıldı (`ZeminUygula(Brush,double)` yardımcısı; şablonda parça yoksa zemin boyama güvenle atlanır; `Disabled` durumunun `IsEnabled/Opacity` davranışı korunur). Build 0/0 + **665/665** + canlı: iki sekme de açılıyor, NRE 0.
+- **Ders:** Bir kontrolün özel şablonu kaldırıldığında (`GetTemplateChild(name)` null olabilir) tüm **şablon-parçası erişimleri** null-güvenli olmalı; `UpdateValidationState` zaten korumalıydı, `UpdateVisualState` değildi.
+- Tarih: 2026-09-18
+
 ## Singleton repo + pencere-başına DI scope: kullanıcı ve KFR farklı DbContext'e yazıldı (FK constraint failed) (ÇÖZÜLDÜ — 2026-09-17 — Oturum 285)
 - **Belirti:** Kullanıcı Yönetimi'nde "Kaydet" → `SQLite Error 19: 'FOREIGN KEY constraint failed.'`; kullanıcı oluşmuyor (liste değişmiyor). Hata mesajı kök nedeni gizliyordu.
 - **Sebep:** `ServiceLocator.Current` **pencere başına ayrı `IServiceScope`** açar. `IUserRepository` **Singleton** olduğundan ilk çözüldüğü pencerenin `SistemDbContext`'ini tutuyordu; `IUnitOfWork`/`IKullaniciFirmaRolRepository` ise **Scoped** olup K2 penceresinin context'ini kullanıyordu. `_kullaniciRepository.AddAsync(kullanici)` A context'ine, `_kfrRepository.AddAsync(kfr)` B context'ine gitti; `SaveChangesAsync` (B) yalnız KFR'ı yazınca henüz yazılmamış `KullaniciId`'ye FK verdi.

@@ -68,7 +68,7 @@ public class YapayZekaAyarlarViewModelTests
     {
         var saglayici = new AiAsistanSettingsProvider(bellek, Mock.Of<IEventBus>(), auth);
         return new YapayZekaAyarlarViewModel(
-            OrtakServisler(durum, dialog).Object, saglayici, auth,
+            OrtakServisler(durum, dialog).Object, saglayici,
             surum?.Object, sohbet?.Object);
     }
 
@@ -108,18 +108,15 @@ public class YapayZekaAyarlarViewModelTests
     }
 
     [Fact]
-    public async Task Yetkisiz_Alias_StatusError()
+    public async Task ModelAlias_Sabit_Kalir()
     {
         var bellek = new BellekAyarlari();
-        var durum = new Mock<IStatusMessageService>();
-        var vm = KurVm(bellek, Kimlik(2, KullaniciRolTip.Kullanici), durum);
+        bellek.Kutu[AiAsistanSettings.SettingsKey] = new AiAsistanSettings { ModelAlias = "phi-4-mini" };
+        var vm = KurVm(bellek, Kimlik(1, KullaniciRolTip.Yönetici), new Mock<IStatusMessageService>());
+
         await vm.LoadAsync();
 
-        vm.ModelAlias = "phi-4-mini";
-
-        (await BekleAsync(() => !string.IsNullOrEmpty(vm.HataMetni))).Should().BeTrue();
-        vm.HataMetni.Should().Contain("yönetici");
-        durum.Verify(d => d.ShowMessage(It.IsAny<string>(), It.IsAny<StatusMessageType>(), It.IsAny<int?>()), Times.AtLeastOnce);
+        vm.ModelAlias.Should().Be(AiAsistanSettings.VarsayilanModelAlias);
     }
 
     [Fact]
@@ -245,26 +242,6 @@ public class YapayZekaAyarlarViewModelTests
         await vm.ModelSilAsync(vm.Modeller[0]);
 
         sohbet.Verify(s => s.ModelSilAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task AliasUygula_Onayla_Uygular()
-    {
-        var dialog = new Mock<IDialogService>();
-        dialog.Setup(d => d.ShowConfirmationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(true);
-        var sohbet = SohbetServisi();
-        sohbet.Setup(s => s.AliasDegisiminiUygulaAsync(It.IsAny<string>(), It.IsAny<IProgress<AsistanDurumDto>?>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-        var vm = KurVm(new BellekAyarlari(), Kimlik(1, KullaniciRolTip.Yönetici),
-            new Mock<IStatusMessageService>(), null, sohbet, dialog);
-        await vm.LoadAsync();
-
-        vm.ModelAlias = "phi-4-mini";
-        await vm.ModelAliasUygulaAsync();
-
-        sohbet.Verify(s => s.AliasDegisiminiUygulaAsync("phi-4-mini", It.IsAny<IProgress<AsistanDurumDto>?>(), It.IsAny<CancellationToken>()), Times.Once);
-        vm.IsModelUygulaniyor.Should().BeFalse();
     }
 
     [Theory]

@@ -29,7 +29,7 @@
         </Grid.RowDefinitions>
 
         <!-- Sol: NavSidebar 240 -->
-        <components:NavSidebarControl Grid.Column="0" Grid.Row="0" />
+        <components:NavSidebarControl Grid.Column="0" Grid.Row="0" ViewModel="{x:Bind ViewModel}" />
 
         <!-- Kural 17 — Katman 2: sağ içerik ana border paneli (sidebar zemin üzerinde kalır);
              Kural 13 ? panelin sağ üst köşesinde. -->

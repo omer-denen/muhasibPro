@@ -22,6 +22,7 @@ namespace MuhasibPro.Business.Services.UIService
         private readonly ITenantVersionReader _versionReader;
         private readonly IEventBus _eventBus;
         private readonly IPostUpdateDogrulamaService _postUpdate;
+        private readonly IDevModeProvider _devMode;
 
         public SplashRoutingService(
             ISistemDatabaseService sistemDatabaseService,
@@ -30,7 +31,8 @@ namespace MuhasibPro.Business.Services.UIService
             ITenantSQLiteDatabaseService tenantService,
             ITenantVersionReader versionReader,
             IEventBus eventBus,
-            IPostUpdateDogrulamaService postUpdate)
+            IPostUpdateDogrulamaService postUpdate,
+            IDevModeProvider devMode)
         {
             _sistemDatabaseService = sistemDatabaseService;
             _kurulumKayitService = kurulumKayitService;
@@ -39,6 +41,7 @@ namespace MuhasibPro.Business.Services.UIService
             _versionReader = versionReader;
             _eventBus = eventBus;
             _postUpdate = postUpdate;
+            _devMode = devMode;
         }
 
         public async Task<SplashRouteDecision> DecideRouteAsync(bool? startupDbReady)
@@ -68,7 +71,8 @@ namespace MuhasibPro.Business.Services.UIService
                     IsDatabaseReady = ready,
                     HasPendingMigrations = hasPending,
                     PendingMigrationCount = state.PendingMigrations?.Count ?? 0,
-                    PostUpdateGerekli = postUpdate
+                    PostUpdateGerekli = postUpdate,
+                    DevOttomatikGoc = _devMode?.IsEnabled == true
                 };
             }
             catch

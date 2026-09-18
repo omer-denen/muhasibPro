@@ -44,6 +44,14 @@ public static class SplashNavigator
                 targetView = typeof(Views.SistemDbYonetim.SistemDbYonetimView);
                 targetArgs = new ShellArgs { ViewModel = typeof(ViewModels.ViewModels.Sistem.SistemDbYonetimViewModel), Parameter = decision.KararOzeti };
             }
+            else if (decision.Target == SplashTarget.DevMigration)
+            {
+                // DEV-ONLY: bekleyen göçler açılışta otomatik uygulanır (SistemMigrationView) —
+                // manuel Veritabanı Yönetimi ekranına gitmeden. Release'de bu hedef seçilmez.
+                Debug.WriteLine($"Splash karar: {decision.KararOzeti}");
+                targetView = typeof(Views.ShellViews.Splash.SistemMigrationView);
+                targetArgs = new ShellArgs { ViewModel = typeof(ViewModels.ViewModels.Sistem.SistemMigrationViewModel) };
+            }
             else if (decision.Target == SplashTarget.PostUpdateVerification)
             {
                 // Faz 6.91-D: uygulama güncellendi — açılışta doğrulama sagası (view kendi akışını yürütür).

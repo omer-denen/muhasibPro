@@ -112,30 +112,40 @@ public class FormComboBox : ComboBox, IFormControl
 
     private void UpdateVisualState()
     {
-        if (_isInitialized)
+        if (!_isInitialized)
         {
-            switch (VisualState)
-            {
-                case FormVisualState.Idle:
-                    _backgroundBorder.Opacity = 0.40;
-                    _backgroundBorder.Background = TransparentBrush;
-                    break;
-                case FormVisualState.Ready:
-                    _backgroundBorder.Opacity = 1.0;
-                    _backgroundBorder.Background = OpaqueBrush;
-                    break;
-                case FormVisualState.Focused:
-                    _backgroundBorder.Opacity = 1.0;
-                    _backgroundBorder.Background = OpaqueBrush;
-                    break;
-                case FormVisualState.Disabled:
-                    _backgroundBorder.Opacity = 0.40;
-                    _backgroundBorder.Background = TransparentBrush;
-                    IsEnabled = false;
-                    Opacity = 0.75;
-                    break;
-            }
+            return;
         }
+
+        switch (VisualState)
+        {
+            case FormVisualState.Idle:
+                ZeminUygula(TransparentBrush, 0.40);
+                break;
+            case FormVisualState.Ready:
+            case FormVisualState.Focused:
+                ZeminUygula(OpaqueBrush, 1.0);
+                break;
+            case FormVisualState.Disabled:
+                ZeminUygula(TransparentBrush, 0.40);
+                IsEnabled = false;
+                Opacity = 0.75;
+                break;
+        }
+    }
+
+    /// <summary>Faz 6.85: FormComboBox WinUI varsayılan şablonunu kullanır; şablonda "Background"
+    /// parçası bulunmadığından `_backgroundBorder` null olabilir. Bu durumda zemin boyama güvenle
+    /// atlanır (eski özel şablonda parça vardı — Oturum 287'de kaldırıldı; NRE bu yüzden oluşuyordu).</summary>
+    private void ZeminUygula(Brush firca, double opaklik)
+    {
+        if (_backgroundBorder == null)
+        {
+            return;
+        }
+
+        _backgroundBorder.Opacity = opaklik;
+        _backgroundBorder.Background = firca;
     }
 
     private readonly Brush TransparentBrush = new SolidColorBrush(Colors.Transparent);

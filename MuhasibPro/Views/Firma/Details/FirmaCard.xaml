@@ -26,6 +26,7 @@
                     <PersonPicture
                         Width="68"
                         Height="68"
+                        Initials="{x:Bind Item.Initials, Mode=OneWay}"
                         ProfilePicture="{x:Bind Item.LogoSource, Mode=OneWay, Converter={StaticResource ObjectToImageConverter}}" />
                     <controls:RoundButton
                         HorizontalAlignment="Center"

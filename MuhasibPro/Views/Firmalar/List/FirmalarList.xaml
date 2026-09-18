@@ -51,6 +51,7 @@
                                                     <PersonPicture
                                                         Width="28"
                                                         Height="28"
+                                                        Initials="{x:Bind Initials, Mode=OneWay}"
                                                         ProfilePicture="{x:Bind LogoOnizlemeSource,Mode=OneWay, Converter={StaticResource ObjectToImageConverter}}"
                                                         x:Phase="1" />
                                                 </StackPanel>
@@ -59,8 +60,8 @@
                                     </tv:TableViewTemplateColumn>
                                     <tv:TableViewTextColumn
                                         Width="120"
-                                        Binding="{Binding Id}"
-                                        Header="Kimlik" />
+                                        Binding="{Binding FirmaKodu}"
+                                        Header="Firma Kodu" />
                                     <tv:TableViewTextColumn
                                         Width="auto"
                                         Binding="{Binding KisaUnvani}"

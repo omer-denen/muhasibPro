@@ -46,12 +46,14 @@ namespace MuhasibPro.Configurations
         {
             NavigationService.Register<SistemDbYonetimViewModel, SistemDbYonetimView>();
             NavigationService.Register<KurulumSplashViewModel, Views.ShellViews.Splash.KurulumSplashView>();
+            NavigationService.Register<SistemMigrationViewModel, Views.ShellViews.Splash.SistemMigrationView>();
             NavigationService.Register<LoginViewModel, LoginView>();
             NavigationService.Register<ShellViewModel, ShellView>();
             NavigationService.Register<MainShellViewModel, MainShellView>();
             NavigationService.Register<FirmaShellViewModel,FirmaShellView>();
             NavigationService.Register<DenetimMasasiViewModel, DenetimMasasiView>();
             NavigationService.Register<KullaniciYonetimiViewModel, KullaniciYonetimiView>();
+            NavigationService.Register<KullaniciDetailsViewModel, KullaniciDetailsView>();
             
             
 

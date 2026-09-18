@@ -81,7 +81,7 @@ public class AiAsistanSettingsProviderTests
     }
 
     [Fact]
-    public async Task Yonetici_ModelAlias_Degistirebilir()
+    public async Task Yonetici_Bile_ModelAlias_Degistiremez_SabitKalir()
     {
         var svc = new AiAsistanSettingsProvider(
             new BellekAyarlari(), new Mock<IEventBus>().Object, Kimlik(1, KullaniciRolTip.Yönetici));
@@ -89,18 +89,20 @@ public class AiAsistanSettingsProviderTests
         await svc.SaveAsync(new AiAsistanSettings { ModelAlias = "phi-4-mini" });
         var ayar = await svc.GetAsync();
 
-        ayar.GetModelAlias().Should().Be("phi-4-mini");
+        ayar.GetModelAlias().Should().Be(AiAsistanSettings.VarsayilanModelAlias);
     }
 
     [Fact]
-    public async Task Yonetici_Olmayan_ModelAlias_Degistiremez()
+    public async Task Yonetici_Olmayan_Kaydetse_Bile_SabitKalir()
     {
         var svc = new AiAsistanSettingsProvider(
             new BellekAyarlari(), new Mock<IEventBus>().Object, Kimlik(2, KullaniciRolTip.Kullanici));
 
-        var eylem = () => svc.SaveAsync(new AiAsistanSettings { ModelAlias = "phi-4-mini" });
+        await svc.SaveAsync(new AiAsistanSettings { ModelAlias = "phi-4-mini", EtkinMi = false });
+        var ayar = await svc.GetAsync();
 
-        await eylem.Should().ThrowAsync<UnauthorizedAccessException>();
+        ayar.GetModelAlias().Should().Be(AiAsistanSettings.VarsayilanModelAlias);
+        ayar.EtkinMi.Should().BeFalse();
     }
 
     [Fact]

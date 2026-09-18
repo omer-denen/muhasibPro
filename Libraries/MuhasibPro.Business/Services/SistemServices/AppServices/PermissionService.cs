@@ -19,6 +19,9 @@ public class PermissionService : IPermissionService
     private readonly IAuthenticationService _auth;
     private readonly ConcurrentDictionary<(long kullaniciId, long firmaId), RolCozumu> _cache = new();
 
+    /// <summary>Firma-bağımsız kullanıcı izin çözümü cache'i (K4 — seçim-öncesi yüzeyler).</summary>
+    private readonly ConcurrentDictionary<long, RolCozumu> _kullaniciCache = new();
+
     /// <summary>Firma-başına rol çözümü: Yönetici ise tüm izinler geçerli (bypass).</summary>
     private sealed record RolCozumu(bool Yonetici, HashSet<Permission> Yetkiler);
 
@@ -65,5 +68,42 @@ public class PermissionService : IPermissionService
         return yeniCozum.Yetkiler.Contains(permission);
     }
 
-    public void ClearCache() => _cache.Clear();
+    /// <summary>Firma seçimi gerektirmeyen, kullanıcı düzeyinde izin kontrolü (Faz 6.85 K4).
+    /// Kullanıcının herhangi bir firmadaki rolü izni içeriyorsa (veya Yönetici ise) true.</summary>
+    public async Task<bool> KullaniciYetkisiVarMiAsync(Permission permission)
+    {
+        if (!_auth.IsAuthenticated) return false;
+        var kullaniciId = _auth.GetCurrentUserId;
+        if (kullaniciId <= 0) return false;
+
+        if (_kullaniciCache.TryGetValue(kullaniciId, out var cozum))
+            return cozum.Yonetici || cozum.Yetkiler.Contains(permission);
+
+        var kfrList = await _kfrRepo.GetByKullaniciIdAsync(kullaniciId);
+        if (kfrList == null || !kfrList.Any()) return false;
+
+        if (kfrList.Any(x => x.Rol?.RolTip == KullaniciRolTip.Yönetici))
+        {
+            _kullaniciCache[kullaniciId] = new RolCozumu(true, new HashSet<Permission>());
+            return true;
+        }
+
+        var yetkiler = new HashSet<Permission>();
+        foreach (var kfr in kfrList)
+        {
+            var rolPerms = await _rolPermRepo.GetByRolIdAsync(kfr.RolId);
+            foreach (var rp in rolPerms)
+                yetkiler.Add(rp.PermissionId);
+        }
+
+        var yeni = new RolCozumu(false, yetkiler);
+        _kullaniciCache[kullaniciId] = yeni;
+        return yeni.Yetkiler.Contains(permission);
+    }
+
+    public void ClearCache()
+    {
+        _cache.Clear();
+        _kullaniciCache.Clear();
+    }
 }

@@ -117,6 +117,50 @@ public class KullaniciServiceTests
     }
 
     [Fact]
+    public async Task Update_Resim_Alanlarini_Kalicilastirir()
+    {
+        var repo = new Mock<IUserRepository>();
+        repo.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(Kayit());
+        var svc = KurServis(repo, Kimlik(5, KullaniciRolTip.Yönetici));
+        var resim = new byte[] { 9, 8, 7 };
+        var onizleme = new byte[] { 1, 2 };
+
+        var sonuc = await svc.UpdateKullaniciAsync(new KullaniciModel
+        {
+            Id = 10,
+            Adi = "Yeni",
+            Resim = resim,
+            ResimOnizleme = onizleme
+        });
+
+        sonuc.Success.Should().BeTrue();
+        repo.Verify(r => r.UpdateAsync(It.Is<Kullanici>(k =>
+            k.Resim == resim && k.ResimOnizleme == onizleme)), Times.Once);
+    }
+
+    [Fact]
+    public async Task Create_Resim_Alanlarini_Kalicilastirir()
+    {
+        var repo = new Mock<IUserRepository>();
+        repo.Setup(r => r.GetByUsernameAsync("resimli")).ReturnsAsync((Kullanici)null!);
+        var kfr = new Mock<IKullaniciFirmaRolRepository>();
+        kfr.Setup(r => r.FindAsync(It.IsAny<long>(), 7)).ReturnsAsync((KullaniciFirmaRol)null!);
+        var rol = new Mock<IKullaniciRolRepository>();
+        rol.Setup(r => r.GetByIdAsync(It.IsAny<long>()))
+            .ReturnsAsync(new KullaniciRol { Id = KullaniciRolSabitleri.KullaniciRolId, RolTip = KullaniciRolTip.Kullanici });
+        var svc = KurServis(repo, Kimlik(5, KullaniciRolTip.Yönetici), null!, kfr, rol);
+        var resim = new byte[] { 5, 5, 5 };
+
+        var sonuc = await svc.CreateKullaniciAsync(
+            new KullaniciModel { KullaniciAdi = "resimli", Adi = "A", Resim = resim, ResimOnizleme = resim },
+            "gizli-123", 7, KullaniciRolSabitleri.KullaniciRolId);
+
+        sonuc.Success.Should().BeTrue();
+        repo.Verify(r => r.AddAsync(It.Is<Kullanici>(k =>
+            k.Resim == resim && k.ResimOnizleme == resim)), Times.Once);
+    }
+
+    [Fact]
     public async Task SetAktif_SeedYonetici_PasifeAlinamaz()
     {
         var repo = new Mock<IUserRepository>();

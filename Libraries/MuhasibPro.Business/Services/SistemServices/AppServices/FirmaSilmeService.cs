@@ -7,34 +7,41 @@ using MuhasibPro.Data.Contracts.Repository.SistemRepos;
 using MuhasibPro.Data.DataContext;
 using MuhasibPro.Domain.Common;
 using MuhasibPro.Domain.Entities.SistemEntity;
+using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Utilities.Responses;
 
 namespace MuhasibPro.Business.Services.SistemServices.AppServices
 {
-    /// <summary>Firma silme kanadı (tekli/toplu) — FirmaService kompozisyonunun parçası.</summary>
+    /// <summary>Firma silme kanadı (tekli/toplu) — FirmaService kompozisyonunun parçası.
+    /// K4: yıkıcı işlem — `Firma_Yonet` izni gerekir (servis katmanı kapısı).</summary>
     public class FirmaSilmeService : IFirmaSilmeService
     {
         private readonly IFirmaRepository _firmaRepository;
         private readonly IUnitOfWork<SistemDbContext> _unitOfWork;
         private readonly ILogService _logService;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IPermissionService _permissionService;
 
         public FirmaSilmeService(
             IFirmaRepository firmaRepository,
             IUnitOfWork<SistemDbContext> unitOfWork,
             ILogService logService,
-            IAuthenticationService authenticationService)
+            IAuthenticationService authenticationService,
+            IPermissionService permissionService = null)
         {
             _firmaRepository = firmaRepository;
             _unitOfWork = unitOfWork;
             _logService = logService;
             _authenticationService = authenticationService;
+            _permissionService = permissionService;
         }
 
         public async Task<ApiDataResponse<int>> DeleteFirmaAsync(long firmaId)
         {
             if (_authenticationService.GetCurrentUserId <= 0)
                 return new ErrorApiDataResponse<int>(data: 0, message: "⚠️ Giriş yapmış bir kullanıcı bulunamadı!");
+            if (_permissionService != null && !await _permissionService.KullaniciYetkisiVarMiAsync(Permission.Firma_Yonet))
+                return new ErrorApiDataResponse<int>(data: 0, message: "🔒 Firma silme yetkiniz yok (Firma Yönetimi izni gerekir).");
             if (firmaId <= 0)
                 return new ErrorApiDataResponse<int>(data: 0, message: "⚠️ Silinecek firma bilgisi boş olamaz!");
             try
@@ -68,6 +75,8 @@ namespace MuhasibPro.Business.Services.SistemServices.AppServices
         {
             if (_authenticationService.GetCurrentUserId <= 0)
                 return new ErrorApiDataResponse<int>(data: 0, message: "❌ Giriş yapmış bir kullanıcı bulunamadı!");
+            if (_permissionService != null && !await _permissionService.KullaniciYetkisiVarMiAsync(Permission.Firma_Yonet))
+                return new ErrorApiDataResponse<int>(data: 0, message: "🔒 Firma silme yetkiniz yok (Firma Yönetimi izni gerekir).");
             try
             {
                 var items = await _firmaRepository.GetFirmaKeysAsync(index, length, request);

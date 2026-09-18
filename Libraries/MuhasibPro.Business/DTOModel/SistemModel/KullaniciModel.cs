@@ -26,6 +26,8 @@ public class KullaniciModel : ObservableObject
     //BaseEntity    
     public string AdiSoyadi => $"{Adi} {Soyadi}";
     public string Initials => string.Format("{0}{1}", $"{Adi} "[0], $"{Soyadi} "[0]).Trim().ToUpper();
+    public string RolAdi => Rol?.RolAdi ?? string.Empty;
+    public string AktifMetni => AktifMi ? "Aktif" : "Pasif";
 
     public bool IsNew => Id <= 0;
     public ICollection<HesapModel> Hesaplar { get; set; }
@@ -48,6 +50,10 @@ public class KullaniciModel : ObservableObject
             AktifMi = source.AktifMi;
             RolId = source.RolId;
             Telefon = source.Telefon;
+            Resim = source.Resim;
+            ResimOnizleme = source.ResimOnizleme;
+            ResimSource = source.ResimSource;
+            ResimOnizlemeSource = source.ResimOnizlemeSource;
 
             AktifMi = source.AktifMi;
             KayitTarihi = source.KayitTarihi;

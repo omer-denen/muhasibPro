@@ -67,8 +67,13 @@ Her mantıksal blok (form, liste, özet, araç çubuğu) **ana border içinde ay
 
 ---
 
-## Dialog zeminleri
+## Master-detail — detay büyütme (expander)
 
+Master-detail sayfalarda (liste + detay paneli), **detay panelinin sağ üstünde yukarı açılan bir büyüt/küçült butonu** olur (chevron: normalde yukarı `E70E`, büyütülünce aşağı `E70D`). Büyütünce **liste kapanır** (`RowDefinition.Height=0` + `MinHeight=0`, liste kartı `Collapsed`) ve detay tüm içerik alanını kaplar; küçültünce eski iki-panel düzenine dönülür. Uygulama view code-behind'inde yapılır (saf yerleşim durumu).
+
+Emsal: `FirmalarView` (Firma Yönetimi), `KullaniciYonetimiView` (Kullanıcılar sekmesi). Sonraki master-detail tasarımlarında **zorunludur**.
+
+## Dialog zeminleri
 - Dialog `Background`'ı **opak** `SolidBackgroundFillColorBaseBrush` olur.
 - Yarı saydam `CardBackgroundFillColorDefaultBrush` dialog zemini olarak **kullanılmaz** (arkası sızar — Oturum 248 dersi).
 

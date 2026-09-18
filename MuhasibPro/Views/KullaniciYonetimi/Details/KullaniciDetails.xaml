@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="MuhasibPro.Views.KullaniciYonetimi.Details.KullaniciDetails"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:MuhasibPro.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="using:MuhasibPro.ViewModels.ViewModels.KullaniciYonetimi"
+    xmlns:views="using:MuhasibPro.Views.KullaniciYonetimi.Details"
+    d:DesignHeight="600"
+    d:DesignWidth="1100"
+    mc:Ignorable="d"
+    Background="Transparent">
+    <UserControl.Resources>
+        <DataTemplate x:Key="DetailsTemplate" x:DataType="viewmodels:KullaniciDetailsViewModel">
+            <controls:FluidGrid
+                controls:ValidationBehavior.Errors="{x:Bind ValidationErrors, Mode=OneWay}"
+                ColumnSpacing="12"
+                Columns="2"
+                RowSpacing="14">
+
+                <Border
+                    controls:FluidGrid.ColumnSpan="2"
+                    Padding="10,6"
+                    CornerRadius="{StaticResource MuhasibPillCornerRadius}"
+                    Background="{ThemeResource MuhasibPetrolTintBrush}"
+                    BorderBrush="{ThemeResource MuhasibPetrolBorderBrush}"
+                    BorderThickness="1"
+                    HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="{StaticResource IconUser}" FontSize="12" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
+                        <TextBlock Text="Kullanıcı Bilgileri" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <controls:FormTextBox
+                    controls:ValidationHelper.PropertyName="KullaniciAdi"
+                    Header="Kullanıcı Adı *"
+                    IsEnabled="{x:Bind ItemIsNew, Mode=OneWay}"
+                    Text="{x:Bind EditableItem.KullaniciAdi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <controls:FormTextBox
+                    controls:ValidationHelper.PropertyName="Adi"
+                    Header="Ad *"
+                    Text="{x:Bind EditableItem.Adi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <controls:FormTextBox
+                    Header="Soyad"
+                    Text="{x:Bind EditableItem.Soyadi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <controls:FormTextBox
+                    DataType="Phone"
+                    Header="Telefon"
+                    Text="{x:Bind EditableItem.Telefon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <controls:FormTextBox
+                    Header="E-Posta"
+                    Text="{x:Bind EditableItem.Eposta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <controls:FormComboBox
+                    DisplayMemberPath="RolAdi"
+                    Header="Firma Rolü"
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{x:Bind Roller, Mode=OneWay}"
+                    SelectedItem="{x:Bind SeciliRol, Mode=TwoWay}" />
+
+                <ToggleSwitch
+                    Header="Aktif"
+                    IsOn="{x:Bind EditableItem.AktifMi, Mode=TwoWay}"
+                    OffContent="Pasif"
+                    OnContent="Aktif" />
+
+                <StackPanel
+                    controls:FluidGrid.ColumnSpan="2"
+                    Spacing="12"
+                    Visibility="{x:Bind ItemIsNew, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border
+                        Padding="10,6"
+                        CornerRadius="{StaticResource MuhasibPillCornerRadius}"
+                        Background="{ThemeResource MuhasibPetrolTintBrush}"
+                        BorderBrush="{ThemeResource MuhasibPetrolBorderBrush}"
+                        BorderThickness="1"
+                        HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="{StaticResource IconLock}" FontSize="12" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
+                            <TextBlock Text="Şifre (yalnız yeni kullanıcı)" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
+                        </StackPanel>
+                    </Border>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <PasswordBox
+                            Grid.Column="0"
+                            Header="Şifre *"
+                            Password="{x:Bind Sifre, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <PasswordBox
+                            Grid.Column="1"
+                            Header="Şifre Tekrar *"
+                            Password="{x:Bind SifreTekrar, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+                </StackPanel>
+
+            </controls:FluidGrid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0">
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource MuhasibCardStyle}" Padding="12" VerticalAlignment="Top">
+                <views:KullaniciCard Item="{x:Bind ViewModel.Item, Mode=OneWay}" ViewModel="{x:Bind ViewModel}" />
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource MuhasibCardStyle}" Padding="14" VerticalAlignment="Top">
+                <controls:Details
+                    x:Name="details"
+                    CancelCommand="{x:Bind ViewModel.CancelCommand}"
+                    DeleteCommand="{x:Bind ViewModel.DeleteCommand}"
+                    DetailsContent="{x:Bind ViewModel}"
+                    DetailsTemplate="{StaticResource DetailsTemplate}"
+                    EditCommand="{x:Bind ViewModel.EditCommand}"
+                    IsEditMode="{x:Bind ViewModel.IsEditMode, Mode=OneWay}"
+                    SaveCommand="{x:Bind ViewModel.SaveCommand}" />
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

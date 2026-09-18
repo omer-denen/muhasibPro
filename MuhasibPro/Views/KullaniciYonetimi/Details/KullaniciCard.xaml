@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="MuhasibPro.Views.KullaniciYonetimi.Details.KullaniciCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:MuhasibPro.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="600"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+    <StackPanel Spacing="12">
+
+        <!-- Kimlik karti: avatar + ad soyad + kullanici adi + rol hapi.
+             Formda olan alanlar (e-posta/telefon) burada TEKRARLANMAZ. -->
+        <Border Style="{StaticResource MuhasibCardStyle}" Padding="16">
+            <StackPanel Spacing="10">
+                <Grid Width="96" Height="96" HorizontalAlignment="Center">
+                    <PersonPicture
+                        Width="96"
+                        Height="96"
+                        Initials="{x:Bind Item.Initials, Mode=OneWay}"
+                        ProfilePicture="{x:Bind Item.ResimOnizleme, Mode=OneWay, Converter={StaticResource ObjectToImageConverter}}" />
+                    <controls:RoundButton
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="Transparent"
+                        BorderBrush="{ThemeResource MuhasibPetrolBorderBrush}"
+                        BorderThickness="2"
+                        Command="{x:Bind ViewModel.EditPictureCommand}"
+                        Radius="96"
+                        Visibility="{x:Bind ViewModel.IsEditMode, Mode=OneWay}">
+                        <Grid Width="96" Height="96">
+                            <Rectangle Fill="{ThemeResource MuhasibPetrolBrush}" Opacity="0.8" RadiusX="48" RadiusY="48" />
+                            <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Foreground="{ThemeResource MuhasibOnPetrolBrush}" Glyph="{StaticResource IconEdit}" Visibility="{x:Bind ViewModel.IsEnabled, Mode=OneWay}" />
+                            <Image HorizontalAlignment="Center" VerticalAlignment="Center" Source="{x:Bind ViewModel.NewPictureSource, Mode=OneWay, Converter={StaticResource ObjectToImageConverter}}" Stretch="UniformToFill" Visibility="{x:Bind ViewModel.NewPictureSource, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}" />
+                        </Grid>
+                    </controls:RoundButton>
+                </Grid>
+
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                    Text="{x:Bind Item.AdiSoyadi, Mode=OneWay, FallbackValue='Yeni Kullanıcı'}"
+                    TextAlignment="Center"
+                    TextWrapping="WrapWholeWords" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                    Text="{x:Bind Item.KullaniciAdi, Mode=OneWay, FallbackValue='kullanıcı adı'}"
+                    TextAlignment="Center"
+                    TextWrapping="WrapWholeWords" />
+                <Border
+                    HorizontalAlignment="Center"
+                    Padding="10,3"
+                    Background="{ThemeResource MuhasibPetrolTintBrush}"
+                    BorderBrush="{ThemeResource MuhasibPetrolBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="{StaticResource MuhasibPillCornerRadius}">
+                    <TextBlock
+                        FontSize="11"
+                        FontWeight="Bold"
+                        Foreground="{ThemeResource MuhasibPetrolDeepBrush}"
+                        Text="{x:Bind Item.RolAdi, Mode=OneWay, FallbackValue='ROL'}" />
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Ozet (hizli okuma): durum + tarihler -->
+        <Border Style="{StaticResource MuhasibCardStyle}" Padding="14">
+            <StackPanel Spacing="0">
+                <Grid Padding="0,6" ColumnSpacing="10">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <FontIcon Glyph="{StaticResource IconShield}" FontSize="13" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="1">
+                        <TextBlock Text="Rol" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Text="{x:Bind Item.RolAdi, Mode=OneWay, FallbackValue='—'}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    </StackPanel>
+                </Grid>
+                <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.6" />
+                <Grid Padding="0,6" ColumnSpacing="10">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <FontIcon Glyph="{StaticResource IconCheckMark}" FontSize="13" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="1">
+                        <TextBlock Text="Durum" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Text="{x:Bind Item.AktifMetni, Mode=OneWay, FallbackValue='—'}" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    </StackPanel>
+                </Grid>
+                <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.6" />
+                <Grid Padding="0,6" ColumnSpacing="10">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <FontIcon Glyph="{StaticResource IconCalendar}" FontSize="13" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="1">
+                        <TextBlock Text="Kayıt" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Text="{x:Bind Item.KayitTarihi, Mode=OneWay, Converter={StaticResource DateTimeFormatConverter}, FallbackValue='—'}" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    </StackPanel>
+                </Grid>
+                <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.6" />
+                <Grid Padding="0,6" ColumnSpacing="10">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <FontIcon Glyph="{StaticResource IconRefresh}" FontSize="13" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Spacing="1">
+                        <TextBlock Text="Son Güncelleme" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        <TextBlock Text="{x:Bind Item.GuncellemeTarihi, Mode=OneWay, Converter={StaticResource DateTimeFormatConverter}, FallbackValue='—'}" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

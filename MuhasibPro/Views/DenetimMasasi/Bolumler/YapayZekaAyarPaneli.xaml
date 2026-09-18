@@ -48,6 +48,12 @@
                     <FontIcon Glyph="{StaticResource IconShield}" FontSize="16" />
                 </controls:SettingsCard.HeaderIcon>
             </controls:SettingsCard>
+            <controls:SettingsCard Header="Model" Description="Ürün tarafından sabitlenmiştir (değiştirilemez).">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="{StaticResource IconDatabase}" FontSize="16" />
+                </controls:SettingsCard.HeaderIcon>
+                <TextBlock Text="{Binding ModelAlias}" VerticalAlignment="Center" />
+            </controls:SettingsCard>
             <controls:SettingsCard Header="Model durumu" Description="{Binding ModelDurumMetni}">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="{StaticResource IconZap}" FontSize="16" />
@@ -62,25 +68,6 @@
                        Style="{StaticResource CaptionTextBlockStyle}"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        TextWrapping="WrapWholeWords" />
-        </StackPanel>
-
-        <!-- Model -->
-        <StackPanel Spacing="8">
-            <TextBlock Text="Model" Style="{StaticResource SubtitleTextBlockStyle}" />
-            <controls:SettingsCard Header="Model adı" Description="Foundry katalog adı. Yalnızca yönetici değiştirir.">
-                <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="{StaticResource IconDatabase}" FontSize="16" />
-                </controls:SettingsCard.HeaderIcon>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBox Text="{Binding ModelAlias, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="220" IsEnabled="{Binding IsYonetici}" />
-                    <Button Content="Uygula" Command="{Binding ModelAliasUygulaCommand}" Style="{StaticResource MuhasibPrimaryButtonStyle}" MinWidth="120" ToolTipService.ToolTip="Modeli etkinleştir (eski bırak + yeni hazırla)" />
-                    <Button Content="Varsayılan" Command="{Binding ModelAliasSifirlaCommand}" />
-                </StackPanel>
-            </controls:SettingsCard>
-            <StackPanel Spacing="6" Visibility="{Binding IsModelUygulaniyor, Converter={StaticResource TrueToVis}}">
-                <TextBlock Text="{Binding UygulamaAsamasi}" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                <ProgressBar Value="{Binding UygulamaYuzde}" Maximum="100" />
-            </StackPanel>
         </StackPanel>
 
         <!-- Model yönetimi (disk) -->
@@ -134,7 +121,7 @@
                     </DataTemplate>
                 </controls:SettingsExpander.ItemTemplate>
             </controls:SettingsExpander>
-            <TextBlock Text="İndirme: çalışma alanında statü çubuğunun sağındaki Asistan düğmesini açıp soru sorun; model ve yürütücü ilk soruda otomatik indirilir, ilerleme panelde görünür. Bu bölümden yalnız model seçimi ve disk yönetimi yapılır."
+            <TextBlock                        Text="İndirme: çalışma alanında statü çubuğunun sağındaki Asistan düğmesini açıp soru sorun; model ve yürütücü ilk soruda otomatik indirilir, ilerleme panelde görünür. Model ürün tarafından sabitlenmiştir; bu bölümden yalnız disk yönetimi yapılır."
                        Style="{StaticResource CaptionTextBlockStyle}"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        TextWrapping="WrapWholeWords" />

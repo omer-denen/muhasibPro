@@ -179,6 +179,7 @@ Veritabanından/diskten veri çeken **her** dinamik yüzey (sayfa, panel, kart, 
   - `Padding` standardı: standart kart `16`; küçük kart `12`; büyük panel `20`.
   - Kart arası boşluk **sabit 12px** (`StackPanel Spacing` / `Grid ColumnSpacing-RowSpacing`).
   - **İç içe kart > 2 seviye yasak.**
+  - **Master-detail sayfalarda (liste + detay):** detay panelinin sağ üstünde, yukarı açılan bir **büyüt/küçült (expander)** butonu olur; büyütünce **liste kapanır** ve detay tüm içerik alanını kaplar (`FirmalarView`/`KullaniciYonetimiView` emsali; sonraki master-detail tasarımlarında zorunlu).
 - **Dialog zeminleri opak:** dialog `Background`'ı `SolidBackgroundFillColorBaseBrush` (opak) olur; yarı saydam `CardBackgroundFillColorDefaultBrush` dialog zemini olarak **kullanılmaz** (arkası sızar).
 - **Renk:** yalnız `{ThemeResource ...}`/`{StaticResource ...}` — hardcode `#RRGGBB` **yasak** (DesignTokens/ThemeDictionaries tanımları hariç).
 - **Yasaklar:** kök `Grid` + `Background`; ana border'sız doğrudan zemine kart; **iç içe kart > 2 seviye**; view'dan view'a tutarsızlık.
@@ -202,6 +203,22 @@ Veritabanından/diskten veri çeken **her** dinamik yüzey (sayfa, panel, kart, 
 - **Aynı işi tekrar yapma:** yeni bir view/özelliğe dokunmadan önce defter okunur; aynı yer için daha önce referans uygulanmışsa tekrar araştırılmaz, mevcut karar korunur (stabilite).
 - **Çelişki:** defterdeki mevcut referansla çelişen yeni bir tasarım gerekiyorsa **kullanıcıya sorulur** (Kural 15); habersiz ezme yasak.
 - **Kapı:** referansı kaydedilmemiş (veya `Durum` güncellenmemiş) tasarım işi tamamlanmış sayılmaz; faz kapanmaz.
+
+### 20. İş sırası — elindeki işi bitir, yenisini sıraya al (KESİN)
+**Bir kez başlanan iş, yeni talimat gelse bile yarım bırakılmaz.** (Kullanıcı kuralı, Oturum 286.)
+- Elindeki (başlanmış) iş **tamamlanmadan** yeni talimata geçilmez; yeni talimat **sıraya alınır**.
+- Kullanıcı iş sırasında yeni bir şey yazarsa sıra: **(1)** elindeki işi bitir → **(2)** sırada bekleyeni yap. Ara vermek zorundaysan (ör. kullanıcı onayı/kararı gerekiyorsa) bunu **açıkça söyle** ve işi "yarım" olarak kaydet.
+- **İstisna — aynı iş:** Kullanıcının yazdığı şey **üzerinde çalışılan işle ilgiliyse** (geri bildirim/düzeltme/ayrıntı), bu "yeni iş" sayılmaz; sıraya alınmaz, **doğrudan mevcut işe uygulanır** (iş kesilmez).
+- **Söyle:** Yeni (farklı) bir talimat geldiğinde agent, "şu an X işini bitiriyorum, senin yazdığın Y'yi sıraya aldım / X bitince Y'ye geçeceğim" der. Sessizce konu değiştirmek yarım iş bırakır — kabul edilmez.
+- **Kapı:** Elindeki iş build 0/0 + test + (gerekiyorsa) canlı/kanıt ile kapanmadan yeni işe başlamak süreç ihlalidir.
+
+### 21. Sahte/gösterimlik içerik yasak — UI'da yalnız gerçekten var olan (KESİN)
+**Hiçbir yüzeyde (navbar/menü, buton, liste, rozet, başlık, kart) projede gerçekten var olmayan modül/özellik/veri gösterilmez.** (Kullanıcı kuralı, Oturum 291.)
+- Projede karşılığı olmayan menü öğesi/buton/modül **konmaz**; "örnek/mock/placeholder/yakında" görsel giriş yasaktır.
+- Sahte sabit veri (uydurma firma/şirket adı, sabit kullanıcı/rol/dönem) gösterilmez; gösterilecekse **gerçek veriye bağlanır** (Kural 7).
+- Bir özellik henüz yoksa arayüzde **hiç görünmez**; boş/pasif bırakıp varmış gibi gösterilmez.
+- Erişim/izin kapıları yalnız **gerçek** yüzeylere bağlanır; olmayan modül için kapı yazılmaz.
+- **Kapı:** UI'da projede olmayan bir giriş bulunursa o iş `dotnet build` 0/0 olsa bile kapanmaz; önce kaldırılır (Kural 4 ile birlikte).
 
 ---
 

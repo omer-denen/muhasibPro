@@ -1,7 +1,7 @@
 # MuhasibPro — Faz 6.85: Kullanıcı Yönetimi + RBAC (kullanıcı → modül/alan erişimi) Planı
 
 > **Faz 6.85 (genişletildi).** Kullanıcı bazlı yapı çekirdeğin sonuna bırakıldı; **kim hangi modülü/alanı kullanabilir, nereye girebilir, yetkisiz alan nasıl engellenir** eksik kaldı. Bu faz onu kapatır.
-> **Durum:** **K1 ✅🧪 (Oturum 285) · K2 ✅🧪 (Oturum 285, canlı onay bekliyor)** · K3-K6 📋 plan (Oturum 284). **Öncelikli faz** (kullanıcı kararı: "eksik işleri tamamladıktan sonra öncelikli faz").
+> **Durum:** **K1 ✅🧪 · K2 ✅🧪 (canlı onay bekliyor) (Oturum 285)** · **K2-REDESIGN + K3 🔨 (Oturum 285 devam — YENİ CONTEXT)** · K4-K6 📋. **Öncelikli faz** (kullanıcı kararı: "eksik işleri tamamladıktan sonra öncelikli faz").
 > **Sahiplik:** RBAC `Data`+`Business` (motor) · UI `Views`/`ViewModels` · migration (Kural 8) — sınıf bazlı onay.
 
 ## Kullanıcı sözü / kapsam
@@ -75,19 +75,28 @@ Kullanici ──(KullaniciFirmaRol)──► Firma  (firma-başına rol)
 
 > **Oturum 285 notu:** varsayılan `Kullanıcı` seti = 15 modül `*_Goruntule` + `AiAsistan_Kullan` (default-deny; `Veritabani_*`/`Log_*` ve tüm yazma kapalı; K3'te düzenlenir). Dev DB'de Oturum 284'ten kalan geçici `RolPermission` satırı migration'ı UNIQUE ihlaliyle durduracaktı → migration idempotent yapıldı ve gerçek dev DB kopyasıyla doğrulandı.
 
-### K2 — Kullanıcı Yönetimi modal penceresi ✅🧪 (Oturum 285) — Kural 8 sınıf onayı ✅
-- [x] `KullaniciYonetimiViewModel` + `KullaniciDuzenleViewModel` (composition) + `KullaniciYonetimiView` + `KullaniciDuzenlePanel` (ayrı `Views/KullaniciYonetimi/`, ayrı pencere deseni).
-- [x] Liste + yeni kullanıcı (`Adi/Soyadi` dahil; kullanıcı adı benzersiz) + düzenle + aktif/pasif + şifre belirle + sil (guard'lı).
-- [x] Kapı: yalnız yönetici (`AyarYetkiDenetimi.KullaniciYoneticiMi`). (İnce `Permission` kapısı K4.)
-- [x] `IKullaniciService`'e eksik create/rol metotları (`CreateKullaniciAsync`, `RolAtaAsync`, `GetKullanicilarWithRolAsync`, `GetRollerAsync`) + yeni `IKullaniciRolRepository` (Scoped) (sözleşme → Business → Data zinciri, Kural 5).
-- [x] **Giriş noktası:** `UserInfoControl` menüsüne yalnız yöneticiye görünen **"Kullanıcı Yönetimi"** maddesi (K5 menü işinin bu kısmı K2'ye çekildi).
-- [x] **Bug fix (canlı):** `IUserRepository` Singleton→**Scoped** (pencere-başına DI scope → aynı `SistemDbContext`; FK ihlali giderildi; Kural 8 ✅ onaylı).
-- [x] Testler: `KullaniciYonetimiTests` (6) + `KullaniciServiceTests` create/rol (3) + DI-scoped regresyon (`PolitikaTests`).
-- [x] **Kural 18 canlı (`ot285_*`):** FirmaShell → kullanıcı menüsü → "Kullanıcı Yönetimi" → pencere açıldı (Kural 17 katmanlı); liste **Ömer Korkut/Yönetici**; yeni kullanıcı kaydı → **"Kullanıcı oluşturuldu."** + liste **Test Kullanici/Kullanıcı** (`ot285_s_kayit`) — RBAC rol ataması KFR ile çalışıyor. **Onay bekliyor.**
+### K2-REDESIGN — standart modül deseni (FirmaList/FirmaDetails) 🔨 (Oturum 285 devam — YENİ CONTEXT)
+> **Oturum 286 güncellemesi (K2-ÖN ✅):** Desen kaynağı **hazırlandı ve canlı doğrulandı** — `Views/Firmalar/*` Kural 17 + `MuhasibCardStyle` ile yeniden tasarlandı (liste `DataList`+`TableView`, detay `Details`+`FirmalarCard`, master-detail + Pivot) ve FirmaShell'den **"Firma Yönetimi"** butonuyla açılıyor. K2-REDESIGN bu dosyaları birebir referans alır. Detay: `docs/LOG/LOG-261-280.md` Oturum 286 + `KONTROL-LISTESI` "K2-ÖN".
+> **Kullanıcı kararı (Oturum 285 devam):** Mevcut K2 view'i **elle yazılmış master-detail** olduğu için **reddedildi** ("bu şekilde bir kullanıcı ekleme sayfası istemiyorum"). İstenen: `FirmaList.xaml` + `FirmaDetails.xaml` (kullanılmayan/örnek) **standart deseni**. K3 izin matrisi **aynı sayfada** olacak. **Kural 8 sınıf onayı ✅ alındı.**
+- Silinecek (Kural 4): `Views/KullaniciYonetimi/Components/KullaniciDuzenlePanel.*` + `KullaniciYonetimiViewModel` + `KullaniciDuzenleViewModel` + `KullaniciYonetimiView.xaml(.cs)` (elle yazılan sürüm).
+- **Yeni VM'ler** (`ViewModels/ViewModels/KullaniciYonetimi/`): `KullaniciYonetimiViewModel` (orkestratör/composition) · `KullaniciListViewModel : GenericListViewModel<KullaniciModel>` · `KullaniciDetailsViewModel : GenericDetailsViewModel<KullaniciModel>` · `KullaniciRolYetkiViewModel` (K3 izin matrisi).
+- **Yeni View'ler** (`Views/KullaniciYonetimi/`): `KullaniciYonetimiView` (Section + Pivot: "Kullanıcılar" + "Roller & İzinler") · `List/KullaniciList` (`DataList`+`BaseConfig`+`TableView` kolonları: Kullanıcı Adı · Ad Soyad · E-posta · Telefon · **Firma Rolü** · Aktif) · `Details/KullaniciDetails` (`Details`+`FormTextBox`/`FluidGrid`) · `Details/KullaniciCard`.
+- **Servis/motor korunur:** `IKullaniciService` create/rol (K2) + `IRolYetkiService` (K3).
+- **Avatar/profil resmi (kullanıcı isteği, Oturum 285 devam):** firma logosu gibi (`FirmaDetailsViewModel.OnEditPicture` + `IFilePickerService.OpenImagePickerAsync`) **kullanıcı profil resmi** ekleme. `Kullanici` entity'de `Resim`/`ResimOnizleme`, `KullaniciModel`'de `Resim`/`ResimOnizleme`/`ResimSource`/`ResimOnizlemeSource` **zaten var**; `KullaniciCard`'da `PersonPicture` ile gösterilir. **Eksik:** `IKullaniciService.CreateKullaniciAsync`/`UpdateKullaniciAsync` resmi **kalıcılaştırmıyor** (`ToModel` okur ama yazma eşlemesi yok) → create/update'e `Resim`+`ResimOnizleme` yazımı eklenir; `KullaniciDetailsViewModel`'e `EditPictureCommand` + `NewPictureSource` (FirmaDetails deseni).
+- **Referans:** `Views/Firmalar/FirmalarView.xaml`, `Views/Firmalar/List/FirmalarList.xaml`, `Views/Firma/Details/FirmaDetails.xaml` + `FirmaCard.xaml`, `FirmaListViewModel`, `FirmaDetailsViewModel`, `GenericListViewModel`, `GenericDetailsViewModel`, `Controls/DataList`, `Controls/Details`. (Araştırma iç desen; dış araştırma gerekmez.)
 
-### K3 — İzin matrisi + rol atama (iki rol) ⬜
-- [x] Kullanıcıya firma-bazlı **rol atama** (KFR yazımı; `Yönetici`/`Kullanıcı`) — K2'de kullanıcı formundaki rol seçici + `RolAtaAsync` ile teslim edildi.
-- [ ] **İzin matrisi UI** (kategori başlıklarıyla 71 izin): `Yönetici` sabit (tüm izinler/bypass), **`Kullanıcı` rolü düzenlenebilir** → modül/aksiyon erişimi buradan yönetilir.
+### K2 — Kullanıcı Yönetimi modal penceresi ✅🧪 (Oturum 285) — ⚠️ VIEW REDESIGN gerekli (yukarı bkz.); motor/servis ✅
+- [x] `IKullaniciService`'e create/rol metotları (`CreateKullaniciAsync`, `RolAtaAsync`, `GetKullanicilarWithRolAsync`, `GetRollerAsync`) + `IKullaniciRolRepository` (Scoped) (Kural 5).
+- [x] Kapı: `AyarYetkiDenetimi.KullaniciYoneticiMi`. Giriş: `UserInfoControl` admin "Kullanıcı Yönetimi" maddesi.
+- [x] **Bug fix (canlı):** `IUserRepository` Singleton→Scoped (pencere-scope context birliği; FK).
+- [x] Testler + **Kural 18 canlı** (`ot285_s_kayit`: kullanıcı oluşturma + rol atama çalışıyor).
+- [ ] **View redesign** (standart desene) — yeni context.
+
+### K3 — İzin matrisi + rol atama (iki rol) 🔨 (Oturum 285 devam)
+- [x] Kullanıcıya firma-bazlı **rol atama** (KFR; `RolAtaAsync`) — K2 motorunda.
+- [x] **Servis iskeleti:** `RolIzinModel` + `IRolYetkiService`/`RolYetkiService` (`GetMatrisAsync`, `SetIzinAsync` + `ClearCache`) — **kodlandı, DI kaydı/UI/test YOK** (yeni context).
+- [ ] DI kaydı (`AddServicesHostBuilderExtensions` Scoped) + `KullaniciRolYetkiViewModel` + "Roller & İzinler" sekmesi UI (kategori başlıklı 71 izin; `Yönetici` sabit, `Kullanıcı` düzenlenebilir).
+- [ ] Testler + canlı (yetkisiz alan kapısı K4).
 - [ ] **Özel rol oluşturma YOK** (kullanıcı kararı Oturum 284); `KullaniciRolTip` iki rol kalır.
 
 ### K4 — Modül/alan erişim kapısı ⬜

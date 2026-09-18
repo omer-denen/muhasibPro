@@ -19,7 +19,7 @@
         <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="MinWidth" Value="80" />
-        <Setter Property="MaxWidth" Value="120" />
+        <Setter Property="MaxWidth" Value="240" />
         <Setter Property="UseSystemFocusVisuals" Value="True" />
         <Setter Property="AllowFocusOnInteraction" Value="False" />
         <Setter Property="CornerRadius" Value="6" />

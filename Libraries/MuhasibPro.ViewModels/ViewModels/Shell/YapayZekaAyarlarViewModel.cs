@@ -2,7 +2,6 @@ using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
 using MuhasibPro.Business.DTOModel.SistemModel;
-using MuhasibPro.Business.Services.SistemServices.Authentication;
 using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Models;
 using MuhasibPro.ViewModels.Infrastructure.Common;
@@ -13,14 +12,13 @@ using System.Windows.Input;
 namespace MuhasibPro.ViewModels.ViewModels.Shell;
 
 /// <summary>Denetim Masası "Yapay Zeka" bölümü VM'i (Faz 6.92 Adım 5).
-/// Tek cümle: AI ayar modelini panele bağlar + model hazırlığını çalıştırır.</summary>
+/// Tek cümle: AI ayar modelini (sabit model + davranış eşikleri) panele bağlar; disk/model yönetimini sunar.</summary>
 public class YapayZekaAyarlarViewModel : ViewModelBase
 {
     internal const string YardimAnahtari = "YapayZeka";
     internal const string YardimBasligi = "Yapay Zeka — Yardım";
 
     private readonly IAiAsistanSettingsProvider? _saglayici;
-    private readonly IAuthenticationService? _auth;
     private readonly ISurumOzellikService? _surum;
     private readonly IAsistanSohbetService? _sohbet;
     private readonly IYardimBilgiTabani? _yardimTabani;
@@ -30,13 +28,11 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
     public YapayZekaAyarlarViewModel(
         ICommonServices commonServices,
         IAiAsistanSettingsProvider? saglayici = null,
-        IAuthenticationService? auth = null,
         ISurumOzellikService? surum = null,
         IAsistanSohbetService? sohbet = null,
         IYardimBilgiTabani? yardimTabani = null) : base(commonServices)
     {
         _saglayici = saglayici;
-        _auth = auth;
         _surum = surum;
         _sohbet = sohbet;
         _yardimTabani = yardimTabani;
@@ -55,7 +51,6 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
             NotifyPropertyChanged(nameof(MaksGecmisTur));
             NotifyPropertyChanged(nameof(EnFazlaMadde));
             NotifyPropertyChanged(nameof(SoruZamanAsimiSn));
-            NotifyPropertyChanged(nameof(IsYonetici));
             await SurumuYukleAsync();
             await ModelDurumunuYukleAsync();
             await DizinDurumunuYukleAsync();
@@ -67,17 +62,8 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
         await ModelleriYukleAsync();
     }
 
-    public string ModelAlias
-    {
-        get => _ayarlar.ModelAlias;
-        set
-        {
-            if (_ayarlar.ModelAlias == value) return;
-            _ayarlar.ModelAlias = value;
-            NotifyPropertyChanged(nameof(ModelAlias));
-            _ = SaveAsync();
-        }
-    }
+    /// <summary>Sabit sohbet modeli (S1 tam kilit, Oturum 292): ürün sabitidir, kullanıcı değiştiremez.</summary>
+    public string ModelAlias => _ayarlar.GetModelAlias();
 
     public bool EtkinMi
     {
@@ -126,8 +112,6 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
             _ = SaveAsync();
         }
     }
-
-    public bool IsYonetici => AyarYetkiDenetimi.KullaniciYoneticiMi(_auth);
 
     private bool _isYukleniyor;
     public bool IsYukleniyor
@@ -206,30 +190,6 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
         private set { if (Set(ref _isModelIslemde, value)) ModelKomutlariniTazele(); }
     }
 
-    private bool _isModelUygulaniyor;
-    /// <summary>Alias uygulama (eski bırak + yeni hazırla) sürüyor (Kural 12: determinate).</summary>
-    public bool IsModelUygulaniyor
-    {
-        get => _isModelUygulaniyor;
-        private set { if (Set(ref _isModelUygulaniyor, value)) ModelKomutlariniTazele(); }
-    }
-
-    private double _uygulamaYuzde;
-    public double UygulamaYuzde
-    {
-        get => _uygulamaYuzde;
-        private set => Set(ref _uygulamaYuzde, value);
-    }
-
-    private string _uygulamaAsamasi = string.Empty;
-    public string UygulamaAsamasi
-    {
-        get => _uygulamaAsamasi;
-        private set => Set(ref _uygulamaAsamasi, value);
-    }
-
-    private AsyncRelayCommand? _sifirla;
-    public ICommand ModelAliasSifirlaCommand => _sifirla ??= new AsyncRelayCommand(ModelAliasSifirlaAsync);
     private AsyncRelayCommand? _yardim;
     public ICommand YardimCommand => _yardim ??= new AsyncRelayCommand(YardimGoster);
 
@@ -238,16 +198,12 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
 
     private AsyncRelayCommand<AsistanModelSatiri>? _modelSil;
     public ICommand ModelSilCommand => _modelSil ??= new AsyncRelayCommand<AsistanModelSatiri>(
-        ModelSilAsync, s => s != null && !IsModelIslemde && !IsModelUygulaniyor);
-
-    private AsyncRelayCommand? _aliasUygula;
-    public ICommand ModelAliasUygulaCommand => _aliasUygula ??= new AsyncRelayCommand(ModelAliasUygulaAsync, AliasUygulanabilirMi);
+        ModelSilAsync, s => s != null && !IsModelIslemde);
 
     private void ModelKomutlariniTazele()
     {
         _modelleriYenile?.RaiseCanExecuteChanged();
         _modelSil?.RaiseCanExecuteChanged();
-        _aliasUygula?.RaiseCanExecuteChanged();
     }
 
     public async Task SaveAsync()
@@ -270,13 +226,6 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
             HataMetni = ex.Message;
             StatusError(ex.Message);
         }
-    }
-
-    public async Task ModelAliasSifirlaAsync()
-    {
-        _ayarlar.ModelAlias = AiAsistanSettings.VarsayilanModelAlias;
-        NotifyPropertyChanged(nameof(ModelAlias));
-        await SaveAsync();
     }
 
     /// <summary>İndirilmiş modelleri + disk özetini yükler (Kural 11 bayrak; hata listeye özel metinde).</summary>
@@ -363,54 +312,6 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
         }
     }
 
-    private bool AliasUygulanabilirMi() =>
-        _sohbet != null && IsYonetici && !IsModelUygulaniyor && !IsModelIslemde && !IsYukleniyor;
-
-    /// <summary>Model adını uygular: ayarı kaydeder, onay alır, eski modeli bırakıp yeniyi hazırlar.</summary>
-    public async Task ModelAliasUygulaAsync()
-    {
-        if (_sohbet == null)
-            return;
-        await SaveAsync();
-        if (!string.IsNullOrEmpty(HataMetni))
-            return;
-        var alias = _ayarlar.ModelAlias;
-        var onay = await DialogService.ShowConfirmationAsync(
-            "Model uygulanısın mı?",
-            $"'{alias}' modeli etkinleştirilecek: eski model bellekten bırakılır, yeni model gerekirse indirilip yüklenir. İndirme uzun sürebilir. Onaylıyor musunuz?",
-            "Uygula",
-            "Vazgeç");
-        if (!onay)
-            return;
-
-        IsModelUygulaniyor = true;
-        HataMetni = string.Empty;
-        UygulamaYuzde = 0;
-        UygulamaAsamasi = "Hazırlanıyor";
-        try
-        {
-            var ilerleme = new Progress<AsistanDurumDto>(d =>
-            {
-                UygulamaYuzde = d.IlerlemeYuzde ?? 0;
-                UygulamaAsamasi = d.Asama;
-            });
-            await _sohbet.AliasDegisiminiUygulaAsync(alias, ilerleme);
-            await ModelDurumunuYukleAsync();
-            await ModelleriYukleAsync();
-            StatusActionMessage($"Model hazır: {alias}", StatusMessageType.Success);
-        }
-        catch (Exception ex)
-        {
-            HataMetni = ex.Message;
-            StatusError(ex.Message);
-            await LogSistemExceptionAsync("YapayZekaAyarlar", "ModelAliasUygula", ex);
-        }
-        finally
-        {
-            IsModelUygulaniyor = false;
-        }
-    }
-
     private async Task SurumuYukleAsync()
     {
         if (_surum == null)
@@ -478,10 +379,9 @@ public class YapayZekaAyarlarViewModel : ViewModelBase
     /// <summary>Kural 13 içeriği (AI öz-yardımı bilgi tabanı dışındadır — meta içerik).</summary>
     internal static List<YardimMaddesiDto> YardimMaddeleri() => new()
     {
-        new() { Baslik = "Bu bölüm ne yapar?", Aciklama = "AI yardım asistanının ayarlarını ve model durumunu yönetir: sürüm hakkı, model seçimi ve davranış eşikleri." },
+        new() { Baslik = "Bu bölüm ne yapar?", Aciklama = "AI yardım asistanının ayarlarını ve model durumunu yönetir: sürüm hakkı, model bilgisi ve davranış eşikleri." },
         new() { Baslik = "Sürüm hakkı", Aciklama = "Asistan Profesyonel ve Kurumsal sürümlerde (Deneme'de açık) çalışır. Hakkınız yoksa gerekçesi burada yazar; sohbet paneli kilitli görünür." },
-        new() { Baslik = "Model adı", Aciklama = "Foundry katalogdaki model adıdır. Yalnızca yönetici değiştirir. Adı yazıp 'Uygula' dediğinizde eski model bellekten bırakılır, yeni model gerekirse indirilip yüklenir." },
-        new() { Baslik = "Modeli uygula", Aciklama = "'Uygula', seçili model adını etkinleştirir. Yeni model indirilmediyse indirme başlar ve uzun sürebilir; ilerleme bu bölümde çubukla görünür. Uygulama bitince model durumu güncellenir." },
+        new() { Baslik = "Model", Aciklama = "Sohbet modeli ürün tarafından sabitlenmiştir (değiştirilemez). Modelin adı bu bölümde görünür; kurulum ve yönetim otomatiktir." },
         new() { Baslik = "Model yönetimi", Aciklama = "İndirilmiş modeller boyutu ve 'Yüklü' rozetiyle listelenir; üstteki 'Yenile' listeyi ve disk kullanımını tazeler. 'Sil' modeli diskten kalıcı olarak kaldırır: önce onay ister, yüklü modeli silmeden önce bellekten bırakır. Silme geri alınamaz." },
         new() { Baslik = "Model indirme", Aciklama = "Model/yürütücü indirme bu bölümde değil, çalışma alanındaki AI Yardım Asistanı panelinden yapılır (statü çubuğu → Asistan; ilk soruda otomatik indirilir). İlerleme panelde görünür." },
         new() { Baslik = "Yardım dizini", Aciklama = "Asistanın dayandığı yardım maddeleri uygulamaya gömülü Markdown içerikten gelir ve AsistanBilgi.db dizininde tutulur. İlk soruda kurulur; model indirilemezse yalnız anahtar kelimeyle arama yapılır ve asistan çalışmaya devam eder." },

@@ -8,8 +8,14 @@
     {
         public const string SettingsKey = "AiAsistanSettings";
 
-        /// <summary>Foundry katalog model adı. Geçici varsayılan (doküman örneği); Türkçe final seçimi Windows canlı testte.</summary>
+        /// <summary>Foundry katalog model adı. P2 kararı (Oturum 291): `qwen2.5-0.5b` kalıcı varsayılan (S1 tam kilit).</summary>
         public const string VarsayilanModelAlias = "qwen2.5-0.5b";
+
+        /// <summary>S2 deterministik üretim (Oturum 292): sohbet sıcaklığı. 0 = aynı soruya aynı cevap.</summary>
+        public const float UretimSicakligi = 0f;
+
+        /// <summary>S2 deterministik üretim (Oturum 292): sabit üretim tohumu (temperature ile birlikte tekrarlanabilirlik).</summary>
+        public const int UretimSabitTohumu = 292291;
 
         /// <summary>Foundry katalog embedding model adı (Faz 6.93 hibrit RAG).</summary>
         public const string VarsayilanEmbeddingModelAlias = "qwen3-embedding-0.6b";

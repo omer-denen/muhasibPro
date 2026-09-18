@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:shell="using:MuhasibPro.ViewModels.ViewModels.Shell"
     mc:Ignorable="d"
     Width="240">
 
@@ -14,104 +15,40 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!-- Marka kartı (gerçek: uygulama adı + bağlam). Sahte firma/dönem gösterilmez (Kural 21). -->
         <Border Grid.Row="0" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Padding="8" Margin="0,0,0,12" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Width="32" Height="32" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{StaticResource MuhasibPetrolTintBrush}" VerticalAlignment="Center">
-                    <TextBlock Text="Ö" FontSize="13" FontWeight="Bold" Foreground="{StaticResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Border>
-                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="ÖRNEK DIŞ TİCARET" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <TextBlock Text="2026 Dönemi" FontSize="10" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                        <Ellipse Width="5" Height="5" Fill="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" />
-                    </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Image Width="28" Height="28" Source="ms-appx:///Assets/AppIcon.png" Stretch="Uniform" VerticalAlignment="Center" />
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="MuhasibPro" FontSize="12" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    <TextBlock Text="Çalışma Alanı" FontSize="10" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                 </StackPanel>
-            </Grid>
+            </StackPanel>
         </Border>
 
+        <!-- Kural 21: yalnız projede gerçekten var olan hedefler (ViewModel.GorunurNavigationItems).
+             K4: yetkisiz menü öğesi gizlenir (Kural 14/19 araştırma: menüde gizle, tease-and-block yok). -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Spacing="4">
-                <Button HorizontalAlignment="Stretch" Style="{StaticResource InventNavActiveButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <FontIcon Glyph="{StaticResource IconDashboard}" FontSize="14" />
-                        <TextBlock Text="Genel Bakış" FontSize="12" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Button>
-
-                <Button HorizontalAlignment="Stretch" Style="{StaticResource InventToolbarButtonStyle}" HorizontalContentAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <FontIcon Glyph="{StaticResource IconAccounts}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="Cari Hesaplar" FontSize="12" FontWeight="Medium" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-                </Button>
-
-                <Button HorizontalAlignment="Stretch" Style="{StaticResource InventToolbarButtonStyle}" HorizontalContentAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <FontIcon Glyph="{StaticResource IconInventory}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="Stok &amp; Depo" FontSize="12" FontWeight="Medium" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-                </Button>
-
-                <Button HorizontalAlignment="Stretch" Style="{StaticResource InventToolbarButtonStyle}" HorizontalContentAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <FontIcon Glyph="{StaticResource IconInvoice}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="Fatura &amp; E-Arşiv" FontSize="12" FontWeight="Medium" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-                </Button>
-
-                <Button HorizontalAlignment="Stretch" Style="{StaticResource InventToolbarButtonStyle}" HorizontalContentAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <FontIcon Glyph="{StaticResource IconVault}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="Kasa &amp; Banka" FontSize="12" FontWeight="Medium" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-                </Button>
-
-                <Button HorizontalAlignment="Stretch" Style="{StaticResource InventToolbarButtonStyle}" HorizontalContentAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <FontIcon Glyph="{StaticResource IconBank}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="Çek &amp; Senet" FontSize="12" FontWeight="Medium" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-                </Button>
-
-                <Button HorizontalAlignment="Stretch" Style="{StaticResource InventToolbarButtonStyle}" HorizontalContentAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <FontIcon Glyph="{StaticResource IconReports}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="Teklif &amp; Sipariş" FontSize="12" FontWeight="Medium" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-                </Button>
-
-                <Button HorizontalAlignment="Stretch" Style="{StaticResource InventToolbarButtonStyle}" HorizontalContentAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <FontIcon Glyph="{StaticResource IconEmployees}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="Personel &amp; Bordro" FontSize="12" FontWeight="Medium" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-                </Button>
-
-                <Button HorizontalAlignment="Stretch" Style="{StaticResource InventToolbarButtonStyle}" HorizontalContentAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <FontIcon Glyph="{StaticResource IconReports}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="Mali Raporlar" FontSize="12" FontWeight="Medium" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-                </Button>
-
-                <Button HorizontalAlignment="Stretch" Style="{StaticResource InventToolbarButtonStyle}" HorizontalContentAlignment="Left">
-                    <Grid>
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <FontIcon Glyph="{StaticResource IconSettings}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                            <TextBlock Text="Sistem &amp; Güvenlik" FontSize="12" FontWeight="Medium" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        </StackPanel>
-                        <Border HorizontalAlignment="Right" Background="{StaticResource MuhasibPetrolTintBrush}" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="4,1,4,1">
-                            <TextBlock Text="RBAC" FontSize="9" FontWeight="Bold" FontFamily="{StaticResource MuhasibMonospaceFontFamily}" Foreground="{StaticResource MuhasibPetrolDeepBrush}" />
-                        </Border>
-                    </Grid>
-                </Button>
-            </StackPanel>
+            <ItemsControl ItemsSource="{x:Bind ViewModel.GorunurNavigationItems, Mode=OneWay}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="shell:NavigationItem">
+                        <Button
+                            Margin="0,0,0,4"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Click="OnNavClick"
+                            Style="{StaticResource InventToolbarButtonStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <FontIcon Glyph="{x:Bind Glyph}" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{x:Bind Label}" FontSize="12" FontWeight="Medium" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </ScrollViewer>
 
+        <!-- Gerçek kullanıcı (oturum) + kapat -->
         <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" CornerRadius="{StaticResource MuhasibInventInnerCornerRadius}" Padding="8" Margin="0,10,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -120,13 +57,13 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Width="26" Height="26" CornerRadius="{StaticResource MuhasibCircleCornerRadius}" Background="{StaticResource MuhasibPetrolTintBrush}">
-                    <TextBlock Text="Ö" FontSize="11" FontWeight="Bold" Foreground="{StaticResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{x:Bind ViewModel.UserInfo.KullaniciModel.Initials, Mode=OneWay}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="Ömer Korkut" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Text="Sistem Yöneticisi" FontSize="9" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{x:Bind ViewModel.UserInfo.KullaniciModel.AdiSoyadi, Mode=OneWay}" FontSize="11" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{x:Bind ViewModel.UserInfo.KullaniciModel.RolAdi, Mode=OneWay}" FontSize="9" Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
-                <Button Grid.Column="2" Style="{StaticResource InventToolbarButtonStyle}" ToolTipService.ToolTip="Oturumu Kapat">
+                <Button Grid.Column="2" Click="OnLogoutClick" Style="{StaticResource InventToolbarButtonStyle}" ToolTipService.ToolTip="Oturumu Kapat">
                     <FontIcon Glyph="&#xF3B1;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </Button>
             </Grid>

@@ -23,6 +23,9 @@ public static class AddAppViewModelHostBuilderExtensions
             services.AddTransient<FirmaShellViewModel>();
             services.AddTransient<DenetimMasasiViewModel>();
             services.AddTransient<KullaniciYonetimiViewModel>();
+            services.AddTransient<KullaniciListViewModel>();
+            services.AddTransient<KullaniciDetailsViewModel>();
+            services.AddTransient<KullaniciRolYetkiViewModel>();
             services.AddTransient<AsistanSohbetViewModel>();
             services.AddTransient<YapayZekaAyarlarViewModel>();
             services.AddTransient<GelistiriciAraclariViewModel>();
@@ -47,6 +50,7 @@ public static class AddAppViewModelHostBuilderExtensions
             services.AddTransient<SistemDbYonetimViewModel>();
             services.AddTransient<KurulumSplashViewModel>();
             services.AddTransient<GuncellemeSonrasiViewModel>();
+            services.AddTransient<SistemMigrationViewModel>();
 
             services.AddTransient<SistemLogsViewModel>();
 

@@ -9,6 +9,7 @@ using MuhasibPro.Business.Contracts.UIServices.CommonServices;using MuhasibPro.B
 using MuhasibPro.Data.Contracts.Database.Common.Helpers;
 using MuhasibPro.Domain.Common;
 using MuhasibPro.Domain.Entities.SistemEntity;
+using MuhasibPro.Domain.Enum;
 using MuhasibPro.ViewModels.Infrastructure.Common;
 using MuhasibPro.ViewModels.Infrastructure.ViewModels;
 using System.Collections.ObjectModel;
@@ -38,6 +39,10 @@ public class DenetimMasasiViewModel : ViewModelBase
     private readonly IFirmaService _firmaService;
     private readonly IAuthenticationService _auth;
     private readonly IDevModeProvider _devMode;
+    private readonly IPermissionService _yetki;
+
+    /// <summary>K4: kullanıcı düzeyinde çözülen izinler (firma bağımsız). null = henüz yüklenmedi.</summary>
+    private HashSet<Permission> _kullaniciIzinleri;
 
     /// <summary>Görünüm & Bildirim bölümü (AppPlatform, kullanıcı bazlı).</summary>
     public AppPlatformAyarlarViewModel Gorunum { get; }
@@ -86,11 +91,13 @@ public class DenetimMasasiViewModel : ViewModelBase
         IAiAsistanSettingsProvider aiSaglayici = null,
         ISurumOzellikService surumService = null,
         IAsistanSohbetService asistanSohbet = null,
-        IYardimBilgiTabani yardimBilgiTabani = null) : base(commonServices)
+        IYardimBilgiTabani yardimBilgiTabani = null,
+        IPermissionService permissionService = null) : base(commonServices)
     {
         _firmaService = firmaService;
         _auth = auth;
         _devMode = devMode;
+        _yetki = permissionService;
         Gorunum = new AppPlatformAyarlarViewModel(commonServices, saglayici);
         Giris = new IdentityAyarlarViewModel(commonServices, kimlikSaglayici, auth);
         YedekSaklama = new YedekSaklamaAyarlarViewModel(commonServices, veritabaniSaglayici, auth);
@@ -98,7 +105,7 @@ public class DenetimMasasiViewModel : ViewModelBase
         FirmaKayit = new FirmaKayitAyarlarViewModel(commonServices, kayitSaglayici, auth);
         Donem = new DonemAyarlarViewModel(commonServices, donemSaglayici, auth);
         GirisPaneli = new GirisDashboardViewModel(commonServices, firmaService, auth, sistemDb, updateService);
-        YapayZeka = new YapayZekaAyarlarViewModel(commonServices, aiSaglayici, auth, surumService, asistanSohbet, yardimBilgiTabani);
+        YapayZeka = new YapayZekaAyarlarViewModel(commonServices, aiSaglayici, surumService, asistanSohbet, yardimBilgiTabani);
         GelistiriciAraclari = new GelistiriciAraclariViewModel(commonServices, devMode, devAraclari, yolAcici, updateService, appPaths, sistemDb, diagnosticsService, modulTestleri, surumService, asistanSohbet, yardimBilgiTabani);
         GirisPaneli.BolumAcildi += b => SeciliBolum = b;
         Menuler = new ObservableCollection<AyarlarNavigationMenu>(AyarlarNavigationMenu.VarsayilanMenuler());
@@ -212,12 +219,25 @@ public class DenetimMasasiViewModel : ViewModelBase
         return false;
     }
 
-    /// <summary>Bölümün bu kullanıcıya görünürlüğü (Geliştirici Araçları yalnız DEBUG kapısında).</summary>
+    /// <summary>Bölümün bu kullanıcıya görünürlüğü (Geliştirici Araçları yalnız DEBUG; K4 izin kapıları).</summary>
     private bool MenuGorunurMu(AyarBolumu bolum)
     {
         if (bolum == AyarBolumu.GelistiriciAraclari)
             return _devMode?.IsEnabled ?? false;
-        return true;
+
+        // İzin servisi yok (test) veya henüz yüklenmedi: gizleme yapma (yanlış-negatif önlenir).
+        if (_yetki == null || _kullaniciIzinleri == null)
+            return true;
+
+        return bolum switch
+        {
+            AyarBolumu.Firma => _kullaniciIzinleri.Contains(Permission.Firma_Yonet),
+            AyarBolumu.Veritabani => _kullaniciIzinleri.Contains(Permission.Veritabani_Goruntule),
+            AyarBolumu.Donem => _kullaniciIzinleri.Contains(Permission.MaliDonem_Yonet),
+            AyarBolumu.YapayZeka => _kullaniciIzinleri.Contains(Permission.AiAsistan_Kullan),
+            AyarBolumu.Giris => _kullaniciIzinleri.Contains(Permission.Kullanici_Yonet),
+            _ => true
+        };
     }
 
     /// <summary>Arama süzgeci (başlık veya açıklamada geçer; boş arama hepsini geçirir).</summary>
@@ -246,7 +266,29 @@ public class DenetimMasasiViewModel : ViewModelBase
     {
         YukleKullaniciKartini();
         FirmaSayisi = await FirmaSayisiniOkuAsync();
+        await IzinleriYukleAsync();
         GorunurMenuleriTazele();
+    }
+
+    /// <summary>K4 kapısında kullanılan izinler (firma bağımsız, kullanıcı düzeyinde).</summary>
+    private static readonly Permission[] KapiIzinleri =
+    {
+        Permission.Firma_Yonet,
+        Permission.Veritabani_Goruntule,
+        Permission.MaliDonem_Yonet,
+        Permission.AiAsistan_Kullan,
+        Permission.Kullanici_Yonet
+    };
+
+    private async Task IzinleriYukleAsync()
+    {
+        if (_yetki == null)
+            return;
+        var izinler = new HashSet<Permission>();
+        foreach (var izin in KapiIzinleri)
+            if (await _yetki.KullaniciYetkisiVarMiAsync(izin))
+                izinler.Add(izin);
+        _kullaniciIzinleri = izinler;
     }
 
     private async Task<int> FirmaSayisiniOkuAsync()

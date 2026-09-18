@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.DTOModel.SistemModel;
 using MuhasibPro.Data.Contracts.Repository.Common.BaseRepo;
@@ -7,6 +8,7 @@ using MuhasibPro.Data.Contracts.Repository.SistemRepos.Authentication;
 using MuhasibPro.Data.DataContext;
 using MuhasibPro.Domain.Entities;
 using MuhasibPro.Domain.Entities.SistemEntity;
+using MuhasibPro.Domain.Enum;
 using MuhasibPro.Domain.Utilities.Responses;
 using MuhasibPro.Domain.Utilities.UIDGenerator;
 
@@ -21,6 +23,7 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
         private readonly IAuthenticationService _authenticationService;
         private readonly IPasswordHasher<Kullanici> _passwordHasher;
         private readonly IIdentitySettingsProvider _identitySettings;
+        private readonly IPermissionService _permissionService;
 
         public KullaniciService(
             IUserRepository kullaniciRepository,
@@ -29,7 +32,8 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
             IUnitOfWork<SistemDbContext> unitOfWork,
             IAuthenticationService authenticationService,
             IPasswordHasher<Kullanici> passwordHasher,
-            IIdentitySettingsProvider identitySettings = null!)
+            IIdentitySettingsProvider identitySettings = null!,
+            IPermissionService permissionService = null)
         {
             _kullaniciRepository = kullaniciRepository;
             _kfrRepository = kfrRepository;
@@ -38,6 +42,7 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
             _authenticationService = authenticationService;
             _passwordHasher = passwordHasher;
             _identitySettings = identitySettings;
+            _permissionService = permissionService;
         }
 
         public async Task<ApiDataResponse<KullaniciModel>> GetKullaniciAsync(long id)
@@ -75,8 +80,12 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
             {
                 var model = ToModel(entity);
                 var kfr = kfrler.FirstOrDefault(x => x.KullaniciId == entity.Id);
-                if (kfr?.Rol != null)
-                    model.Rol = ToRolModel(kfr.Rol);
+                if (kfr != null)
+                {
+                    model.RolId = kfr.RolId;
+                    if (kfr.Rol != null)
+                        model.Rol = ToRolModel(kfr.Rol);
+                }
                 liste.Add(model);
             }
             return new SuccessApiDataResponse<List<KullaniciModel>>(liste, $"{liste.Count} kullanıcı listelendi.");
@@ -115,6 +124,8 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
                 Soyadi = model.Soyadi?.Trim() ?? string.Empty,
                 Eposta = model.Eposta?.Trim() ?? string.Empty,
                 Telefon = model.Telefon?.Trim() ?? string.Empty,
+                Resim = model.Resim,
+                ResimOnizleme = model.ResimOnizleme,
                 AktifMi = true,
                 ParolaHash = string.Empty,
                 KayitTarihi = DateTime.UtcNow,
@@ -184,6 +195,8 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
             entity.Soyadi = model.Soyadi?.Trim() ?? entity.Soyadi;
             entity.Eposta = model.Eposta?.Trim() ?? entity.Eposta;
             entity.Telefon = model.Telefon?.Trim() ?? entity.Telefon;
+            entity.Resim = model.Resim;
+            entity.ResimOnizleme = model.ResimOnizleme;
             entity.AktifMi = model.AktifMi;
             entity.GuncelleyenId = _authenticationService.GetCurrentUserId;
             entity.GuncellemeTarihi = DateTime.Now;
@@ -247,6 +260,10 @@ namespace MuhasibPro.Business.Services.SistemServices.Authentication
                 return new ErrorApiDataResponse<int>(0, "Kendi hesabınız silinemez.");
             if (id == KullaniciSabitleri.SeedYoneticiId)
                 return new ErrorApiDataResponse<int>(0, "Seed yöneticisi silinemez.");
+
+            // K4: yıkıcı işlem — `Kullanici_Yonet` izni gerekir (servis katmanı kapısı).
+            if (_permissionService != null && !await _permissionService.KullaniciYetkisiVarMiAsync(Permission.Kullanici_Yonet))
+                return new ErrorApiDataResponse<int>(0, "🔒 Kullanıcı silme yetkiniz yok (Kullanıcı Yönetimi izni gerekir).");
 
             var entity = await _kullaniciRepository.GetByIdAsync(id);
             if (entity == null)

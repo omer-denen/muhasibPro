@@ -48,10 +48,8 @@ namespace MuhasibPro.Business.Services.SistemServices.AiAsistan
 
         internal static AiAsistanSettings Clamp(AiAsistanSettings s)
         {
-            if (string.IsNullOrWhiteSpace(s.ModelAlias))
-                s.ModelAlias = AiAsistanSettings.VarsayilanModelAlias;
-            else
-                s.ModelAlias = s.ModelAlias.Trim();
+            // S1 tam kilit (Oturum 292): sohbet modeli sabittir — yönetici dahil kimse değiştiremez.
+            s.ModelAlias = AiAsistanSettings.VarsayilanModelAlias;
             s.MaksGecmisTur = Math.Clamp(s.MaksGecmisTur, 0, 20);
             s.EnFazlaMadde = Math.Clamp(s.EnFazlaMadde, 1, 12);
             s.SoruZamanAsimiSn = Math.Clamp(s.SoruZamanAsimiSn, 10, 300);

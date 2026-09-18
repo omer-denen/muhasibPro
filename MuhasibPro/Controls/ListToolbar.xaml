@@ -12,7 +12,7 @@
 
     <CommandBar x:Name="commandBar" Margin="0 0 0 10" DefaultLabelPosition="Right" Style="{StaticResource ToolBarStyle}" Background="Transparent">
         <AppBarButton x:Name="buttonCancel" Icon="Cancel" Label="İptal" LabelPosition="Default" HorizontalAlignment="Left" Style="{StaticResource ModernToolBarButtonStyle}" Tag="cancel" />
-        <AppBarButton x:Name="buttonNew" Icon="Add" Label="{x:Bind NewLabel, Mode=OneWay}" LabelPosition="Default" HorizontalAlignment="Left" Style="{StaticResource PrimaryButtonStyle}" Tag="new" />
+        <AppBarButton x:Name="buttonNew" Icon="Add" Label="{x:Bind NewLabel, Mode=OneWay}" LabelPosition="Default" HorizontalAlignment="Left" Style="{StaticResource ModernToolBarButtonStyle}" Tag="new" />
         <AppBarButton x:Name="buttonEdit" Icon="Edit" Label="Düzenle" LabelPosition="Default" HorizontalAlignment="Left" Style="{StaticResource ModernToolBarButtonStyle}" Tag="edit" />
         <AppBarButton x:Name="buttonDelete" Icon="Delete" Label="Sil" LabelPosition="Default" HorizontalAlignment="Left" Style="{StaticResource ModernToolBarButtonStyle}" Tag="delete" />
         <CommandBar.Content>

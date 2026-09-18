@@ -5,76 +5,124 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:MuhasibPro.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dev="using:DevWinUI"
-    xmlns:local="using:MuhasibPro.Views.Firmalar"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewDetails="using:MuhasibPro.Views.Firmalar.Details"
     xmlns:viewLists="using:MuhasibPro.Views.Firmalar.List"
-    mc:Ignorable="d">
-    <UserControl.Resources>
-        <DataTemplate x:Key="ListHeaderTemplate">
-            <StackPanel
-                Margin="6,4,0,0"
-                VerticalAlignment="Center"
-                Orientation="Horizontal">
-                <TextBlock
-                    FontSize="18"
-                    Foreground="{ThemeResource ApplicationForegroundThemeBrush}"
-                    Text="Firmalar" />
-                <TextBlock
-                    FontSize="18"
-                    Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
-                    Text="{Binding}" />
-            </StackPanel>
-        </DataTemplate>
-    </UserControl.Resources>
+    Loaded="OnPageLoaded"
+    mc:Ignorable="d"
+    Background="Transparent">
 
+    <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + perde). Statik. -->
+    <Border x:Name="KokZemin" CornerRadius="0">
+        <Grid>
+            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <!--firmalar-->
-        <controls:WindowTitle Prefix="Firmalar" Title="{x:Bind ViewModel.Title, Mode=OneWay}" />
-        <Grid Grid.RowSpan="{x:Bind GetRowSpan(ViewModel.FirmaList.IsMultipleSelection), Mode=OneWay}">
-            <Border Style="{StaticResource ModernCard}" >
-                <controls:Section
-                    Header="{x:Bind ViewModel.FirmaList.Title, Mode=OneWay}"
-                    HeaderButtonClick="OpenInNewView"
-                    HeaderButtonGlyph="&#xE2B4;"
-                    HeaderTemplate="{StaticResource ListHeaderTemplate}"
-                    IsButtonVisible="{x:Bind ViewModel.IsMainWindow}">
-                    <viewLists:FirmalarList ViewModel="{x:Bind ViewModel.FirmaList}" />
-                </controls:Section>
-            </Border>
+            <Grid x:Name="RootLayout" RowSpacing="12" Padding="20,16,20,16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <controls:WindowTitle Prefix="Firma Yönetimi" Title="{x:Bind ViewModel.FirmaList.Title, Mode=OneWay}" />
+
+                <!-- Kural 17 — Katman 2: ana border paneli. Baslik pencere cubugunda; icerik
+                     dogrudan master-detail (liste DataList toolbar'i yeni/yenile/ara tasir). -->
+                <Grid x:Name="PanelWrap" Grid.Row="0" Grid.RowSpan="2">
+                    <Border
+                        x:Name="AnaBorder"
+                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}"
+                        BorderThickness="1.5"
+                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                        Padding="24"
+                        Translation="0,0,32">
+                        <Border.Shadow>
+                            <ThemeShadow x:Name="AnaBorderShadow" />
+                        </Border.Shadow>
+
+                        <!-- Master-detail: ustte liste, altta secili firma (Kural 17 Katman 3 kartlar) -->
+                        <Grid RowSpacing="12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition x:Name="ListeSatiri" Height="*" MinHeight="200" />
+                                <RowDefinition Height="*" MinHeight="280" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Liste karti -->
+                            <Border
+                                x:Name="ListeKarti"
+                                Grid.Row="0"
+                                Grid.RowSpan="{x:Bind GetRowSpan(ViewModel.FirmaList.IsMultipleSelection), Mode=OneWay}"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource ControlCornerRadius}"
+                                Padding="12">
+                                <viewLists:FirmalarList ViewModel="{x:Bind ViewModel.FirmaList}" />
+                            </Border>
+
+                            <!-- Detay + mali donemler karti -->
+                            <Border
+                                Grid.Row="1"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource ControlCornerRadius}"
+                                Padding="12"
+                                Visibility="{x:Bind ViewModel.FirmaList.IsMultipleSelection, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                <Grid>
+                                    <Pivot x:Name="pivot" Visibility="{x:Bind ViewModel.FirmaDetails.IsDataAvailable, Mode=OneWay}">
+                                        <PivotItem Header="Firma Bilgileri">
+                                            <viewDetails:FirmalarDetails ViewModel="{x:Bind ViewModel.FirmaDetails}" />
+                                        </PivotItem>
+                                        <PivotItem Header="Mali Dönemler">
+                                            <viewDetails:FirmaMaliDonemler ViewModel="{x:Bind ViewModel.MaliDonemList}" />
+                                        </PivotItem>
+                                    </Pivot>
+
+                                    <!-- Detay panelini buyut/kucult (yukari acilan expander) — liste kapanir -->
+                                    <Button
+                                        x:Name="DetayBuyutButton"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Margin="0,-6,-6,0"
+                                        Padding="6"
+                                        AutomationProperties.AutomationId="DetayBuyutButton"
+                                        Click="OnDetayBuyutClick"
+                                        Style="{StaticResource CircleIconButtonStyle}"
+                                        ToolTipService.ToolTip="Detayı büyüt (listeyi kapat)">
+                                        <FontIcon x:Name="DetayBuyutIcon" FontSize="13" Glyph="&#xE70E;" />
+                                    </Button>
+
+                                    <!-- Bos durum: firma secili degil -->
+                                    <StackPanel
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="6"
+                                        Visibility="{x:Bind ViewModel.FirmaDetails.IsDataUnavailable, Mode=OneWay}">
+                                        <FontIcon
+                                            HorizontalAlignment="Center"
+                                            FontSize="24"
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Glyph="{StaticResource IconBuilding}" />
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontSize="13"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="Firma seçilmedi" />
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontSize="11"
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                            Text="Listeden bir firma seçin; bilgileri ve mali dönemleri burada görünür." />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
         </Grid>
-
-        <!--Details-->
-
-        <Grid
-            Grid.Row="1"            
-            Visibility="{x:Bind ViewModel.FirmaList.IsMultipleSelection, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-            <controls:Section
-                HeaderButtonClick="OpenDetailsInNewView"
-                HeaderButtonGlyph="&#xE2B4;"
-                IsEnabled="{x:Bind ViewModel.FirmaDetails.IsEnabled, Mode=OneWay}"
-                Visibility="{x:Bind ViewModel.FirmaDetails.IsDataAvailable, Mode=OneWay}">
-
-                <Pivot x:Name="pivot">
-                    <PivotItem Header="Detaylar">
-                        <viewDetails:FirmalarDetails ViewModel="{x:Bind ViewModel.FirmaDetails}" />
-                    </PivotItem>
-                    <PivotItem Header="Dönemler">
-                        <viewDetails:FirmaMaliDonemler ViewModel="{x:Bind ViewModel.MaliDonemList}" />
-                    </PivotItem>
-                </Pivot>
-            </controls:Section>
-
-            <!--Empty Details-->
-            <controls:Section Header="Öğe seçilmedi" Visibility="{x:Bind ViewModel.FirmaDetails.IsDataUnavailable, Mode=OneWay}" />
-        </Grid>
-
-    </Grid>
-
+    </Border>
 </Page>

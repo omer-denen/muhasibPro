@@ -51,7 +51,7 @@
                                     <tv:TableViewTextColumn
                                         Width="auto"
                                         Binding="{Binding MaliYil}"
-                                        Header="MaliDonem" />
+                                        Header="Mali Dönem" />
                                     <tv:TableViewTextColumn
                                         Width="auto"
                                         Binding="{Binding DatabaseType}"

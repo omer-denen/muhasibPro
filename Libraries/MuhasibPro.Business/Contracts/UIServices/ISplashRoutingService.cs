@@ -7,6 +7,9 @@ namespace MuhasibPro.Business.Contracts.UIServices
         FirstSetup,
         /// <summary>DB var ama migration/güncelleme gerekiyor (SistemDbYonetim ekranına yönlendir).</summary>
         MigrationRequired,
+        /// <summary>DEV-ONLY: bekleyen göçler açılışta otomatik uygulanır (SistemMigrationView).
+        /// Dev kipinde <see cref="MigrationRequired"/> yerine seçilir; Release'de kullanılmaz.</summary>
+        DevMigration,
         /// <summary>Uygulama güncellendi — açılışta güncelleme sonrası doğrulama sagası çalışmalı (GuncellemeSonrasiView).</summary>
         PostUpdateVerification,
         /// <summary>DB hazır — doğrudan Login'e geç.</summary>
@@ -23,20 +26,25 @@ namespace MuhasibPro.Business.Contracts.UIServices
         /// <summary>Güncelleme sonrası doğrulama gerekli mi (Faz 6.91-D — kalıcı damgadan).</summary>
         public bool PostUpdateGerekli { get; set; }
 
+        /// <summary>Dev kipi (Faz 6.82) — true ise bekleyen göç <see cref="SplashTarget.DevMigration"/> ile
+        /// otomatik uygulanır (Release'de her zaman false).</summary>
+        public bool DevOttomatikGoc { get; set; }
+
         public SplashTarget Target
         {
             get
             {
                 if (!IsDatabaseExists) return SplashTarget.FirstSetup;
                 if (PostUpdateGerekli) return SplashTarget.PostUpdateVerification;
-                if (!IsDatabaseReady || HasPendingMigrations) return SplashTarget.MigrationRequired;
+                if (!IsDatabaseReady || HasPendingMigrations)
+                    return DevOttomatikGoc ? SplashTarget.DevMigration : SplashTarget.MigrationRequired;
                 return SplashTarget.Login;
             }
         }
 
         /// <summary>Karar izi: neden bu hedef seçildi (Adım 0 tanısı — sayfa günlüğüne düşer).</summary>
         public string KararOzeti =>
-            $"exists={IsDatabaseExists} ready={IsDatabaseReady} pending={PendingMigrationCount} postUpdate={PostUpdateGerekli} target={Target}";
+            $"exists={IsDatabaseExists} ready={IsDatabaseReady} pending={PendingMigrationCount} postUpdate={PostUpdateGerekli} devGoc={DevOttomatikGoc} target={Target}";
     }
 
     /// <summary>Taşınmış-veri taraması sonucu — dialog gösterimi View'a aittir (Business dialog bilmez).

@@ -88,6 +88,15 @@
                                             <TextBlock Text="Ayarlar" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
+                                    <Button x:Name="FirmaYonetimiButton" AutomationProperties.AutomationId="FirmaYonetimiButton" Command="{x:Bind ViewModel.FirmaYonetimiCommand, Mode=OneWay}"
+                                            IsEnabled="{x:Bind ViewModel.FirmaYonetimiYetkisi, Mode=OneWay}"
+                                            CornerRadius="{StaticResource MuhasibCardCornerRadius}" Padding="0" Background="Transparent" BorderThickness="0" VerticalAlignment="Center"
+                                            ToolTipService.ToolTip="{x:Bind ViewModel.FirmaYonetimiNedenTooltip, Mode=OneWay}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" MinHeight="30" Padding="8,2">
+                                            <FontIcon Glyph="{StaticResource IconBuilding}" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                            <TextBlock Text="Firma Yönetimi" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
                                     <Rectangle Width="1" Height="20" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Opacity="0.7" VerticalAlignment="Center" />
                                     <components:UserInfoControl DataContext="{x:Bind ViewModel, Mode=OneWay}" VerticalAlignment="Center" />
                                 </StackPanel>

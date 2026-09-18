@@ -24,8 +24,11 @@ public class SplashRoutingTests
         ITenantSQLiteDatabaseService tenant,
         ITenantVersionReader reader,
         IEventBus bus,
-        IPostUpdateDogrulamaService? postUpdate = null)
-        => new(sistem, kurulum, makine, tenant, reader, bus, postUpdate ?? Mock.Of<IPostUpdateDogrulamaService>());
+        IPostUpdateDogrulamaService? postUpdate = null,
+        IDevModeProvider? devMode = null)
+        => new(sistem, kurulum, makine, tenant, reader, bus,
+               postUpdate ?? Mock.Of<IPostUpdateDogrulamaService>(),
+               devMode ?? Mock.Of<IDevModeProvider>());
 
     private static ApiDataResponse<DatabaseConnectionAnalysis> DbState(
         bool exists, bool connect, bool hasError, bool valid, List<string>? pending = null)
@@ -109,6 +112,46 @@ public class SplashRoutingTests
         karar.IsDatabaseExists.Should().BeTrue();
         karar.HasPendingMigrations.Should().BeTrue();
         karar.PendingMigrationCount.Should().Be(1);
+        karar.Target.Should().Be(SplashTarget.MigrationRequired);
+    }
+
+    [Fact]
+    public async Task DecideRoute_DevKipi_BekleyenGoc_DevMigration()
+    {
+        var sistem = new Mock<ISistemDatabaseService>();
+        sistem.Setup(s => s.GetSistemDatabaseStateAsync())
+            .ReturnsAsync(DbState(true, true, false, true, new List<string> { "20260908_AddIdentity" }));
+        var dev = new Mock<IDevModeProvider>();
+        dev.Setup(d => d.IsEnabled).Returns(true);
+        var svc = BuildService(sistem.Object,
+            Mock.Of<IKurulumKayitService>(), Mock.Of<IMakineKimligiProvider>(),
+            Mock.Of<ITenantSQLiteDatabaseService>(), Mock.Of<ITenantVersionReader>(), Mock.Of<IEventBus>(),
+            devMode: dev.Object);
+
+        var karar = await svc.DecideRouteAsync(null);
+
+        karar.IsDatabaseExists.Should().BeTrue();
+        karar.HasPendingMigrations.Should().BeTrue();
+        karar.DevOttomatikGoc.Should().BeTrue();
+        karar.Target.Should().Be(SplashTarget.DevMigration);
+    }
+
+    [Fact]
+    public async Task DecideRoute_DevKipiYok_BekleyenGoc_MigrationRequiredKalir()
+    {
+        var sistem = new Mock<ISistemDatabaseService>();
+        sistem.Setup(s => s.GetSistemDatabaseStateAsync())
+            .ReturnsAsync(DbState(true, true, false, true, new List<string> { "20260908_AddIdentity" }));
+        var dev = new Mock<IDevModeProvider>();
+        dev.Setup(d => d.IsEnabled).Returns(false);
+        var svc = BuildService(sistem.Object,
+            Mock.Of<IKurulumKayitService>(), Mock.Of<IMakineKimligiProvider>(),
+            Mock.Of<ITenantSQLiteDatabaseService>(), Mock.Of<ITenantVersionReader>(), Mock.Of<IEventBus>(),
+            devMode: dev.Object);
+
+        var karar = await svc.DecideRouteAsync(null);
+
+        karar.DevOttomatikGoc.Should().BeFalse();
         karar.Target.Should().Be(SplashTarget.MigrationRequired);
     }
 

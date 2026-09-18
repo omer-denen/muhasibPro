@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="MuhasibPro.Views.KullaniciYonetimi.List.KullaniciList"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:MuhasibPro.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MuhasibPro.Business.DTOModel.SistemModel"
+    xmlns:tv="using:WinUI.TableView"
+    mc:Ignorable="d"
+    d:DesignHeight="400"
+    d:DesignWidth="900"
+    Loaded="KullaniciList_Loaded">
+    <controls:DataList x:Name="dataList">
+        <controls:DataList.ConfigControl>
+            <controls:BaseConfig>
+                <controls:BaseConfig.CoreData>
+                    <controls:CoreDataConfig
+                        ItemsCount="{x:Bind ViewModel.ItemsCount, Mode=OneWay}"
+                        ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
+                        NewLabel="Yeni Kullanıcı"
+                        Query="{x:Bind ViewModel.Query, Mode=TwoWay}"
+                        SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}">
+                        <controls:CoreDataConfig.ListContent>
+                            <tv:TableView
+                                x:Name="pageTableView"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                AlternateRowForeground="{StaticResource TextBoxButtonForegroundThemeBrush}"
+                                AutoGenerateColumns="False"
+                                CornerRadius="5"
+                                DoubleTapped="{x:Bind dataList.ConfigControl.Selection.OnDoubleTapped}"
+                                GridLinesVisibility="Horizontal"
+                                HeaderGridLinesVisibility="Vertical"
+                                IsMultiSelectCheckBoxEnabled="{x:Bind ViewModel.IsMultipleSelection, Mode=OneWay}"
+                                IsReadOnly="True"
+                                ItemsSource="{x:Bind ViewModel.ItemsSource, Mode=OneWay}"
+                                SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
+                                SelectionMode="{x:Bind dataList.ConfigControl.Selection.SelectionMode,Mode=OneWay}"
+                                SelectionUnit="Row">
+                                <tv:TableView.Columns>
+                                    <!-- Avatar Column -->
+                                    <tv:TableViewTemplateColumn Width="44">
+                                        <tv:TableViewTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="models:KullaniciModel">
+                                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <PersonPicture
+                                                        Width="28"
+                                                        Height="28"
+                                                        Initials="{x:Bind Initials, Mode=OneWay}"
+                                                        ProfilePicture="{x:Bind ResimOnizleme, Mode=OneWay, Converter={StaticResource ObjectToImageConverter}}"
+                                                        x:Phase="1" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </tv:TableViewTemplateColumn.CellTemplate>
+                                    </tv:TableViewTemplateColumn>
+                                    <tv:TableViewTextColumn
+                                        Width="150"
+                                        Binding="{Binding KullaniciAdi}"
+                                        Header="Kullanıcı Adı" />
+                                    <tv:TableViewTextColumn
+                                        Width="auto"
+                                        Binding="{Binding AdiSoyadi}"
+                                        Header="Ad Soyad" />
+                                    <tv:TableViewTextColumn
+                                        Width="auto"
+                                        Binding="{Binding Eposta}"
+                                        Header="E-posta" />
+                                    <tv:TableViewTextColumn
+                                        Width="auto"
+                                        Binding="{Binding Telefon}"
+                                        Header="Telefon" />
+                                    <tv:TableViewTextColumn
+                                        Width="auto"
+                                        Binding="{Binding RolAdi}"
+                                        Header="Rol" />
+                                    <tv:TableViewTextColumn
+                                        Width="90"
+                                        Binding="{Binding AktifMetni}"
+                                        Header="Aktif" />
+                                </tv:TableView.Columns>
+                            </tv:TableView>
+                        </controls:CoreDataConfig.ListContent>
+                    </controls:CoreDataConfig>
+                </controls:BaseConfig.CoreData>
+                <controls:BaseConfig.Command>
+                    <controls:CommandConfig
+                        CancelSelectionCommand="{x:Bind ViewModel.CancelSelectionCommand}"
+                        DeleteCommand="{x:Bind ViewModel.DeleteSelectionCommand}"
+                        DeselectItemsCommand="{x:Bind ViewModel.DeselectItemsCommand}"
+                        ItemSecondaryActionInvokedCommand="{x:Bind ViewModel.OpenInNewViewCommand}"
+                        NewCommand="{x:Bind ViewModel.NewCommand}"
+                        QuerySubmittedCommand="{x:Bind ViewModel.RefreshCommand}"
+                        RefreshCommand="{x:Bind ViewModel.RefreshCommand}"
+                        SelectItemsCommand="{x:Bind ViewModel.SelectItemsCommand}"
+                        SelectRangesCommand="{x:Bind ViewModel.SelectRangesCommand}"
+                        StartSelectionCommand="{x:Bind ViewModel.StartSelectionCommand}" />
+                </controls:BaseConfig.Command>
+                <controls:BaseConfig.Selection>
+                    <controls:SelectionConfig IsMultipleSelection="{x:Bind ViewModel.IsMultipleSelection, Mode=TwoWay}" />
+                </controls:BaseConfig.Selection>
+                <controls:BaseConfig.Pagination>
+                    <controls:PaginationConfig
+                        CurrentPage="{x:Bind ViewModel.CurrentPage, Mode=TwoWay}"
+                        NextPageCommand="{x:Bind ViewModel.NextPageCommand}"
+                        PageSize="{x:Bind ViewModel.PageSize, Mode=TwoWay}"
+                        PreviousPageCommand="{x:Bind ViewModel.PreviousPageCommand}"
+                        TotalItems="{x:Bind ViewModel.ItemsCount, Mode=OneWay}" />
+                </controls:BaseConfig.Pagination>
+            </controls:BaseConfig>
+        </controls:DataList.ConfigControl>
+    </controls:DataList>
+</UserControl>

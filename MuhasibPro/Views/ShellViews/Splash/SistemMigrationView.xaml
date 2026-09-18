@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="MuhasibPro.Views.ShellViews.Splash.SistemMigrationView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:MuhasibPro.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Loaded="OnPageLoaded"
+    mc:Ignorable="d"
+    Background="Transparent">
+
+    <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="TrueToVis" TrueValue="Visible" FalseValue="Collapsed" />
+    </Page.Resources>
+
+    <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + perde). Statik. -->
+    <Border x:Name="KokZemin" CornerRadius="0">
+        <Grid>
+            <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
+            <Border Background="{ThemeResource MuhasibZeminPerdeBrush}" />
+
+            <Grid x:Name="RootLayout" Padding="20,16">
+                <!-- Kural 17 — Katman 2: ana border paneli (splash ailesi — ortalanmis) -->
+                <Grid x:Name="PanelWrap" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border
+                        x:Name="AnaBorder"
+                        Width="560"
+                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource MuhasibAnaBorderCizgiBrush}"
+                        BorderThickness="1.5"
+                        CornerRadius="{StaticResource OverlayCornerRadius}"
+                        Padding="24"
+                        Translation="0,0,32">
+                        <Border.Shadow>
+                            <ThemeShadow x:Name="AnaBorderShadow" />
+                        </Border.Shadow>
+
+                        <StackPanel Spacing="14">
+                            <!-- Baslik -->
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Border
+                                    Width="36"
+                                    Height="36"
+                                    VerticalAlignment="Center"
+                                    Background="{ThemeResource MuhasibPetrolTintBrush}"
+                                    BorderBrush="{ThemeResource MuhasibPetrolBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{StaticResource MuhasibControlCornerRadius}">
+                                    <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" Glyph="{StaticResource IconHardDrive}" />
+                                </Border>
+                                <StackPanel VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock FontSize="18" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" Text="Veritabanı Şema Güncellemesi" />
+                                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Geliştirme ortamı — bekleyen göçler otomatik uygulanır." />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Katman 3: durum karti (Kural 11 — ring + sonuc) -->
+                            <Border
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource ControlCornerRadius}"
+                                Padding="16">
+                                <StackPanel Spacing="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <ProgressRing
+                                            Width="18"
+                                            Height="18"
+                                            Foreground="{ThemeResource MuhasibPetrolBrush}"
+                                            IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}"
+                                            Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                            Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <ProgressBar
+                                        Height="3"
+                                        Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        Foreground="{ThemeResource AccentFillColorDefaultBrush}"
+                                        IsIndeterminate="True"
+                                        Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Hata (yalniz hata durumunda; basari otomatik Login'e gecer) -->
+                            <InfoBar
+                                IsClosable="False"
+                                IsOpen="{x:Bind ViewModel.HataVar, Mode=OneWay}"
+                                Message="{x:Bind ViewModel.HataMetni, Mode=OneWay}"
+                                Severity="Error" />
+
+                            <StackPanel
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal"
+                                Spacing="10"
+                                Visibility="{x:Bind ViewModel.HataVar, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                                <Button AutomationProperties.AutomationId="MigrationManageButton" Click="OnManageClick" Content="Veritabanı Yönetimi" />
+                                <Button AutomationProperties.AutomationId="MigrationRetryButton" Click="OnRetryClick" Content="Tekrar Dene" Style="{StaticResource AccentButtonStyle}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Page>

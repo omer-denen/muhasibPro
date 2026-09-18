@@ -5,6 +5,7 @@ using Microsoft.AI.Foundry.Local;
 using Microsoft.Extensions.Logging;
 using MuhasibPro.Business.Contracts.SistemServices.AiAsistan;
 using MuhasibPro.Business.Services.SistemServices.AiAsistan;
+using MuhasibPro.Domain.Models;
 
 namespace MuhasibPro.Services.AiAsistan;
 
@@ -124,6 +125,8 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
         var model = await katalog.GetModelAsync(alias).ConfigureAwait(false)
             ?? throw new InvalidOperationException($"Model katalogda bulunamadı: '{alias}'.");
         var istemci = await model.GetChatClientAsync().ConfigureAwait(false);
+        istemci.Settings.Temperature = AiAsistanSettings.UretimSicakligi;
+        istemci.Settings.RandomSeed = AiAsistanSettings.UretimSabitTohumu;
         var istek = mesajlar.Select(m => new ChatMessage { Role = m.Rol, Content = m.Icerik }).ToList();
 
         using var zamanAsimi = new CancellationTokenSource(TimeSpan.FromSeconds(ayar.GetSoruZamanAsimiSn()));
@@ -242,6 +245,10 @@ public sealed class FoundryAsistanSohbetService : IAsistanSohbetService
         var hedef = (yeniAlias ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(hedef))
             throw new ArgumentException("Model adı boş olamaz.", nameof(yeniAlias));
+        // S1 tam kilit (Oturum 292): sohbet modeli sabittir — kilitli alias dışı hedef kabul edilmez.
+        if (!string.Equals(hedef, AiAsistanSettings.VarsayilanModelAlias, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException(
+                $"Sohbet modeli sabittir: '{AiAsistanSettings.VarsayilanModelAlias}' dışı model uygulanamaz.");
         await _kapi.WaitAsync(ct).ConfigureAwait(false);
         try
         {

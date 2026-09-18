@@ -3,12 +3,14 @@
     x:Class="MuhasibPro.Views.KullaniciYonetimi.KullaniciYonetimiView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:components="using:MuhasibPro.Views.KullaniciYonetimi.Components"
     xmlns:controls="using:MuhasibPro.Controls"
     xmlns:converters="using:MuhasibPro.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:model="using:MuhasibPro.Business.DTOModel.SistemModel"
+    xmlns:models="using:MuhasibPro.Business.DTOModel.SistemModel"
+    xmlns:viewDetails="using:MuhasibPro.Views.KullaniciYonetimi.Details"
+    xmlns:viewLists="using:MuhasibPro.Views.KullaniciYonetimi.List"
+    xmlns:vm="using:MuhasibPro.ViewModels.ViewModels.KullaniciYonetimi"
     Loaded="OnPageLoaded"
     mc:Ignorable="d"
     Background="Transparent">
@@ -18,7 +20,7 @@
         <converters:BoolToVisibilityConverter x:Key="FalseToVis" TrueValue="Collapsed" FalseValue="Visible" />
     </Page.Resources>
 
-    <!-- Kural 17 — Katman 1: kök Border (tema-resimli zemin + perde). Statik. -->
+    <!-- Kural 17 — Katman 1: kok Border (tema-resimli zemin + perde). Statik. -->
     <Border x:Name="KokZemin" CornerRadius="0">
         <Grid>
             <Image Source="{ThemeResource UygulamaZeminGorseli}" Stretch="UniformToFill" />
@@ -30,7 +32,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <controls:WindowTitle Title="Kullanıcı Yönetimi" />
+                <controls:WindowTitle Prefix="Kullanıcı Yönetimi" Title="{x:Bind ViewModel.List.Title, Mode=OneWay}" />
 
                 <!-- Kural 17 — Katman 2: ana border paneli -->
                 <Grid x:Name="PanelWrap" Grid.Row="0" Grid.RowSpan="2">
@@ -46,14 +48,14 @@
                             <ThemeShadow x:Name="AnaBorderShadow" />
                         </Border.Shadow>
 
-                        <Grid RowSpacing="14">
+                        <Grid RowSpacing="12">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <!-- Başlık + firma + birincil aksiyon (sağda) -->
+                            <!-- Baslik + firma + birincil aksiyon (sagda) -->
                             <Grid Grid.Row="0" ColumnSpacing="12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -64,7 +66,7 @@
                                     Grid.Column="0"
                                     VerticalAlignment="Center"
                                     FontSize="20"
-                                    Glyph="&#xE716;"
+                                    Glyph="{StaticResource IconUser}"
                                     Foreground="{ThemeResource MuhasibPrimaryBrush}" />
                                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                                     <TextBlock
@@ -76,7 +78,7 @@
                                         <TextBlock
                                             Style="{StaticResource CaptionTextBlockStyle}"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="Kullanıcıları yönetin ve firma rolünü atayın." />
+                                            Text="Kullanıcıları, firma rollerini ve izinleri yönetin." />
                                         <Border
                                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -96,193 +98,365 @@
                                             Visibility="{x:Bind ViewModel.IsYukleniyor, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
                                     </StackPanel>
                                 </StackPanel>
-                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <Button Command="{x:Bind ViewModel.YenileCommand}" ToolTipService.ToolTip="Yenile">
-                                        <FontIcon FontSize="14" Glyph="&#xE72C;" />
-                                    </Button>
-                                    <Button
-                                        MinWidth="130"
-                                        AutomationProperties.AutomationId="YeniKullaniciButton"
-                                        Command="{x:Bind ViewModel.YeniCommand}"
-                                        Content="Yeni Kullanıcı"
-                                        Style="{StaticResource AccentButtonStyle}" />
-                                </StackPanel>
+                                <Button
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="KullaniciYenileButton"
+                                    Command="{x:Bind ViewModel.YenileCommand}"
+                                    ToolTipService.ToolTip="Yenile">
+                                    <FontIcon FontSize="14" Glyph="{StaticResource IconRefresh}" />
+                                </Button>
                             </Grid>
 
-                            <!-- Durum bantları (Kural 11/12) -->
-                            <StackPanel Grid.Row="1" Spacing="8">
-                                <InfoBar
-                                    IsClosable="False"
-                                    IsOpen="{x:Bind ViewModel.HataVar, Mode=OneWay}"
-                                    Message="{x:Bind ViewModel.HataMetni, Mode=OneWay}"
-                                    Severity="Error" />
-                                <InfoBar
-                                    IsClosable="False"
-                                    IsOpen="{x:Bind ViewModel.BasariVar, Mode=OneWay}"
-                                    Message="{x:Bind ViewModel.BasariMetni, Mode=OneWay}"
-                                    Severity="Success" />
-                            </StackPanel>
+                            <!-- Yetki kapisi (K2): yalniz yonetici -->
+                            <InfoBar
+                                Grid.Row="1"
+                                IsClosable="False"
+                                IsOpen="{x:Bind ViewModel.Yetkisiz, Mode=OneWay}"
+                                Message="{x:Bind ViewModel.YetkiMesaji}"
+                                Severity="Error" />
 
-                            <!-- Master-detail: solda liste, sağda form/detay -->
-                            <Grid Grid.Row="2" ColumnSpacing="12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="380" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                            <Pivot Grid.Row="2" SelectedIndex="{x:Bind ViewModel.SeciliSekme, Mode=TwoWay}">
+                                <PivotItem Header="Kullanıcılar" VerticalContentAlignment="Stretch">
+                                    <Grid RowSpacing="12" Padding="0,8,0,0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition x:Name="ListeSatiri" Height="*" MinHeight="200" />
+                                            <RowDefinition Height="*" MinHeight="260" />
+                                        </Grid.RowDefinitions>
 
-                                <!-- Katman 3: liste kartı -->
-                                <Border
-                                    Grid.Column="0"
-                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource ControlCornerRadius}"
-                                    Padding="12">
-                                    <Grid RowSpacing="8">
+                                        <!-- Liste karti -->
+                                        <Border
+                                            x:Name="ListeKarti"
+                                            Grid.Row="0"
+                                            Grid.RowSpan="{x:Bind GetRowSpan(ViewModel.List.IsMultipleSelection), Mode=OneWay}"
+                                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="{StaticResource ControlCornerRadius}"
+                                            Padding="12">
+                                            <viewLists:KullaniciList ViewModel="{x:Bind ViewModel.List}" />
+                                        </Border>
+
+                                        <!-- Detay karti -->
+                                        <Grid
+                                            Grid.Row="1"
+                                            Visibility="{x:Bind ViewModel.List.IsMultipleSelection, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                            <Border
+                                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource ControlCornerRadius}"
+                                                Padding="12"
+                                                Visibility="{x:Bind ViewModel.Details.IsDataAvailable, Mode=OneWay}">
+                                                <Grid>
+                                                    <viewDetails:KullaniciDetails ViewModel="{x:Bind ViewModel.Details}" />
+
+                                                    <!-- Detay panelini buyut/kucult (yukari acilan expander) — liste kapanir -->
+                                                    <Button
+                                                        x:Name="DetayBuyutButton"
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Top"
+                                                        Margin="0,-6,-6,0"
+                                                        Padding="6"
+                                                        AutomationProperties.AutomationId="DetayBuyutButton"
+                                                        Click="OnDetayBuyutClick"
+                                                        Style="{StaticResource CircleIconButtonStyle}"
+                                                        ToolTipService.ToolTip="Detayı büyüt (listeyi kapat)">
+                                                        <FontIcon x:Name="DetayBuyutIcon" FontSize="13" Glyph="&#xE70E;" />
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+
+                                            <!-- Bos durum: kullanici secili degil -->
+                                            <StackPanel
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Spacing="6"
+                                                Visibility="{x:Bind ViewModel.Details.IsDataUnavailable, Mode=OneWay}">
+                                                <FontIcon
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="24"
+                                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                    Glyph="{StaticResource IconUser}" />
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="13"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Text="Kullanıcı seçilmedi" />
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="11"
+                                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                    Text="Listeden bir kullanıcı seçin veya araç çubuğundan yeni kullanıcı ekleyin." />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Grid>
+                                </PivotItem>
+
+                                <PivotItem Header="Roller &amp; İzinler" VerticalContentAlignment="Stretch">
+                                    <Grid Padding="0,8,0,0" RowSpacing="12">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" MinHeight="360" />
                                         </Grid.RowDefinitions>
-                                        <TextBlock
-                                            Grid.Row="0"
-                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                            Text="Kullanıcılar" />
-                                        <ListView
-                                            x:Name="KullaniciListesi"
+
+                                        <!-- Üst şerit: kullanıcı + rol + atama özeti | hazır ayar + ata -->
+                                        <Grid Grid.Row="0" ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ComboBox
+                                                Grid.Column="0"
+                                                MinWidth="260"
+                                                Header="Kullanıcı"
+                                                DisplayMemberPath="AdiSoyadi"
+                                                ItemsSource="{x:Bind ViewModel.RolYetki.Kullanicilar, Mode=OneWay}"
+                                                SelectedItem="{x:Bind ViewModel.RolYetki.SeciliKullanici, Mode=TwoWay}" />
+
+                                            <!-- Aktif rol + atama özeti (düz dil) + dolu ilerleme -->
+                                            <StackPanel
+                                                Grid.Column="1"
+                                                Spacing="6"
+                                                VerticalAlignment="Bottom">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Border
+                                                        Padding="10,4"
+                                                        Background="{ThemeResource MuhasibPetrolTintBrush}"
+                                                        BorderBrush="{ThemeResource MuhasibPetrolBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="{StaticResource MuhasibPillCornerRadius}">
+                                                        <TextBlock
+                                                            FontSize="12"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{ThemeResource MuhasibPetrolDeepBrush}"
+                                                            Text="{x:Bind ViewModel.RolYetki.SeciliRolAdi, Mode=OneWay}" />
+                                                    </Border>
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="{x:Bind ViewModel.RolYetki.AtananOzet, Mode=OneWay}" />
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                        Text="{x:Bind ViewModel.RolYetki.DegisiklikOzeti, Mode=OneWay}" />
+                                                </StackPanel>
+                                                <ProgressBar
+                                                    Height="4"
+                                                    Maximum="100"
+                                                    Value="{x:Bind ViewModel.RolYetki.IlerlemeYuzdesi, Mode=OneWay}" />
+                                            </StackPanel>
+
+                                            <!-- Birincil aksiyon sağda (Kural 16): hazır ayar + ata -->
+                                            <StackPanel
+                                                Grid.Column="2"
+                                                Orientation="Horizontal"
+                                                Spacing="8"
+                                                VerticalAlignment="Bottom">
+                                                <ProgressRing
+                                                    Width="18"
+                                                    Height="18"
+                                                    VerticalAlignment="Center"
+                                                    Foreground="{ThemeResource MuhasibPrimaryBrush}"
+                                                    IsActive="{x:Bind ViewModel.RolYetki.IsYukleniyor, Mode=OneWay}"
+                                                    Visibility="{x:Bind ViewModel.RolYetki.IsYukleniyor, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
+                                                <Button
+                                                    AutomationProperties.AutomationId="HazirAyarButton"
+                                                    IsEnabled="{x:Bind ViewModel.RolYetki.Duzenlenebilir, Mode=OneWay}">
+                                                    <Button.Content>
+                                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                                            <FontIcon FontSize="13" Glyph="{StaticResource IconEdit}" />
+                                                            <TextBlock Text="Hazır ayar" />
+                                                        </StackPanel>
+                                                    </Button.Content>
+                                                    <Button.Flyout>
+                                                        <MenuFlyout>
+                                                            <MenuFlyoutItem
+                                                                Command="{x:Bind ViewModel.RolYetki.HazirAyarCommand}"
+                                                                CommandParameter="TumunuVer"
+                                                                Text="Tümünü ver" />
+                                                            <MenuFlyoutItem
+                                                                Command="{x:Bind ViewModel.RolYetki.HazirAyarCommand}"
+                                                                CommandParameter="YalnizGoruntule"
+                                                                Text="Yalnız görüntüleme" />
+                                                            <MenuFlyoutSeparator />
+                                                            <MenuFlyoutItem
+                                                                Command="{x:Bind ViewModel.RolYetki.HazirAyarCommand}"
+                                                                CommandParameter="Temizle"
+                                                                Text="Tümünü temizle" />
+                                                        </MenuFlyout>
+                                                    </Button.Flyout>
+                                                </Button>
+                                                <Button
+                                                    MinWidth="170"
+                                                    AutomationProperties.AutomationId="YetkiAtaButton"
+                                                    Command="{x:Bind ViewModel.RolYetki.AtaCommand}"
+                                                    Content="Kullanıcı için ata"
+                                                    IsEnabled="{x:Bind ViewModel.RolYetki.DegisiklikVar, Mode=OneWay}"
+                                                    Style="{StaticResource AccentButtonStyle}" />
+                                                <ProgressRing
+                                                    Width="18"
+                                                    Height="18"
+                                                    VerticalAlignment="Center"
+                                                    Foreground="{ThemeResource MuhasibPrimaryBrush}"
+                                                    IsActive="{x:Bind ViewModel.RolYetki.IsKaydediliyor, Mode=OneWay}"
+                                                    Visibility="{x:Bind ViewModel.RolYetki.IsKaydediliyor, Mode=OneWay, Converter={StaticResource TrueToVis}}" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <InfoBar
                                             Grid.Row="1"
-                                            AutomationProperties.AutomationId="KullaniciListesi"
-                                            ItemsSource="{x:Bind ViewModel.Kullanicilar, Mode=OneWay}"
-                                            SelectedItem="{x:Bind ViewModel.SeciliKullanici, Mode=TwoWay}"
-                                            SelectionMode="Single">
-                                            <ListView.ItemTemplate>
-                                                <DataTemplate x:DataType="model:KullaniciModel">
-                                                    <Grid ColumnSpacing="8" Padding="0,6">
+                                            IsClosable="False"
+                                            IsOpen="True"
+                                            Message="{x:Bind ViewModel.RolYetki.RolBilgi, Mode=OneWay}"
+                                            Severity="Informational" />
+
+                                        <!-- Solda modüller, sağda seçili modülün aksiyon kartı -->
+                                        <Grid Grid.Row="2" ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="260" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Sol: modüller (kendi içinde kayar, seçili vurgulu) -->
+                                            <Border
+                                                Grid.Column="0"
+                                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource ControlCornerRadius}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
+                                                    <Grid Grid.Row="0" Padding="12,10" ColumnSpacing="8">
                                                         <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto" />
                                                             <ColumnDefinition Width="*" />
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
-                                                        <Border
-                                                            Grid.Column="0"
-                                                            Width="34"
-                                                            Height="34"
+                                                        <TextBlock
+                                                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                            Text="Modüller" />
+                                                        <TextBlock
+                                                            Grid.Column="1"
                                                             VerticalAlignment="Center"
-                                                            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="{StaticResource MuhasibCircleCornerRadius}">
+                                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                            Text="{x:Bind ViewModel.RolYetki.Moduller.Count, Mode=OneWay}" />
+                                                    </Grid>
+                                                    <ListView
+                                                        Grid.Row="1"
+                                                        AutomationProperties.AutomationId="ModulListesi"
+                                                        ItemsSource="{x:Bind ViewModel.RolYetki.Moduller, Mode=OneWay}"
+                                                        SelectedItem="{x:Bind ViewModel.RolYetki.SeciliModul, Mode=TwoWay}"
+                                                        SelectionMode="Single">
+                                                        <ListView.ItemTemplate>
+                                                            <DataTemplate x:DataType="vm:ModulYetki">
+                                                                <Grid ColumnSpacing="8" AutomationProperties.Name="{x:Bind Kategori}">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <TextBlock
+                                                                        VerticalAlignment="Center"
+                                                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                                        Text="{x:Bind Kategori}"
+                                                                        TextTrimming="CharacterEllipsis" />
+                                                                    <Border
+                                                                        Grid.Column="1"
+                                                                        Padding="7,1"
+                                                                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                        BorderThickness="1"
+                                                                        CornerRadius="{StaticResource MuhasibPillCornerRadius}">
+                                                                        <TextBlock
+                                                                            FontSize="11"
+                                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                            Text="{x:Bind SayiOzeti, Mode=OneWay}" />
+                                                                    </Border>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ListView.ItemTemplate>
+                                                    </ListView>
+                                                </Grid>
+                                            </Border>
+
+                                            <Border
+                                                Grid.Column="1"
+                                                Padding="16"
+                                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="{StaticResource ControlCornerRadius}"
+                                                Visibility="{x:Bind ViewModel.RolYetki.ModulVar, Mode=OneWay, Converter={StaticResource TrueToVis}}">
+                                                <Grid RowSpacing="12">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
+                                                    <!-- Modül başlığı + "Tümü" master -->
+                                                    <Grid Grid.Row="0" ColumnSpacing="12">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Spacing="2">
                                                             <TextBlock
-                                                                HorizontalAlignment="Center"
-                                                                VerticalAlignment="Center"
-                                                                FontSize="12"
-                                                                FontWeight="Bold"
-                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                Text="{x:Bind Initials}" />
-                                                        </Border>
-                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                                            <TextBlock
+                                                                FontSize="16"
                                                                 FontWeight="SemiBold"
                                                                 Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                                                Text="{x:Bind AdiSoyadi}"
-                                                                TextTrimming="CharacterEllipsis" />
-                                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                                <TextBlock
-                                                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                                                    Text="{x:Bind KullaniciAdi}" />
-                                                                <Border
-                                                                    Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                                    BorderThickness="1"
-                                                                    CornerRadius="{StaticResource MuhasibControlCornerRadius}"
-                                                                    Padding="6,0,6,1">
-                                                                    <TextBlock
-                                                                        FontSize="10"
-                                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                        Text="{x:Bind Rol.RolAdi, Mode=OneWay}" />
-                                                                </Border>
-                                                            </StackPanel>
+                                                                Text="{x:Bind ViewModel.RolYetki.SeciliModul.Kategori, Mode=OneWay}" />
+                                                            <TextBlock
+                                                                Style="{StaticResource CaptionTextBlockStyle}"
+                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                Text="{x:Bind ViewModel.RolYetki.SeciliModul.SayiOzeti, Mode=OneWay}" />
                                                         </StackPanel>
-                                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-                                                            <Button
-                                                                Background="Transparent"
-                                                                BorderThickness="0"
-                                                                Click="OnDuzenleClick"
-                                                                ToolTipService.ToolTip="Düzenle">
-                                                                <FontIcon FontSize="13" Glyph="&#xE70F;" />
-                                                            </Button>
-                                                            <Button
-                                                                Background="Transparent"
-                                                                BorderThickness="0"
-                                                                Click="OnAktifClick"
-                                                                ToolTipService.ToolTip="Aktif/Pasif">
-                                                                <FontIcon FontSize="13" Glyph="&#xE8D8;" />
-                                                            </Button>
-                                                            <Button
-                                                                Background="Transparent"
-                                                                BorderThickness="0"
-                                                                Click="OnSifreClick"
-                                                                ToolTipService.ToolTip="Şifre belirle">
-                                                                <FontIcon FontSize="13" Glyph="&#xE72E;" />
-                                                            </Button>
-                                                            <Button
-                                                                Background="Transparent"
-                                                                BorderThickness="0"
-                                                                Click="OnSilClick"
-                                                                ToolTipService.ToolTip="Sil">
-                                                                <FontIcon FontSize="13" Glyph="&#xE74D;" />
-                                                            </Button>
-                                                        </StackPanel>
+                                                        <CheckBox
+                                                            Grid.Column="1"
+                                                            VerticalAlignment="Center"
+                                                            Content="Tümü"
+                                                            FontWeight="SemiBold"
+                                                            IsChecked="{x:Bind ViewModel.RolYetki.SeciliModul.TumuSecili, Mode=TwoWay}"
+                                                            IsEnabled="{x:Bind ViewModel.RolYetki.Duzenlenebilir, Mode=OneWay}" />
                                                     </Grid>
-                                                </DataTemplate>
-                                            </ListView.ItemTemplate>
-                                        </ListView>
-                                    </Grid>
-                                </Border>
 
-                                <!-- Katman 3: form / boş-durum kartı -->
-                                <Border
-                                    Grid.Column="1"
-                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="{StaticResource ControlCornerRadius}"
-                                    Padding="16">
-                                    <Grid>
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                            Text="Bir kullanıcı seçin veya yeni kullanıcı ekleyin."
-                                            Visibility="{x:Bind ViewModel.Duzenle.Gorunur, Mode=OneWay, Converter={StaticResource FalseToVis}}" />
+                                                    <!-- Aksiyonlar (iki kolona yayılır, kart kendi içinde kayar) -->
+                                                    <GridView
+                                                        Grid.Row="1"
+                                                        IsEnabled="{x:Bind ViewModel.RolYetki.Duzenlenebilir, Mode=OneWay}"
+                                                        IsItemClickEnabled="False"
+                                                        ItemsSource="{x:Bind ViewModel.RolYetki.SeciliModul.Izinler, Mode=OneWay}"
+                                                        SelectionMode="None">
+                                                        <GridView.ItemTemplate>
+                                                            <DataTemplate x:DataType="models:RolIzinModel">
+                                                                <CheckBox
+                                                                    MinWidth="200"
+                                                                    Content="{x:Bind Ad}"
+                                                                    IsChecked="{x:Bind Secili, Mode=TwoWay}" />
+                                                            </DataTemplate>
+                                                        </GridView.ItemTemplate>
+                                                    </GridView>
 
-                                        <ScrollViewer
-                                            HorizontalScrollBarVisibility="Disabled"
-                                            VerticalScrollBarVisibility="Auto"
-                                            Visibility="{x:Bind ViewModel.Duzenle.Gorunur, Mode=OneWay, Converter={StaticResource TrueToVis}}">
-                                            <StackPanel Spacing="12">
-                                                <components:KullaniciDuzenlePanel DataContext="{x:Bind ViewModel.Duzenle, Mode=OneWay}" />
-                                                <StackPanel
-                                                    HorizontalAlignment="Right"
-                                                    Orientation="Horizontal"
-                                                    Spacing="8">
-                                                    <Button
-                                                        MinWidth="120"
-                                                        AutomationProperties.AutomationId="VazgecButton"
-                                                        Command="{x:Bind ViewModel.VazgecCommand}"
-                                                        Content="Vazgeç" />
-                                                    <Button
-                                                        MinWidth="120"
-                                                        AutomationProperties.AutomationId="KaydetButton"
-                                                        Command="{x:Bind ViewModel.KaydetCommand}"
-                                                        Content="Kaydet"
-                                                        Style="{StaticResource AccentButtonStyle}" />
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </ScrollViewer>
-                                    </Grid>
-                                </Border>
-                            </Grid>
+                                                    <TextBlock
+                                                        Grid.Row="2"
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                        Text="Bu değişiklikler bu roldeki tüm kullanıcılara uygulanır."
+                                                        TextWrapping="Wrap" />
+                                                </Grid>
+                                            </Border>
+                                        </Grid>
+
+                                        </Grid>
+                                </PivotItem>
+                            </Pivot>
                         </Grid>
                     </Border>
                 </Grid>

@@ -55,6 +55,7 @@ namespace MuhasibPro.Business.HostBuilder
                 services.AddScoped<IPermissionService, PermissionService>();
                 services.AddScoped<IModuleLicenseService, ModuleLicenseService>();
                 services.AddScoped<IKullaniciService, KullaniciService>();
+                services.AddScoped<IRolYetkiService, RolYetkiService>();
                 services.AddScoped<ILisansService, LisansService>();
                 // Faz 6.92: sürüm→özellik kapısı (Scoped — ILisansService Scoped'a yaslanır).
                 services.AddScoped<ISurumOzellikService, SurumOzellikService>();

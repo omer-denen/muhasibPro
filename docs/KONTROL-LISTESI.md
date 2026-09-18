@@ -333,6 +333,14 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 
 **Oturum 268 seçim animasyonu (kod ✅, ONAYLI "gayet başarılı"):** orbit **kaldırıldı** (kuyruk hub'ı geçiyordu + `StrokeDashOffset` bağımlı → takılma); `SelectionWaveControl` nabzı denendi, **kullanıcı reddetti** → **animasyon sınıfları tümüyle silindi** (Kural 4). NİHAİ: **seçili dönem/firma satırı ana kart rengini alır** (`CardBackgroundFillColorSecondaryBrush` → panel üstüne binince içeride/çukur), **seçimsiz saydam**, seçim yalnız sol accent hub; **seçili firma kartı** (sol panel) da aynı; **hover tema-farkında token** `MuhasibHoverOverlayBrush` (Light `#14000000` / Dark `#1AFFFFFF`) ile iki temada görünür (eski `ControlFillColorSecondaryBrush` Light'ta etkisizdi — HATALAR). Ayrıca **ana border `1→1.5`** (10 Katman-2 view; mühür revizyonu — AGENTS Kural 17 + TASARIM-KURALLARI). Kural 14/19: MS Motion → REFERANSLAR güncel. x64 **0 hata + 492/492**; canlı Dark/Light kanıt (`ot275_*`/`ot276_*`: Light panel 250/seçili 248/hover 251→231; Dark panel 76/seçili 82/hover 77→95). Commit yapıldı.
 
+## DEV-ONLY otomatik migration (Oturum 286) ✅🧪
+> **Talep:** Veritabanı Yönetimi ekranı migration için açılıyor; dev'de bekleyen göçler otomatik uygulanmalı (güncelleme doğrulama sagasının dev karşılığı). **Karar:** ayrı dev-only akış + `IDevModeProvider` kapısı (Kural 8 ✅).
+- [x] `SplashTarget.DevMigration` + `SplashRouteDecision.DevOttomatikGoc` (dev kipinde bekleyen göçte `MigrationRequired` yerine)
+- [x] `SplashRoutingService`'e `IDevModeProvider`; `SplashNavigator` → `SistemMigrationView`
+- [x] `SistemMigrationViewModel` (motor `ISistemDatabaseService.ApplyPendingSistemMigrationsAsync`: ön-yedek → göç → doğrulama) + `SistemMigrationView` (Kural 17; başarıda Login, hatada Tekrar Dene / Veritabanı Yönetimi)
+- [x] DI (`AddAppViewModel` + `Startup.ConfigureNavigation`) + 2 test → build 0 + **657/657**
+- [ ] **Canlı:** dev DB'de bekleyen göç üretilip akış izlenecek (şu an göç yok → üretilemedi; karar yolu birim testli)
+
 ## Faz 6.85 — Kullanıcı Yönetimi + RBAC (kullanıcı → modül/alan erişimi) — **ÖNCELİKLİ FAZ** (Oturum 284 plan 📋; Oturum 256 ilk karar)
 
 > **Plan:** `docs/KULLANICI-YONETIMI-PLAN.md` (kod doğrulamalı mevcut durum + hedef mimari + K1-K6 + riskler).
@@ -349,24 +357,42 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] Testler: gerçek seed ile `PermissionService` integration + KFR yazımı + backfill (`RbacK1Tests`, 6 test)
 
 
-### K2 — Kullanıcı Yönetimi modal penceresi ✅🧪 (Oturum 285) — Kural 8 sınıf onaylı
-- [x] `KullaniciYonetimiViewModel` + `KullaniciDuzenleViewModel` + `KullaniciYonetimiView` + `KullaniciDuzenlePanel` (ayrı `Views/KullaniciYonetimi/`; `CreateNewViewAsync` ayrı pencere; Kural 17)
-- [x] Liste + yeni kullanıcı (`Adi/Soyadi` dahil; kullanıcı adı benzersiz) + düzenle + aktif/pasif + şifre belirle + sil (guard'lı). Kapı: yönetici (`AyarYetkiDenetimi.KullaniciYoneticiMi`)
-- [x] `IKullaniciService`'e create/rol metotları + yeni `IKullaniciRolRepository` (Scoped) (Kural 5 zinciri)
-- [x] `UserInfoControl` menüsüne admin "Kullanıcı Yönetimi" girişi
-- [x] **Bug fix:** `IUserRepository` Scoped (pencere-scope context birliği; FK ihlali giderildi; Kural 8 ✅)
-- [x] Testler (`KullaniciYonetimiTests` 6 + `KullaniciServiceTests` +3 + DI regresyon) · **Kural 18 canlı ✅** (`ot285_s_kayit`), ⏳ onay
+### K2-ÖN — Firma modülü yeni tasarım (K2-REDESIGN ön koşulu) ✅🧪 (Oturum 286) — **Kural 8 sınıf onaylı**
+> **Neden:** Kullanıcılar sayfası "FirmaList gibi" tasarlanacağı için önce eski tasarımdaki `Views/Firmalar/*` yeni tasarıma çekildi + FirmaShell'den "Firma Yönetimi" butonuyla erişilir yapıldı (kullanıcı kararı Oturum 286). `Views/Firma/*` hızlı düzenleme akışı korundu.
+- [x] **`FirmalarView.xaml`** Kural 17 (zemin → ana border → iç kartlar) + master-detail (liste + detay/mali dönemler Pivot) + başlık/`IsBusy` ring + Yenile/Yeni Firma; `?` yardım **eklenmedi** (kullanıcı kararı: sayfa yardımları kaldırıldı)
+- [x] **`FirmalarList.xaml`** "Kimlik" → **"Firma Kodu"** kolonu (sektör: Sage/QB şirket listesi)
+- [x] **`FirmalarDetails.xaml`** `GlassPanel` → `MuhasibCardStyle` + petrol bölüm hapı; **form yalnız gerekli + güncellenebilir alanlar** (Kısa Ünvan*/Yetkili Kişi*/Tam Ünvan*/Telefon*/E-Posta/Vergi Dairesi/Vergi No/Adres) + ortalama kaldırıldı
+- [x] **`FirmalarCard.xaml`** `ElevatedCard` → `MuhasibCardStyle` (sade: logo+kimlik+özet; form alanları tekrarlanmaz; avatar `Initials`)
+- [x] **`FirmaMaliDonemler.xaml`** kolon başlığı "Mali Dönem"
+- [x] **`FirmaShellView`** başlıkta **"Firma Yönetimi"** butonu (`FirmaYonetimiCommand` → `FirmalarView`, yeni pencere)
+- [x] **`FirmalarView.xaml.cs`** ThemeShadow (Loaded) + `GetRowSpan` (çoklu seçim) + **detay-büyütme expander** (`DetayBuyutButton`; liste kapanır) + ölü `OpenInNewView*` silindi (Kural 4)
+- [x] **`ListToolbar`** New butonu stili `PrimaryButtonStyle`→`ModernToolBarButtonStyle` (boş hap bug'ı; kaynak: VanArsdelPreview orijinali); NewLabel "Yeni Firma"/"Yeni Mali Dönem"
+- [x] **Kural 14/19 araştırma:** MS list/details + Sage 50 Company Information + QuickBooks company file + VanArsdelPreview orijinali → `REFERANSLAR` 286
+- [x] **Doğrulama:** build 0 · **664/664** · **Kural 18 canlı** (`ot286_*`/`ot287_*`: FirmaShell → "Firma Yönetimi" → liste → satır seç → detay; expander normal/büyük; ⏳ onay)
+- [x] **Kurala işlendi:** master-detail expander → `AGENTS` Kural 17 + `docs/TASARIM-KURALLARI.md` (sonraki sayfalarda zorunlu)
+- [ ] **Açık uç:** açılışta ilk satır otomatik seçilmiyor (satır seçilince detay gelir) — `FirmaListViewModel` davranışı (eski sayfayla aynı); istenirse VM'e ilk-seçim fallback'i eklenir
 
-### K3 — İzin matrisi + rol atama (iki rol) ⬜
-- [x] Kullanıcıya firma-bazlı **rol atama** (KFR; form rol seçici + `RolAtaAsync`) — K2'de teslim
-- [ ] **İzin matrisi UI** (71 izin, kategori başlıklı): `Yönetici` sabit (tüm izinler), **`Kullanıcı` düzenlenebilir** → modül/aksiyon erişimi buradan
-- [ ] **Özel rol oluşturma YOK** (kullanıcı kararı Oturum 284)
+### K2 — Kullanıcı Yönetimi penceresi ✅🧪 (Oturum 285) — ⚠️ **VIEW REDESIGN gerekli** (Kural 8 sınıf onaylı)
+- [x] Motor/servis: `IKullaniciService` create/rol + `IKullaniciRolRepository` (Scoped) + `IUserRepository` Scoped fix (FK)
+- [x] Giriş: `UserInfoControl` admin "Kullanıcı Yönetimi"; kapı `AyarYetkiDenetimi.KullaniciYoneticiMi`
+- [x] Testler + **Kural 18 canlı ✅** (`ot285_s_kayit` — kullanıcı oluşturma + rol); commit `213c3b4`
+- [x] **REDESIGN (Oturum 286 ✅):** Firma deseni (`DataList`+`TableView`+`Details`+`GenericList/DetailsViewModel`) — `KullaniciListViewModel`/`KullaniciDetailsViewModel`/`KullaniciRolYetkiViewModel` + orkestratör `KullaniciYonetimiViewModel`; `KullaniciYonetimiView` (Kural 17 + Pivot) + `List/KullaniciList` + `Details/KullaniciDetails`+`KullaniciCard`; eski `KullaniciDuzenlePanel`/`KullaniciDuzenleViewModel` silindi (Kural 4)
+- [x] **Avatar/profil resmi:** `KullaniciService` create/update `Resim`+`ResimOnizleme` kalıcılığı + `KullaniciDetailsViewModel.EditPictureCommand` + `KullaniciCard` foto seç — **664/664**; canlı tur ⏳
 
-### K4 — Modül/alan erişim kapısı ⬜
-- [ ] `MainShell` modül menüsü: yetkisiz modül **gizli/pasif + gerekçe** (`MainMenuViewModel` + `Permission`)
-- [ ] Denetim Masası bölümleri: yetkisiz bölüm gizli (`DenetimMasasiViewModel.MenuGorunurMu`)
-- [ ] Sayfa/buton guard'ları (yıkıcı işlemler: sil/güncelle/geri yükle)
-- [ ] `IModuleLicenseService` modül lisans kapısı nav'a; `ModuleLicenseViewModel` hardcoded `firmaId` düzeltmesi
+### K3 — İzin matrisi + rol atama (iki rol) ✅🧪 (Oturum 286; canlı onay ⏳)
+- [x] Kullanıcıya firma-bazlı **rol atama** (KFR; `RolAtaAsync`) — K2 motorunda
+- [x] Motor iskeleti: `RolIzinModel` + `IRolYetkiService`/`RolYetkiService` (`GetMatrisAsync`/`SetIzinAsync`+`ClearCache`)
+- [x] DI kaydı (`AddServicesHostBuilderExtensions` Scoped) + **izin matrisi UI** ("Roller & İzinler" sekmesi, kategori başlıklı 71 izin; `Yönetici` sabit, `Kullanıcı` düzenlenebilir) — `KullaniciRolYetkiViewModel`
+- [x] Testler (`RbacK3Tests` 3) → build 0 + **664/664**; canlı tur ⏳ onay
+- [x] **Özel rol oluşturma YOK** (kullanıcı kararı Oturum 284)
+
+### K4 — Modül/alan erişim kapısı 🔨 (Oturum 291 — ana model)
+- [x] **Firma-bağımsız izin:** `IPermissionService.KullaniciYetkisiVarMiAsync` (seçim-öncesi yüzeyler; Yönetici bypass) + 3 test
+- [x] **`MainShell` menüsü:** yalnız **gerçek** hedefler (Kural 21; `NavSidebarControl` statik sahteleri kaldırıldı) + yetkisiz öğe **gizli** (`MainMenuViewModel.GorunurNavigationItems`; standart hibrit: menüde gizle, butonda pasif+gerekçe) + 2 test · canlı `ot297_*`
+- [x] **Denetim Masası bölümleri:** yetkisiz bölüm gizli (`DenetimMasasiViewModel.MenuGorunurMu` izin kapıları) + test
+- [x] **FirmaShell "Firma Yönetimi"** butonu: `Firma_Yonet` → pasif + gerekçe tooltip
+- [ ] Sayfa/buton guard'ları (yıkıcı işlemler) — **kısmi (Oturum 291):** servis katmanında **Firma sil** (`FirmaSilmeService` → `Firma_Yonet`) + **Kullanıcı sil** (`KullaniciService` → `Kullanici_Yonet`) + test. **Kalan:** DB geri-yükle/arşiv/kalıcı-sil, log sil, mali dönem sil.
+- [ ] `IModuleLicenseService` modül lisans kapısı; `ModuleLicenseViewModel` hardcoded `firmaId` düzeltmesi (gerçek modül gelince)
 
 ### K5 — Hesabım + UserInfoControl menüsü ⬜
 - [ ] "Hesabım": profil (ad/iletişim/avatar) + şifre değiştir (mevcut şifre doğrulamalı)
@@ -609,9 +635,9 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 
 ---
 
-## Faz 6.92 — AI Yardım Asistanı (sürüm-paketli, yerel Foundry) (Oturum 276+277 — Adım 1-6 ✅🧪; UI revizyonu ✅ (277); **sahiplik: UI 277'de, servis/contract diğer modelde**; Adım 7 servis+UI sonrası)
+## Faz 6.92 — AI Yardım Asistanı (sürüm-paketli, yerel Foundry) (Oturum 276+277 — Adım 1-6 ✅🧪; UI revizyonu ✅ (277); **sahiplik (Oturum 291): katman ayrımı**; **Adım 7 ✅ (291)**)
 
-> **Sahiplik (Oturum 277 güncel):** AI **UI** (statü çubuğu flyout + panel + Denetim paneli) **Oturum 277'de**; **servis/contract** (model listele/sil/unload, alias-değişimi uygulama) **diğer modelde** — UI bağlantısı servis bitince. Çakışma yasak (LOG `📨`).
+> **Sahiplik (Oturum 291 — katman ayrımı):** AI **motor/veri/model** (sohbet servisi, model yönetimi motoru, KB motoru, prompt/retrieval, ölçüm/hardware kapısı) = yardımcı model; **UI/VM/XAML/DI/içerik/doğrulama** = ana model.
 
 - [x] **1. Araştırma + REFERANSLAR ✅ (kod öncesi):** Foundry .NET SDK akışı (CreateAsync→EP→katalog→indir/yükle→streaming→unload) + NuGet TFM bulgusu (WinML=windows-TFM → impl App'te) + MEAI ret (öz sözleşme) + Xero JAX salt-okunur ilkesi + katalog (alias ayardan, varsayılan `qwen2.5-0.5b` geçici) + Phi Silica ret — `REFERANSLAR` 276 (6 satır) ✅
 - [x] **2. Sürüm katmanı ✅ (kod):** `SurumKatalogu.AiAsistanIcerirMi` (Domain ürün sabiti) + `ISurumOzellikService`/`SurumOzellikService` (Scoped, fail-closed) + `Permission.AiAsistan_Kullan=2300` + DI + `SurumOzellikServiceTests` (6 fact: 4 tür × geçerli/geçersiz + fail) ✅🧪
@@ -621,8 +647,25 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] **6. Ayar + Tanılama ✅🧪 (kod + Windows):** Denetim AI paneli (Adım 5'te) + dev-mode "AI Bağlantı Öz-testi" (`AiOzTestCommand`: sürüm hakkı + model durumu + RAG derlemi, salt-okunur) + `GelistiriciAiOzTestTests` (3 fact) ✅
 - [x] **5b. UI revizyonu ✅🧪 (Oturum 277, kullanıcı kararı):** asistan **statü çubuğunun en sağında 🤖 → sağa hizalı Flyout** (`TopEdgeAlignedRight`; MainShell yerleşimine girmez, popup); panel başlığında `?` → **gizle**; **model indirme panel içinde** (Denetim'deki "Modeli Hazırla" + hazırlık bölümü kaldırıldı, yalnız ayar + ipucu); ölü `HazirlaCommand`/panel `YardimCommand` temizlendi (Kural 4); yardım maddeleri güncellendi. Canlı: kapalı/açık/gizle (`ot277f_*`), **C2/C3 ✅** (model indi+yüklendi, düzgün Türkçe soru → RAG cevabı `ot277f_soru_19.png`). Build 0 + **604/604** ✅
 - [x] **5c. Servis/contract ✅ (diğer model, Adım 8) + UI bağlantısı ✅ (Oturum 278):** model **listele + disk**, **sil** (+unload), **alias-değişimi uygulama** bitti. UI: Denetim "Model yönetimi" (`SettingsExpander` liste + disk özeti + `Yenile` + `Sil` onay dialogu) + "Model → Uygula" (`AliasDegisiminiUygulaAsync` + determinate ilerleme) + indirme yönergeleri; sohbet panelinde alias uyuşmazlığı yeniden-hazırlama. Canlı S1/S2/S3 + restore (`ot278*`), test **617/617** ✅🧪
-- [ ] **7. Kapanış:** build 0/0 ✅ + test 617/617 ✅ + Kural 18 canlı (model liste/sil/alias-uygula ✅; Standart=kilit + streaming önceki oturumlarda) → **kullanıcı onayı bekliyor** ⬜
+- [x] **7. Kapanış ✅ (kullanıcı onayı, Oturum 291):** build 0/0 + test 665/665 + Kural 18 canlı (model liste/sil/alias-uygula ✅; Standart=kilit + streaming) → **onay verildi.**
 - [x] **8. Model yönetimi servisi ✅🧪 (kod + Windows/canlış, 277 isteği):** contract +4 metot (`ModelleriGetir`/`DiskKullanimi`/`ModelSil`/`AliasDegisiminiUygula`) + 3 DTO + Foundry impl (SDK imzaları DLL metaverisinden doğrulandı) + `ModelKlasorOlcer` + 4 fact; UI 278 bağladı, canlı S1-S4 ✅, test 617/617 ✅
+- [ ] **9. Kalıcı model seçimi (6.92-D, Muse Spark — Oturum 288 ölçü):** varsayılan `qwen2.5-0.5b` Türkçe kalitesi zayıf (282 notu) → 8 GB RAM CPU-only hedef için aday ölçümü (`Temp/opencode/modeltest`, 6 soru; Q6 RAG-simülasyonlu):
+  - [x] `qwen3-1.7b-generic-cpu` ❌ ELENDİ (1355 MB · +1827 MB RAM · `<think>` sızıntısı + tekrar döngüsü + "kısa" dinlemiyor)
+  - [x] `qwen2.5-1.5b-instruct-generic-cpu` ❌ ELENDİ (1842 MB · +1369 MB RAM · Türkçe halüsinasyon: "arşivlenmez", 1120×2=660)
+  - [x] `phi-3.5-mini` ❌ İPTAL (Oturum 289, kullanıcı kısıtı: **max 1.5B parametre** — fan/CPU/RAM yükü; indirme başlatıldı, ölçüm koşulamadan durduruldu, 2648 MB önbellek silindi)
+  - [x] **≤1.5B aday ölçümü (Oturum 291 — tamamlandı):** aynı 6 soru (`Temp/opencode/modeltest`, Q6 RAG-simülasyonlu) + karar:
+  - [x] `qwen3-0.6b-generic-cpu` ❌ ELENDİ (Oturum 291: 511 MB/+769 MB · `<think>` sızıntısı + tekrar döngüsü + RAG-bağlamı yoksayma; önbellek silindi)
+  - [x] `qwen3.5-0.8b-generic-cpu` ❌ ELENDİ (Oturum 291: 1038 MB/+1280 MB · tekrar döngüleri + **Q6 bağlam inkârı** ("mümkün değildir" vs bağlam "yeniden açılır"); önbellek silindi)
+  - [x] **P2 karar (Oturum 291, ana modele teslim): kazanan yok — varsayılan `qwen2.5-0.5b` kalır** + prompt/RAG sertleştirme (S2+S3). P3 strip düştü (koşul gerçekleşmedi).
+    - Baz: `qwen2.5-0.5b` (0.5B · 822 MB · mevcut varsayılan, Türkçesi zayıf — 282 notu). Elenenler: `qwen2.5-1.5b` ❌ (halüsinasyon) · `qwen2.5-coder-1.5b` ❌ (coder, sohbet dışı) · `smollm3-3b`/`qwen3.5-2b-text`/`phi-3.5-mini` ❌ (limit üstü)
+    - Karar kriteri (288'den aynen + yük): **bağlama sadakat + Türkçe komut takibi + temiz çıktı + düşük CPU/RAM**. İkisi de bazı geçemezse varsayılan `qwen2.5-0.5b` kalır + RAG/prompt sertleştirme (RAG v1 → KB zaten devrede).
+  - [ ] **Stabilite planı S1-S4 (Oturum 290 kararları — kilitli):**
+    - [x] S1 tam kilit: tek alias ürün sabiti (`VarsayilanModelAlias` sabit; `Clamp` modeli sabitler; `AliasDegisiminiUygulaAsync` sabit dışı hedefi reddeder) + **Denetim model seçici kaldırıldı** (VM `ModelAlias` salt-okunur + `Uygula`/`Varsayılan`/uygulama ilerlemesi silindi; panelde sabit model gösterilir) — ✅ **Oturum 292 (servis, yardımcı) + Oturum 293 (UI, ana model)**; 2 kırmızı test kapandı, **683/683**
+    - [x] S2 deterministik üretim: `Settings.Temperature = 0` + `RandomSeed = UretimSabitTohumu` (Kural 8) — ✅ **Oturum 292 (yardımcı, kod)** + 2 test
+    - [ ] S3 öğretme = RAG (6.94 H2; sadakat kuralı korunur)
+    - [ ] S4 regresyon kapısı: 6 soruluk set; alias/prompt değişimi setten geçmeden varsayılan olamaz (P1 ilk kullanım)
+  - Fine-tune **RAFTA** (290): Foundry özel-ONNX duvarı + ≤1.5B ezber zayıflığı + yaşayan içerik + maliyet; S1-S4 yetmezse ayrı fazda araştırılır.
+- [ ] **10. Donanım kapısı (6.92-D):** D2 `IDonanimUygunlukService` (RAM/disk/CPU) · D3 hüküm (≥8 GB Uygun / 6-8 Sınırda / <6 Yetersiz) — ✅ **Oturum 292 (yardımcı, servis + testler)** · **Kalan (ana model):** DI kaydı + D4 panel uyarı bandı (`DonanimUyarisiniGizle`, kilit yok) + indirme-öncesi onay · D5 Denetim "Bu bilgisayar" kartı. Kapı: Kural 8 sınıf onayı + build/test + Kural 18 canlı + onay
 
 **Kapı:** Kural 8 (Adım 5 view'ları) + build 0/0 + test + Kural 18 canlı + onay.
 **Windows doğrulama paketi ✅🧪 (Oturum 275, 2026-09-16):** restore doğrulandı (`project.assets.json`) + build 0 hata (yeni dosyalardan uyarı yok) + test **583/583** (bekçi yeşil) + bozulan eski test yok.
@@ -633,7 +676,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 ## Faz 6.93 — AI Yardım Bilgi Tabanı (AsistanBilgi.db + Hibrit RAG) (Oturum 278 plan ✅ → Oturum 279 motor ✅ → Oturum 280 Adım 2 + 6.91-G ✅)
 
 > **Plan/sözleşme:** `docs/YARDIM-DB-PLAN.md` (dondurulmuş kontrat + veri modeli + davranış + dosya sahipliği).
-> **Sahiplik (kullanıcı kararı, Oturum 278):** **motor + veri diğer modelde**, **UI/entegrasyon/doğrulama bende**.
+> **Sahiplik (Oturum 291 — katman ayrımı):** **motor/veri/model = yardımcı model**; **UI/entegrasyon/doğrulama/içerik = ana model**.
 > **Kararlar:** yalnız AI kapsamı · içerik repoda `docs/yardim/*.md` · **hibrit** (lexical + Foundry embedding + RRF; FTS5 yok) · ayrı `%AppData%\MuhasibPro\AsistanBilgi.db`.
 
 - [x] **0. Araştırma + sözleşme ✅ (Oturum 278):** `REFERANSLAR` 278 (5 satır: Foundry RAG/embedding, BM25↔vektör/hibrit, FTS5 Türkçe sınırı, vstash RRF, on-device Türkçe karakterizasyon) + `docs/YARDIM-DB-PLAN.md` (frozen) ✅
@@ -652,7 +695,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 ## Faz 6.94 — Tek Yardım Yüzeyi (AI Asistanı) (Oturum 283 plan 📋 → kullanıcının ek soruları sonrası başlar)
 
 > **Plan:** `docs/YARDIM-TEK-YUZEY-PLAN.md` (kilitli kararlar + envanter + H1-H5 + riskler).
-> **Sahiplik:** içerik `docs/yardim/*.md` + UI sadeleştirme (Views/ViewModels) **ana modelde**; motor/prompt/retrieval **diğer modelde**.
+> **Sahiplik (Oturum 291 — katman ayrımı):** **motor/prompt/retrieval (H4) = yardımcı model**; **içerik (H2) + UI/entegrasyon (H1/H3) + doğrulama (H5) = ana model.**
 > **Karar özeti:** yardım kitabı ❌ iptal · view `?` yardım listeleri/dialogu ❌ kaldırılır · tek kaynak `docs/yardim/*.md` → `AsistanBilgi.db` → asistan · giriş **F1 + statü çubuğu "Asistan"** · AI erişilemezse yalnız kilit gerekçesi · eski altyapı silinir (Kural 4) · kapsam tüm yapı.
 
 ### H1 — Karar / sözleşme (ben) ⬜
@@ -678,7 +721,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [ ] `TenantDatabaseUpdateView` ölü kod doğrulaması (Kural 4)
 - [ ] Build 0/0 + test yeşil
 
-### H4 — Motor (diğer model) ⬜
+### H4 — Motor (Muse Spark) ⬜
 - [ ] Geniş derlem için retrieval ayarı (top-k / etiket ağırlığı)
 - [ ] Prompt sertleştirme (yalnız maddelere dayan; genel tavsiye verme; "yardım maddesi yok" fallback)
 - [ ] Değerlendirme seti: "soru → beklenen madde" (offline) + canlı ölçüm

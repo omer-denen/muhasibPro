@@ -1,4 +1,5 @@
 ﻿using MuhasibPro.Business.Contracts.DatabaseServices.SistemDatabaseServices;
+using MuhasibPro.Business.Contracts.SistemServices.AppServices;
 using MuhasibPro.Business.Contracts.SistemServices.Authentication;
 using MuhasibPro.Business.Contracts.SistemServices.LogServices;
 using MuhasibPro.Business.Contracts.UIServices.CommonServices;
@@ -16,7 +17,8 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         public MainShellViewModel(
             IAuthenticationService authenticationService,
             ISistemDatabaseService sistemDatabaseService,
-            ICommonServices commonServices) : base(authenticationService, sistemDatabaseService, commonServices)
+            ICommonServices commonServices,
+            IPermissionService permissionService = null) : base(authenticationService, sistemDatabaseService, commonServices, permissionService)
         {
         }
 
@@ -61,6 +63,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         public override async Task LoadAsync(ShellArgs args)
         {
             InitializeNavigationItems();
+            await YetkileriUygulaAsync();
             // Ana pencere kabuğu: içerik VM'ye navigasyon yok; yalnız durum çubuğunu besle.
             ViewModelArgs = args;
             if (args?.UserInfo != null)

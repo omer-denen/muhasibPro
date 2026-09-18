@@ -1,7 +1,7 @@
 # MuhasibPro — AI Yardım Bilgi Tabanı (AsistanBilgi.db + Hibrit RAG) Planı
 
 > **Faz 6.93** — AI asistanının yardım kaynağını view statiklerinden ayırıp tek bir **yardım bilgi tabanına** taşır.
-> **Sahiplik (kullanıcı kararı, Oturum 278):** **motor + veri diğer modelde**, **UI/entegrasyon/doğrulama bende** (Oturum 278 spec'i dondurdu).
+> **Sahiplik (kullanıcı kararı, Oturum 288 — devir):** AI asistanın **tamamı Muse Spark'ta** — motor + veri + UI/entegrasyon/doğrulama. (Önceki: motor+veri diğer modelde, UI/entegrasyon/doğrulama ana modelde — Oturum 278 düzeni Oturum 288'de kapatıldı.)
 > **Bu dosya sözleşmedir:** interface/DTO imzaları ve davranış buradan değişmez; değişiklik gerekiyorsa kullanıcıya sorulur (Kural 15) ve sözleşme revizyonu olarak LOG'a işlenir.
 >
 > **Uzlaşma notu:** Diğer modelin LOG notunda geçen ad **`AsistanBilgi.db`** benimsendi (tek ad). Faz A'da önerilen **FTS5 yerine** küçük derlem için **in-memory lexical + embedding + RRF** tercih edildi (araştırma: `REFERANSLAR` 278 — vektör zaten var, FTS5'in Türkçe kökleyicisi yok, corpus küçük). FTS5 yalnız derlem büyürse sonraki revizyonda düşünülür.
@@ -141,8 +141,8 @@ public interface IYardimIcerikKaynagi { IReadOnlyList<YardimHamKaynak> Kaynaklar
 - **İlk kullanımda indirme:** embedding modeli yoksa `IYardimVektorUretici` (App/Foundry impl) modeli indirip yükler (ilerleme verir); başarısızsa `AraAsync` lexical sonuç döndürür, kullanıcı hata görmez (yalnız durum satırında "semantik indeks yok" bilgisi).
 - **Prompt:** `AsistanPromptKurucu` artık `YardimAramaSonucu` listesi alır (uyarı-strip, bağlam, geçmiş kırpma davranışı **aynı**).
 
-## Dosya yerleşimi + sahiplik
-**Diğer model (motor + veri) — yeni dosyalar:**
+## Dosya yerleşimi + sahiplik (Oturum 291 — katman ayrımı: motor/veri/model = yardımcı model; UI/VM/DI/içerik/doğrulama = ana model)
+**Muse Spark (hepsi — motor + veri + UI/entegrasyon/doğrulama):**
 - `Business/Contracts/SistemServices/AiAsistan/IYardimBilgiTabani.cs` (yukarıdaki DTO+interface'ler)
 - `Business/Services/SistemServices/AiAsistan/YardimMarkdownCozumleyici.cs` (saf)
 - `Business/Services/SistemServices/AiAsistan/YardimSkorlayici.cs` (mevcut, geliştirilir: Türkçe normalizasyon + starts-with)
@@ -160,7 +160,7 @@ public interface IYardimIcerikKaynagi { IReadOnlyList<YardimHamKaynak> Kaynaklar
 
 > **SIRA NOTU (derleme güvenliği):** `YardimIcerikToplayici` (bende) `IYardimIcerikSaglayici`'yi implement eder. Bu yüzden arayüzü **Adım 1'de silmek derlemeyi kırar** (ders: `HATALAR` 277/278). Sıra: **Adım 1** (yardımcı) yeni KB'yi yazar + `FoundryAsistanSohbetService`'i çevirir, **eski arayüz/dosya KALIR**; **Adım 2** (ben) öz-testi `IYardimBilgiTabani`'na çevirir → sonra `YardimIcerikToplayici.cs` **+** `IYardimIcerikSaglayici.cs` **+** DI kaydı birlikte silinir.
 
-**Bende (içerik + UI/entegrasyon/doğrulama) — sözleşme dondurulduktan sonra:**
+**Muse Spark (içerik + UI/entegrasyon/doğrulama — sözleşme dondurulduktan sonra):**
 - **İçerik:** `docs/yardim/*.md` — başlangıç seti (9 sayfa) Oturum 278'de yazıldı; gözden geçirme/genişletme bende (Kural 13/14/19)
 - **Sil (Kural 4 — Adım 2, birlikte):** `ViewModels/Services/YardimIcerikToplayici.cs` + `Tests/YardimIcerikToplayiciTests.cs` + `Business/Contracts/SistemServices/AiAsistan/IYardimIcerikSaglayici.cs` + DI kaydı (`AddSingleton<IYardimIcerikSaglayici, …>`) — öz-test `IYardimBilgiTabani`'na çevrildikten sonra
 - `ViewModels/ViewModels/Shell/GelistiriciAraclariViewModel.cs` → öz-test "RAG derlemi" satırı `IYardimBilgiTabani.TumKayitlar().Count`
@@ -170,7 +170,7 @@ public interface IYardimIcerikKaynagi { IReadOnlyList<YardimHamKaynak> Kaynaklar
 - Kural 13/14/19: `?` yardım metinleri (AI paneli) + `REFERANSLAR` + `docs/yardim` içeriğinin gözden geçirilmesi/genişletilmesi (motor başlangıç içeriğini bırakır)
 - Build/test + **Kural 18 canlı** + dokümanlar (LOG/KONTROL/DURUM/ROADMAP)
 
-**Çakışma kuralı:** Diğer model **bendeki dosyalara** dokunmaz; ben **diğer modelin yeni dosyalarına** dokunmam. Entegrasyon ben onların tesliminden (`📨`) sonra yaparım; aynı anda yazım yok (ders: `HATALAR` 277/278).
+**Sahiplik (Oturum 291 — katman ayrımı):** AI **motor/veri/model** dosyalarında yalnız yardımcı model yazar; **UI/VM/XAML/DI/içerik/doğrulama** ve paylaşılan docs (`DURUM`/`KONTROL`/`ROADMAP`/`LOG`/`HATALAR`/`REFERANSLAR`) = ana model. Sınır sözleşmelerle çizilir (`IAsistanSohbetService`, `IYardimBilgiTabani`).
 
 ## Kabul kriterleri
 - Build 0 hata; test yeşil (beklenen ~617 + yeni testler).

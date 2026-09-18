@@ -68,7 +68,8 @@
         /// <summary>Modeli önbellekten siler (yüklüyse önce bırakır). İptal hariç fırlatmaz; sonucu döndürür.</summary>
         Task<AsistanIslemSonucuDto> ModelSilAsync(string alias, CancellationToken ct = default);
         /// <summary>Aktif model aliasını değiştirir: eskiyi bırakır + yeniyi hazırlar (ilerleme HazirlaAsync fazlarıyla).
-        /// ModelAlias ayarının güncel olduğu varsayılır; ayar yazılmaz.</summary>
+        /// ModelAlias ayarının güncel olduğu varsayılır; ayar yazılmaz.
+        /// S1 tam kilit (Oturum 292): sabit alias dışındaki hedef fırlatır (InvalidOperationException).</summary>
         Task AliasDegisiminiUygulaAsync(string yeniAlias, IProgress<AsistanDurumDto>? ilerleme = null, CancellationToken ct = default);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using MuhasibPro.Business.DTOModel;
+using MuhasibPro.Domain.Enum;
 using System.Collections.ObjectModel;
 
 namespace MuhasibPro.ViewModels.ViewModels.Shell;
@@ -11,10 +12,11 @@ public class NavigationItem : ObservableObject
         Children = new ObservableCollection<NavigationItem>();
     }
 
-    public NavigationItem(int glyph, string label, Type viewModel) : this(viewModel)
+    public NavigationItem(int glyph, string label, Type viewModel, Permission? gerekliIzin = null) : this(viewModel)
     {
         Label = label;
         Glyph = char.ConvertFromUtf32(glyph).ToString();
+        GerekliIzin = gerekliIzin;
     }
 
     public NavigationItem(int glyph, string label, Type viewModel, ObservableCollection<NavigationItem> children) : this(glyph, label, viewModel)
@@ -26,6 +28,10 @@ public class NavigationItem : ObservableObject
     public string Label { get; }
     public Type ViewModel { get; }
     public ObservableCollection<NavigationItem> Children { get; }
+
+    /// <summary>K4: bu menü öğesine erişim için gereken izin (null = kapısız).
+    /// Kaynak katalogda kalır; görünür liste `MainMenuViewModel.GorunurNavigationItems`'ta süzülür.</summary>
+    public Permission? GerekliIzin { get; }
 
     // Badge - Dinamik olacak
     private string _badge;
@@ -67,4 +73,3 @@ public class NavigationItem : ObservableObject
         IsBadgeVisible = false;
     }
 }
-

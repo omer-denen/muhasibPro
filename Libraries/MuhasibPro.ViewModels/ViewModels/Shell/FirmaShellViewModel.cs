@@ -19,6 +19,7 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
     public class FirmaShellViewModel : ViewModelBase, IMaliDonemListHost
     {
         private readonly IFirmaWithMaliDonemSelectedService _selectedService;
+        private readonly IPermissionService _yetki;
 
         public FirmalarViewModel FirmalarVM { get; }
         public MaliDonemViewModel MaliDonemVM { get; }
@@ -40,9 +41,11 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
             ITenantSQLiteDatabaseService tenantWorkflowService,
             ITenantDatabaseUpdateService updateService,
             ITenantSQLiteDatabaseOperationService operations,
-            IEventBus eventBus = null) : base(commonServices)
+            IEventBus eventBus = null,
+            IPermissionService permissionService = null) : base(commonServices)
         {
             _selectedService = selectedService;
+            _yetki = permissionService;
 
             // Önce MaliDonemList oluştur, sonra her iki VM'e paylaştır
             var sharedMaliDonemList = new MaliDonemListViewModel(commonServices, maliDonemService, tenantWorkflowService, eventBus);
@@ -135,6 +138,59 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         public bool HasSelection => Selection.HasSelection;
 
         public ICommand DevamEtCommand { get; }
+
+        private ICommand _firmaYonetimiCommand;
+
+        private bool _firmaYonetimiYetkisi = true;
+
+        /// <summary>K4: 'Firma_Yonet' izni (firma-bağımsız, kullanıcı düzeyinde). Yetkisizse buton pasif + gerekçe.</summary>
+        public bool FirmaYonetimiYetkisi
+        {
+            get => _firmaYonetimiYetkisi;
+            private set
+            {
+                if (Set(ref _firmaYonetimiYetkisi, value))
+                    NotifyPropertyChanged(nameof(FirmaYonetimiNedenTooltip));
+            }
+        }
+
+        public string FirmaYonetimiNedenTooltip => _firmaYonetimiYetkisi
+            ? "Firma Yönetimi — firma tanımlama, düzenleme ve mali dönemler (ayrı pencere)"
+            : "Firma Yönetimi yetkiniz yok — yöneticinizden 'Firma Yönetimi' izni isteyin.";
+
+        /// <summary>Firma Yönetimi sayfasını açar (tam CRUD: lista + detay + mali dönemler).</summary>
+        public ICommand FirmaYonetimiCommand => _firmaYonetimiCommand ??= new AsyncRelayCommand(FirmaYonetimiAc, () => FirmaYonetimiYetkisi);
+
+        private async Task FirmaYonetimiAc()
+        {
+            if (!FirmaYonetimiYetkisi)
+            {
+                StatusError("Firma Yönetimi yetkiniz yok.");
+                return;
+            }
+
+            StatusReady();
+            var args = new FirmaListArgs();
+            if (IsMainWindow)
+                await NavigationService.CreateNewViewAsync<FirmalarViewModel>(args, "Firma Yönetimi");
+            else
+                NavigationService.Navigate<FirmalarViewModel>(args);
+        }
+
+        private async Task FirmaYonetimiYetkisiniYukleAsync()
+        {
+            if (_yetki == null)
+                return;
+            try
+            {
+                FirmaYonetimiYetkisi = await _yetki.KullaniciYetkisiVarMiAsync(Permission.Firma_Yonet);
+            }
+            catch (Exception ex)
+            {
+                await LogSistemExceptionAsync("FirmaShell", "FirmaYonetimiYetki", ex);
+            }
+            (_firmaYonetimiCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
+        }
 
         private ICommand _yardimCommand;
 
