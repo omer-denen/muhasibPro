@@ -731,10 +731,12 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [ ] Değerlendirme seti: "soru → beklenen madde" (offline) + canlı ölçüm
 - [ ] Sözleşme değişikliği gerekirse Kural 15 + onay + `YARDIM-DB-PLAN` revizyonu
 
-### H5 — Doğrulama + doküman (ben) ⬜
-- [ ] Build 0/0 + test (silinen yardım testleri temizliği)
-- [ ] Kural 18 canlı: F1 → asistan; her ekrandan projeye özgü cevap; kilit senaryosu; kanıt + onay
-- [ ] LOG/DURUM/ROADMAP/KONTROL/REFERANSLAR güncel
+### H5 — Doğrulama + doküman (ben) 🔨 (Oturum 293 — canlı tur yapıldı)
+- [x] Build 0 hata + test **685/685** (silinen yardım altyapısı testlerde referanslı değildi)
+- [x] **Kural 18 canlı (F1 + `?` + MainShell):** uygulama açıldı → login → çalışma alanı. UIA: `YardimButton` **YOK**, `AsistanToggleButton` **VAR**, "Şifremi Unuttum?" **YOK**; **F1 → "AI Yardım Asistanı" paneli AÇILDI**. Kanıt: `Temp/opencode/ot298_0_mainshell.png`, `ot298_1_f1_asistan.png`. Sol menü yalnız 3 gerçek öğe; sahte Snapshot/WAL/placeholder yok; durum çubuğu gerçek (Korkut Mermer / 2025 Dönemi / Ömer Korkut / Asistan).
+- [ ] **Kalan canlı:** kilit senaryosu (lisans/yetki/asistan kapalı → yalnız gerekçe) + her ekrandan projeye özgü cevap
+- [x] LOG/DURUM/KONTROL güncel (ROADMAP/REFERANSLAR H1'de)
+- [ ] **Kullanıcı onayı** (Kural 18)
 
 **Kapı:** H1 onayı → H2 içerik → H3 Kural 8 onayları + build/test → H4 motor → H5 canlı + onay.
 
