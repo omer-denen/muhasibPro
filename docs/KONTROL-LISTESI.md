@@ -706,12 +706,12 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [ ] `REFERANSLAR.md`: MS F1/help + uygulama-içi AI yardım araştırması (kaynak + karar)
 - [ ] Kullanıcı onayı (Kural 8/15)
 
-### H2 — İçerik genişletme (ben) ⬜
-- [ ] 78 XAML view + ~81 mevcut yardım metni taraması (ekran/buton envanteri)
-- [ ] Mevcut 9 sayfa/60 madde buton/işlem düzeyinde derinleştirme (projeye özgü; genel anlatım yasak)
-- [ ] Yeni sayfalar: `10-denetim-masasi` · `11-sistem-veritabani-yonetimi` · `12-guncelleme-sonrasi` · `13-diyaloglar` · `14-acilis-kurulum`
-- [ ] Yazım standardı: ekran → buton → adım → sonuç/onay/hata; `Etiket:` ekran+buton adlarıyla
-- [ ] Kaynak: gerçek XAML/VM + mevcut yardım maddeleri (uydurma yok)
+### H2 — İçerik genişletme (ben) 🔨 (Oturum 293 başladı)
+- [x] Ekran/buton envanteri (Denetim Masası 9 bölüm, SistemDbYonetim, Güncelleme Sonrası 4 adım, Splash/Kurulum/Şema, 13 diyalog) — XAML/VM kaynak-doğrulanmış (explore, dosya:satır)
+- [ ] Mevcut 9 sayfa/60 madde buton/işlem düzeyinde derinleştirme (projeye özgü; genel anlatım yasak) — **sıradaki**
+- [x] Yeni sayfalar eklendi: `10-denetim-masasi` · `11-sistem-veritabani-yonetimi` · `12-guncelleme-sonrasi` · `13-diyaloglar` · `14-acilis-kurulum` (gerçek etiketlerle; `docs/yardim` 14 sayfa)
+- [x] Yazım standardı: ekran → buton → adım → sonuç/onay/hata; `Etiket:` ekran+buton adlarıyla
+- [x] Kaynak: gerçek XAML/VM (uydurma yok)
 - [ ] İçerik gözden geçirme (kullanıcı); DB otomatik tazelenir
 
 ### H3 — UI sadeleştirme (ben, Kural 8) ⬜
