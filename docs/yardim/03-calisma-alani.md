@@ -18,7 +18,7 @@ Etiket: durum çubuğu, bildirim, ilerleme, firma, mali dönem, saat
 
 ## Asistan düğmesi ne yapar?
 Durum çubuğunun en sağındaki "Asistan" düğmesi AI yardım panelini açar (yukarı hizalı flyout). Panelde soru yazıp yanıt alırsınız. Ayrıntı için "Yapay Zeka Yardım Asistanı" sayfasına bakın.
-Etiket: asistan, yapay zeka, durum çubuğu, f1
+Etiket: asistan, yapay zeka, durum çubuğu
 
 ## Firma Yönetimi ve Sistem Kayıtları
 "Firma Yönetimi" (izin varsa) firma listesi/detay yönetimini açar. "Sistem Kayıtları" sistem günlüğünü listeler ve detayını gösterir. Bu öğeler yetkinize göre görünür/gizlenir.

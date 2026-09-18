@@ -714,7 +714,7 @@ Marker: `⬜` bekliyor · `🔨` aktif · `✅` kod eklendi · `🧪` derleme do
 - [x] Kaynak: gerçek XAML/VM (uydurma yok)
 - [x] **Sonuç:** `docs/yardim` **14 sayfa / 119 madde** (60 → 119); build 0 + 685/685
 - [ ] İçerik gözden geçirme (kullanıcı); DB otomatik tazelenir
-- [ ] **İçerik taramasında bulunan Kural 21 ihlalleri (ayrı iş — View/Kural 8):** MainShell "Snapshot Yedek" (Command yok) + statik tenant header/ContentFrame yer tutucu metinleri ("Faz B modülleri...") + Login "Şifremi Unuttum?" (işlevsiz etiket)
+- [x] **İçerik taramasında bulunan Kural 21 ihlalleri temizlendi (Oturum 293, onaylı — View/Kural 8):** `MainShellView` "Snapshot Yedek" (Command'siz) + statik tenant header ("Tenant bağlantısı başarılı / WAL Aktif") + placeholder ContentFrame metinleri ("Faz B modülleri...") kaldırıldı; `NamePasswordControl` "Şifremi Unuttum?" (işlevsiz) kaldırıldı; `MainShellViewModel.YardimMaddeleri` gerçeğe çekildi (gerçek 3 menü + durum çubuğu + Asistan). `docs/yardim` içeriğinden de bu sahte yüzeyler çıkarıldı.
 
 ### H3 — UI sadeleştirme (ben, Kural 8) ⬜
 - [ ] `?` butonları kaldırılır (Login, MainShell, FirmaShell, MaliDonemYonetim, DatabaseSettings, Update, SistemDbYonetim, DenetimMasasi, GelistiriciAraclariPaneli, YapayZekaAyarPaneli)

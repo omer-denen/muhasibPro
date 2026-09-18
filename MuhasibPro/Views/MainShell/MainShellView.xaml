@@ -55,61 +55,11 @@
                     <TextBlock Text="Genel Bakış" FontSize="14" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Style="{StaticResource GhostTintPetrolButtonStyle}" ToolTipService.ToolTip="Snapshot Yedek (Faz B)">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="{StaticResource IconBackup}" FontSize="12" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
-                            <TextBlock Text="Snapshot Yedek" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" />
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
+                <!-- Kural 21: işlevsiz "Snapshot Yedek" yer tutucu butonu kaldırıldı. -->
             </Grid>
 
-            <!-- Tenant kartı + içerik (panel içi) -->
-            <Grid Grid.Row="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-
-                    <!-- Tenant header kartı -->
-                    <Border Grid.Row="0" Style="{StaticResource InventCardStyle}" Padding="16" Margin="0,0,0,10">
-                        <Grid ColumnSpacing="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <Border Width="40" Height="40" Background="{ThemeResource MuhasibPetrolTintBrush}" CornerRadius="{StaticResource MuhasibCardCornerRadius}">
-                                <FontIcon Glyph="{StaticResource IconCheckMark}" FontSize="18" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                                <TextBlock Text="MuhasibPro — Ana Çalışma Alanı" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                <TextBlock Text="Tenant bağlantısı başarılı — Çok kiracılı SQLite aktif" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <Border Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="{StaticResource MuhasibControlCornerRadius}" Padding="8,4">
-                                    <TextBlock Text="WAL Aktif" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                                </Border>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!-- Faz B hazır placeholder -->
-                    <Frame x:Name="ContentFrame" Grid.Row="1" Padding="0,16,0,0">
-                        <Grid>
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                                <FontIcon Glyph="{StaticResource IconCheckMark}" FontSize="48" Foreground="{ThemeResource SystemFillColorSuccessBrush}" HorizontalAlignment="Center" />
-                                <TextBlock Text="Hazır — Tenant seçimi başarılı" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                <TextBlock Text="FirmaShell → MainShell geçişi doğrulandı. Faz B modülleri (Cari/Stok/Fatura) bu iskelet üzerine eklenecek." FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="520" HorizontalAlignment="Center" />
-                                <Border Background="{ThemeResource MuhasibPetrolTintBrush}" CornerRadius="{StaticResource MuhasibCardCornerRadius}" Padding="12,8" Margin="0,8,0,0" HorizontalAlignment="Center">
-                                    <TextBlock Text="Çekirdek (Aşama A) 0 kusur ile tamamlandı — Güncelleme altyapısı dahil" FontSize="11" Foreground="{ThemeResource MuhasibPetrolDeepBrush}" TextAlignment="Center" TextWrapping="Wrap" />
-                                </Border>
-                            </StackPanel>
-                        </Grid>
-                    </Frame>
-                </Grid>
-                    <!-- (Faz 6.92 AI paneli artık AnaBorder içinde değil; statü çubuğu üstü çekmecede.) -->
+            <!-- İçerik alanı: navigasyon bu çerçeveye yüklenir (Kural 21: sahte içerik/yer tutucu yok). -->
+            <Frame x:Name="ContentFrame" Grid.Row="1" Padding="0,16,0,0" />
                     </Grid>
                 </Border>
 

@@ -2,6 +2,13 @@
 
 Format: `## Başlık` → Belirti / Sebep / Çözüm / Tarih
 
+## Kural 21 ihlali: işlevsiz/sahte UI yüzeyleri (ÇÖZÜLDÜ — 2026-09-18 — Oturum 293)
+- **Belirti:** 6.94 H2 içerik envanteri sırasında ana ekranda gerçek olmayan yüzeyler bulundu: `MainShellView` "Snapshot Yedek" butonu (**Command bağlı değil**, tooltip "(Faz B)"), statik tenant header ("Tenant bağlantısı başarılı — Çok kiracılı SQLite aktif" + "WAL Aktif") ve ContentFrame placeholder metinleri ("Faz B modülleri (Cari/Stok/Fatura) bu iskelet üzerine eklenecek"); `LoginViewModel.YardimMaddeleri`'nde "Cari, Stok, Fatura gibi modüller" + "'Snapshot Yedek' yer tutucusu"; `NamePasswordControl` "Şifremi Unuttum?" (**işlevsiz** TextBlock).
+- **Sebep:** Aşama A iskeleti döneminden kalan yer tutucular, Oturum 291'de eklenen **Kural 21** ("UI'da projede gerçekten var olmayan modül/buton/veri gösterilmez") kapsamında temizlenmemişti; navbar temizlenmiş ama MainShell gövdesi + Login kontrolü kalmıştı.
+- **Çözüm (onaylı — View/Kural 8):** Snapshot butonu, statik tenant header ve placeholder ContentFrame içeriği kaldırıldı (içerik alanı gerçek navigasyona bırakıldı; bağlam durum çubuğunda); "Şifremi Unuttum?" kaldırıldı; `MainShellViewModel.YardimMaddeleri` gerçek 3 menü + durum çubuğu + Asistan ile güncellendi; `docs/yardim` içeriği de bu sahte yüzeylerden arındırıldı.
+- **Ders:** Yeni kural eklendiğinde yalnız kural dosyası değil, **tüm mevcut yüzeyler** taranır; içerik/yardım yazımı sırasında bulunan sahte yüzey içeriğe YAZILMAZ, kaldırılır (yoksa Kural 21 ihlali belgelenmiş olur).
+- Tarih: 2026-09-18
+
 ## ≤1B sohbet modeli RAG bağlamını bile kullanamaz (DERS — 2026-09-18 — Oturum 291)
 - **Belirti:** `qwen3-0.6b` (her cevapta `<think>` + "bir yıl" ×~250 tekrar, 6292 karakter) ve `qwen3.5-0.8b` (46 adımlı uydurma liste; "ekonomiye yıkım" saçmalığı) elendi. Kritik: **Q6'da bağlam açıkça "Arşivden Çıkar ile dönem yeniden açılır" derken 0.8B "Hayır, mümkün değildir" dedi — RAG bağlamını aktif inkâr.**
 - **Sebep:** Bu kapasitede model komut takibi + bağlam sadakatini sürdüremiyor; RAG (doğru maddeyi önüne koymak) yetmiyor — sorun retrieval'de değil, üretimde.

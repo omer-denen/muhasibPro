@@ -47,12 +47,10 @@ namespace MuhasibPro.ViewModels.ViewModels.Shell
         /// <summary>Kural 13 içeriği (? yardım dialogu — AI bilgi tabanı artık `docs/yardim/*.md`).</summary>
         internal static List<MuhasibPro.Business.DTOModel.SistemModel.YardimMaddesiDto> YardimMaddeleri() => new()
         {
-            new() { Baslik = "Bu ekran nedir?", Aciklama = "Girişten sonra açılan ana çalışma alanıdır: solda modül menüsü, sağdaki panelde seçili modülün içeriği gösterilir." },
-            new() { Baslik = "Sol menü", Aciklama = "Cari, Stok, Fatura gibi modüller listelenir; seçili modül vurgulanır ve içerik paneli ona göre değişir." },
-            new() { Baslik = "Tenant kartı", Aciklama = "Bağlı olan firma ve mali dönem veritabanını, WAL (Write-Ahead Logging) durumunu gösterir. Bağlantı sorununda dönem seçimine dönüp yeniden bağlanın." },
-            new() { Baslik = "'Snapshot Yedek'", Aciklama = "Açık dönemin hızlı yedeğini alır. Bu buton Faz B ile etkinleşecek; şu an hazırlık yer tutucusudur." },
-            new() { Baslik = "Modül açılmıyorsa", Aciklama = "Henüz hazırlanmamış modüller bilgi mesajı gösterir; hazır olduklarında menüden açılır." },
-            new() { Baslik = "Durum çubuğu", Aciklama = "Pencerenin altındaki şerit solda anlık durumu ve süren işin ilerlemesini; sağda aktif firmayı ve mali dönemi, tenant (dönem) veritabanı bağlantısını, kullanıcı adını, sistem veritabanı göstergesini ve saati gösterir." },
+            new() { Baslik = "Bu ekran nedir?", Aciklama = "Girişten ve firma/dönem seçiminden sonra açılan ana çalışma alanıdır: solda modül menüsü, ortada seçili modülün içeriği, altta durum çubuğu yer alır." },
+            new() { Baslik = "Sol menü", Aciklama = "Yalnız gerçek hedefler listelenir: Genel Bakış, Firma Yönetimi (Firma Yönetimi izni) ve Sistem Kayıtları (Log görüntüleme izni). Yetkiniz olmayan öğe menüde gizlenir; altta aktif kullanıcı ve 'Oturumu Kapat' bulunur." },
+            new() { Baslik = "Durum çubuğu", Aciklama = "Pencerenin altındaki şerit solda anlık durumu ve süren işin ilerlemesini; sağda sistem veritabanı göstergesini, aktif firma ve mali dönemi, kullanıcı adını ve saati gösterir." },
+            new() { Baslik = "Asistan düğmesi", Aciklama = "Durum çubuğunun en sağındaki 'Asistan' düğmesi AI yardım panelini açar; soru yazıp yanıt alırsınız." },
         };
 
         private async Task YardimGoster()

@@ -31,7 +31,3 @@ Etiket: hızlı giriş, kayıtlı hesap, hesap kaldır
 ## İlk kez mi kullanıyorum?
 Sistem veritabanı henüz kurulmadıysa girişten önce "İlk Kurulum" ekranı çıkar. Kurulum tamamlanınca giriş ekranına dönülür. (Bkz. Açılış ve Kurulum Ekranları.)
 Etiket: ilk kullanım, kurulum, sistem veritabanı
-
-## "Şifremi Unuttum?" bağlantısı
-Giriş formundaki "Şifremi Unuttum?" metni şu an herhangi bir işlem başlatmaz (yalnız etikettir). Şifre sıfırlama için yöneticinize başvurun.
-Etiket: şifremi unuttum, şifre sıfırlama, yönetici
